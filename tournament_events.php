@@ -49,7 +49,7 @@
   
   function saveMessage(message) {
 		document.getElementById('messages').style.display = "block";
-		document.getElementById('messages').innerHTML = "<strong>Saved: </strong>"+message+" has been saved successfully!";
+		document.getElementById('messages').innerHTML = "<strong>Saved: </strong>"+message+" have been saved successfully!";
 		document.body.scrollTop = document.documentElement.scrollTop = 0;						
 	}
 	
@@ -145,9 +145,9 @@
     <script src="js/bootstrap.min.js"></script>
     
     <?php 
-    	if ($_SESSION['savesuccessTournament'] != null and $_SESSION['savesuccessTournament'] == '1') { ?>
-    	<script type="text/javascript">saveMessage('Tournament');</script>
-   	<?php $_SESSION['savesuccessTournament'] = null; } ?> 	
+    	if ($_SESSION['savesuccessScore'] != null and $_SESSION['savesuccessScore'] == '1') { ?>
+    	<script type="text/javascript">saveMessage('Event scores');</script>
+   	<?php $_SESSION['savesuccessScore'] = null; } ?> 	
     
   </body>
 </html>

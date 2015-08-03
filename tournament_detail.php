@@ -46,18 +46,78 @@
 			if (document.getElementById(fields[str]).value.length === 0 || !document.getElementById(fields[str]).value.trim()) {
 				error = true;
 			}
-		}
-	
+		}	
 		if (error) {
-			document.getElementById('errors').style.display = "block";
-			document.getElementById('errors').innerHTML = "<strong>Required Fields:</strong> Please complete the required fields denoted with an ' * '.";
-			document.body.scrollTop = document.documentElement.scrollTop = 0;			
+			displayError("<strong>Required Fields:</strong> Please complete the required fields denoted with an ' * '.");
 			return false;			
 		}
 		else {
-			document.getElementById('errors').style.display = "none";
-			document.getElementById('errors').innerHTML = "";
+			clearError();
 			return true;
+		}
+	}
+	
+	function validateDeleteTeam(element, row) {
+		if (!confirmDelete('team')) return;
+		
+		if (element.value == null || element.value == '') {
+			// remove from table
+			// success message
+			displaySuccess("<strong>Deleted:</strong> Team has been deleted successfully!");
+			document.getElementById("teamTable").deleteRow(row+1);
+		}
+		else {
+			xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+					clearError();
+					clearSuccess();
+					if (xmlhttp.responseText == 'error') {
+						//error message
+						displayError("<strong>Cannot Delete Team:</strong> Scores have already been entered for this team.")
+						
+					}
+					else {
+						// success message
+						displaySuccess("<strong>Deleted:</strong> Team has been deleted successfully!");
+						// remove from table
+						document.getElementById("teamTable").deleteRow(row+1);
+					}					
+				}
+			}	
+        xmlhttp.open("GET","controller.php?command=validateDeleteTeam&TournTeamId="+element.value,true);
+        xmlhttp.send();
+		}
+	}
+	
+	function validateDeleteEvent(element, row) {
+		if (!confirmDelete('event')) return;
+		if (element.value == null || element.value == '') {
+			// remove from table
+			// success message
+			displaySuccess("<strong>Deleted:</strong> Event has been deleted successfully!");
+			document.getElementById("eventTable").deleteRow(row+1);
+		}
+		else {
+			xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+					clearError();
+					clearSuccess();
+					if (xmlhttp.responseText == 'error') {
+						//error message
+						displayError("<strong>Cannot Delete Event:</strong> Scores have already been entered for this event.")					
+					}
+					else {
+						// success message
+						displaySuccess("<strong>Deleted:</strong> Event has been deleted successfully!");
+						// remove from table
+						document.getElementById("eventTable").deleteRow(row+1);
+					}					
+				}
+			}	
+        xmlhttp.open("GET","controller.php?command=validateDeleteEvent&TournEventId="+element.value,true);
+        xmlhttp.send();
 		}
 	}
   
@@ -95,6 +155,7 @@
      <div class="container">
 	 
 	 <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
+	 <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
 	 
      <h1>Edit Tournament</h1>
 	 <hr>
@@ -160,11 +221,12 @@
 	<hr>
 	
       <h2>Events</h2>
-        <table class="table table-hover">
+        <table class="table table-hover" id="eventTable">
         <thead>
             <tr>
                 <th data-field="name" data-align="right" data-sortable="true">Event Name</th>
                 <th data-field="trial" data-align="center" data-sortable="true">Trial Event?</th>
+				<th data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -181,6 +243,7 @@
 					echo '<option value="1"'; if($event['2'] == 1){echo("selected");} echo '>Yes</option>';
 					echo '</select>';
 					echo '</div></td>';
+					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteEvent" onclick="validateDeleteEvent(this,'.$eventCount.')" value='.$event['3'].'>Delete</button></td>';
 					echo '</tr>';
 					
 					$eventCount++;
@@ -210,12 +273,13 @@
 	<hr>
 	
 	    <h2>Teams</h2>
-        <table class="table table-hover">
+        <table class="table table-hover" id="teamTable">
         <thead>
             <tr>
                 <th data-field="name" data-align="right" data-sortable="true">Team Name</th>
                 <th data-field="name" data-align="right" data-sortable="true">Team Number</th>
                 <th data-field="alternate" data-align="center" data-sortable="true">Alternate Team?</th>
+				<th data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -237,6 +301,7 @@
 					echo '<option value="1"'; if($team['3'] == 1){echo("selected");} echo '>Yes</option>';
 					echo '</select>';
 					echo '</div></td>';
+					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteTeam" onclick="validateDeleteTeam(this,'.$teamCount.')" value='.$team['4'].'>Delete</button></td>';
 					echo '</tr>';
 					
 					$teamCount++;

@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+// DB Connection --------------
 require_once 'login.php';
 	$mysqli = mysqli_init();
 	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
@@ -12,6 +13,8 @@ require_once 'login.php';
 	}
 
 
+// Begin MAIN METHOD -------------------------->	
+	
 if (isset($_GET['addTournament'])) {
 	clearTournament();
 	header("Location: tournament_detail.php");	
@@ -21,6 +24,14 @@ else if (isset($_GET['deleteTournament'])) {
 	$_SESSION["tournamentId"] = $_GET['deleteTournament'];
 	deleteTournament($_GET['deleteTournament'], $mysqli);
 	header("Location: tournament.php");
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteTeam') {
+	deleteTournamentTeam($mysqli, $_GET['TournTeamId']);
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteEvent') {
+	deleteTournamentEvent($mysqli, $_GET['TournEventId']);
 	exit();
 }
 else if (isset($_GET['searchTournament']) or ($_GET['command'] != null and $_GET['command'] == 'loadAllTournaments')) {
@@ -153,11 +164,17 @@ else if (isset($_GET['addTeam'])) {
 
 // No commands were met. Return to Home Page
 else {	
-	header("Location: index.php");
+	//header("Location: index.php");
 	exit();
 }
 
 ?>
+<!-- END MAIN METHOD -->
+
+
+
+<!-- FUNCTIONS -->
+
 
 <?php
 	function cacheTournamnent() {
@@ -223,6 +240,30 @@ else {
 	
 	}
 	
+	function deleteTournamentTeam($mysqli, $id) {
+		$result = $mysqli->query("SELECT TES.SCORE FROM TEAM_EVENT_SCORE TES WHERE TES.TOURN_TEAM_ID = " .$id);
+		if ($result) {
+			$row = $result->fetch_row();
+			if ($row['0'] != null and $row['0'] != '') echo 'error';
+			else {
+				// delete tourn team
+				$result = $mysqli->query("DELETE FROM TOURNAMENT_TEAM WHERE TOURN_TEAM_ID = " .$id);
+			}
+		}	
+	}
+	
+	function deleteTournamentEvent($mysqli, $id) {
+		$result = $mysqli->query("SELECT TES.SCORE FROM TEAM_EVENT_SCORE TES WHERE TES.TOURN_EVENT_ID = " .$id);
+		if ($result) {
+			$row = $result->fetch_row();
+			if ($row['0'] != null and $row['0'] != '') echo 'error';
+			else {
+				// delete tourn event
+				$result = $mysqli->query("DELETE FROM TOURNAMENT_EVENT WHERE TOURN_EVENT_ID = " .$id);
+			}
+		}	
+	}
+	
 	
 	function loadEventScores($mysqli) {
 				
@@ -279,6 +320,7 @@ else {
 			}
 		}	
 		$_SESSION["teamEventScoreList"] = $scoreList;
+		$_SESSION['savesuccessScore'] = "1";
 	}
 	
 	
