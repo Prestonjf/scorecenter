@@ -1,0 +1,285 @@
+<?php session_start(); ?>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Score Center - Michigan Science Olympiad</title>
+
+    <!-- CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="js/jquery-ui-1.11.4/jquery-ui.css" rel="stylesheet">
+	<!-- 	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"> -->
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+	<!-- JS -->
+  <script src="js/jquery-1.11.3.js"></script>
+  <script src="js/jquery-ui-1.11.4/jquery-ui.js"></script>
+  <script src="js/scorecenter.js"></script>
+  
+
+  <script type="text/javascript">
+  $(document).ready(function(){
+  
+    //	$("#addTournament").click(function(){
+     //   	alert("add");
+    //	});
+
+    	
+    	
+	});
+	
+	function validate() {
+		var error = false;
+		var fields = ["tournamentName", "tournamentDivision", "tournamentLocation","tournamentDate","numberEvents","numberTeams","highestScore"];
+		var str;
+		for (str in fields) {
+			if (document.getElementById(fields[str]).value.length === 0 || !document.getElementById(fields[str]).value.trim()) {
+				error = true;
+			}
+		}
+	
+		if (error) {
+			document.getElementById('errors').style.display = "block";
+			document.getElementById('errors').innerHTML = "<strong>Required Fields:</strong> Please complete the required fields denoted with an ' * '.";
+			document.body.scrollTop = document.documentElement.scrollTop = 0;			
+			return false;			
+		}
+		else {
+			document.getElementById('errors').style.display = "none";
+			document.getElementById('errors').innerHTML = "";
+			return true;
+		}
+	}
+  
+  
+  </script>
+  <style>
+  	.borderless td {
+  			padding-top: 1em;
+			padding-right: 2em;
+  			border: none;
+  	}
+	.red {
+		color: red;
+	}
+  
+  
+  </style>
+  </head>
+  
+  <body>
+  <?php include_once 'navbar.php'; ?>
+ 
+       <?php
+        // Load Events and Teams
+        	require_once 'login.php';
+		 	$db_server = mysql_connect($db_hostname, $db_username, $db_password);
+ 			if (!db_server) die("Unable to connect to MySQL: " . mysql_error());			
+ 			mysql_select_db($db_database);
+    		
+    		$events = mysql_query("SELECT DISTINCT * FROM EVENT ORDER BY NAME ASC");
+    		$teams = mysql_query("SELECT DISTINCT * FROM TEAM ORDER BY NAME ASC");
+        ?>
+  
+  	<form action="controller.php" method="GET">
+     <div class="container">
+	 
+	 <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
+	 
+     <h1>Edit Tournament</h1>
+	 <hr>
+	 
+	<table width="100%" class="borderless"> 
+	<tr>
+		<td width="15%"><label for="tournamentName">Tournament Name:<span class="red">*</span></label></td>
+		<td width="35%"><input type="text" class="form-control" name="tournamentName" id="tournamentName" size="50" value=<?php echo '"'.$_SESSION["tournamentName"].'"' ?>></td>
+		<td width="15%"><label for="tournamentDivision">Division:<span class="red">*</span></label></td>
+		<td width="35%"><select class="form-control" name="tournamentDivision" id="tournamentDivision" >
+			<option value=""></option>
+			<option value="A" <?php if($_SESSION["tournamentDivision"] == 'A'){echo("selected");}?>>A</option>
+			<option value="B" <?php if($_SESSION["tournamentDivision"] == 'B'){echo("selected");}?>>B</option>
+			<option value="C" <?php if($_SESSION["tournamentDivision"] == 'C'){echo("selected");}?>>C</option>
+			</select>
+		</td>
+
+	</tr>
+	<tr>
+		<td><label for="tournamentLocation">Location:<span class="red">*</span></label></td>
+		<td><input type="text" class="form-control" name="tournamentLocation" id="tournamentLocation" size="50" value=<?php echo '"'.$_SESSION["tournamentLocation"].'"' ?>></td>
+
+		<td><label for="tournamentDate">Date:<span class="red">*</span></label></td>
+		<td>
+		<div class="controls">
+		<div class="input-group">
+			<input type="text" class="date-picker form-control" size="20" name="tournamentDate" id="tournamentDate" readonly="true" value=<?php echo '"'.$_SESSION["tournamentDate"].'"' ?>>
+			<label for="tournamentDate" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
+		</div>
+		</div>
+					<script type="text/javascript">
+				$(".date-picker").datepicker({
+					changeMonth: true,
+					changeYear: true
+				});
+			</script>
+		</td>
+	</tr>
+	<tr>
+		<td><label for="numberEvents">Number of Events:<span class="red">*</span></label></td>
+		<td><input type="text" class="form-control" name="numberEvents" id="numberEvents" value=<?php echo '"'.$_SESSION["numberEvents"].'"' ?>></td>
+		<td><label for="numberTeams">Number of Teams:<span class="red">*</span></label></td>
+		<td><input type="text" class="form-control" name="numberTeams" id="numberTeams" value=<?php echo '"'.$_SESSION["numberTeams"].'"' ?>></td>
+	</tr>
+	<tr>
+		<td><label for="highestScore">Highest Event Score:<span class="red">*</span></label></td>
+		<td><input type="text" class="form-control" name="highestScore" id="highestScore" value=<?php echo '"'.$_SESSION["highestScore"].'"' ?>></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td><label for="tournamentDescription">Description: </label></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td colspan="4">
+			<textarea class="form-control"  name="tournamentDescription" id="tournamentDescription" spellcheck="true" rows="5" cols="100"><?php echo $_SESSION["tournamentDescription"];?></textarea>
+		</td>
+	</tr>
+	</table>
+	<hr>
+	
+      <h2>Events</h2>
+        <table class="table table-hover">
+        <thead>
+            <tr>
+                <th data-field="name" data-align="right" data-sortable="true">Event Name</th>
+                <th data-field="trial" data-align="center" data-sortable="true">Trial Event?</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php
+			$eventList = $_SESSION["eventList"];
+			$eventCount = 0;
+			if ($eventList) {
+				foreach ($eventList as $event) {
+					echo '<tr>';
+      				echo '<td>'; echo $event['1']; echo '</td>';
+					echo '<td><div class="col-xs-5 col-md-5">'; 
+					echo '<select  class="form-control" name="trialEvent'.$eventCount.'" id="trialEvent'.$eventCount.'">';
+					echo '<option value="0"'; if($event['2'] == '' or $event['2'] == 0){echo("selected");} echo '>No</option>';
+					echo '<option value="1"'; if($event['2'] == 1){echo("selected");} echo '>Yes</option>';
+					echo '</select>';
+					echo '</div></td>';
+					echo '</tr>';
+					
+					$eventCount++;
+				}
+			}        
+        ?>
+        </tbody>
+        </table>
+	<div class="input-group">
+	<span class="input-group-btn">
+	<button type="submit" class="btn btn-xs btn-primary" name="addEvent">Add Event</button>
+	</span>
+	<div class="col-xs-4 col-md-4">
+		<select class="form-control" name="eventAdded" id="eventAdded">
+			<option value=""></option>
+			<?php
+			    if ($events) {
+             		while($eventRow = mysql_fetch_array($events)) {
+             			echo '<option value="'.$eventRow['0'].'">'.$eventRow['1'].'</option>';
+             			
+             		}
+             	}
+        	?>
+		</select>
+		</div>
+		</div>
+	<hr>
+	
+	    <h2>Teams</h2>
+        <table class="table table-hover">
+        <thead>
+            <tr>
+                <th data-field="name" data-align="right" data-sortable="true">Team Name</th>
+                <th data-field="name" data-align="right" data-sortable="true">Team Number</th>
+                <th data-field="alternate" data-align="center" data-sortable="true">Alternate Team?</th>
+            </tr>
+        </thead>
+        <tbody>
+         <?php
+			$teamList = $_SESSION["teamList"];
+			$teamCount = 0;
+			if ($teamList) {
+				foreach ($teamList as $team) {
+					echo '<tr>';
+      				echo '<td>'; echo $team['1']; echo '</td>';
+      				echo '<td><div class="col-xs-5 col-md-5">';
+      				echo '<input type="number"  class="form-control" size="10" onkeydown="limit(this);" onkeyup="limit(this);" 
+      						min="0" max="100" step="1" 
+      						name="teamNumber'.$teamCount.'" id="teamNumber'.$teamCount.'" value="'.$team['2'].'">';
+      				echo '</div></td>';
+					echo '<td><div class="col-xs-5 col-md-5">'; 
+					echo '<select   class="form-control" name="alternateTeam'.$teamCount.'" id="alternateTeam'.$teamCount.'" >';
+					echo '<option value="0"'; if($team['3'] == '' or $$team['3'] == 0){echo("selected");} echo '>No</option>';
+					echo '<option value="1"'; if($team['3'] == 1){echo("selected");} echo '>Yes</option>';
+					echo '</select>';
+					echo '</div></td>';
+					echo '</tr>';
+					
+					$teamCount++;
+				}
+			}        
+        ?>  
+        </tbody>
+        </table>
+
+	<div class="input-group">
+	<span class="input-group-btn">
+	<button type="submit" class="btn btn-xs btn-primary" name="addTeam">Add Team</button>
+	</span>
+	<div class="col-xs-4 col-md-4">
+		<select class="form-control" name="teamAdded" id="teamAdded">
+			<option value=""></option>
+			<?php
+			    if ($teams) {
+             		while($teamRow = mysql_fetch_array($teams)) {
+             			echo '<option value="'.$teamRow['0'].'">'.$teamRow['1'].'</option>';
+             			
+             		}
+             	}
+        	?>
+		</select>
+	</div>
+	</div>
+	<hr>
+
+     <button type="submit" class="btn btn-xs btn-danger" name="saveTournament" onclick="return validate();" value=<?php echo '"'.$tournamentRow['0'].'"' ?>>Save</button>
+ 	 <button type="submit" class="btn btn-xs btn-primary" name="cancelTournament">Cancel</button>
+      <hr>
+	<?php include_once 'footer.php'; ?>
+
+    </div><!--/.container-->
+    
+    </form>
+      
+      
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+   <script src="js/jquery-1.11.3.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+	
+  </body>
+</html>
