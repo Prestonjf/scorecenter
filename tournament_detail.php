@@ -51,6 +51,7 @@
 				error = true;
 			}
 		}	
+		// validate max events/teams
 		if (error) {
 			displayError("<strong>Required Fields:</strong> Please complete the required fields denoted with an ' * '.");
 			return false;			
@@ -114,9 +115,10 @@
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			clearError();
 			clearSuccess();
-			if (xmlhttp.responseText == 'error') {
+			if (xmlhttp.responseText == 'error1' || xmlhttp.responseText == 'error2') {
 				//error message
-				displayError("<strong>Cannot Add Event:</strong> .")					
+				if (xmlhttp.responseText == 'error1') displayError("<strong>Cannot Add Event:</strong> Event already added or no event selected.");
+				else if (xmlhttp.responseText == 'error2') displayError("<strong>Cannot Add Event:</strong> Cannot add more than "+document.getElementById('numberEvents').value+" events.");				
 			}
 			else {
 				// success message
@@ -125,7 +127,8 @@
 				}					
 		}
 		}	
-        xmlhttp.open("GET","controller.php?command=addEvent&eventAdded="+document.getElementById('eventAdded').value+generateEventParamsString(),true);
+        xmlhttp.open("GET","controller.php?command=addEvent&eventAdded="+document.getElementById('eventAdded').value+generateEventParamsString()
+						+ getNumberEventsTeams(),true);
         xmlhttp.send();
 	}
 		
@@ -135,9 +138,10 @@
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			clearError();
 			clearSuccess();
-			if (xmlhttp.responseText == 'error') {
-				//error message
-				displayError("<strong>Cannot Add Team:</strong> .")					
+			if (xmlhttp.responseText == 'error1' || xmlhttp.responseText == 'error2') {
+				//error message 
+				if (xmlhttp.responseText == 'error1') displayError("<strong>Cannot Add Team:</strong> Team already added or no team selected.");
+				else if (xmlhttp.responseText == 'error2') displayError("<strong>Cannot Add Team:</strong> Cannot add more than "+document.getElementById('numberTeams').value+" teams.");
 			}
 			else {
 				// success message
@@ -146,7 +150,8 @@
 				}					
 		}
 		}	
-        xmlhttp.open("GET","controller.php?command=addTeam&teamAdded="+document.getElementById('teamAdded').value+generateTeamParamsString(),true);
+        xmlhttp.open("GET","controller.php?command=addTeam&teamAdded="+document.getElementById('teamAdded').value+generateTeamParamsString()
+						+getNumberEventsTeams(),true);
         xmlhttp.send();
 	}
 	
@@ -174,6 +179,10 @@
 			count++;
 		}
 		return str;
+	}
+	
+	function getNumberEventsTeams() {
+		return "&numberEvents="+document.getElementById('numberEvents').value+"&numberTeams="+document.getElementById('numberTeams').value;
 	}
 	
   

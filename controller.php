@@ -224,21 +224,32 @@ else {
 	}
 	
 	function addTeam($selectedTeam,$mysqli) {
-		// Validation: cannot add existing Team or blank
-		if ($selectedTeam != '') { //validation Flag	
+		// Validation: cannot add existing Team or blank	
 			$teamList = null;
 			if ($_SESSION["teamList"] == null) $teamList = array();
 			else $teamList = $_SESSION["teamList"];
 		
-			$exists = FALSE;
+			$error = FALSE;
+			$errorStr = "";			
+			$count = 0;
 			
+			if ($selectedTeam == '') { $error = TRUE; $errorStr = 'error1';}	
 			if ($teamList) {
 				foreach ($teamList as $team) { 
-					if ($selectedTeam == $team['0']) $exists = TRUE; //validation Flag	
+					$count++;
+					if ($selectedTeam == $team['0']) { $error = TRUE; $errorStr = 'error1';}	
 				}
 			}
+
+			if ($_GET['numberTeams'] != null and $_GET['numberTeams'] != '' and $_GET['numberTeams'] < $count+1) {
+				$error = TRUE; 
+				$errorStr = 'error2';
+			}
+			
+			
 		
-			if (!$exists) {
+			if (!$error) {
+				//echo $_SERVER['REQUEST_URI'];
 				// Load Event Name
 				$result = $mysqli->query("SELECT NAME FROM TEAM WHERE TEAM_ID = ".$selectedTeam); 
 				$row1 = $result->fetch_row();
@@ -249,27 +260,34 @@ else {
 				reloadTournamentTeam();
 			}
 			else {
-				echo 'error';
+				echo $errorStr;
 			}
-		}
 	}
 	
 	function addEvent($selectedEvent, $mysqli) {
 		// Validation: cannot add existing event or blank
-		if ($selectedEvent != '') { //validation Flag	
 			$eventList = null;
 			if ($_SESSION["eventList"] == null) $eventList = array();
 			else $eventList = $_SESSION["eventList"];
 		
-			$exists = FALSE;
+			$error = FALSE;
+			$errorStr = "";			
+			$count = 0;
 		
+			if ($selectedEvent == '') { $error = TRUE; $errorStr = 'error1';}
 			if ($eventList) {
 				foreach ($eventList as $event) { 
-					if ($selectedEvent == $event['0']) $exists = TRUE; //validation Flag						
+					$count++;
+					if ($selectedEvent == $event['0']) { $error = TRUE; $errorStr = 'error1';}						
 				}
 			}
+			
+			if ($_GET['numberEvents'] != null and $_GET['numberEvents'] != '' and $_GET['numberEvents'] < $count+1) {
+				$error = TRUE; 
+				$errorStr = 'error2';
+			}
 	
-			if (!$exists) {
+			if (!$error) {
 				// Load Event Name
 				$result = $mysqli->query("SELECT NAME FROM EVENT WHERE EVENT_ID = ".$selectedEvent); 
 				$row1 = $result->fetch_row();
@@ -279,9 +297,8 @@ else {
 				$_SESSION["eventList"] = $eventList;
 				reloadTournamentEvent();
 			} else {
-				echo 'error';
+				echo $errorStr;
 			}
-		}
 	}
 	
 	function deleteTournamentTeam($mysqli, $row) {
