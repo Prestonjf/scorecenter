@@ -38,7 +38,11 @@
     	
 	});
 	
+
+	
 	function validate() {
+		clearError();
+		clearSuccess();
 		var error = false;
 		var fields = ["tournamentName", "tournamentDivision", "tournamentLocation","tournamentDate","numberEvents","numberTeams","highestScore"];
 		var str;
@@ -57,48 +61,8 @@
 		}
 	}
 	
-	function validateDeleteTeam(element, row) {
-		if (!confirmDelete('team')) return;
-		
-		if (element.value == null || element.value == '') {
-			// remove from table
-			// success message
-			displaySuccess("<strong>Deleted:</strong> Team has been deleted successfully!");
-			document.getElementById("teamTable").deleteRow(row+1);
-		}
-		else {
-			xmlhttp = new XMLHttpRequest();
-			xmlhttp.onreadystatechange = function() {
-				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-					clearError();
-					clearSuccess();
-					if (xmlhttp.responseText == 'error') {
-						//error message
-						displayError("<strong>Cannot Delete Team:</strong> Scores have already been entered for this team.")
-						
-					}
-					else {
-						// success message
-						displaySuccess("<strong>Deleted:</strong> Team has been deleted successfully!");
-						// remove from table
-						document.getElementById("teamTable").deleteRow(row+1);
-					}					
-				}
-			}	
-        xmlhttp.open("GET","controller.php?command=validateDeleteTeam&TournTeamId="+element.value,true);
-        xmlhttp.send();
-		}
-	}
-	
-	function validateDeleteEvent(element, row) {
+	function validateDeleteEvent(element) {
 		if (!confirmDelete('event')) return;
-		if (element.value == null || element.value == '') {
-			// remove from table
-			// success message
-			displaySuccess("<strong>Deleted:</strong> Event has been deleted successfully!");
-			document.getElementById("eventTable").deleteRow(row+1);
-		}
-		else {
 			xmlhttp = new XMLHttpRequest();
 			xmlhttp.onreadystatechange = function() {
 				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -112,15 +76,106 @@
 						// success message
 						displaySuccess("<strong>Deleted:</strong> Event has been deleted successfully!");
 						// remove from table
-						document.getElementById("eventTable").deleteRow(row+1);
+						document.getElementById('eventTableBody').innerHTML = xmlhttp.responseText;
 					}					
 				}
 			}	
-        xmlhttp.open("GET","controller.php?command=validateDeleteEvent&TournEventId="+element.value,true);
+        xmlhttp.open("GET","controller.php?command=validateDeleteEvent&TournEventRowId="+$(element).closest('tr').index()+generateEventParamsString(),true);
         xmlhttp.send();
-		}
 	}
-  
+	
+	function validateDeleteTeam(element) {
+		if (!confirmDelete('team')) return;
+			xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+					clearError();
+					clearSuccess();
+					if (xmlhttp.responseText == 'error') {
+						//error message
+						displayError("<strong>Cannot Delete Team:</strong> Scores have already been entered for this team.")	
+					}
+					else {
+						// success message
+						displaySuccess("<strong>Deleted:</strong> Team has been deleted successfully!");
+						// remove from table
+						document.getElementById('teamTableBody').innerHTML = xmlhttp.responseText;
+					}					
+				}
+			}	
+        xmlhttp.open("GET","controller.php?command=validateDeleteTeam&TournTeamRowId="+$(element).closest('tr').index()+generateTeamParamsString,true);
+        xmlhttp.send();
+	}
+	
+	
+	function addTournEvent() {
+		xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			clearError();
+			clearSuccess();
+			if (xmlhttp.responseText == 'error') {
+				//error message
+				displayError("<strong>Cannot Add Event:</strong> .")					
+			}
+			else {
+				// success message
+				document.getElementById('eventTableBody').innerHTML = xmlhttp.responseText;
+
+				}					
+		}
+		}	
+        xmlhttp.open("GET","controller.php?command=addEvent&eventAdded="+document.getElementById('eventAdded').value+generateEventParamsString(),true);
+        xmlhttp.send();
+	}
+		
+  	function addTournTeam() {
+		xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			clearError();
+			clearSuccess();
+			if (xmlhttp.responseText == 'error') {
+				//error message
+				displayError("<strong>Cannot Add Team:</strong> .")					
+			}
+			else {
+				// success message
+				document.getElementById('teamTableBody').innerHTML = xmlhttp.responseText;
+
+				}					
+		}
+		}	
+        xmlhttp.open("GET","controller.php?command=addTeam&teamAdded="+document.getElementById('teamAdded').value+generateTeamParamsString(),true);
+        xmlhttp.send();
+	}
+	
+	function generateEventParamsString() {
+		var str = "";
+		var count = 0;
+		while (count < 100) {
+			if (document.getElementById('trialEvent'+count) != null) {
+				str += "&trialEvent"+count+"="+document.getElementById('trialEvent'+count).value;
+			}
+			count++;
+		}
+		return str;
+	}
+	function generateTeamParamsString() {
+		var str = "";
+		var count = 0;
+		while (count < 100) {
+			if (document.getElementById('alternateTeam'+count) != null) {
+				str += "&alternateTeam"+count+"="+document.getElementById('alternateTeam'+count).value;
+			}
+			if (document.getElementById('teamNumber'+count) != null) {
+				str += "&teamNumber"+count+"="+document.getElementById('teamNumber'+count).value;
+			}
+			count++;
+		}
+		return str;
+	}
+	
   
   </script>
   <style>
@@ -229,7 +284,7 @@
 				<th data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="eventTableBody">
         <?php
 			$eventList = $_SESSION["eventList"];
 			$eventCount = 0;
@@ -243,7 +298,7 @@
 					echo '<option value="1"'; if($event['2'] == 1){echo("selected");} echo '>Yes</option>';
 					echo '</select>';
 					echo '</div></td>';
-					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteEvent" onclick="validateDeleteEvent(this,'.$eventCount.')" value='.$event['3'].'>Delete</button></td>';
+					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteEvent" onclick="validateDeleteEvent(this)" value='.$event['3'].'>Delete</button></td>';
 					echo '</tr>';
 					
 					$eventCount++;
@@ -254,7 +309,7 @@
         </table>
 	<div class="input-group">
 	<span class="input-group-btn">
-	<button type="submit" class="btn btn-xs btn-primary" name="addEvent">Add Event</button>
+	<button type="button" class="btn btn-xs btn-primary" onclick="addTournEvent()" name="addEvent">Add Event</button>
 	</span>
 	<div class="col-xs-4 col-md-4">
 		<select class="form-control" name="eventAdded" id="eventAdded">
@@ -282,7 +337,7 @@
 				<th data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="teamTableBody">
          <?php
 			$teamList = $_SESSION["teamList"];
 			$teamCount = 0;
@@ -301,7 +356,7 @@
 					echo '<option value="1"'; if($team['3'] == 1){echo("selected");} echo '>Yes</option>';
 					echo '</select>';
 					echo '</div></td>';
-					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteTeam" onclick="validateDeleteTeam(this,'.$teamCount.')" value='.$team['4'].'>Delete</button></td>';
+					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteTeam" onclick="validateDeleteTeam(this)" value='.$team['4'].'>Delete</button></td>';
 					echo '</tr>';
 					
 					$teamCount++;
@@ -313,7 +368,7 @@
 
 	<div class="input-group">
 	<span class="input-group-btn">
-	<button type="submit" class="btn btn-xs btn-primary" name="addTeam">Add Team</button>
+	<button type="button" class="btn btn-xs btn-primary" onclick="addTournTeam()" name="addTeam">Add Team</button>
 	</span>
 	<div class="col-xs-4 col-md-4">
 		<select class="form-control" name="teamAdded" id="teamAdded">
@@ -345,6 +400,14 @@
    <script src="js/jquery-1.11.3.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
+    <script>
+    //	$('table tr').click(function() {
+
+ 	//   alert( this.rowIndex );  // alert the index number of the clicked row.
+
+	//});
+    
+    </script>
 	
   </body>
 </html>
