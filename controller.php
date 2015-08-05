@@ -26,6 +26,11 @@ else if (isset($_GET['deleteTournament'])) {
 	header("Location: tournament.php");
 	exit();
 }
+else if (isset($_GET['addNewEvent'])) {
+	
+	header("Location: event_detail.php");
+	exit();
+}
 else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteTeam') {
 	cacheTournamnent();
 	deleteTournamentTeam($mysqli, $_GET['TournTeamRowId']);
@@ -47,6 +52,11 @@ else if (isset($_GET['searchTournament']) or ($_GET['command'] != null and $_GET
 	
 	header("Location: tournament.php");
 	exit();
+}
+else if (isset($_GET['searchEvent']) or ($_GET['command'] != null and $_GET['command'] == 'loadAllEvents')) {
+	loadAllEvents($mysqli);
+	header("Location: event.php");
+	exit();	
 }
 
 else if (isset($_GET['loadTournament'])) {
@@ -130,6 +140,8 @@ else {
 
 <?php
 
+
+// TOURNAMENT DISPLAY SCREEN ---------------------------------------
 	function loadAllTournaments($mysqli) {
 		$query = "SELECT TOURNAMENT_ID, NAME, LOCATION,DIVISION, DATE_FORMAT(DATE,'%m/%d/%Y') 'DATE1' FROM TOURNAMENT WHERE 1=1 ";	
 		if ($_SESSION["fromTournamentDate"] !=null and $_SESSION["fromTournamentDate"] != '') {
@@ -149,9 +161,23 @@ else {
 		
 		$_SESSION["allTournaments"] = $query;
 	}
+	
+	
+	function deleteTournament($id, $mysqli) {
+		
+		// delete score_table
+		
+		// delete TOURN_EVENT_LINK
+		
+		// delete TOURN_TEAM_LINK
+		
+		// DELETE TOURNAMENT
+		//$result = $mysqli->query("DELETE FROM TOURNAMENT WHERE TOURNAMENT_ID = " .$id); 
+		
+	}
 
 
-
+// MANAGE TOURNAMENTS SCREEN ---------------------------------------
 	function cacheTournamnent() {
 		if ($_GET['tournamentName'] != null) $_SESSION["tournamentName"] = $_GET['tournamentName'];
 		if ($_GET['tournamentDivision'] != null) $_SESSION["tournamentDivision"] = $_GET['tournamentDivision'];
@@ -593,19 +619,43 @@ else {
 	
 	
 	
+		
+// DISPLAY TOURNAMENT'S EVENTS SCREEN ---------------------------------------	
+	function loadTournamentEvents($mysqli) {
+	
+		$query = "SELECT TE.EVENT_ID, E.NAME, TE.TRIAL_EVENT_FLAG, TE.TOURN_EVENT_ID, COUNT(TES.TEAM_EVENT_SCORE_ID) as SCORES_COMPLETED, 
+					T.NUMBER_TEAMS FROM TOURNAMENT_EVENT TE 
+					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
+					INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID 
+					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TES.SCORE IS NOT NULL									
+					WHERE TE.TOURNAMENT_ID=".$_SESSION["tournamentId"]. 
+					" GROUP BY EVENT_ID,NAME, TRIAL_EVENT_FLAG,TOURN_EVENT_ID, NUMBER_TEAMS
+					ORDER BY UPPER(E.NAME) ASC"; 
+					
+		$_SESSION["tournamentEventsQuery"] = $query;
+		
+		 $result = $mysqli->query("SELECT * FROM TOURNAMENT WHERE TOURNAMENT_ID = " .$_SESSION["tournamentId"]); 
+ 			if ($result) {
+ 				$tournamentRow = $result->fetch_row();
+ 				
+ 				$_SESSION["tournamentName"] = $tournamentRow['1'];
+ 				$_SESSION["tournamentDivision"] = $tournamentRow['3'];
+ 				$_SESSION["tournamentLocation"] = $tournamentRow['2'];
+ 				$_SESSION["numberEvents"] = $tournamentRow['5'];
+ 				$_SESSION["numberTeams"] = $tournamentRow['6'];
+ 				$_SESSION["highestScore"] = $tournamentRow['7'];
+ 				$_SESSION["tournamentDescription"] = $tournamentRow['8'];
+ 				
+ 				$date = strtotime($tournamentRow['4']);
+ 				$_SESSION["tournamentDate"] = date('m/d/Y', $date);
+ 				
+    		}
+		
+		
+	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+// MANAGE EVENT SCORES SCREEN ---------------------------------------	
 	function loadEventScores($mysqli) {
 				
 		 $result = $mysqli->query("SELECT E.NAME, T.HIGHEST_SCORE_POSSIBLE FROM EVENT E INNER JOIN TOURNAMENT_EVENT TE ON TE.EVENT_ID=E.EVENT_ID 
@@ -641,6 +691,9 @@ else {
 		if ($scoreList) {
 			$teamCount = 0;
 			foreach ($scoreList as $score) {
+				$value = $_GET['teamScore'.$teamCount];
+				if ($value == '' || $value == '0') $value = null;
+					
 				if ($score['3'] == null or $score['3'] == '') {
 					$result = $mysqli->query("select max(TEAM_EVENT_SCORE_ID) + 1 from TEAM_EVENT_SCORE");
 					$row = $result->fetch_row();
@@ -648,13 +701,13 @@ else {
 					if ($row['0'] != null) $id = $row['0']; 
 				
 					$query = $mysqli->prepare("INSERT INTO TEAM_EVENT_SCORE (TEAM_EVENT_SCORE_ID, TOURN_TEAM_ID, TOURN_EVENT_ID, SCORE) VALUES (".$id.", ?, ?, ?) ");
-					$query->bind_param('iii',$score['4'],$_SESSION["tournEventId"], $_GET['teamScore'.$teamCount]); 
+					$query->bind_param('iii',$score['4'],$_SESSION["tournEventId"], $value); 
 					$query->execute();
 					$score['3'] = $id;
 				}
 				else {
 					$query = $mysqli->prepare("UPDATE TEAM_EVENT_SCORE SET SCORE=? WHERE TEAM_EVENT_SCORE_ID=".$score['3']);			
-					$query->bind_param('i',$_GET['teamScore'.$teamCount]);
+					$query->bind_param('i',$value);
 					$query->execute();
 				}
 				$teamCount++;	
@@ -663,71 +716,25 @@ else {
 		$_SESSION["teamEventScoreList"] = $scoreList;
 		$_SESSION['savesuccessScore'] = "1";
 	}
-	
-	
-	function loadTournamentEvents($mysqli) {
-	
-		$query = "SELECT TE.EVENT_ID, E.NAME, TE.TRIAL_EVENT_FLAG, TE.TOURN_EVENT_ID, COUNT(TES.TEAM_EVENT_SCORE_ID) as SCORES_COMPLETED, 
-					T.NUMBER_TEAMS FROM TOURNAMENT_EVENT TE 
-					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
-					INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID 
-					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TES.SCORE IS NOT NULL									
-					WHERE TE.TOURNAMENT_ID=".$_SESSION["tournamentId"]. 
-					" GROUP BY EVENT_ID,NAME, TRIAL_EVENT_FLAG,TOURN_EVENT_ID, NUMBER_TEAMS
-					ORDER BY UPPER(E.NAME) ASC"; 
-					
-		$_SESSION["tournamentEventsQuery"] = $query;
-		
-		 $result = $mysqli->query("SELECT * FROM TOURNAMENT WHERE TOURNAMENT_ID = " .$_SESSION["tournamentId"]); 
+
+
+	// MANAGE EVENTS SCREEN ---------------------------------------
+	function loadAllEvents($mysqli) {
+			$eventList = array();
+			$result = $mysqli->query("Select * from EVENT"); 
  			if ($result) {
- 				$tournamentRow = $result->fetch_row();
+				while($eventRow = $result->fetch_array()) {
+ 					$eventRecord = array();	
+					array_push($eventRecord, $eventRow['0']);
+					array_push($eventRecord, $eventRow['1']);
  				
- 				$_SESSION["tournamentName"] = $tournamentRow['1'];
- 				$_SESSION["tournamentDivision"] = $tournamentRow['3'];
- 				$_SESSION["tournamentLocation"] = $tournamentRow['2'];
- 				$_SESSION["numberEvents"] = $tournamentRow['5'];
- 				$_SESSION["numberTeams"] = $tournamentRow['6'];
- 				$_SESSION["highestScore"] = $tournamentRow['7'];
- 				$_SESSION["tournamentDescription"] = $tournamentRow['8'];
- 				
- 				$date = strtotime($tournamentRow['4']);
- 				$_SESSION["tournamentDate"] = date('m/d/Y', $date);
- 				
-    		}
+					array_push($eventList, $eventRecord);
+				}
+			}
 		
 		
+		$_SESSION["eventsList"] = $eventList;
 	}
-	
-
-
-
-
-	
-	
-	
-	
-	
-	
-	
-
-	function deleteTournament($id, $mysqli) {
-		
-		// delete score_table
-		
-		// delete TOURN_EVENT_LINK
-		
-		// delete TOURN_TEAM_LINK
-		
-		// DELETE TOURNAMENT
-		$result = $mysqli->query("DELETE FROM TOURNAMENT WHERE TOURNAMENT_ID = " .$id); 
-		
-	}
-
-
-
-
-
-
 
 
 

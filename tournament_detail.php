@@ -38,7 +38,11 @@
     	
 	});
 	
-
+	function limitNumber(element) {
+		var max = 1000;
+		if (isNaN(element.value)) element.value = '';
+		if (element.value > max || element.value < 1) element.value = '';
+	}
 	
 	function validate() {
 		clearError();
@@ -260,13 +264,16 @@
 	</tr>
 	<tr>
 		<td><label for="numberEvents">Number of Events:<span class="red">*</span></label></td>
-		<td><input type="text" class="form-control" name="numberEvents" id="numberEvents" value=<?php echo '"'.$_SESSION["numberEvents"].'"' ?>></td>
+		<td><input type="text" class="form-control" name="numberEvents" id="numberEvents" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
+			value=<?php echo '"'.$_SESSION["numberEvents"].'"' ?>></td>
 		<td><label for="numberTeams">Number of Teams:<span class="red">*</span></label></td>
-		<td><input type="text" class="form-control" name="numberTeams" id="numberTeams" value=<?php echo '"'.$_SESSION["numberTeams"].'"' ?>></td>
+		<td><input type="text" class="form-control" name="numberTeams" id="numberTeams" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
+			value=<?php echo '"'.$_SESSION["numberTeams"].'"' ?>></td>
 	</tr>
 	<tr>
 		<td><label for="highestScore">Highest Event Score:<span class="red">*</span></label></td>
-		<td><input type="text" class="form-control" name="highestScore" id="highestScore" value=<?php echo '"'.$_SESSION["highestScore"].'"' ?>></td>
+		<td><input type="text" class="form-control" name="highestScore" id="highestScore" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
+			value=<?php echo '"'.$_SESSION["highestScore"].'"' ?>></td>
 		<td></td>
 		<td></td>
 	</tr>
@@ -355,7 +362,7 @@
 					echo '<tr>';
       				echo '<td>'; echo $team['1']; echo '</td>';
       				echo '<td><div class="col-xs-5 col-md-5">';
-      				echo '<input type="number"  class="form-control" size="10" onkeydown="limit(this);" onkeyup="limit(this);" 
+      				echo '<input type="text"  class="form-control" size="10" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);" 
       						min="0" max="100" step="1" 
       						name="teamNumber'.$teamCount.'" id="teamNumber'.$teamCount.'" value="'.$team['2'].'">';
       				echo '</div></td>';

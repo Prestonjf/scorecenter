@@ -53,43 +53,11 @@
 		document.body.scrollTop = document.documentElement.scrollTop = 0;						
 	}
 	
-	function limitNumber(element) {
-		var max = <?php echo $_SESSION["tournamentHighestScore"];?>;
-		if (isNaN(element.value)) element.value = '';
-		if (element.value > max || element.value < 1) element.value = '';
-	}
-	
-	function validate() {
-		var error = false;
-		var count = 0;
-		var maxScore = <?php echo $_SESSION["tournamentHighestScore"];?>;
-		var scoreArr = [];
-		var exists = false;
+	function clearDates() {
+		document.getElementById('fromDate').value = '';
+		document.getElementById('toDate').value = '';
+		document.getElementById('tournamentsNumber').value = '20';
 		
-		while (count < 1000) {
-			exists = false;
-			if  ($('#teamScore'+count) != null && $('#teamScore'+count).val() != null) {
-				var score = $('#teamScore'+count).val();
-				scoreArr.forEach(function(entry) {
-					if (score == entry) exists = true;
-				});
-				
-				if (exists) {
-					error = true;
-					break;
-				}
-				else if (score != '' && score != '0') {
-					scoreArr.push(score);
-				}
-			} 
-			else { break;}
-			count++;
-		}
-		if (error) {
-			displayError("<strong>Cannot Save Scores:</strong> Team cannot have the same score / rank as another unless the value entered is the maximum allowed score.");
-			return false;
-		}
-		else return true;		
 	}
   
   </script>
@@ -116,47 +84,68 @@
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
-     <h1>Enter Event Scores</h1>
-     <h4>Event: <?php echo $_SESSION["tournamentName"]; ?></h4>
-     <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
-     <h4>Event: <?php echo $_SESSION["eventName"]; ?></h4> 
-     <br />
-     <h6>*Instructions: Enter the finishing position/score for each team on the list below. The maximum score for events at this tournament is: <?php echo $_SESSION["tournamentHighestScore"];?></h6>    
+     <h1>Manage Events</h1>
 	 <hr>
+	<table width="90%" class="borderless">
+	<tr>
+	<td width="15"><label for="eventName">Event Name: </label></td>
+	<td width="35">
+	<input type="text" size="20" class="date-picker form-control" name="eventName" id="eventName" value="">
+	</td>
+	
+	<td width="15"></td>
+	<td width="35">
+	</td>
+	</tr>
+	<tr>
+	<td><label># of Results: </label></td><td>
+	<input type="number" class="form-control" size="10" onkeydown="limit(this);" onkeyup="limit(this);" name="tournamentsNumber" id="tournamentsNumber" min="0" max="999"
+		step="1" value="100">
+	</td>
+	<td></td>
+	<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchTournament">Search</button>
+		<button type="button" class="btn btn-xs btn-warning" name="clearSearchTournament" onclick="clearDates()">Clear</button>
+	</td>
+	
+	</tr>
+	</table>
+	
+	<script type="text/javascript">
+		$(".date-picker").datepicker({
+			changeMonth: true,
+			changeYear: true
+		});
+	</script>
 
+<hr>
+<br />
+<br />
         <table class="table table-hover">
         <thead>
             <tr>
-                <th data-field="name" data-align="right" data-sortable="true">Team Number</th>
-                <th data-field="teamNumber" data-align="center" data-sortable="true">Team Name</th>
-                <th data-field="score" data-align="center" data-sortable="true">Score / Rank</th>
+                <th data-field="name" data-align="right" data-sortable="true">Event Name</th>
+                <th data-field="actions" data-sortable="true">Actions</th>
             </tr>
         </thead>
         <tbody>
-         <?php
-         if ($_SESSION["teamEventScoreList"] != null and $_SESSION["teamEventScoreList"] != '') {			
- 			if ($_SESSION["teamEventScoreList"] ) {
- 				$teamCount = 0;
-      			foreach ($_SESSION["teamEventScoreList"] as $scoreRecord) {
-      				echo '<tr>';
-      				echo '<td>'; echo $scoreRecord['1']; echo '</td>';
-					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
-					echo '<td><div class="col-xs-5 col-md-5">';
-      				echo '<input type="text"  class="form-control" size="10" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"  
-      						name="teamScore'.$teamCount.'" id="teamScore'.$teamCount.'" value="'.$scoreRecord['2'].'">';
-      				echo '</div></td>';					
-					echo '</tr>';
-					
-					$teamCount++;	
-      			}
+         <?php 
+         if ($_SESSION["eventsList"] != null) {
+         //echo $_SESSION["allTournaments"];
+			foreach ($_SESSION["eventsList"] as $event) {
+      			echo '<tr>';
+      			echo '<td>'; echo $event['1']; echo '</td>';
+				echo '<td>';
+				echo '<button type="submit" class="btn btn-xs btn-primary" name="editEvent" value="'.$event['0'].'">Edit Event</button> &nbsp;'; 				
+				echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteEvent" onclick="return confirmDelete(\'event\')" value='.$event['0'].'>Delete</button>&nbsp;';
+				echo '</td>';	
+				echo '</tr>';	
     		}
     	}
         ?>
           </tbody>
           </table>
            
-		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"' ?>>Save</button>
- 	 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEvent">Cancel</button>
+		<button type="submit" class="btn btn-xs btn-primary" name="addNewEvent">Add Event</button>
 
       <hr>
 	<?php include_once 'footer.php'; ?>
@@ -168,7 +157,12 @@
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="js/jquery-1.11.3.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/bootstrap.min.js"></script>	
+    <script src="js/bootstrap.min.js"></script>
+    
+    <?php 
+    	if ($_SESSION['savesuccessTournament'] != null and $_SESSION['savesuccessTournament'] == '1') { ?>
+    	<script type="text/javascript">saveMessage('Tournament');</script>
+   	<?php $_SESSION['savesuccessTournament'] = null; } ?> 	
     
   </body>
 </html>
