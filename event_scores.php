@@ -78,7 +78,7 @@
 					error = true;
 					break;
 				}
-				else if (score != '' && score != '0') {
+				else if (score != '' && score != '0' && score != maxScore) {
 					scoreArr.push(score);
 				}
 			} 

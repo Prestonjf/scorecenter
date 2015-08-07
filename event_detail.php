@@ -46,19 +46,7 @@
     	
     	
 	});
-  
-  function saveMessage(message) {
-		document.getElementById('messages').style.display = "block";
-		document.getElementById('messages').innerHTML = "<strong>Saved: </strong>"+message+" has been saved successfully!";
-		document.body.scrollTop = document.documentElement.scrollTop = 0;						
-	}
-	
-	function clearDates() {
-		document.getElementById('fromDate').value = '';
-		document.getElementById('toDate').value = '';
-		document.getElementById('tournamentsNumber').value = '20';
-		
-	}
+
   
   </script>
     <style>
@@ -88,31 +76,27 @@
 	 <hr>
 	<table width="90%" class="borderless">
 	<tr>
-	<td width="15"><label for="eventName">Event Name: </label></td>
-	<td width="35">
-	<input type="text" size="20" class="date-picker form-control" name="eventName" id="eventName" value="">
-	</td>
-	
-	<td width="15"></td>
-	<td width="35">
+	<td width="40%"><label for="eventName">Event Name: </label></td>
+	<td width="60%">
+	<input type="text" size="40" class="form-control" name="eventName" id="eventName" value="<?php echo $_SESSION["eventName"];?>">
 	</td>
 	</tr>
-	<tr>
-	<td><label>: </label></td>
-	<td>
-
-	</td>
-	<td></td>
-	<td align="right">
-	</td>
 	
+	<tr>
+	<td><label>Event Description: </label></td>
+	<td></td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<textarea class="form-control"  name="eventDescription" id="eventDescription" spellcheck="true" rows="5" cols="100"><?php echo $_SESSION["eventDescription"];?></textarea>
+		</td>
 	</tr>
 	</table>
 	
 	<hr>
 
-     <button type="submit" class="btn btn-xs btn-danger" name="saveTournament" onclick="return validate();" value=<?php echo '"'."".'"' ?>>Save</button>
- 	 <button type="submit" class="btn btn-xs btn-primary" name="cancelTournament">Cancel</button>
+     <button type="submit" class="btn btn-xs btn-danger" name="saveEvent" onclick="return validate();" value="<?php echo $_SESSION["eventId"];?>">Save</button>
+ 	 <button type="submit" class="btn btn-xs btn-primary" name="cancelEvent" value="0">Cancel</button>
 
 
       <hr>

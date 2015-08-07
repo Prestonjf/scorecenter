@@ -145,7 +145,7 @@
           </tbody>
           </table>
            
-		<button type="submit" class="btn btn-xs btn-primary" name="addNewEvent">Add Event</button>
+		<button type="submit" class="btn btn-xs btn-primary" name="addNewEvent" value="0">Add Event</button>
 
       <hr>
 	<?php include_once 'footer.php'; ?>
