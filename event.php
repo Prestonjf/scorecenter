@@ -53,11 +53,9 @@
 		document.body.scrollTop = document.documentElement.scrollTop = 0;						
 	}
 	
-	function clearDates() {
-		document.getElementById('fromDate').value = '';
-		document.getElementById('toDate').value = '';
-		document.getElementById('tournamentsNumber').value = '20';
-		
+	function clearFilterCriteria() {
+		document.getElementById('eventName').value = '';
+		document.getElementById('eventsNumber').value = '';
 	}
   
   </script>
@@ -90,7 +88,7 @@
 	<tr>
 	<td width="15"><label for="eventName">Event Name: </label></td>
 	<td width="35">
-	<input type="text" size="20" class="date-picker form-control" name="eventName" id="eventName" value="">
+	<input type="text" size="20" class="form-control" name="eventName" id="eventName" value=<?php echo '"'.$_SESSION["eventFilterName"].'"' ?>>
 	</td>
 	
 	<td width="15"></td>
@@ -99,23 +97,15 @@
 	</tr>
 	<tr>
 	<td><label># of Results: </label></td><td>
-	<input type="number" class="form-control" size="10" onkeydown="limit(this);" onkeyup="limit(this);" name="tournamentsNumber" id="tournamentsNumber" min="0" max="999"
-		step="1" value="100">
+	<input type="number" class="form-control" size="10" onkeydown="limit(this);" onkeyup="limit(this);" name="eventsNumber" id="eventsNumber" min="0" 	max="999" step="1" value=<?php echo '"'.$_SESSION["eventFilterNumber"].'"' ?>>
 	</td>
 	<td></td>
-	<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchTournament">Search</button>
-		<button type="button" class="btn btn-xs btn-warning" name="clearSearchTournament" onclick="clearDates()">Clear</button>
+	<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchEvent">Search</button>
+		<button type="button" class="btn btn-xs btn-warning" name="clearSearchEvent" onclick="clearFilterCriteria()">Clear</button>
 	</td>
 	
 	</tr>
 	</table>
-	
-	<script type="text/javascript">
-		$(".date-picker").datepicker({
-			changeMonth: true,
-			changeYear: true
-		});
-	</script>
 
 <hr>
 <br />
@@ -160,9 +150,9 @@
     <script src="js/bootstrap.min.js"></script>
     
     <?php 
-    	if ($_SESSION['savesuccessTournament'] != null and $_SESSION['savesuccessTournament'] == '1') { ?>
-    	<script type="text/javascript">saveMessage('Tournament');</script>
-   	<?php $_SESSION['savesuccessTournament'] = null; } ?> 	
+    	if ($_SESSION['savesuccessEvent'] != null and $_SESSION['savesuccessEvent'] == '1') { ?>
+    	<script type="text/javascript">saveMessage('Event');</script>
+   	<?php $_SESSION['savesuccessEvent'] = null; } ?> 	
     
   </body>
 </html>

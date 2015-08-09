@@ -44,6 +44,7 @@ else if (isset($_GET['deleteEvent'])) {
 }
 else if (isset($_GET['saveEvent'])) {
 	saveEvent($mysqli);	
+	loadAllEvents($mysqli);
 	header("Location: event.php");
 	exit();
 }
@@ -75,6 +76,10 @@ else if (isset($_GET['searchTournament']) or ($_GET['command'] != null and $_GET
 	exit();
 }
 else if (isset($_GET['searchEvent']) or ($_GET['command'] != null and $_GET['command'] == 'loadAllEvents')) {
+	if (isset($_GET['searchEvent'])) {
+		$_SESSION["eventFilterNumber"] = $_GET['eventsNumber'];
+		$_SESSION["eventFilterName"] = $_GET['eventName'];
+	}
 	loadAllEvents($mysqli);
 	header("Location: event.php");
 	exit();	
@@ -741,7 +746,16 @@ else {
 	// MANAGE EVENTS SCREEN ---------------------------------------
 	function loadAllEvents($mysqli) {
 			$eventList = array();
-			$result = $mysqli->query("Select * from EVENT"); 
+			$query = "Select * from EVENT WHERE 1=1 ";
+			if ($_SESSION["eventFilterName"] != null) {
+				$query = $query . " AND NAME LIKE '".$_SESSION["eventFilterName"]."%' " ;
+			}
+			$query = $query . " ORDER BY NAME ASC ";
+			if ($_SESSION["eventFilterNumber"] != null) {
+				$query = $query . " LIMIT ".$_SESSION["eventFilterNumber"];
+			}
+			
+			$result = $mysqli->query($query); 
  			if ($result) {
 				while($eventRow = $result->fetch_array()) {
  					$eventRecord = array();	
@@ -783,21 +797,19 @@ else {
 			if ($row != null) $id = $row['0'];  
 			$_SESSION["eventId"] = $id;
 			
-			//$query = $mysqli->prepare("INSERT INTO TOURNAMENT (TOURNAMENT_ID, NAME, LOCATION, DIVISION, DATE, NUMBER_EVENTS, NUMBER_TEAMS, 
-			//HIGHEST_SCORE_POSSIBLE, DESCRIPTION) VALUES (".$id.", ?, ?, ?, ?, ?, ?, ?,?) ");
+			$query = $mysqli->prepare("INSERT INTO EVENT (EVENT_ID, NAME, COMMENTS) VALUES (".$id.", ?, ?) ");
 			
-			//$query->bind_param('ssssiiis',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description);
+			$query->bind_param('ss',$_GET["eventName"], $_GET["eventDescription"]);
 			
-			//$query->execute();
-			//$query->free_result();
+			$query->execute();
+			$query->free_result();
 		}
 		else {
-			//$query = $mysqli->prepare("UPDATE TOURNAMENT SET NAME=?, LOCATION=?, DIVISION=?, DATE=?, NUMBER_EVENTS=?,NUMBER_TEAMS=?,
-			//HIGHEST_SCORE_POSSIBLE=?, DESCRIPTION=? WHERE TOURNAMENT_ID=".$_SESSION["tournamentId"]);
+			$query = $mysqli->prepare("UPDATE EVENT SET NAME=?, COMMENTS=? WHERE EVENT_ID=".$_SESSION["eventId"]);
 			
-			//$query->bind_param('ssssiiis',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description);
-			//$query->execute();
-			//$query->free_result();
+			$query->bind_param('ss',$_GET["eventName"], $_GET["eventDescription"]);
+			$query->execute();
+			$query->free_result();
 		}
 		// save Confirmation
 		$_SESSION['savesuccessEvent'] = "1";	
