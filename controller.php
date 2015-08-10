@@ -53,6 +53,33 @@ else if (isset($_GET['cancelEvent'])) {
 	header("Location: event.php");
 	exit();
 }
+else if (isset($_GET['addNewTeam'])) {	
+	//clearTeam();
+	header("Location: team_detail.php");
+	exit();
+}
+else if (isset($_GET['editTeam'])) {
+	//clearTeam();	
+	//loadTeam($_GET['editEvent'], $mysqli);
+	header("Location: team_detail.php");
+	exit();
+}
+else if (isset($_GET['deleteTeam'])) {
+	//deleteTeam($_GET['deleteEvent'], $mysqli);	
+	header("Location: team.php");
+	exit();
+}
+else if (isset($_GET['saveTeam'])) {
+	//saveTeam($mysqli);	
+	//loadAllTeams($mysqli);
+	header("Location: team.php");
+	exit();
+}
+
+else if (isset($_GET['cancelTeam'])) {	
+	header("Location: team.php");
+	exit();
+}
 else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteTeam') {
 	cacheTournamnent();
 	deleteTournamentTeam($mysqli, $_GET['TournTeamRowId']);
@@ -82,6 +109,15 @@ else if (isset($_GET['searchEvent']) or ($_GET['command'] != null and $_GET['com
 	}
 	loadAllEvents($mysqli);
 	header("Location: event.php");
+	exit();	
+}
+else if (isset($_GET['searchTeam']) or ($_GET['command'] != null and $_GET['command'] == 'loadAllTeams')) {
+	if (isset($_GET['searchTeam'])) {
+		$_SESSION["teamFilterNumber"] = $_GET['teamNumber'];
+		$_SESSION["teamFilterName"] = $_GET['teamName'];
+	}
+	loadAllTeams($mysqli);
+	header("Location: team.php");
 	exit();	
 }
 
@@ -816,6 +852,35 @@ else {
 	}
 
 
+
+
+	// MANAGE TEAMS SCREEN ---------------------------------------
+	function loadAllTeams($mysqli) {
+			$teamList = array();
+			$query = "Select * from TEAM WHERE 1=1 ";
+			if ($_SESSION["teamFilterName"] != null) {
+				$query = $query . " AND NAME LIKE '".$_SESSION["teamFilterName"]."%' " ;
+			}
+			$query = $query . " ORDER BY NAME ASC ";
+			if ($_SESSION["teamFilterNumber"] != null) {
+				$query = $query . " LIMIT ".$_SESSION["teamFilterNumber"];
+			}
+			
+			$result = $mysqli->query($query); 
+ 			if ($result) {
+				while($teamRow = $result->fetch_array()) {
+ 					$teamRecord = array();	
+					array_push($teamRecord, $teamRow['0']);
+					array_push($teamRecord, $teamRow['1']);
+ 				
+					array_push($teamList, $teamRecord);
+				}
+			}
+		
+		
+		$_SESSION["teamsList"] = $teamList;
+	
+	}
 
 
 

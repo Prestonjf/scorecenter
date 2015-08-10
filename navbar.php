@@ -24,7 +24,7 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Configuration<span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="controller.php?command=loadAllTournaments&">Manage Tournaments</a></li>
-            <li><a href="#">Manage Teams</a></li>
+            <li><a href="controller.php?command=loadAllTeams&">Manage Teams</a></li>
             <li><a href="controller.php?command=loadAllEvents&">Manage Events</a></li>
             <li role="separator" class="divider"></li>
             <li><a href="#">Utilities</a></li>
