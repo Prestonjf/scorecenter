@@ -54,13 +54,13 @@ else if (isset($_GET['cancelEvent'])) {
 	exit();
 }
 else if (isset($_GET['addNewTeam'])) {	
-	//clearTeam();
+	clearTeam();
 	header("Location: team_detail.php");
 	exit();
 }
 else if (isset($_GET['editTeam'])) {
-	//clearTeam();	
-	//loadTeam($_GET['editEvent'], $mysqli);
+	clearTeam();	
+	loadTeam($_GET['editTeam'], $mysqli);
 	header("Location: team_detail.php");
 	exit();
 }
@@ -70,13 +70,14 @@ else if (isset($_GET['deleteTeam'])) {
 	exit();
 }
 else if (isset($_GET['saveTeam'])) {
-	//saveTeam($mysqli);	
-	//loadAllTeams($mysqli);
+	saveTeam($mysqli);	
+	loadAllTeams($mysqli);
 	header("Location: team.php");
 	exit();
 }
 
 else if (isset($_GET['cancelTeam'])) {	
+	clearTeam();
 	header("Location: team.php");
 	exit();
 }
@@ -153,10 +154,16 @@ else if (isset($_GET['saveEventScores'])) {
 		header("Location: tournament_events.php");
 		exit();
 }
+else if (isset($_GET['cancelEventScores'])) {	
+	header("Location: tournament_events.php");
+	exit();
+}
 
-
-else if (isset($_GET['printScores'])) {
-
+else if (isset($_GET['printScore'])) {
+	$_SESSION["tournamentId"] = $_GET['printScore'];
+	generateTournamentResults($_GET['printScore'], $mysqli);
+	header("Location: tournament_results.php");
+	exit();
 }
 
 else if (isset($_GET['saveTournament'])) {
@@ -855,6 +862,15 @@ else {
 
 
 	// MANAGE TEAMS SCREEN ---------------------------------------
+	function clearTeam() {
+		$_SESSION["teamId"] = null;
+		$_SESSION["teamName"] = null;
+		$_SESSION["teamCity"] = null;
+		$_SESSION["teamPhone"] = null;
+		$_SESSION["teamEmail"] = null;
+		$_SESSION["teamDescription"] = null;
+	}
+	
 	function loadAllTeams($mysqli) {
 			$teamList = array();
 			$query = "Select * from TEAM WHERE 1=1 ";
@@ -876,12 +892,72 @@ else {
 					array_push($teamList, $teamRecord);
 				}
 			}
-		
-		
 		$_SESSION["teamsList"] = $teamList;
+	}
 	
+	function loadTeam($id, $mysqli) {
+		$result = $mysqli->query("SELECT * FROM TEAM WHERE TEAM_ID = " .$id); 
+ 			if ($result) {
+ 				$eventRow = $result->fetch_row();	
+ 				$_SESSION["teamId"] = $eventRow['0'];
+ 				$_SESSION["teamName"] = $eventRow['1'];
+ 				$_SESSION["teamCity"] = $eventRow['2']; 
+				$_SESSION["teamPhone"] = $eventRow['4'];
+				$_SESSION["teamEmail"] = $eventRow['3'];				
+    		}
+	}
+	
+	function saveTeam($mysqli) {
+		// if Event id is null create new
+		if ($_SESSION["teamId"] == null) { 
+			$result = $mysqli->query("select max(TEAM_ID) + 1 from TEAM");
+			$row = $result->fetch_row(); 
+			$id = 0;
+			if ($row != null) $id = $row['0'];  
+			$_SESSION["teamId"] = $id;
+			
+			$query = $mysqli->prepare("INSERT INTO TEAM (TEAM_ID, NAME, CITY, PHONE_NUMBER, EMAIL_ADDRESS) VALUES (".$id.",?,?,?,?) ");
+			
+			$query->bind_param('ssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"]);
+			
+			$query->execute();
+			$query->free_result();
+		}
+		else {
+			$query = $mysqli->prepare("UPDATE TEAM SET NAME=?, CITY=?, PHONE_NUMBER=?, EMAIL_ADDRESS=? WHERE TEAM_ID=".$_SESSION["teamId"]);
+			
+			$query->bind_param('ssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"]);
+			$query->execute();
+			$query->free_result();
+		}
+		// save Confirmation
+		$_SESSION['savesuccessTeam'] = "1";	
 	}
 
+	
+	// GENERATE RESULTS / STATISTICS ---------------------------------------
+	function generateTournamentResults($id, $mysqli) {
+		$query = "  SELECT T.NAME, TT.TEAM_NUMBER, 0 AS TOTAL, 0 AS RANK, TES.*  ";
+		
+		$query .= " FROM TOURNAMENT TM ";
+		$query .= " INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID ";
+		$query .= " INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID ";
+		$query .= " INNER JOIN TEAM_EVENT_SCORE TES ON TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID ";
+		$query .= " INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURN_EVENT_ID=TES.TOURN_EVENT_ID ";
+		$query .= " INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID ";
+		$query .= " WHERE TM.TOURNAMENT_ID=".$id;
+		$query .= " ORDER BY TEAM_NUMBER ASC ";
+	
+	
+
+	/* TODO
+		1. Handle Ties
+		2. ORDER BY OPTION
+		3.
+	
+	*/
+		$_SESSION['tournamentResultsQuery'] = $query;
+	}
 
 
 ?>

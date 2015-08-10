@@ -156,7 +156,7 @@
           </table>
            
 		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"' ?>>Save</button>
- 	 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEvent">Cancel</button>
+ 	 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores">Cancel</button>
 
       <hr>
 	<?php include_once 'footer.php'; ?>

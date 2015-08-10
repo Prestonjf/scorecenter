@@ -69,7 +69,7 @@
 						echo '<td>'; echo $row['4']; echo '</td>';
 						echo '<td>';
 						echo '<button type="submit" class="btn btn-xs btn-primary" name="enterScores" value="'.$row['0'].'">Enter Scores</button> &nbsp;'; 				
-						echo '<button type="submit" class="btn btn-xs btn-success" name="printScores" value='.$row['0'].'>Print Scores</button>';
+						echo '<button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$row['0'].'>Print Scores</button>';
 						echo '</td>';						
 						echo '</tr>';	
       				}
