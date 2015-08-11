@@ -95,24 +95,31 @@
             <tr>
 				<th width="20%" class="rotate" data-field="name" data-sortable="true"><div><span></span></div></th>
 				<th width="10%" class="rotate" data-field="name" data-sortable="true"><div><span></span></div></th>
-				
-                <th class="rotate" data-field="name" data-sortable="true"><div><span>Total Score</span></div></th>
-                <th class="rotate" data-field="actions" data-sortable="true"><div><span>Final Rank</span></div></th>
+				<?php
+				$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
+				if ($tournamentResultsHeader != null) {
+					foreach ($tournamentResultsHeader as $resultHeader) {
+						echo '<th class="rotate" data-field="name" data-sortable="true"><div><span>'.$resultHeader.'</span></div></th>';						
+					}
+				}
+				?>
+                <th width="10%" class="rotate" data-field="name" data-sortable="true"><div><span>Total Score</span></div></th>
+                <th width="10%" class="rotate" data-field="actions" data-sortable="true"><div><span>Final Rank</span></div></th>
             </tr>
         </thead>
         <tbody>
          <?php 
-		 	$result = $mysqli->query($_SESSION['tournamentResultsQuery']); 
-         if ($result != null) {
-			 while($teamResultRow = $result->fetch_array()) {
+		 $tournamentResults = $_SESSION['tournamentResults'];
+         if ($tournamentResults != null) {
+			 foreach ($tournamentResults as $resultRow) {
       			echo '<tr>';
-				echo '<td>'.$teamResultRow['0'].'</td><td>'.$teamResultRow['1'].'</td>';
+				echo '<td><b>'.$resultRow['1'].'</b></td><td><b>'.$resultRow['2'].'</b></td>';
+				$i = 3;
+				while ($i < sizeof($resultRow)-1) {
+					echo '<td>'.$resultRow[$i].'</td>';
+					$i++;
+				}
 				
-				
-				
-				
-				echo '<td>'.$teamResultRow['2'].'</td>';	
-				echo '<td>'.$teamResultRow['3'].'</td>';	
 				echo '</tr>';
 		 }
     	}

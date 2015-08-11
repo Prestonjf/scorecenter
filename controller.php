@@ -937,27 +937,154 @@ else {
 	
 	// GENERATE RESULTS / STATISTICS ---------------------------------------
 	function generateTournamentResults($id, $mysqli) {
-		$query = "  SELECT T.NAME, TT.TEAM_NUMBER, 0 AS TOTAL, 0 AS RANK, TES.*  ";
+		$tournamentResultsHeader = array();
+		$tournamentResults = array();
 		
-		$query .= " FROM TOURNAMENT TM ";
-		$query .= " INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID ";
-		$query .= " INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID ";
-		$query .= " INNER JOIN TEAM_EVENT_SCORE TES ON TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID ";
-		$query .= " INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURN_EVENT_ID=TES.TOURN_EVENT_ID ";
-		$query .= " INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID ";
-		$query .= " WHERE TM.TOURNAMENT_ID=".$id;
-		$query .= " ORDER BY TEAM_NUMBER ASC ";
+		$query1 = "SELECT E.NAME, TE.TOURN_EVENT_ID
+					FROM TOURNAMENT TM
+					INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURNAMENT_ID=TM.TOURNAMENT_ID 
+					INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID 
+					WHERE TM.TOURNAMENT_ID=6
+					ORDER BY NAME ASC ";
+					
+		$result = $mysqli->query($query1); 
+ 		if ($result) {
+			while($events = $result->fetch_array()) {
+					array_push($tournamentResultsHeader, $events['0']);
+			}
+		}	
+		$_SESSION['tournamentResultsHeader'] = $tournamentResultsHeader;	
+		
+		$query2 = "  SELECT T.NAME, TT.TEAM_NUMBER, TT.TOURN_TEAM_ID 
+					FROM TOURNAMENT TM
+					INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID
+					INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
+					WHERE TM.TOURNAMENT_ID=".$id."
+					 ORDER BY TEAM_NUMBER ASC ";
+		$result = $mysqli->query($query2); 
+ 		if ($result) {
+			while($teams = $result->fetch_array()) {
+					$resultRow = array();
+					array_push($resultRow, $teams['2']);
+					array_push($resultRow, $teams['0']);
+					array_push($resultRow, $teams['1']);
+					
+					$query3 = "SELECT TES.SCORE, E.NAME
+								FROM TEAM_EVENT_SCORE TES
+								INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURN_TEAM_ID=TES.TOURN_TEAM_ID
+								INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURN_EVENT_ID=TES.TOURN_EVENT_ID
+								INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID
+								WHERE TES.TOURN_TEAM_ID=".$teams['2']." ORDER BY NAME ASC ";
+					$scoreSet = $mysqli->query($query3); 
+					$total = 0;
+					$positionCounts = getNewPositionCountMap();
+					if ($scoreSet) {
+						while($scores = $scoreSet->fetch_array()) {
+							$value = $scores['0'];
+							array_push($resultRow, $value);
+							if ($value < sizeof($resultRow)) {
+								$positionCounts[$value] = $positionCounts[$value] + 1;
+							}
+							$total = $total + $value;
+						}
+					}
+					array_push($resultRow, $total); // Total
+					array_push($resultRow, 0); // Rank
+					array_push($resultRow, $positionCounts);
+					
+					array_push($tournamentResults, $resultRow);
+					
+					//echo print_r($positionCounts);
+					//echo '<br /><br /><br />';
+					
+			}
+		}	
+		// Determine Final Rank With Tie Breakers
+		$tournamentResults = quicksort($tournamentResults); 
+		
+		// Set Final Rank VALUE
+		$count = 1;
+		foreach ($tournamentResults as $k => $row) {
+			$row[sizeof($row)-2] = $count;
+			$tournamentResults[$k] = $row;
+			$count++;
+		}
+		
+		
+		// Additional Ordering OPTIONS
+		
+		
+		$_SESSION['tournamentResults'] = $tournamentResults;
+	}
 	
+	// Results Structure:
+	// TOURN_TEAM_ID : TEAM_NAME : TEAM_NUMBER : EV1_SCR : EV2_SCR : EV3_SCR ... ... : TOTAL_SCORE : RANK : POSITIONCOUNTS
+	
+	
+	// QuickSort Results on Total Score + Tie Breakers
+	function quicksort($array) {
+		if(count($array) < 2) {
+			return $array;
+		}
+		$left = $right = array();
+		reset($array);
+		$pivot_key = key($array);
+		$pivot  = array_shift($array);
+		foreach($array as $k => $v) {
+			if ($v[sizeof($v)-3] < $pivot[sizeof($pivot)-3])
+				$left[$k] = $v;
+			else if ($v[sizeof($v)-3] == $pivot[sizeof($pivot)-3])  {
+				$vCounts = $v[sizeof($v)-1];
+				$pivotCounts = $pivot[sizeof($pivot)-1];
+				
+				if ($vCounts[1] <  $pivotCounts[1]) $left[$k] = $v; else if ($vCounts[1] > $pivotCounts[1]) $right[$k] = $v;
+				else if ($vCounts[2] <  $pivotCounts[2]) $left[$k] = $v; else if ($vCounts[2] >  $pivotCounts[2]) $right[$k] = $v;
+				else if ($vCounts[3] <  $pivotCounts[3]) $left[$k] = $v; else if ($vCounts[3] >  $pivotCounts[3]) $right[$k] = $v;
+				else if ($vCounts[4] <  $pivotCounts[4]) $left[$k] = $v; else if ($vCounts[4] >  $pivotCounts[4]) $right[$k] = $v;
+				else if ($vCounts[5] <  $pivotCounts[5]) $left[$k] = $v; else if ($vCounts[5] >  $pivotCounts[5]) $right[$k] = $v;
+				else if ($vCounts[6] <  $pivotCounts[6]) $left[$k] = $v; else if ($vCounts[6] >  $pivotCounts[6]) $right[$k] = $v;
+				else if ($vCounts[7] <  $pivotCounts[7]) $left[$k] = $v; else if ($vCounts[7] >  $pivotCounts[7]) $right[$k] = $v;
+				else if ($vCounts[8] <  $pivotCounts[8]) $left[$k] = $v; else if ($vCounts[8] >  $pivotCounts[8]) $right[$k] = $v;
+				else if ($vCounts[9] <  $pivotCounts[9]) $left[$k] = $v; else if ($vCounts[9] >  $pivotCounts[9]) $right[$k] = $v;
+				else if ($vCounts[10] <  $pivotCounts[10]) $left[$k] = $v; else if ($vCounts[10] >  $pivotCounts[10]) $right[$k] = $v;
+				else if ($vCounts[11] <  $pivotCounts[11]) $left[$k] = $v; else if ($vCounts[11] >  $pivotCounts[11]) $right[$k] = $v;
+				else if ($vCounts[12] <  $pivotCounts[12]) $left[$k] = $v; else if ($vCounts[12] >  $pivotCounts[12]) $right[$k] = $v;
+				else if ($vCounts[13] <  $pivotCounts[13]) $left[$k] = $v; else if ($vCounts[13] >  $pivotCounts[13]) $right[$k] = $v;
+				else if ($vCounts[14] <  $pivotCounts[14]) $left[$k] = $v; else if ($vCounts[14] >  $pivotCounts[14]) $right[$k] = $v;
+				else if ($vCounts[15] <  $pivotCounts[15]) $left[$k] = $v; else if ($vCounts[15] >  $pivotCounts[15]) $right[$k] = $v;
+				else if ($vCounts[16] <  $pivotCounts[16]) $left[$k] = $v; else if ($vCounts[16] >  $pivotCounts[16]) $right[$k] = $v;
+				else if ($vCounts[17] <  $pivotCounts[17]) $left[$k] = $v; else if ($vCounts[17] >  $pivotCounts[17]) $right[$k] = $v;
+				else if ($vCounts[18] <  $pivotCounts[18]) $left[$k] = $v; else if ($vCounts[18] >  $pivotCounts[18]) $right[$k] = $v;
+				else if ($vCounts[19] <  $pivotCounts[19]) $left[$k] = $v; else if ($vCounts[19] >  $pivotCounts[19]) $right[$k] = $v;
+				else if ($vCounts[20] <  $pivotCounts[20]) $left[$k] = $v; else if ($vCounts[20] >  $pivotCounts[20]) $right[$k] = $v;
+				else $right[$k] = $v;
+
+			}
+			else
+				$right[$k] = $v;
+		}
+		return array_merge(quicksort($left), array($pivot_key => $pivot), quicksort($right));
+	
+	}
 	
 
-	/* TODO
-		1. Handle Ties
-		2. ORDER BY OPTION
-		3.
-	
-	*/
-		$_SESSION['tournamentResultsQuery'] = $query;
+	function getNewPositionCountMap() {
+		$array = array(
+			1=>0,2=>0,3=>0,4=>0,5=>0,6=>0,7=>0,8=>0,9=>0,10=>0,11=>0,
+			12=>0,13=>0,14=>0,15=>0,16=>0,17=>0,18=>0,19=>0,20=>0,21=>0,22=>0		
+		);
+		return $array;
 	}
 
 
+	/**** GENERAL ISSUES ********
+	
+	1. Handles 100 Teams / Events Per TOURNAMENT
+	2. Results: Ties Broken to 20 positions
+	3. Results Order By OPTION
+	
+	
+	
+	
+	**** GENERAL ISSUES *********/
 ?>
