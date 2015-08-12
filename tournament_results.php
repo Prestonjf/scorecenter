@@ -67,7 +67,7 @@
 	}
 	
 	th.rotate {
-		height: 140px;
+		height: 175px;
 		white-space: nowrap;
 	}
 	th.rotate > div {
@@ -92,8 +92,7 @@
 	 <h4>Tournament: <?php echo $_SESSION["tournamentName"]; ?></h4>
      <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
 	 <hr>
-<br />
-<br />
+
         <table class="table table-bordered table-hover" data-sortable data-sort-name="rank" data-sort-order="desc">
         <thead>
             <tr>
