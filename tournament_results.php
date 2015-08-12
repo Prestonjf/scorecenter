@@ -22,6 +22,7 @@
 
     <!-- CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="js/sortable-0.5.0/css/sortable-theme-bootstrap.css" />
     <link href="js/jquery-ui-1.11.4/jquery-ui.css" rel="stylesheet">
 	<!-- 	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"> -->
 
@@ -35,6 +36,7 @@
   	<!-- JS -->
   <script src="js/jquery-1.11.3.js"></script>
   <script src="js/jquery-ui-1.11.4/jquery-ui.js"></script>
+  <script src="js/sortable-0.5.0/js/sortable.min.js"></script>
   <script src="js/scorecenter.js"></script>
   <script type="text/javascript">
   $(document).ready(function(){
@@ -69,7 +71,7 @@
 		white-space: nowrap;
 	}
 	th.rotate > div {
-		transform: translate(25px, 0px) rotate(270deg);
+		transform: translate(0px, 0px) rotate(270deg);
 		width: 30px;
 	}
 	
@@ -87,24 +89,26 @@
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Tournament Results</h1>
+	 <h4>Tournament: <?php echo $_SESSION["tournamentName"]; ?></h4>
+     <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
 	 <hr>
 <br />
 <br />
-        <table class="table table-bordered table-hover">
+        <table class="table table-bordered table-hover" data-sortable data-sort-name="rank" data-sort-order="desc">
         <thead>
             <tr>
 				<th width="20%" class="rotate" data-field="name" data-sortable="true"><div><span></span></div></th>
-				<th width="10%" class="rotate" data-field="name" data-sortable="true"><div><span></span></div></th>
+				<th class="rotate" data-field="number" data-sortable="true"><div><span></span></div></th>
 				<?php
 				$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
 				if ($tournamentResultsHeader != null) {
 					foreach ($tournamentResultsHeader as $resultHeader) {
-						echo '<th class="rotate" data-field="name" data-sortable="true"><div><span>'.$resultHeader.'</span></div></th>';						
+						echo '<th class="rotate" data-field="score" data-align="center" data-sortable="true"><div><span>'.$resultHeader.'</span></div></th>';						
 					}
 				}
 				?>
-                <th width="10%" class="rotate" data-field="name" data-sortable="true"><div><span>Total Score</span></div></th>
-                <th width="10%" class="rotate" data-field="actions" data-sortable="true"><div><span>Final Rank</span></div></th>
+                <th class="rotate" data-field="total" data-align="center" data-sortable="true"><div><span>Total Score</span></div></th>
+                <th class="rotate" data-field="rank" data-align="center" data-sortable="true"><div><span>Final Rank</span></div></th>
             </tr>
         </thead>
         <tbody>

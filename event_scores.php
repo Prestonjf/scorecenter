@@ -61,6 +61,8 @@
 	
 	function validate() {
 		var error = false;
+		var error2 = false;
+		var max = <?php echo $_SESSION["tournamentHighestScore"];?>;
 		var count = 0;
 		var maxScore = <?php echo $_SESSION["tournamentHighestScore"];?>;
 		var scoreArr = [];
@@ -70,6 +72,9 @@
 			exists = false;
 			if  ($('#teamScore'+count) != null && $('#teamScore'+count).val() != null) {
 				var score = $('#teamScore'+count).val();
+				if (score == null || score == '') {
+					if(!confirm("A team's score / rank has been left blank. Do you still wish to save?")) return false;
+				}
 				scoreArr.forEach(function(entry) {
 					if (score == entry) exists = true;
 				});
@@ -80,6 +85,7 @@
 				}
 				else if (score != '' && score != '0' && score != maxScore) {
 					scoreArr.push(score);
+					if (score > max) error2 = true;
 				}
 			} 
 			else { break;}
@@ -87,6 +93,10 @@
 		}
 		if (error) {
 			displayError("<strong>Cannot Save Scores:</strong> Team cannot have the same score / rank as another unless the value entered is the maximum allowed score.");
+			return false;
+		}
+		if (error2) {
+			displayError("<strong>Cannot Save Scores:</strong> Team cannot have score / rank greater than the maximum score.");
 			return false;
 		}
 		else return true;		

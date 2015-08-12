@@ -65,7 +65,7 @@ else if (isset($_GET['editTeam'])) {
 	exit();
 }
 else if (isset($_GET['deleteTeam'])) {
-	//deleteTeam($_GET['deleteEvent'], $mysqli);	
+	//deleteTeam($_GET['deleteTeam'], $mysqli);	
 	header("Location: team.php");
 	exit();
 }
@@ -162,6 +162,7 @@ else if (isset($_GET['cancelEventScores'])) {
 else if (isset($_GET['printScore'])) {
 	$_SESSION["tournamentId"] = $_GET['printScore'];
 	generateTournamentResults($_GET['printScore'], $mysqli);
+	loadTournamentEvents($mysqli);
 	header("Location: tournament_results.php");
 	exit();
 }
@@ -944,7 +945,7 @@ else {
 					FROM TOURNAMENT TM
 					INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURNAMENT_ID=TM.TOURNAMENT_ID 
 					INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID 
-					WHERE TM.TOURNAMENT_ID=6
+					WHERE TM.TOURNAMENT_ID=".$id."
 					ORDER BY NAME ASC ";
 					
 		$result = $mysqli->query($query1); 
@@ -970,11 +971,14 @@ else {
 					array_push($resultRow, $teams['1']);
 					
 					$query3 = "SELECT TES.SCORE, E.NAME
-								FROM TEAM_EVENT_SCORE TES
-								INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURN_TEAM_ID=TES.TOURN_TEAM_ID
-								INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURN_EVENT_ID=TES.TOURN_EVENT_ID
+								FROM TOURNAMENT_TEAM TT
+                                INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TT.TOURNAMENT_ID
+								INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURNAMENT_ID=T.TOURNAMENT_ID
 								INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID
-								WHERE TES.TOURN_TEAM_ID=".$teams['2']." ORDER BY NAME ASC ";
+                                LEFT JOIN TEAM_EVENT_SCORE TES ON TES.TOURN_EVENT_ID=TE.TOURN_EVENT_ID 
+								AND TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID
+								WHERE TT.TOURN_TEAM_ID=".$teams['2']."
+                                ORDER BY NAME ASC ";
 					$scoreSet = $mysqli->query($query3); 
 					$total = 0;
 					$positionCounts = getNewPositionCountMap();
@@ -1037,26 +1041,26 @@ else {
 				$vCounts = $v[sizeof($v)-1];
 				$pivotCounts = $pivot[sizeof($pivot)-1];
 				
-				if ($vCounts[1] <  $pivotCounts[1]) $left[$k] = $v; else if ($vCounts[1] > $pivotCounts[1]) $right[$k] = $v;
-				else if ($vCounts[2] <  $pivotCounts[2]) $left[$k] = $v; else if ($vCounts[2] >  $pivotCounts[2]) $right[$k] = $v;
-				else if ($vCounts[3] <  $pivotCounts[3]) $left[$k] = $v; else if ($vCounts[3] >  $pivotCounts[3]) $right[$k] = $v;
-				else if ($vCounts[4] <  $pivotCounts[4]) $left[$k] = $v; else if ($vCounts[4] >  $pivotCounts[4]) $right[$k] = $v;
-				else if ($vCounts[5] <  $pivotCounts[5]) $left[$k] = $v; else if ($vCounts[5] >  $pivotCounts[5]) $right[$k] = $v;
-				else if ($vCounts[6] <  $pivotCounts[6]) $left[$k] = $v; else if ($vCounts[6] >  $pivotCounts[6]) $right[$k] = $v;
-				else if ($vCounts[7] <  $pivotCounts[7]) $left[$k] = $v; else if ($vCounts[7] >  $pivotCounts[7]) $right[$k] = $v;
-				else if ($vCounts[8] <  $pivotCounts[8]) $left[$k] = $v; else if ($vCounts[8] >  $pivotCounts[8]) $right[$k] = $v;
-				else if ($vCounts[9] <  $pivotCounts[9]) $left[$k] = $v; else if ($vCounts[9] >  $pivotCounts[9]) $right[$k] = $v;
-				else if ($vCounts[10] <  $pivotCounts[10]) $left[$k] = $v; else if ($vCounts[10] >  $pivotCounts[10]) $right[$k] = $v;
-				else if ($vCounts[11] <  $pivotCounts[11]) $left[$k] = $v; else if ($vCounts[11] >  $pivotCounts[11]) $right[$k] = $v;
-				else if ($vCounts[12] <  $pivotCounts[12]) $left[$k] = $v; else if ($vCounts[12] >  $pivotCounts[12]) $right[$k] = $v;
-				else if ($vCounts[13] <  $pivotCounts[13]) $left[$k] = $v; else if ($vCounts[13] >  $pivotCounts[13]) $right[$k] = $v;
-				else if ($vCounts[14] <  $pivotCounts[14]) $left[$k] = $v; else if ($vCounts[14] >  $pivotCounts[14]) $right[$k] = $v;
-				else if ($vCounts[15] <  $pivotCounts[15]) $left[$k] = $v; else if ($vCounts[15] >  $pivotCounts[15]) $right[$k] = $v;
-				else if ($vCounts[16] <  $pivotCounts[16]) $left[$k] = $v; else if ($vCounts[16] >  $pivotCounts[16]) $right[$k] = $v;
-				else if ($vCounts[17] <  $pivotCounts[17]) $left[$k] = $v; else if ($vCounts[17] >  $pivotCounts[17]) $right[$k] = $v;
-				else if ($vCounts[18] <  $pivotCounts[18]) $left[$k] = $v; else if ($vCounts[18] >  $pivotCounts[18]) $right[$k] = $v;
-				else if ($vCounts[19] <  $pivotCounts[19]) $left[$k] = $v; else if ($vCounts[19] >  $pivotCounts[19]) $right[$k] = $v;
-				else if ($vCounts[20] <  $pivotCounts[20]) $left[$k] = $v; else if ($vCounts[20] >  $pivotCounts[20]) $right[$k] = $v;
+				if ($vCounts[1] >  $pivotCounts[1]) $left[$k] = $v; else if ($vCounts[1] > $pivotCounts[1]) $right[$k] = $v;
+				else if ($vCounts[2] >  $pivotCounts[2]) $left[$k] = $v; else if ($vCounts[2] <  $pivotCounts[2]) $right[$k] = $v;
+				else if ($vCounts[3] >  $pivotCounts[3]) $left[$k] = $v; else if ($vCounts[3] <  $pivotCounts[3]) $right[$k] = $v;
+				else if ($vCounts[4] >  $pivotCounts[4]) $left[$k] = $v; else if ($vCounts[4] <  $pivotCounts[4]) $right[$k] = $v;
+				else if ($vCounts[5] >  $pivotCounts[5]) $left[$k] = $v; else if ($vCounts[5] <  $pivotCounts[5]) $right[$k] = $v;
+				else if ($vCounts[6] >  $pivotCounts[6]) $left[$k] = $v; else if ($vCounts[6] <  $pivotCounts[6]) $right[$k] = $v;
+				else if ($vCounts[7] >  $pivotCounts[7]) $left[$k] = $v; else if ($vCounts[7] <  $pivotCounts[7]) $right[$k] = $v;
+				else if ($vCounts[8] >  $pivotCounts[8]) $left[$k] = $v; else if ($vCounts[8] <  $pivotCounts[8]) $right[$k] = $v;
+				else if ($vCounts[9] >  $pivotCounts[9]) $left[$k] = $v; else if ($vCounts[9] <  $pivotCounts[9]) $right[$k] = $v;
+				else if ($vCounts[10] >  $pivotCounts[10]) $left[$k] = $v; else if ($vCounts[10] <  $pivotCounts[10]) $right[$k] = $v;
+				else if ($vCounts[11] >  $pivotCounts[11]) $left[$k] = $v; else if ($vCounts[11] <  $pivotCounts[11]) $right[$k] = $v;
+				else if ($vCounts[12] >  $pivotCounts[12]) $left[$k] = $v; else if ($vCounts[12] <  $pivotCounts[12]) $right[$k] = $v;
+				else if ($vCounts[13] >  $pivotCounts[13]) $left[$k] = $v; else if ($vCounts[13] <  $pivotCounts[13]) $right[$k] = $v;
+				else if ($vCounts[14] >  $pivotCounts[14]) $left[$k] = $v; else if ($vCounts[14] <  $pivotCounts[14]) $right[$k] = $v;
+				else if ($vCounts[15] >  $pivotCounts[15]) $left[$k] = $v; else if ($vCounts[15] <  $pivotCounts[15]) $right[$k] = $v;
+				else if ($vCounts[16] >  $pivotCounts[16]) $left[$k] = $v; else if ($vCounts[16] <  $pivotCounts[16]) $right[$k] = $v;
+				else if ($vCounts[17] >  $pivotCounts[17]) $left[$k] = $v; else if ($vCounts[17] <  $pivotCounts[17]) $right[$k] = $v;
+				else if ($vCounts[18] >  $pivotCounts[18]) $left[$k] = $v; else if ($vCounts[18] <  $pivotCounts[18]) $right[$k] = $v;
+				else if ($vCounts[19] >  $pivotCounts[19]) $left[$k] = $v; else if ($vCounts[19] < $pivotCounts[19]) $right[$k] = $v;
+				else if ($vCounts[20] >  $pivotCounts[20]) $left[$k] = $v; else if ($vCounts[20] <  $pivotCounts[20]) $right[$k] = $v;
 				else $right[$k] = $v;
 
 			}
