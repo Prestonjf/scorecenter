@@ -1,3 +1,10 @@
+<script type="text/javascript">
+	function about() { 
+		alert('Score Center \n \n Developed by Michigan Science Olympiad \n An open source scoring application for Science Olympiad Tournaments. \n \n Version: 1.0 (Alpha) - August 2015'); 
+	}
+
+</script>
+
 <nav class="navbar navbar-default">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -28,7 +35,9 @@
             <li><a href="controller.php?command=loadAllEvents&">Manage Events</a></li>
             <li role="separator" class="divider"></li>
             <li><a href="#">Utilities</a></li>
-            <li><a href="#">About</a></li>
+            <li><a href="#" onclick="about();return false;" >About</a></li>
+			<li role="separator" class="divider"></li>
+			 <li><a href="controller.php?command=logout&">Logout</a></li>
           </ul>
         </li>
       </ul>

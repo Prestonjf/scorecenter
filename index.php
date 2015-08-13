@@ -1,4 +1,8 @@
-<?php session_start(); ?>
+<?php session_start(); 
+if($_SESSION["loginUserName"] == null or $_SESSION["loginUserName"] == ''){
+	header("location: logon.php");
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>

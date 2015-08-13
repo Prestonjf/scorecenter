@@ -14,8 +14,21 @@ require_once 'login.php';
 
 
 // Begin MAIN METHOD -------------------------->	
-	
-if (isset($_GET['addTournament'])) {
+if (isset($_POST['login'])) {		
+	if (login($mysqli)) {
+		header("Location: index.php");
+		exit();
+	} else {
+		header("Location: logon.php");
+		exit();
+	}
+}	
+else if (isset($_GET['logout']) or ($_GET['command'] != null and $_GET['command'] == 'logout')) {	
+	session_destroy();
+	header("Location: logon.php");	
+	exit();
+}
+else if (isset($_GET['addTournament'])) {
 	clearTournament();
 	header("Location: tournament_detail.php");	
 	exit();
@@ -1078,6 +1091,31 @@ else {
 			12=>0,13=>0,14=>0,15=>0,16=>0,17=>0,18=>0,19=>0,20=>0,21=>0,22=>0		
 		);
 		return $array;
+	}
+	
+	
+	
+	// LOGIN ---------------------------------------
+	function login($mysqli) {
+		$myusername=$_POST['userName']; 
+		$mypassword=$_POST['password']; 
+		
+		$query = $mysqli->prepare("SELECT * FROM USERS WHERE username=? and password=? ");
+			
+		$query->bind_param('ss',$myusername, $mypassword);
+		$query->execute();
+		$result = $query->get_result();
+		$count = $result->num_rows;
+		$query->free_result();
+		
+		if($count == 1){
+			$_SESSION["loginFlag"] = 1;
+			$_SESSION["loginUserName"] = $myusername;
+			return true;
+		}
+		// Throw Error Message
+		$_SESSION["loginError1"] = "1";
+		return false;
 	}
 
 
