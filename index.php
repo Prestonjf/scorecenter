@@ -1,8 +1,18 @@
-<?php session_start(); 
-if($_SESSION["loginUserName"] == null or $_SESSION["loginUserName"] == ''){
-	header("location: logon.php");
+<?php 
+session_start(); 
+include_once ('score_center_objects.php');
+$userSessionInfo = null;
+
+if($_SESSION["userSessionInfo"] == null){
+	//header("location: logon.php");
+	exit();
+}
+else {
+	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+	
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -56,7 +66,8 @@ if($_SESSION["loginUserName"] == null or $_SESSION["loginUserName"] == ''){
         </thead>
         <tbody>
         <?php
-        	require_once 'login.php';
+			echo print_r($_SESSION, true);
+        	require_once('login.php');
 		 	$db_server = mysql_connect($db_hostname, $db_username, $db_password);
  			if (!db_server) die("Unable to connect to MySQL: " . mysql_error());
  			mysql_select_db($db_database);

@@ -1,8 +1,10 @@
 <?php
 session_start();
+include_once('score_center_objects.php');
+
 
 // DB Connection --------------
-require_once 'login.php';
+require_once('login.php');
 	$mysqli = mysqli_init();
 	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
 	mysqli_real_connect($mysqli, $db_hostname,$db_username,$db_password,$db_database);
@@ -1111,6 +1113,8 @@ else {
 		if($count == 1){
 			$_SESSION["loginFlag"] = 1;
 			$_SESSION["loginUserName"] = $myusername;
+			$userSessionInfo = new UserSessionInfo($myusername);
+			$_SESSION["userSessionInfo"] = serialize($userSessionInfo);
 			return true;
 		}
 		// Throw Error Message
