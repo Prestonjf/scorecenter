@@ -58,43 +58,56 @@
   </head>
   
   <body>
-  
+   <?php include_once 'navbarLogin.php'; ?>
   	<form action="controller.php" method="POST">
      <div class="container">
-     
+      
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
-     
-     <h1>Score Center</h1>
-	 <hr>
+      
+     	<div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-12 col-sm-9">
+        
 	<div width="50%" style="margin-bottom: 2em; background-color: #eee; border-radius: 4px; padding: 1em;">
 		<table class="borderless" cellspacing="5">
 		<tr>
-		<td><label for="userName"><h3>Login</h3></label></td>
-		<td></td>
+		<td width="20%"><label for="userName"><h3>Login</h3></label></td>
+		<td width="60%"></td>
+		<td width="20%"></td>
 		</tr>
 		<tr>
 		<td><label for="userName">User Name: </label></td>
 		<td>
 		<input type="text" size="40" class="form-control" name="userName" id="userName">
 		</td>
+		<td style="padding-left: 2em;"><a href="#"><h6>Create Account</h6></a></td>
 		</tr>
 		<tr>
-		<td ><label for="password">Password: </label></td>
+		<td><label for="password">Password: </label></td>
 		<td>
 		<input type="password" size="40" class="form-control" name="password" id="password">
 		</td>
+		<td style="padding-left: 2em;"><a href="#"><h6>Forgot Password?</h6></a></td>
 		</tr>
-		<tr><td>&nbsp;</td><td></td></tr>
-		<tr>
-		<td colspan="2">* Score Center is an open source electronic scoring application for Science Olympiad tournaments.</td>
-		</tr>
+		<tr><td>&nbsp;</td><td></td><td></td></tr>
 		</table>
+	<button type="submit" class="btn btn-xs btn-danger" name="login" value="1">Login</button>
+ 	 <!--<button type="submit" class="btn btn-xs btn-primary" name="cancelEvent" value="0">Cancel</button> -->
+	</div>
 	</div>
 
-     <button type="submit" class="btn btn-xs btn-danger" name="login" value="1">Login</button>
- 	 <!--<button type="submit" class="btn btn-xs btn-primary" name="cancelEvent" value="0">Cancel</button> -->
 
+
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar">
+          <div class="list-group">
+            <a href="#" class="list-group-item active">Quick Links</a>
+            <a href="#" class="list-group-item">Michigan Science Olympiad Website</a>
+            <a href="#" class="list-group-item">MSU State Tournament Website</a>
+          </div>
+        </div><!--/.sidebar-offcanvas-->
+        
+      </div><!--/row-->
+      
 
       <hr>
 	<?php include_once 'footer.php'; ?>
