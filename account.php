@@ -1,6 +1,5 @@
 <?php session_start(); 
-include_once('score_center_objects.php');
-include_once('logon_check.php');
+	include_once('score_center_objects.php');
 	require_once 'login.php';
 	$mysqli = mysqli_init();
 	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
@@ -10,7 +9,6 @@ include_once('logon_check.php');
 		printf("Connect failed: %s\n", mysqli_connect_error());
 		exit();
 	}
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,68 +49,55 @@ include_once('logon_check.php');
   
   </script>
     <style>
-  	.borderless td {
-  			padding-top: 1em;
-			padding-right: 2em;
-  			border: none;
-  	}
-	.red {
-		color: red;
-	}
   
   
   </style>
   </head>
   
   <body>
-  <?php include_once 'navbar.php'; ?>
-  
-  	<form action="controller.php" method="GET">
+   <?php include_once 'navbarLogin.php'; ?>
+  	<form action="controller.php" method="POST">
      <div class="container">
      
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
-     <h1>Edit Team</h1>
-	 <hr>
-	<table width="100%" class="borderless">
-	<tr>
-	<td width="20%"><label for="eventName">Team Name: </label></td>
-	<td width="30%">
-	<input type="text" size="40" class="form-control" name="teamName" id="teamName" value="<?php echo $_SESSION["teamName"];?>">
-	</td>
-	<td width="20%"><label for="eventName">Team City: </label></td>
-	<td width="30%">
-	<input type="text" size="40" class="form-control" name="teamCity" id="teamCity" value="<?php echo $_SESSION["teamCity"];?>">
-	</td>
-	</tr>
-	<tr>
-	<td><label for="eventName">Team Phone Number: </label></td>
-	<td>
-	<input type="text" size="40" class="form-control" name="teamPhone" id="teamPhone" value="<?php echo $_SESSION["teamPhone"];?>">
-	</td>
-	<td><label for="eventName">Team Email Address: </label></td>
-	<td>
-	<input type="text" size="40" class="form-control" name="teamEmail" id="teamEmail" value="<?php echo $_SESSION["teamEmail"];?>">
-	</td>
-	</tr>
-	
-	<tr>
-	<td><label>Team Description: </label></td>
-	<td></td>
-	</tr>
-	<tr>
-		<td colspan="4">
-			<textarea class="form-control"  name="teamDescription" id="teamDescription" spellcheck="true" rows="5" cols="100"><?php echo $_SESSION["teamDescription"];?></textarea>
-		</td>
-	</tr>
-	</table>
-	
-	<hr>
+     <h1>Manage Account</h1>
+     <h4>Action: <?php if ($_SESSION["accountMode"] != null and $_SESSION["accountMode"] == 'create') echo 'Create'; else echo 'Update';?></h4>
+	<table class="table table-hover"> 
+		<tr>
+			<td width="25%"><label for="firstName">First Name: </label></td>
+			<td width="25%"><input type="text" size="40" class="form-control" name="firstName" id="firstName"></td>
+			<td width="25%"><label for="lastName">Last Name: </label></td>
+			<td width="25%"><input type="text" size="40" class="form-control" name="lastName" id="lastName"></td>
+		</tr>
+		<tr>
+			<td width="25%"><label for="userName">User Name / Email: </label></td>
+			<td width="25%"><input type="text" size="40" class="form-control" name="userName" id="userName"></td>
+			<?php if ($_SESSION["accountMode"] == 'create') { ?>
+				<td width="25%"><label for="regCode">Registration Code: </label></td>
+				<td width="25%"><input type="text" size="40" class="form-control" name="regCode" id="regCode"></td>
+			<?php } else { ?>
+				<td width="25%"></td>
+				<td width="25%"></td>
+			<?php } ?>
+		</tr>
+		<tr>
+			<td width="25%"><label for="password">Password: </label></td>
+			<td width="25%"><input type="password" size="40" class="form-control" name="password" id="password"></td>
+			<td width="25%"><label for="vPassword">Verify Password: </label></td>
+			<td width="25%"><input type="password" size="40" class="form-control" name="vPassword" id="vPassword"></td>
+		</tr>
 
-     <button type="submit" class="btn btn-xs btn-danger" name="saveTeam" onclick="return validate();" value="<?php echo $_SESSION["teamId"];?>">Save</button>
- 	 <button type="submit" class="btn btn-xs btn-primary" name="cancelTeam" value="0">Cancel</button>
-
+		</table>
+		
+		<?php if ($_SESSION["accountMode"] == 'create') { ?>
+			<button type="submit" class="btn btn-xs btn-danger" name="createNewAccount" value="1">Create Account</button>
+		<?php } else { ?>
+			<button type="submit" class="btn btn-xs btn-danger" name="createNewAccount" value="1">Update Account</button>
+		<?php } ?>
+			<button type="submit" class="btn btn-xs btn-primary" name="cancelAccount">Cancel</button>
+      
 
       <hr>
 	<?php include_once 'footer.php'; ?>
@@ -125,11 +110,11 @@ include_once('logon_check.php');
     <script src="js/jquery-1.11.3.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
-    
-    <?php 
-    	if ($_SESSION['savesuccessTournament'] != null and $_SESSION['savesuccessTournament'] == '1') { ?>
-    	<script type="text/javascript">saveMessage('Tournament');</script>
-   	<?php $_SESSION['savesuccessTournament'] = null; } ?> 	
+	<?php if ($_SESSION["loginError1"] != null and $_SESSION["loginError1"] == '1') { ?>
+	<script type="text/javascript">
+		displayError("<strong>Login Failed:</strong> Username or Password incorrect.");
+	</script>
+	<?php } ?>
     
   </body>
 </html>

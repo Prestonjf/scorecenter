@@ -30,6 +30,22 @@ else if (isset($_GET['logout']) or ($_GET['command'] != null and $_GET['command'
 	header("Location: logon.php");	
 	exit();
 }
+else if ($_GET['command'] != null and $_GET['command'] == 'createAccount') {
+	$_SESSION["accountMode"] = 'create';
+	header("Location: account.php");	
+	exit();
+}
+else if (isset($_POST['cancelAccount'])) {
+		$_SESSION["accountMode"] = null;
+		header("Location: logon.php");
+		exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'resetPassword') {
+
+	header("Location: logon.php");	
+	exit();
+}
+
 else if (isset($_GET['addTournament'])) {
 	clearTournament();
 	header("Location: tournament_detail.php");	
@@ -37,7 +53,7 @@ else if (isset($_GET['addTournament'])) {
 }
 else if (isset($_GET['deleteTournament'])) {	
 	$_SESSION["tournamentId"] = $_GET['deleteTournament'];
-	deleteTournament($_GET['deleteTournament'], $mysqli);
+	//deleteTournament($_GET['deleteTournament'], $mysqli);
 	header("Location: tournament.php");
 	exit();
 }
@@ -181,7 +197,12 @@ else if (isset($_GET['printScore'])) {
 	header("Location: tournament_results.php");
 	exit();
 }
-
+else if (isset($_GET['viewStatistics'])) {
+	$_SESSION["tournamentId"] = $_GET['viewStatistics'];
+	loadTournamentEvents($mysqli);
+	header("Location: tournament_events.php");
+	exit();
+}
 else if (isset($_GET['saveTournament'])) {
 	cacheTournamnent();
 	saveTournament($mysqli);
@@ -1111,9 +1132,8 @@ else {
 		$query->free_result();
 		
 		if($count == 1){
-			$_SESSION["loginFlag"] = 1;
-			$_SESSION["loginUserName"] = $myusername;
 			$userSessionInfo = new UserSessionInfo($myusername);
+			$userSessionInfo->setAuthenticatedFlag(1);
 			$_SESSION["userSessionInfo"] = serialize($userSessionInfo);
 			return true;
 		}

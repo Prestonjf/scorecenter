@@ -1,16 +1,8 @@
 <?php 
 session_start(); 
-include_once ('score_center_objects.php');
-$userSessionInfo = null;
+include_once('score_center_objects.php');
+include_once('logon_check.php');
 
-if($_SESSION["userSessionInfo"] == null){
-	//header("location: logon.php");
-	exit();
-}
-else {
-	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
-	
-}
 ?>
 
 <!DOCTYPE html>
@@ -66,7 +58,6 @@ else {
         </thead>
         <tbody>
         <?php
-			echo print_r($_SESSION, true);
         	require_once('login.php');
 		 	$db_server = mysql_connect($db_hostname, $db_username, $db_password);
  			if (!db_server) die("Unable to connect to MySQL: " . mysql_error());

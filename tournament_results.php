@@ -1,5 +1,6 @@
 <?php session_start(); 
-
+	include_once('score_center_objects.php');
+	include_once('logon_check.php');
 	require_once 'login.php';
 	$mysqli = mysqli_init();
 	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
@@ -72,6 +73,8 @@
 	}
 	th.rotate > div {
 		transform: translate(0px, 0px) rotate(270deg);
+		-webkit-transform: rotate(270deg);
+		-ms-transform: rotate(270deg);
 		width: 30px;
 	}
 	

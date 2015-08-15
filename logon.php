@@ -1,5 +1,5 @@
 <?php session_start(); 
-
+	include_once('score_center_objects.php');
 	require_once 'login.php';
 	$mysqli = mysqli_init();
 	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
@@ -9,8 +9,11 @@
 		printf("Connect failed: %s\n", mysqli_connect_error());
 		exit();
 	}
-	if($_SESSION["loginUserName"] != null and $_SESSION["loginUserName"] != ''){
-		header("location: index.php");
+	if($_SESSION["userSessionInfo"] != null) {
+		$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+		if ($userSessionInfo->getUserName() != null and $userSessionInfo->getAuthenticatedFlag() != null) {
+			header("location: index.php");
+		}
 	}
 ?>
 <!DOCTYPE html>
@@ -67,7 +70,7 @@
       
      	<div class="row row-offcanvas row-offcanvas-right">
         <div class="col-xs-12 col-sm-9">
-        
+         
 	<div width="50%" style="margin-bottom: 2em; background-color: #eee; border-radius: 4px; padding: 1em;">
 		<table class="borderless" cellspacing="5">
 		<tr>
@@ -80,14 +83,14 @@
 		<td>
 		<input type="text" size="40" class="form-control" name="userName" id="userName">
 		</td>
-		<td style="padding-left: 2em;"><a href="#"><h6>Create Account</h6></a></td>
+		<td style="padding-left: 2em;"><a href="controller.php?command=createAccount&"><h6>Create Account</h6></a></td>
 		</tr>
 		<tr>
 		<td><label for="password">Password: </label></td>
 		<td>
 		<input type="password" size="40" class="form-control" name="password" id="password">
 		</td>
-		<td style="padding-left: 2em;"><a href="#"><h6>Forgot Password?</h6></a></td>
+		<td style="padding-left: 2em;"><a href="controller.php?command=resetPassword&"><h6>Forgot Password?</h6></a></td>
 		</tr>
 		<tr><td>&nbsp;</td><td></td><td></td></tr>
 		</table>
@@ -124,7 +127,7 @@
 	<script type="text/javascript">
 		displayError("<strong>Login Failed:</strong> Username or Password incorrect.");
 	</script>
-	<?php } ?>
+	<?php $_SESSION["loginError1"] = null; } ?>
     
   </body>
 </html>

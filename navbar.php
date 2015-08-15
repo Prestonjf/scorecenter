@@ -22,11 +22,22 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="<?php if ($_SERVER['REQUEST_URI'] == '/scorecenter/index.php') echo 'active';  ?>"><a href="index.php">Home<span class="sr-only">(current)</span></a></li>
-        <li class="<?php if ($_SERVER['REQUEST_URI'] != '/scorecenter/index.php') echo 'active';  ?>"><a href="controller.php?command=loadAllTournaments&">Tournaments</a></li>       
+        <li class="<?php if ($_SERVER['REQUEST_URI'] == '/scorecenter/index.php' or $_SERVER['REQUEST_URI'] == '/scorecenter/') echo 'active';  ?>">
+        <a href="index.php">Home<span class="sr-only">(current)</span></a></li>
+        <li class="<?php if ($_SERVER['REQUEST_URI'] != '/scorecenter/index.php' and $_SERVER['REQUEST_URI'] != '/scorecenter/') echo 'active';  ?>">
+        <a href="controller.php?command=loadAllTournaments&">Tournaments</a></li>       
       </ul>
-
+	<?php
+		$userName = "";
+		if($_SESSION["userSessionInfo"] != null) {
+		$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+		if ($userSessionInfo->getUserName() != null) {
+			$userName = $userSessionInfo->getUserName();
+		}
+	}
+	?>
       <ul class="nav navbar-nav navbar-right">
+      	<li><a href="#"><?php echo 'Logged in: '.$userName;?></a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Configuration<span class="caret"></span></a>
           <ul class="dropdown-menu">

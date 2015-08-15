@@ -1,14 +1,16 @@
 <?php
+
 // USER SESSION INFO OBJECT
 class UserSessionInfo {
 	
    private $authenticatedFlag;
+   private $userId;
    private $userName;
    private $firstName;
    private $lastName;
    private $role;
    
-
+ 
    public function __construct($userName) {
       $this->userName = $userName;
 	  $this->loadUserSessionInfo();
@@ -48,6 +50,13 @@ class UserSessionInfo {
 	public function getRole() {
 		return $this->role;
 	}
+	
+	public function setUserId($userId) {
+		$this->userId = $userId;
+	}
+	public function getUserId() {
+		return $this->userId;
+	}
    
    public function loadUserSessionInfo() {
 	   
@@ -56,4 +65,3 @@ class UserSessionInfo {
    }
 }
 ?>
-

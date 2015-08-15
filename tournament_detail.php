@@ -1,4 +1,7 @@
-<?php session_start(); ?>
+<?php session_start(); 
+include_once('score_center_objects.php');
+include_once('logon_check.php');
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>

@@ -1,5 +1,6 @@
 <?php session_start(); 
-
+	include_once('score_center_objects.php');
+	include_once('logon_check.php');
 	require_once 'login.php';
 	$mysqli = mysqli_init();
 	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
