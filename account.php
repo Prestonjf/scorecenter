@@ -36,15 +36,33 @@
   <script src="js/jquery-ui-1.11.4/jquery-ui.js"></script>
   <script src="js/scorecenter.js"></script>
   <script type="text/javascript">
-  $(document).ready(function(){
   
-    //	$("#addTournament").click(function(){
-     //   	alert("add");
-    //	});
-
-    	
-    	
-	});
+	function validate() {
+	var mode = '<?php echo $_SESSION["accountMode"]; ?>';
+		if (mode == 'create') {
+			if ($("#firstName").val().trim() == '' || $("#lastName").val().trim() == '' || $("#userName").val().trim() == ''
+			|| $("#regCode").val().trim() == '' || $("#password").val().trim() == '' || $("#vPassword").val().trim() == '') {
+				displayError("<strong>Required Fields:</strong> All fields are required.");
+				return false;
+			}
+			
+			if ($("#password").val().trim() != $("#vPassword").val().trim()) {
+				displayError("<strong>Error:</strong> Verification Password does not match.");
+				$("#vPassword").val() = '';
+				$("#password").val() = '';
+				return false;
+			}
+			
+			document.forms[0].action = document.forms[0].action + "?command=createNewAccount&";
+			document.forms[0].submit();
+		}
+		else if (mode == 'update') {
+		
+			document.forms[0].submit();
+		}
+	
+		return false;
+	}
 
   
   </script>
@@ -67,13 +85,13 @@
 	<table class="table table-hover"> 
 		<tr>
 			<td width="25%"><label for="firstName">First Name: </label></td>
-			<td width="25%"><input type="text" size="40" class="form-control" name="firstName" id="firstName"></td>
+			<td width="25%"><input type="text" size="40" class="form-control" name="firstName" id="firstName" value="<?php $_SESSION["firstName"] ?>"></td>
 			<td width="25%"><label for="lastName">Last Name: </label></td>
-			<td width="25%"><input type="text" size="40" class="form-control" name="lastName" id="lastName"></td>
+			<td width="25%"><input type="text" size="40" class="form-control" name="lastName" id="lastName" value="<?php $_SESSION["lastName"] ?>"></td>
 		</tr>
 		<tr>
 			<td width="25%"><label for="userName">User Name / Email: </label></td>
-			<td width="25%"><input type="text" size="40" class="form-control" name="userName" id="userName"></td>
+			<td width="25%"><input type="text" size="40" class="form-control" name="userName" id="userName" value="<?php $_SESSION["userName"] ?>"></td>
 			<?php if ($_SESSION["accountMode"] == 'create') { ?>
 				<td width="25%"><label for="regCode">Registration Code: </label></td>
 				<td width="25%"><input type="text" size="40" class="form-control" name="regCode" id="regCode"></td>
@@ -84,17 +102,17 @@
 		</tr>
 		<tr>
 			<td width="25%"><label for="password">Password: </label></td>
-			<td width="25%"><input type="password" size="40" class="form-control" name="password" id="password"></td>
+			<td width="25%"><input type="password" size="40" class="form-control" name="password" id="password" value="<?php $_SESSION["password"] ?>"></td>
 			<td width="25%"><label for="vPassword">Verify Password: </label></td>
-			<td width="25%"><input type="password" size="40" class="form-control" name="vPassword" id="vPassword"></td>
+			<td width="25%"><input type="password" size="40" class="form-control" name="vPassword" id="vPassword" value="<?php $_SESSION["vPassword"] ?>"></td>
 		</tr>
 
 		</table>
 		
 		<?php if ($_SESSION["accountMode"] == 'create') { ?>
-			<button type="submit" class="btn btn-xs btn-danger" name="createNewAccount" value="1">Create Account</button>
+			<input type="button" class="btn btn-xs btn-danger" name="createNewAccount" onclick="validate();" value="Create Account"/>
 		<?php } else { ?>
-			<button type="submit" class="btn btn-xs btn-danger" name="createNewAccount" value="1">Update Account</button>
+			<input type="button" class="btn btn-xs btn-danger" name="updateAccount" onclick="validate();" value="Update Account"/>
 		<?php } ?>
 			<button type="submit" class="btn btn-xs btn-primary" name="cancelAccount">Cancel</button>
       
@@ -110,11 +128,14 @@
     <script src="js/jquery-1.11.3.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
-	<?php if ($_SESSION["loginError1"] != null and $_SESSION["loginError1"] == '1') { ?>
-	<script type="text/javascript">
-		displayError("<strong>Login Failed:</strong> Username or Password incorrect.");
-	</script>
-	<?php } ?>
-    
+    	<script type="text/javascript">
+		<?php if ($_SESSION["createAccountError"] != null) { ?>
+		<?php if ($_SESSION["createAccountError"] == 'error1') { ?>
+			displayError("<strong>Create Account Validation:</strong> Email Address has already been registered.");
+		<?php } else if ($_SESSION["createAccountError"] == 'error2') {  ?>
+			displayError("<strong>Create Account Validation:</strong> Registration code is incorrect.");
+		<?php } ?>
+	<?php $_SESSION["createAccountError"] = null; } ?>
+    	</script>
   </body>
 </html>

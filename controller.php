@@ -35,6 +35,20 @@ else if ($_GET['command'] != null and $_GET['command'] == 'createAccount') {
 	header("Location: account.php");	
 	exit();
 }
+else if ($_GET['command'] != null and $_GET['command'] == 'createNewAccount') {
+	if (createAccount($mysqli)) {
+		//login($mysqli);
+		header("Location: index.php");
+		exit();
+	}
+	else {
+		header("Location: account.php");	
+		exit();
+	}
+	
+	header("Location: account.php");	
+	exit();
+}
 else if (isset($_POST['cancelAccount'])) {
 		$_SESSION["accountMode"] = null;
 		header("Location: logon.php");
@@ -1118,12 +1132,12 @@ else {
 	
 	
 	
-	// LOGIN ---------------------------------------
+	// LOGIN AND ACCOUNT MANAGEMENT ---------------------------------------
 	function login($mysqli) {
 		$myusername=$_POST['userName']; 
 		$mypassword=$_POST['password']; 
 		
-		$query = $mysqli->prepare("SELECT * FROM USERS WHERE username=? and password=? ");
+		$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? and PASSWORD=? ");
 			
 		$query->bind_param('ss',$myusername, $mypassword);
 		$query->execute();
@@ -1140,6 +1154,41 @@ else {
 		// Throw Error Message
 		$_SESSION["loginError1"] = "1";
 		return false;
+	}
+	
+	function createAccount($mysqli) {
+		$userName = $_POST['userName']; 
+		$password = $_POST['password']; 
+		$firstName = $_POST['firstName'];
+		$lastName = $_POST['lastName'];
+		$regCode = $_POST['regCode'];
+		// check email / username not already registered
+	
+		$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? ");
+			
+		$query->bind_param('s',$userName);
+		$query->execute();
+		$result = $query->get_result();
+		$count = $result->num_rows;
+		$query->free_result();
+		
+		if($count  > 0){
+			$_SESSION["createAccountError"] = "error1";
+			return false;
+		}
+		if ($regCode != 'science101') {
+			$_SESSION["createAccountError"] = "error2";
+			return false;
+		}
+		
+		// validate registration code
+	
+		// save account info
+		
+		// on success return true.
+		// send confirmation email
+		
+		return true;
 	}
 
 
