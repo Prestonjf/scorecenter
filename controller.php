@@ -36,7 +36,7 @@ else if ($_GET['command'] != null and $_GET['command'] == 'createAccount') {
 	exit();
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'createNewAccount') {
-	if (createAccount($mysqli)) {
+	if (manageAccount($mysqli,'create')) {
 		//login($mysqli);
 		header("Location: index.php");
 		exit();
@@ -1156,12 +1156,19 @@ else {
 		return false;
 	}
 	
-	function createAccount($mysqli) {
+	function manageAccount($mysqli, $mode) {
 		$userName = $_POST['userName']; 
 		$password = $_POST['password']; 
 		$firstName = $_POST['firstName'];
 		$lastName = $_POST['lastName'];
 		$regCode = $_POST['regCode'];
+		
+		$_SESSION["userName"] = $userName;
+		$_SESSION["password"] = $password;
+		$_SESSION["firstName"] = $firstName;
+		$_SESSION["lastName"] = $lastName;
+		$_SESSION["vPassword"] = $password;
+		
 		// check email / username not already registered
 	
 		$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? ");
@@ -1176,14 +1183,26 @@ else {
 			$_SESSION["createAccountError"] = "error1";
 			return false;
 		}
+		// validate registration code
 		if ($regCode != 'science101') {
 			$_SESSION["createAccountError"] = "error2";
 			return false;
 		}
 		
-		// validate registration code
 	
 		// save account info
+		$result = $mysqli->query("select max(USER_ID) + 1 from USER");
+		$row = $result->fetch_row(); 
+		$id = 0;
+		if ($row != null) $id = $row['0'];  
+			
+		$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME) 
+			VALUES (".$id.",?,?,?,?,?) ");
+		$role = 'WORKER';	
+		$query->bind_param('sssss',$userName, $password, $role,$firstName, $lastName);
+			
+		$query->execute();
+		$query->free_result();
 		
 		// on success return true.
 		// send confirmation email
