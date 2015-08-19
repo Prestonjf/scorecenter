@@ -31,24 +31,38 @@ else if (isset($_GET['logout']) or ($_GET['command'] != null and $_GET['command'
 	exit();
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'createAccount') {
+	clearAccount();
 	$_SESSION["accountMode"] = 'create';
+	header("Location: account.php");	
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'updateAccount') {
+    clearAccount();
+	loadAccount();
+	$_SESSION["accountMode"] = 'update';
 	header("Location: account.php");	
 	exit();
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'createNewAccount') {
 	if (manageAccount($mysqli,'create')) {
-		//login($mysqli);
+		login($mysqli);
 		header("Location: index.php");
 		exit();
-	}
-	else {
-		header("Location: account.php");	
-		exit();
-	}
-	
+	}	
 	header("Location: account.php");	
 	exit();
 }
+else if ($_GET['command'] != null and $_GET['command'] == 'updateExistingAccount') {
+	if (manageAccount($mysqli,'update')) {
+		login($mysqli);
+		header("Location: index.php");
+		exit();
+	}
+	header("Location: account.php");	
+	exit();
+}
+
+
 else if (isset($_POST['cancelAccount'])) {
 		$_SESSION["accountMode"] = null;
 		header("Location: logon.php");
@@ -1138,22 +1152,50 @@ else {
 		$mypassword=$_POST['password']; 
 		
 		$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? and PASSWORD=? ");
+		if ($_SESSION["accountMode"] == 'update') {
+			$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? ");
+		}	
+		if ($_SESSION["accountMode"] == 'update') $query->bind_param('s',$myusername);
+		else $query->bind_param('ss',$myusername, $mypassword);
 			
-		$query->bind_param('ss',$myusername, $mypassword);
 		$query->execute();
 		$result = $query->get_result();
 		$count = $result->num_rows;
 		$query->free_result();
+		$_SESSION["accountMode"] == '';
 		
 		if($count == 1){
+			$account = $result->fetch_row();	
 			$userSessionInfo = new UserSessionInfo($myusername);
 			$userSessionInfo->setAuthenticatedFlag(1);
+			$userSessionInfo->setUserId($account['0']);
+			$userSessionInfo->setFirstName($account['4']);
+			$userSessionInfo->setLastName($account['5']);
+			$userSessionInfo->setRole($account['3']);
+			
 			$_SESSION["userSessionInfo"] = serialize($userSessionInfo);
 			return true;
 		}
 		// Throw Error Message
 		$_SESSION["loginError1"] = "1";
 		return false;
+	}
+	
+	function clearAccount() {	
+		$_SESSION["userName"] = '';
+		$_SESSION["password"] = '';
+		$_SESSION["firstName"] = '';
+		$_SESSION["lastName"] = '';
+		$_SESSION["vPassword"] = '';
+	}
+	
+	function loadAccount() {
+		$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+		if ($userSessionInfo != null) {
+			$_SESSION["userName"] = $userSessionInfo->getUserName();
+			$_SESSION["firstName"] = $userSessionInfo->getFirstName();
+			$_SESSION["lastName"] = $userSessionInfo->getLastName();
+		}
 	}
 	
 	function manageAccount($mysqli, $mode) {
@@ -1170,39 +1212,72 @@ else {
 		$_SESSION["vPassword"] = $password;
 		
 		// check email / username not already registered
-	
-		$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? ");
+		if ($mode == 'create') {
+			$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? ");
 			
-		$query->bind_param('s',$userName);
-		$query->execute();
-		$result = $query->get_result();
-		$count = $result->num_rows;
-		$query->free_result();
+			$query->bind_param('s',$userName);
+			$query->execute();
+			$result = $query->get_result();
+			$count = $result->num_rows;
+			$query->free_result();
 		
-		if($count  > 0){
-			$_SESSION["createAccountError"] = "error1";
-			return false;
+			if($count  > 0){
+				$_SESSION["createAccountError"] = "error1";
+				return false;
+			}
+			// validate registration code
+			if ($regCode != 'science101') {
+				$_SESSION["createAccountError"] = "error2";
+				return false;
+			}
+			
+			// save account info
+			$result = $mysqli->query("select max(USER_ID) + 1 from USER");
+			$row = $result->fetch_row(); 
+			$id = 0;
+			if ($row != null) $id = $row['0'];  
+			
+			$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME) 
+				VALUES (".$id.",?,?,?,?,?) ");
+			$role = 'WORKER';	
+			$query->bind_param('sssss',$userName, $password, $role,$firstName, $lastName);		
+			$query->execute();
+			$query->free_result();	
+			$_SESSION["accountCreationSuccess"] = "1";
+	
 		}
-		// validate registration code
-		if ($regCode != 'science101') {
-			$_SESSION["createAccountError"] = "error2";
-			return false;
+		
+		else {
+			$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+			$userId = $userSessionInfo->getUserId();
+			
+			
+			$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? AND USER_ID<>?");
+			
+			$query->bind_param('si',$userName, $userId);
+			$query->execute();
+			$result = $query->get_result();
+			$count = $result->num_rows;
+			$query->free_result();
+		
+			if($count  > 0){
+				$_SESSION["createAccountError"] = "error1";
+				return false;
+			}
+			
+			$sql = "UPDATE USER SET USERNAME=?, PASSWORD=?, FIRST_NAME=?, LAST_NAME=? WHERE USER_ID=? ";
+			if ($password == null or $password == '') $sql = "UPDATE USER SET USERNAME=?, FIRST_NAME=?, LAST_NAME=? WHERE USER_ID=? ";
+			$query = $mysqli->prepare($sql);
+			if ($password == null or $password == '') $query->bind_param('sssi',$userName, $firstName,$lastName, $userId);		
+			else  $query->bind_param('ssssi',$userName, $password, $firstName,$lastName, $userId);		
+			$query->execute();
+			$query->free_result();	
+		
+			$_SESSION["accountUpdateSuccess"] = "1";
 		}
 		
 	
-		// save account info
-		$result = $mysqli->query("select max(USER_ID) + 1 from USER");
-		$row = $result->fetch_row(); 
-		$id = 0;
-		if ($row != null) $id = $row['0'];  
-			
-		$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME) 
-			VALUES (".$id.",?,?,?,?,?) ");
-		$role = 'WORKER';	
-		$query->bind_param('sssss',$userName, $password, $role,$firstName, $lastName);
-			
-		$query->execute();
-		$query->free_result();
+
 		
 		// on success return true.
 		// send confirmation email
