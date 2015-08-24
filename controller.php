@@ -1286,7 +1286,16 @@ else {
 	}
 
 
-	/**** GENERAL ISSUES ********
+	/**** TODO / GENERAL ISSUES ********
+	
+	1. Score Verification Checkbox for each Event
+	2. Link Supervisor (User) to event.
+	3. Create Supervisor Interface to Enter scores for only their events
+	3a. User Management Screen for ADMIN to assign roles.
+	4. Add security role check to Pages
+	5. Notification Emails (Reminder Notifications to Supervisors?)
+	6. Generate Results as Excel / CSV / XML
+	
 	
 	1. Handles 100 Teams / Events Per TOURNAMENT
 	2. Results: Ties Broken to 20 positions
@@ -1295,5 +1304,5 @@ else {
 	
 	
 	
-	**** GENERAL ISSUES *********/
+	**** TODO / GENERAL ISSUES *********/
 ?>

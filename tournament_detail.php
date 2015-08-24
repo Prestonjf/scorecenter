@@ -299,6 +299,7 @@ include_once('logon_check.php');
         <thead>
             <tr>
                 <th data-field="name" data-align="right" data-sortable="true">Event Name</th>
+                <th data-field="name" data-align="right" data-sortable="true">Supervisor</th>
                 <th data-field="trial" data-align="center" data-sortable="true">Trial Event?</th>
 				<th data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
@@ -311,6 +312,7 @@ include_once('logon_check.php');
 				foreach ($eventList as $event) {
 					echo '<tr>';
       				echo '<td>'; echo $event['1']; echo '</td>';
+      				echo '<td>'; echo '</td>';
 					echo '<td><div class="col-xs-5 col-md-5">'; 
 					echo '<select  class="form-control" name="trialEvent'.$eventCount.'" id="trialEvent'.$eventCount.'">';
 					echo '<option value="0"'; if($event['2'] == '' or $event['2'] == 0){echo("selected");} echo '>No</option>';
