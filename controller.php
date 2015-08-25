@@ -1172,6 +1172,7 @@ else {
 			$userSessionInfo->setFirstName($account['4']);
 			$userSessionInfo->setLastName($account['5']);
 			$userSessionInfo->setRole($account['3']);
+			$userSessionInfo->setPhoneNumber($account['9']);
 			
 			$_SESSION["userSessionInfo"] = serialize($userSessionInfo);
 			return true;
@@ -1204,12 +1205,14 @@ else {
 		$firstName = $_POST['firstName'];
 		$lastName = $_POST['lastName'];
 		$regCode = $_POST['regCode'];
+		$phoneNumber = $_POST['phoneNumber'];
 		
 		$_SESSION["userName"] = $userName;
 		$_SESSION["password"] = $password;
 		$_SESSION["firstName"] = $firstName;
 		$_SESSION["lastName"] = $lastName;
 		$_SESSION["vPassword"] = $password;
+		$_SESSION["phoneNumber"] = $phoneNumber;
 		
 		// check email / username not already registered
 		if ($mode == 'create') {
@@ -1237,10 +1240,10 @@ else {
 			$id = 0;
 			if ($row != null) $id = $row['0'];  
 			
-			$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME) 
+			$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, PHONE_NUMBER) 
 				VALUES (".$id.",?,?,?,?,?) ");
-			$role = 'WORKER';	
-			$query->bind_param('sssss',$userName, $password, $role,$firstName, $lastName);		
+			$role = 'SUPERVISOR';	
+			$query->bind_param('sssss',$userName, $password, $role,$firstName, $lastName, $phoneNumber);		
 			$query->execute();
 			$query->free_result();	
 			$_SESSION["accountCreationSuccess"] = "1";
@@ -1265,11 +1268,11 @@ else {
 				return false;
 			}
 			
-			$sql = "UPDATE USER SET USERNAME=?, PASSWORD=?, FIRST_NAME=?, LAST_NAME=? WHERE USER_ID=? ";
-			if ($password == null or $password == '') $sql = "UPDATE USER SET USERNAME=?, FIRST_NAME=?, LAST_NAME=? WHERE USER_ID=? ";
+			$sql = "UPDATE USER SET USERNAME=?, PASSWORD=?, FIRST_NAME=?, LAST_NAME=?,PHONE_NUMBER=? WHERE USER_ID=? ";
+			if ($password == null or $password == '') $sql = "UPDATE USER SET USERNAME=?, FIRST_NAME=?, LAST_NAME=?,PHONE_NUMBER=? WHERE USER_ID=? ";
 			$query = $mysqli->prepare($sql);
-			if ($password == null or $password == '') $query->bind_param('sssi',$userName, $firstName,$lastName, $userId);		
-			else  $query->bind_param('ssssi',$userName, $password, $firstName,$lastName, $userId);		
+			if ($password == null or $password == '') $query->bind_param('ssssi',$userName, $firstName,$lastName,$phoneNumber, $userId);		
+			else  $query->bind_param('sssssi',$userName, $password, $firstName,$lastName,$phoneNumber, $userId);		
 			$query->execute();
 			$query->free_result();	
 		

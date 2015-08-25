@@ -5,6 +5,20 @@
 
 </script>
 
+<?php
+		$userName = "";
+		$role = "";
+		if($_SESSION["userSessionInfo"] != null) {
+			$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+			if ($userSessionInfo->getUserName() != null) {
+				$userName = $userSessionInfo->getUserName();
+			}
+			if ($userSessionInfo->getRole() != null) {
+				$role = $userSessionInfo->getRole();
+			}
+		}
+?>
+
 <nav class="navbar navbar-default">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -24,28 +38,23 @@
       <ul class="nav navbar-nav">
         <li class="<?php if ($_SERVER['REQUEST_URI'] == '/scorecenter/index.php' or $_SERVER['REQUEST_URI'] == '/scorecenter/') echo 'active';  ?>">
         <a href="index.php">Home<span class="sr-only">(current)</span></a></li>
+        <?php if ($role == 'ADMIN' or $role == 'VERIFIER') { ?>
         <li class="<?php if ($_SERVER['REQUEST_URI'] != '/scorecenter/index.php' and $_SERVER['REQUEST_URI'] != '/scorecenter/') echo 'active';  ?>">
-        <a href="controller.php?command=loadAllTournaments&">Tournaments</a></li>       
+        <a href="controller.php?command=loadAllTournaments&">Tournaments</a></li>
+        <?php } ?>      
       </ul>
-	<?php
-		$userName = "";
-		if($_SESSION["userSessionInfo"] != null) {
-		$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
-		if ($userSessionInfo->getUserName() != null) {
-			$userName = $userSessionInfo->getUserName();
-		}
-	}
-	?>
       <ul class="nav navbar-nav navbar-right">
       	<li><a href="controller.php?command=updateAccount&"><?php echo 'Logged in: '.$userName;?></a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Configuration<span class="caret"></span></a>
           <ul class="dropdown-menu">
+           <?php if ($role == 'ADMIN' or $role == 'VERIFIER') { ?>
             <li><a href="controller.php?command=loadAllTournaments&">Manage Tournaments</a></li>
             <li><a href="controller.php?command=loadAllTeams&">Manage Teams</a></li>
             <li><a href="controller.php?command=loadAllEvents&">Manage Events</a></li>
             <li role="separator" class="divider"></li>
             <li><a href="#">Utilities</a></li>
+            <?php } ?>
             <li><a href="#" onclick="about();return false;" >About</a></li>
 			<li role="separator" class="divider"></li>
 			 <li><a href="controller.php?command=logout&">Logout</a></li>

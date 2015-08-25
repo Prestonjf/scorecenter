@@ -9,6 +9,8 @@ class UserSessionInfo {
    private $firstName;
    private $lastName;
    private $role;
+   private $phoneNumber;
+   
    
  
    public function __construct($userName) {
@@ -56,6 +58,13 @@ class UserSessionInfo {
 	}
 	public function getUserId() {
 		return $this->userId;
+	}
+	
+	public function setPhoneNumber($phoneNumber) {
+		$this->phoneNumber = $phoneNumber;
+	}
+	public function getPhoneNumber() {
+		return $this->phoneNumber;
 	}
    
    public function loadUserSessionInfo() {

@@ -11,6 +11,10 @@
 		printf("Connect failed: %s\n", mysqli_connect_error());
 		exit();
 	}
+	
+	// Security Level Check
+	include_once('role_check.php');
+	checkUserRole(2);
 
 ?>
 <!DOCTYPE html>

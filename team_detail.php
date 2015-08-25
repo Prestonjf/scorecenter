@@ -11,6 +11,9 @@ include_once('logon_check.php');
 		exit();
 	}
 
+	// Security Level Check
+	include_once('role_check.php');
+	checkUserRole(2);
 ?>
 <!DOCTYPE html>
 <html lang="en">

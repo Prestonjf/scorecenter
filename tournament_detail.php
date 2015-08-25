@@ -1,6 +1,10 @@
 <?php session_start(); 
-include_once('score_center_objects.php');
-include_once('logon_check.php');
+	include_once('score_center_objects.php');
+	include_once('logon_check.php');
+
+	// Security Level Check
+	include_once('role_check.php');
+	checkUserRole(2);
 ?>
 <!DOCTYPE html>
 <html lang="en">
