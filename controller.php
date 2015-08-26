@@ -347,24 +347,24 @@ else {
 		$count = 0;
 		$eventList = $_SESSION["eventList"];
 		
-		//$event = $eventList['1'];
-		//echo $event['0'];
-		
 		while ($count < 100) {
 			$event = $eventList[$count];
 			if ($_GET['trialEvent'.$count] != null) {	
 				
 				$event['2'] = $_GET['trialEvent'.$count];	
+				$event['5'] = $_GET['eventSupervisor'.$count];	
+				
 				$eventList[$count] = $event;
-
-				$_SESSION["eventList"] = $eventList;	
-
-				$count++;		
+				$_SESSION["eventList"] = $eventList;							
 			} 
 			else {
 				break;
-			}			
+			}
+			$count++;			
 		}
+		
+		// Event Cache - Supervisor
+		
 
 	}
 	
@@ -451,10 +451,10 @@ else {
 				$result = $mysqli->query("SELECT NAME FROM EVENT WHERE EVENT_ID = ".$selectedEvent); 
 				$row1 = $result->fetch_row();
 	
-				$event = array($selectedEvent, $row1['0'], "","","1"); // 0: EVENT_ID 1: NAME 2:TRIAL_EVENT 3: TOURN_EVENT_ID 4: New Event 0/1
+				$event = array($selectedEvent, $row1['0'], "","","1", "", ""); // 0: EVENT_ID 1: NAME 2:TRIAL_EVENT 3: TOURN_EVENT_ID 4: New Event 0/1 5: USER_ID 6: USER NAME
 				array_push($eventList, $event);
 				$_SESSION["eventList"] = $eventList;
-				reloadTournamentEvent();
+				reloadTournamentEvent($mysqli);
 			} else {
 				echo $errorStr;
 			}
@@ -510,14 +510,14 @@ else {
 							unset($eventList[$key]);
 							$eventList = array_values($eventList);
 							$_SESSION["eventList"] = $eventList;
-							reloadTournamentEvent();
+							reloadTournamentEvent($mysqli);
 						}
 					} 
 					else {
 						unset($eventList[$key]);
 						$eventList = array_values($eventList);
 						$_SESSION["eventList"] = $eventList;
-						reloadTournamentEvent();
+						reloadTournamentEvent($mysqli);
 					}			
 					break;
 				}
@@ -552,13 +552,27 @@ else {
 			} 
 	}
 	
-	function reloadTournamentEvent() {
+	function reloadTournamentEvent($mysqli) {
+	    	$supervisors = $mysqli->query("SELECT DISTINCT USER_ID, CONCAT(LAST_NAME,', ',FIRST_NAME,' (', USERNAME,')') AS USER
+    									 FROM USER WHERE ROLE_CODE='SUPERVISOR' ORDER BY UPPER(LAST_NAME) ASC");
+    									 
 			$eventList = $_SESSION["eventList"];
 			$eventCount = 0;
 			if ($eventList) {				
 				foreach ($eventList as $event) {
 					echo '<tr>';
       				echo '<td>'; echo $event['1']; echo '</td>';
+      				echo '<td>';
+      				echo '<select  class="form-control" name="eventSupervisor'.$eventCount.'" id="eventSupervisor'.$eventCount.'">';
+      				echo '<option value=""></option>';
+      				if ($supervisors) {
+             			while($supervisorRow = $supervisors->fetch_array()) {
+             				echo '<option value="'.$supervisorRow['0'].'"'; if($supervisorRow['0'] == $event['5']){echo("selected");} echo '>'.$supervisorRow['1'].'</option>';	
+             			}
+             		}    
+             		mysqli_data_seek($supervisors, 0);				
+      				echo '</select>'; 
+      				echo '</td>';
 					echo '<td><div class="col-xs-5 col-md-5">'; 
 					echo '<select  class="form-control" name="trialEvent'.$eventCount.'" id="trialEvent'.$eventCount.'">';
 					echo '<option value="0"'; if($event['2'] == '' or $event['2'] == 0){echo("selected");} echo '>No</option>';
@@ -599,9 +613,13 @@ else {
 	
 			// Load Events
 			$eventList = array();
-			$result = $mysqli->query("SELECT TE.EVENT_ID, E.NAME, TE.TRIAL_EVENT_FLAG, TE.TOURN_EVENT_ID FROM TOURNAMENT_EVENT TE INNER JOIN TOURNAMENT T on 
-									T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
-									INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID WHERE TE.TOURNAMENT_ID= " .$id. " ORDER BY UPPER(E.NAME) ASC "); 
+			$result = $mysqli->query("SELECT TE.EVENT_ID, E.NAME, TE.TRIAL_EVENT_FLAG, TE.TOURN_EVENT_ID, U.USER_ID, 
+									CONCAT(U.LAST_NAME,', ',U.FIRST_NAME,' (', U.USERNAME,')') AS USER 
+									FROM TOURNAMENT_EVENT TE 
+									INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
+									INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID 
+									LEFT JOIN USER U on U.USER_ID=TE.USER_ID
+									WHERE TE.TOURNAMENT_ID= " .$id. " ORDER BY UPPER(E.NAME) ASC "); 
  			if ($result) {
  				while($eventRow = $result->fetch_array()) {
  					$event = array();
@@ -610,6 +628,8 @@ else {
  					array_push($event, $eventRow['2']);
  					array_push($event, $eventRow['3']);
  					array_push($event, "0");
+ 					array_push($event, $eventRow['4']);
+ 					array_push($event, $eventRow['5']);
 				
  					array_push($eventList, $event);
  				}
@@ -689,10 +709,12 @@ else {
 	
 	
 		// save events
-		// 0: EVENT_ID 1: NAME 2: TRIAL_EVENT 3: TOURN_EVENT_ID
+		// 0: EVENT_ID 1: NAME 2:TRIAL_EVENT 3: TOURN_EVENT_ID 4: New Event 0/1 5: USER_ID 6: USER NAME
 		$eventList = $_SESSION["eventList"];
 		if ($eventList) {
 			foreach ($eventList as $event) {
+			if ($event['5'] == '' || $event['5'] == '0') $event['5'] = null; // USER ID Should be null if blank
+			
 			if ($event['3'] == null or $event['3'] == '') {
 				// Generate Next TOURN_EVENT_ID
 				$result = $mysqli->query("select max(TOURN_EVENT_ID) + 1 from TOURNAMENT_EVENT");
@@ -700,13 +722,13 @@ else {
 				$id = 0;
 				if ($row['0'] != null) $id = $row['0']; 
 				
-				$query = $mysqli->prepare("INSERT INTO TOURNAMENT_EVENT (TOURN_EVENT_ID, TOURNAMENT_ID, EVENT_ID, TRIAL_EVENT_FLAG) VALUES (".$id.", ?, ?, ?) ");
-				$query->bind_param('iii',$_SESSION["tournamentId"],$event['0'], $event['2']); 
+				$query = $mysqli->prepare("INSERT INTO TOURNAMENT_EVENT (TOURN_EVENT_ID, TOURNAMENT_ID, EVENT_ID, TRIAL_EVENT_FLAG, USER_ID) VALUES (".$id.", ?, ?, ?, ?) ");
+				$query->bind_param('iiii',$_SESSION["tournamentId"],$event['0'], $event['2'], $event['5']); 
 				$query->execute();
 			}
 			else {
-				$query = $mysqli->prepare("UPDATE TOURNAMENT_EVENT SET TRIAL_EVENT_FLAG=? WHERE TOURN_EVENT_ID=".$event['3']);			
-				$query->bind_param('i',$event['2']);
+				$query = $mysqli->prepare("UPDATE TOURNAMENT_EVENT SET TRIAL_EVENT_FLAG=?, USER_ID=? WHERE TOURN_EVENT_ID=".$event['3']);			
+				$query->bind_param('ii',$event['2'], $event['5']);
 				$query->execute();
 			}
 			

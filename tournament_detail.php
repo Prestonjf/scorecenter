@@ -172,6 +172,7 @@
 		while (count < 100) {
 			if (document.getElementById('trialEvent'+count) != null) {
 				str += "&trialEvent"+count+"="+document.getElementById('trialEvent'+count).value;
+				str += "&eventSupervisor"+count+"="+document.getElementById('eventSupervisor'+count).value;
 			}
 			count++;
 		}
@@ -224,6 +225,8 @@
     		
     		$events = mysql_query("SELECT DISTINCT * FROM EVENT ORDER BY NAME ASC");
     		$teams = mysql_query("SELECT DISTINCT * FROM TEAM ORDER BY NAME ASC");
+    		$supervisors = mysql_query("SELECT DISTINCT USER_ID, CONCAT(LAST_NAME,', ',FIRST_NAME,' (', USERNAME,')') AS USER
+    									 FROM USER WHERE ROLE_CODE='SUPERVISOR' ORDER BY UPPER(LAST_NAME) ASC");
         ?>
   
   	<form action="controller.php" method="GET">
@@ -302,10 +305,10 @@
         <table class="table table-hover" id="eventTable">
         <thead>
             <tr>
-                <th data-field="name" data-align="right" data-sortable="true">Event Name</th>
-                <th data-field="name" data-align="right" data-sortable="true">Supervisor</th>
-                <th data-field="trial" data-align="center" data-sortable="true">Trial Event?</th>
-				<th data-field="actions" data-align="center" data-sortable="true">Actions</th>
+                <th width="30%" data-field="name" data-align="right" data-sortable="true">Event Name</th>
+                <th width="30%" data-field="name" data-align="right" data-sortable="true">Supervisor</th>
+                <th width="20%" data-field="trial" data-align="center" data-sortable="true">Trial Event?</th>
+				<th width="20%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
         <tbody id="eventTableBody">
@@ -316,7 +319,17 @@
 				foreach ($eventList as $event) {
 					echo '<tr>';
       				echo '<td>'; echo $event['1']; echo '</td>';
-      				echo '<td>'; echo '</td>';
+      				echo '<td>';
+      				echo '<select  class="form-control" name="eventSupervisor'.$eventCount.'" id="eventSupervisor'.$eventCount.'">';
+      				echo '<option value=""></option>';
+      				if ($supervisors) {
+             			while($supervisorRow = mysql_fetch_array($supervisors)) {
+             				echo '<option value="'.$supervisorRow['0'].'"'; if($supervisorRow['0'] == $event['5']){echo("selected");} echo '>'.$supervisorRow['1'].'</option>';	
+             			}
+             		}    
+             		mysql_data_seek($supervisors, 0);				
+      				echo '</select>'; 
+      				echo '</td>';
 					echo '<td><div class="col-xs-5 col-md-5">'; 
 					echo '<select  class="form-control" name="trialEvent'.$eventCount.'" id="trialEvent'.$eventCount.'">';
 					echo '<option value="0"'; if($event['2'] == '' or $event['2'] == 0){echo("selected");} echo '>No</option>';
@@ -356,10 +369,10 @@
         <table class="table table-hover" id="teamTable">
         <thead>
             <tr>
-                <th data-field="name" data-align="right" data-sortable="true">Team Name</th>
-                <th data-field="name" data-align="right" data-sortable="true">Team Number</th>
-                <th data-field="alternate" data-align="center" data-sortable="true">Alternate Team?</th>
-				<th data-field="actions" data-align="center" data-sortable="true">Actions</th>
+                <th width="30%" data-field="name" data-align="right" data-sortable="true">Team Name</th>
+                <th width="30%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
+                <th width="20%" data-field="alternate" data-align="center" data-sortable="true">Alternate Team?</th>
+				<th width="20%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
         <tbody id="teamTableBody">

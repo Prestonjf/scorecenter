@@ -44,8 +44,13 @@ include_once('logon_check.php');
           </div>
           
           <form action="controller.php" method="GET">
-          
-          <h2>Today's Tournaments</h2>
+        
+        <?php
+          	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+			$userRole = $userSessionInfo->getRole();
+          	if ($userRole == 'VERIFIER' or $userRole == 'ADMIN') {
+          ?>
+        <h2>Today's Tournaments</h2>
         <table class="table table-hover">
         <thead>
             <tr>
@@ -88,7 +93,14 @@ include_once('logon_check.php');
 
         </tbody>
     	</table>
+    	
+    	<?php } else { ?>
+		<h2>My Events</h2>
 		
+		
+		
+		
+		<?php } ?>
 		</form>
 
 
