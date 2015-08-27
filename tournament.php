@@ -62,8 +62,7 @@
 	function clearDates() {
 		document.getElementById('fromDate').value = '';
 		document.getElementById('toDate').value = '';
-		document.getElementById('tournamentsNumber').value = '20';
-		
+		document.getElementById('tournamentsNumber').value = '20';		
 	}
   
   </script>

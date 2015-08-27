@@ -74,6 +74,12 @@ else if ($_GET['command'] != null and $_GET['command'] == 'resetPassword') {
 	exit();
 }
 
+else if (isset($_GET['searchUserEvent'])) {
+		$_SESSION["userEventDate"] = $_GET['userEventDate'];
+		header("Location: index.php");
+		exit();
+}
+
 else if (isset($_GET['addTournament'])) {
 	clearTournament();
 	header("Location: tournament_detail.php");	
@@ -1197,6 +1203,7 @@ else {
 			$userSessionInfo->setPhoneNumber($account['9']);
 			
 			$_SESSION["userSessionInfo"] = serialize($userSessionInfo);
+			$_SESSION["userEventDate"] = date("m/d/y");
 			return true;
 		}
 		// Throw Error Message
@@ -1314,10 +1321,8 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	1. Score Verification Checkbox for each Event
-	2. Link Supervisor (User) to event.
 	3. Create Supervisor Interface to Enter scores for only their events
 	3a. User Management Screen for ADMIN to assign roles.
-	4. Add security role check to Pages
 	5. Notification Emails (Reminder Notifications to Supervisors?)
 	6. Generate Results as Excel / CSV / XML
 	
