@@ -25,9 +25,21 @@ include_once('logon_check.php');
   <script type="text/javascript">
   	function clearDates() {
 		document.getElementById('userEventDate').value = '';
-		//document.getElementById('toDate').value = '';	
+		document.getElementById('userTournament').value = '';	
 	}
   </script>
+      <style>
+  	.borderless td {
+  			padding-top: 1em;
+			padding-right: 2em;
+  			border: none;
+  	}
+	.red {
+		color: red;
+	}
+  
+  
+  </style>
   </head>
   <body>
   <?php include_once 'navbar.php'; ?>
@@ -112,6 +124,28 @@ include_once('logon_check.php');
 			<input type="text" size="20" class="date-picker form-control" readonly="true" name="userEventDate" id="userEventDate" value=<?php echo '"'.$_SESSION["userEventDate"].'"' ?>>
 			<label for="userEventDate" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
 			</div></div></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td width="15%"><label for="fromDate">Tournament: </label></td>
+			<td width="35%">
+			<select class="form-control" name="userTournament" id="userTournament">
+			<option value=""></option>
+			<?php
+				$query = "SELECT DISTINCT T.TOURNAMENT_ID, T.TOURNAMENT_NAME
+					FROM TOURNAMENT T
+					INNER JOIN TOURNAMENT_EVENT TE on TE.TOURNAMENT_ID=T.TOURNAMENT_ID 									
+					WHERE TE.USER_ID = ".$userSessionInfo->getUserId();
+					$result1 = mysql_query($query);	
+			    if ($result1) {				 
+             		while($tournamentRow = mysql_fetch_array($result1)) {
+             			echo '<option'; if ($_SESSION["userTournament"] == $tournamentRow['0']) echo 'selected';
+						echo 'value="'.$tournamentRow['0'].'">'.$tournamentRow['1'].'</option>';		
+             		}
+             	}
+        	?>
+		</select>
+		</td>
 			<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchUserEvent">Search</button>
 			<button type="button" class="btn btn-xs btn-warning" name="clearSearchUserEvents" onclick="clearDates()">Clear</button></td>
 		</tr>
@@ -161,8 +195,12 @@ include_once('logon_check.php');
 						$query = $query . " AND T.DATE = '".$date."' ";
 					}
 					
+					if ($_SESSION["userTournament"] != null and $_SESSION["userTournament"] != '') {
+						//$query = $query . " AND T.TOURNAMENT_ID = " . $_SESSION["userTournament"];
+					}
+					
 					$query = $query ." GROUP BY EVENT_ID,eNAME, TRIAL_EVENT_FLAG,TOURN_EVENT_ID, NUMBER_TEAMS
-					ORDER BY UPPER(E.NAME) ASC"; 
+					ORDER BY UPPER(E.NAME) ASC, T.DATE DESC "; 
 	
          	$result = mysql_query($query);			
  			if ($result) {

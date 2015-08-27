@@ -76,6 +76,7 @@ else if ($_GET['command'] != null and $_GET['command'] == 'resetPassword') {
 
 else if (isset($_GET['searchUserEvent'])) {
 		$_SESSION["userEventDate"] = $_GET['userEventDate'];
+		$_SESSION["userTournament"] = $_GET['userTournament'];
 		header("Location: index.php");
 		exit();
 }

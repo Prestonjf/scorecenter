@@ -307,8 +307,8 @@
             <tr>
                 <th width="30%" data-field="name" data-align="right" data-sortable="true">Event Name</th>
                 <th width="30%" data-field="name" data-align="right" data-sortable="true">Supervisor</th>
-                <th width="20%" data-field="trial" data-align="center" data-sortable="true">Trial Event?</th>
-				<th width="20%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
+                <th width="30%" data-field="trial" data-align="center" data-sortable="true">Trial Event?</th>
+				<th width="10%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
         <tbody id="eventTableBody">
@@ -371,8 +371,8 @@
             <tr>
                 <th width="30%" data-field="name" data-align="right" data-sortable="true">Team Name</th>
                 <th width="30%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
-                <th width="20%" data-field="alternate" data-align="center" data-sortable="true">Alternate Team?</th>
-				<th width="20%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
+                <th width="30%" data-field="alternate" data-align="center" data-sortable="true">Alternate Team?</th>
+				<th width="10%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
         <tbody id="teamTableBody">
