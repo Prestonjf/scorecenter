@@ -786,7 +786,7 @@ else {
 	function loadTournamentEvents($mysqli) {
 	
 		$query = "SELECT TE.EVENT_ID, E.NAME, TE.TRIAL_EVENT_FLAG, TE.TOURN_EVENT_ID, COUNT(TES.TEAM_EVENT_SCORE_ID) as SCORES_COMPLETED, 
-					T.NUMBER_TEAMS FROM TOURNAMENT_EVENT TE 
+					T.NUMBER_TEAMS, TE.SUBMITTED_FLAG, TE.VERIFIED_FLAG FROM TOURNAMENT_EVENT TE 
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
 					INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID 
 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TES.SCORE IS NOT NULL									
@@ -808,6 +808,9 @@ else {
  				$_SESSION["highestScore"] = $tournamentRow['7'];
  				$_SESSION["tournamentDescription"] = $tournamentRow['8'];
  				
+ 				// Events Completed
+ 				// Supervisor info
+ 				
  				$date = strtotime($tournamentRow['4']);
  				$_SESSION["tournamentDate"] = date('m/d/Y', $date);
  				
@@ -820,12 +823,19 @@ else {
 // MANAGE EVENT SCORES SCREEN ---------------------------------------	
 	function loadEventScores($mysqli) {
 				
-		 $result = $mysqli->query("SELECT E.NAME, T.HIGHEST_SCORE_POSSIBLE FROM EVENT E INNER JOIN TOURNAMENT_EVENT TE ON TE.EVENT_ID=E.EVENT_ID 
+		 $result = $mysqli->query("SELECT E.NAME, T.HIGHEST_SCORE_POSSIBLE, T.TOURNAMENT_ID, T.DIVISION, T.NAME,TE.SUBMITTED_FLAG,TE.VERIFIED_FLAG 
+		 					FROM EVENT E INNER JOIN TOURNAMENT_EVENT TE ON TE.EVENT_ID=E.EVENT_ID 
 		 					INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TE.TOURNAMENT_ID WHERE TE.TOURN_EVENT_ID = " .$_SESSION["tournEventId"]); 
  			if ($result) {
  				$tournamentRow = $result->fetch_row(); 				
  				$_SESSION["eventName"] = $tournamentRow['0'];
  				$_SESSION["tournamentHighestScore"] = $tournamentRow['1'];
+ 				$_SESSION["tournamentId"] = $tournamentRow['2'];
+ 				
+ 				$_SESSION["tournamentDivision"] = $tournamentRow['3'];
+ 				$_SESSION["tournamentName"] = $tournamentRow['4'];
+ 				$_SESSION["submittedFlag"] = $tournamentRow['5'];
+ 				$_SESSION["verifiedFlag"] = $tournamentRow['6'];
     		}
     		
     	 $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID 
@@ -874,7 +884,12 @@ else {
 				}
 				$teamCount++;	
 			}
-		}	
+		}
+		// Update Submitted/Verified Flags
+		$query = $mysqli->prepare("UPDATE TOURNAMENT_EVENT SET SUBMITTED_FLAG=?, VERIFIED_FLAG=? WHERE TOURN_EVENT_ID=".$_SESSION["tournEventId"]);			
+		$query->bind_param('ii',$_GET['submittedFlag'], $_GET['verifiedFlag']);
+		$query->execute();
+			
 		$_SESSION["teamEventScoreList"] = $scoreList;
 		$_SESSION['savesuccessScore'] = "1";
 	}

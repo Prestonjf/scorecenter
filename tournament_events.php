@@ -103,7 +103,7 @@
 
         <table class="table table-hover">
         <thead>
-            <tr>
+            <tr> 
                 <th data-field="name" data-align="right" data-sortable="true">Event Name</th>
                 <th data-field="division" data-align="center" data-sortable="true">Division</th>
                 <th data-field="trialEvent" data-align="center" data-sortable="true">Trial Event?</th>
@@ -126,12 +126,19 @@
 				echo '<td>'; echo $_SESSION["tournamentDivision"]; echo '</td>';
 				echo '<td>'; if ($row['2'] == 0)echo 'No'; else echo 'Yes'; echo '</td>';
 				echo '<td>'; echo $row['4']."/".$row['5']; echo '</td>';
-				echo '<td>'; echo '</td>';
-				echo '<td>'; echo '</td>';
+				echo '<td>'; if ($row['6'] == '1') echo '<img src="img/check_green.png" alt="check_green" height="20" width="20">';
+							else echo '<img src="img/check_red.png" alt="check_red" height="20" width="20">';	
+				echo '</td>';
+				echo '<td>'; if ($row['7'] == '1') echo '<img src="img/check_green.png" alt="check_green" height="20" width="20">';
+							else echo '<img src="img/check_red.png" alt="check_red" height="20" width="20">';
+				echo '</td>';
 				echo '<td>';
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="enterEventScores" value="'.$row['3'].'">Enter Scores</button> &nbsp;'; 				
 				echo '</td>';
-				echo '<td>'; if ($row['4']==$row['5']) echo'Yes'; else echo 'No'; echo '</td>';					
+				echo '<td>'; if ($row['4']==$row['5'] and $row['6'] == '1' and $row['7'] == '1') 
+							echo '<img src="img/check_green.png" alt="check_green" height="20" width="20">';
+							else echo '<img src="img/check_red.png" alt="check_red" height="20" width="20">'; 				
+				echo '</td>';					
 				echo '</tr>';	
       			}
     		}

@@ -105,7 +105,10 @@ include_once('logon_check.php');
 			displayError("<strong>Cannot Save Scores:</strong> Team cannot have score / rank greater than the maximum score.");
 			return false;
 		}
-		else return true;		
+		 if (document.getElementById('submittedFlag').checked) {
+		 	if (!confirm('This event has been marked as submitted. Only a score verifier will be able to modify them once saved. Do you wish to continue?')) return false;
+		 }
+		 return true;		
 	}
   
   </script>
@@ -133,11 +136,28 @@ include_once('logon_check.php');
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Enter Event Scores</h1>
-     <h4>Event: <?php echo $_SESSION["tournamentName"]; ?></h4>
+     <h4>Tournament: <?php echo $_SESSION["tournamentName"]; ?></h4>
      <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
      <h4>Event: <?php echo $_SESSION["eventName"]; ?></h4> 
      <br />
-     <h6>*Instructions: Enter the finishing position/score for each team on the list below. The maximum score for events at this tournament is: <?php echo $_SESSION["tournamentHighestScore"];?></h6>    
+     <h6>*Instructions: Enter the finishing position/score for each team on the list below. The maximum score for events at this tournament is <?php echo $_SESSION["tournamentHighestScore"];?>. Select the submitted checkbox to complete the scores. The score verifier can modify the scores after they are submitted.</h6>    
+	 <hr>
+	 <?php
+	 	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+		$userRole = $userSessionInfo->getRole();
+		$disable = '';
+		$disableVerfiy = '';
+		$submitted = '';
+		$verified = '';
+        if ($userRole == 'SUPERVISOR' and $_SESSION["submittedFlag"] == '1') $disable = 'disabled';
+        if ($userRole == 'SUPERVISOR') $disableVerfiy = 'disabled';
+        if ($_SESSION["submittedFlag"] == '1') $submitted = 'checked';
+	 	if ($_SESSION["verifiedFlag"] == '1') $verified = 'checked';
+	 ?>
+	 <table width="75%"><tr>
+	 <td><label for="submittedFlag">Submitted</label> &nbsp;&nbsp;<input type="checkbox" id="submittedFlag" name="submittedFlag" <?php echo $disable.' '.$submitted; ?>  echo value="1"></td>
+	 <td><label for="verifiedFlag">Verified</label> &nbsp;&nbsp;<input type="checkbox" id="verifiedFlag" name="verifiedFlag" <?php echo $disableVerfiy.' '.$verified; ?> value="1"></td>
+	 </tr></table>
 	 <hr>
 
         <table class="table table-hover">
@@ -158,7 +178,7 @@ include_once('logon_check.php');
       				echo '<td>'; echo $scoreRecord['1']; echo '</td>';
 					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
 					echo '<td><div class="col-xs-5 col-md-5">';
-      				echo '<input type="text"  class="form-control" size="10" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"  
+      				echo '<input type="text"  class="form-control" size="10" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);" '.$disable.'    
       						name="teamScore'.$teamCount.'" id="teamScore'.$teamCount.'" value="'.$scoreRecord['2'].'">';
       				echo '</div></td>';					
 					echo '</tr>';
@@ -170,8 +190,9 @@ include_once('logon_check.php');
         ?>
           </tbody>
           </table>
-           
+        <?php if ($disable != 'disabled')   { ?>
 		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"' ?>>Save</button>
+		<?php } ?>
  	 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores">Cancel</button>
 
       <hr>

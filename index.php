@@ -3,6 +3,11 @@ session_start();
 include_once('score_center_objects.php');
 include_once('logon_check.php');
 
+            require_once('login.php');
+		 	$db_server = mysql_connect($db_hostname, $db_username, $db_password);
+ 			if (!db_server) die("Unable to connect to MySQL: " . mysql_error());
+ 			mysql_select_db($db_database);
+
 ?>
 
 <!DOCTYPE html>
@@ -80,10 +85,6 @@ include_once('logon_check.php');
         </thead>
         <tbody>
         <?php
-        	require_once('login.php');
-		 	$db_server = mysql_connect($db_hostname, $db_username, $db_password);
- 			if (!db_server) die("Unable to connect to MySQL: " . mysql_error());
- 			mysql_select_db($db_database);
  			$result = mysql_query("SELECT TOURNAMENT_ID, NAME, LOCATION,DIVISION, DATE_FORMAT(DATE,'%m/%d/%Y') 'DATE' FROM TOURNAMENT WHERE
  			DATE_FORMAT(DATE, '%Y-%m-%d') = DATE_FORMAT(CURDATE(), '%Y-%m-%d')"); 
  			if ($result) {
@@ -132,15 +133,15 @@ include_once('logon_check.php');
 			<select class="form-control" name="userTournament" id="userTournament">
 			<option value=""></option>
 			<?php
-				$query = "SELECT DISTINCT T.TOURNAMENT_ID, T.TOURNAMENT_NAME
+				$query = "SELECT DISTINCT T.TOURNAMENT_ID, T.NAME
 					FROM TOURNAMENT T
 					INNER JOIN TOURNAMENT_EVENT TE on TE.TOURNAMENT_ID=T.TOURNAMENT_ID 									
-					WHERE TE.USER_ID = ".$userSessionInfo->getUserId();
+					WHERE TE.USER_ID = ".$userSessionInfo->getUserId() . " ORDER BY NAME ASC ";
 					$result1 = mysql_query($query);	
 			    if ($result1) {				 
              		while($tournamentRow = mysql_fetch_array($result1)) {
-             			echo '<option'; if ($_SESSION["userTournament"] == $tournamentRow['0']) echo 'selected';
-						echo 'value="'.$tournamentRow['0'].'">'.$tournamentRow['1'].'</option>';		
+             			echo '<option '; if ($_SESSION["userTournament"] == $tournamentRow['0']) echo ' selected ';
+						echo ' value="'.$tournamentRow['0'].'">'.$tournamentRow['1'].'</option>';		
              		}
              	}
         	?>
@@ -176,13 +177,9 @@ include_once('logon_check.php');
         </thead>
         <tbody>
          <?php
-            require_once('login.php');
-		 	$db_server = mysql_connect($db_hostname, $db_username, $db_password);
- 			if (!db_server) die("Unable to connect to MySQL: " . mysql_error());
- 			mysql_select_db($db_database);
  			
 			$query = "SELECT TE.EVENT_ID, E.NAME as eName, TE.TRIAL_EVENT_FLAG, TE.TOURN_EVENT_ID, COUNT(TES.TEAM_EVENT_SCORE_ID) as SCORES_COMPLETED, 
-					T.NUMBER_TEAMS, DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE1', T.NAME as tName, T.DIVISION 
+					T.NUMBER_TEAMS, DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE1', T.NAME as tName, T.DIVISION, TE.SUBMITTED_FLAG, TE.VERIFIED_FLAG 
 					FROM TOURNAMENT_EVENT TE 
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
 					INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID 
@@ -196,7 +193,7 @@ include_once('logon_check.php');
 					}
 					
 					if ($_SESSION["userTournament"] != null and $_SESSION["userTournament"] != '') {
-						//$query = $query . " AND T.TOURNAMENT_ID = " . $_SESSION["userTournament"];
+						$query = $query . " AND T.TOURNAMENT_ID = " . $_SESSION["userTournament"];
 					}
 					
 					$query = $query ." GROUP BY EVENT_ID,eNAME, TRIAL_EVENT_FLAG,TOURN_EVENT_ID, NUMBER_TEAMS
@@ -213,12 +210,19 @@ include_once('logon_check.php');
 				echo '<td>'; echo $row['6']; echo '</td>';
 				echo '<td>'; if ($row['2'] == 0)echo 'No'; else echo 'Yes'; echo '</td>';
 				echo '<td>'; echo $row['4']."/".$row['5']; echo '</td>';
-				echo '<td>'; echo '</td>';
-				echo '<td>'; echo '</td>';
+				echo '<td>'; if ($row['9'] == '1') echo '<img src="img/check_green.png" alt="check_green" height="20" width="20">';
+							else echo '<img src="img/check_red.png" alt="check_red" height="20" width="20">';	
+				echo '</td>';
+				echo '<td>'; if ($row['10'] == '1') echo '<img src="img/check_green.png" alt="check_green" height="20" width="20">';
+							else echo '<img src="img/check_red.png" alt="check_red" height="20" width="20">';
+				echo '</td>';
 				echo '<td>';
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="enterEventScores" value="'.$row['3'].'">Enter Scores</button> &nbsp;'; 				
 				echo '</td>';
-				echo '<td>'; if ($row['4']==$row['5']) echo'Yes'; else echo 'No'; echo '</td>';					
+				echo '<td>'; if ($row['4']==$row['5'] and $row['9'] == '1' and $row['10'] == '1') 
+							echo '<img src="img/check_green.png" alt="check_green" height="20" width="20">';
+							else echo '<img src="img/check_red.png" alt="check_red" height="20" width="20">';			
+				echo '</td>';					
 				echo '</tr>';	
       			}
     		}
