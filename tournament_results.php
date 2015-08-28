@@ -95,7 +95,7 @@
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Tournament Results</h1>
-	 <h4>Tournament: <?php echo $_SESSION["tournamentName"]; ?></h4>
+	 <h4>Tournament: <?php echo $_SESSION["tournamentName"] . ' - ' . $_SESSION["tournamentDate"]; ?></h4>
      <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
 	 <hr>
 

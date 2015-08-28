@@ -809,12 +809,12 @@ else {
  				$_SESSION["tournamentDescription"] = $tournamentRow['8'];
  				
  				// Events Completed
- 				// Supervisor info
  				
  				$date = strtotime($tournamentRow['4']);
- 				$_SESSION["tournamentDate"] = date('m/d/Y', $date);
- 				
+ 				$_SESSION["tournamentDate"] = date('m/d/Y', $date);		
     		}
+			//$result = $mysqli->query("SELECT COUNT(TE.VERIFIED_FLAG) as completed from TOURNAMENT_EVENT TE WHERE TE.TOURNAMENT_ID=".$_SESSION["tournamentId"]);
+			
 		
 		
 	}
@@ -823,9 +823,12 @@ else {
 // MANAGE EVENT SCORES SCREEN ---------------------------------------	
 	function loadEventScores($mysqli) {
 				
-		 $result = $mysqli->query("SELECT E.NAME, T.HIGHEST_SCORE_POSSIBLE, T.TOURNAMENT_ID, T.DIVISION, T.NAME,TE.SUBMITTED_FLAG,TE.VERIFIED_FLAG 
+		 $result = $mysqli->query("SELECT E.NAME, T.HIGHEST_SCORE_POSSIBLE, T.TOURNAMENT_ID, T.DIVISION, T.NAME,TE.SUBMITTED_FLAG,TE.VERIFIED_FLAG,
+							CONCAT(U.FIRST_NAME, ' ', U.LAST_NAME, ' - ',U.USERNAME,' - ',U.PHONE_NUMBER) as supervisor 
 		 					FROM EVENT E INNER JOIN TOURNAMENT_EVENT TE ON TE.EVENT_ID=E.EVENT_ID 
-		 					INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TE.TOURNAMENT_ID WHERE TE.TOURN_EVENT_ID = " .$_SESSION["tournEventId"]); 
+		 					INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
+							LEFT JOIN USER U ON TE.USER_ID=U.USER_ID
+							WHERE TE.TOURN_EVENT_ID = " .$_SESSION["tournEventId"]); 
  			if ($result) {
  				$tournamentRow = $result->fetch_row(); 				
  				$_SESSION["eventName"] = $tournamentRow['0'];
@@ -836,6 +839,7 @@ else {
  				$_SESSION["tournamentName"] = $tournamentRow['4'];
  				$_SESSION["submittedFlag"] = $tournamentRow['5'];
  				$_SESSION["verifiedFlag"] = $tournamentRow['6'];
+				$_SESSION["eventSupervisor"] = $tournamentRow['7'];
     		}
     		
     	 $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID 

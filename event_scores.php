@@ -68,6 +68,7 @@ include_once('logon_check.php');
 	function validate() {
 		var error = false;
 		var error2 = false;
+		var error3 = false;
 		var max = <?php echo $_SESSION["tournamentHighestScore"];?>;
 		var count = 0;
 		var maxScore = <?php echo $_SESSION["tournamentHighestScore"];?>;
@@ -80,6 +81,8 @@ include_once('logon_check.php');
 				var score = $('#teamScore'+count).val();
 				if (score == null || score == '') {
 					if(!confirm("A team's score / rank has been left blank. Do you still wish to save?")) return false;
+					if (document.getElementById('submittedFlag').checked || document.getElementById('verifiedFlag').checked)
+						error3 = true;
 				}
 				scoreArr.forEach(function(entry) {
 					if (score == entry) exists = true;
@@ -103,6 +106,10 @@ include_once('logon_check.php');
 		}
 		if (error2) {
 			displayError("<strong>Cannot Save Scores:</strong> Team cannot have score / rank greater than the maximum score.");
+			return false;
+		}
+		if (error3) {
+			displayError("<strong>Cannot Save Scores:</strong> All teams must be scored to submit or verify scores.");
 			return false;
 		}
 		 if (document.getElementById('submittedFlag').checked) {
@@ -136,9 +143,10 @@ include_once('logon_check.php');
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Enter Event Scores</h1>
-     <h4>Tournament: <?php echo $_SESSION["tournamentName"]; ?></h4>
+     <h4>Tournament: <?php echo $_SESSION["tournamentName"]. ' - ' . $_SESSION["tournamentDate"]; ?></h4>
      <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
-     <h4>Event: <?php echo $_SESSION["eventName"]; ?></h4> 
+     <h4>Event: <?php echo $_SESSION["eventName"]; ?></h4>
+	 <h4>Supervisor: <?php echo $_SESSION["eventSupervisor"]; ?></h4> 	 
      <br />
      <h6>*Instructions: Enter the finishing position/score for each team on the list below. The maximum score for events at this tournament is <?php echo $_SESSION["tournamentHighestScore"];?>. Select the submitted checkbox to complete the scores. The score verifier can modify the scores after they are submitted.</h6>    
 	 <hr>
