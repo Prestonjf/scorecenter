@@ -808,12 +808,17 @@ else {
  				$_SESSION["highestScore"] = $tournamentRow['7'];
  				$_SESSION["tournamentDescription"] = $tournamentRow['8'];
  				
- 				// Events Completed
+ 			$result = $mysqli->query("SELECT COUNT(TE.VERIFIED_FLAG) as completed, COUNT(TE.TOURN_EVENT_ID) as total 
+    									FROM TOURNAMENT_EVENT TE WHERE TE.TOURNAMENT_ID=".$_SESSION["tournamentId"]);
+ 			if ($result) {
+ 				$scoreRow = $result->fetch_row(); 
+ 				$_SESSION["tournamentEventsCompleted"] = $scoreRow['0'].' / '.$scoreRow['1'];
+ 			}
  				
  				$date = strtotime($tournamentRow['4']);
  				$_SESSION["tournamentDate"] = date('m/d/Y', $date);		
     		}
-			//$result = $mysqli->query("SELECT COUNT(TE.VERIFIED_FLAG) as completed from TOURNAMENT_EVENT TE WHERE TE.TOURNAMENT_ID=".$_SESSION["tournamentId"]);
+			
 			
 		
 		
@@ -824,7 +829,7 @@ else {
 	function loadEventScores($mysqli) {
 				
 		 $result = $mysqli->query("SELECT E.NAME, T.HIGHEST_SCORE_POSSIBLE, T.TOURNAMENT_ID, T.DIVISION, T.NAME,TE.SUBMITTED_FLAG,TE.VERIFIED_FLAG,
-							CONCAT(U.FIRST_NAME, ' ', U.LAST_NAME, ' - ',U.USERNAME,' - ',U.PHONE_NUMBER) as supervisor 
+							CONCAT(U.FIRST_NAME, ' ', U.LAST_NAME, ' - ',U.USERNAME,' - ',coalesce(U.PHONE_NUMBER,'')) as supervisor, T.DATE 
 		 					FROM EVENT E INNER JOIN TOURNAMENT_EVENT TE ON TE.EVENT_ID=E.EVENT_ID 
 		 					INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
 							LEFT JOIN USER U ON TE.USER_ID=U.USER_ID
@@ -840,6 +845,8 @@ else {
  				$_SESSION["submittedFlag"] = $tournamentRow['5'];
  				$_SESSION["verifiedFlag"] = $tournamentRow['6'];
 				$_SESSION["eventSupervisor"] = $tournamentRow['7'];
+				$date = strtotime($tournamentRow['8']);
+ 				$_SESSION["tournamentDate"] = date('m/d/Y', $date);	
     		}
     		
     	 $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID 
@@ -859,6 +866,7 @@ else {
  					array_push($teamEventScoreList, $scoreRecord);
  				}
     		}
+    									
     		$_SESSION["teamEventScoreList"] = $teamEventScoreList;
 	}
 	

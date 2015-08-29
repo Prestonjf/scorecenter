@@ -94,7 +94,7 @@
      <h4>Tournament: <?php echo $_SESSION["tournamentName"] . ' - ' . $_SESSION["tournamentDate"]; ?></h4>
      <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
      <br />
-     <h6>Events Completed: </h6>
+     <h6>Events Completed: <?php echo $_SESSION["tournamentEventsCompleted"]; ?></h6>
      <?php
      echo' <button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$_SESSION["tournamentId"].'>View Scores</button>&nbsp;';
      echo '<button type="submit" class="btn btn-xs btn-success" name="viewStatistics" value='.$_SESSION["tournamentId"].'>View Statistics</button>&nbsp;';
