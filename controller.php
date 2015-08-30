@@ -260,6 +260,11 @@ else if (isset($_GET['cancelEventScores'])) {
 	exit();
 }
 
+else if (isset($_GET['exportResultsCSV'])) {
+	exportResultsCSV($mysqli);
+	header("Location: tournament_results.php");
+	exit();
+}
 else if (isset($_GET['printScore'])) {
 	$_SESSION["tournamentId"] = $_GET['printScore'];
 	generateTournamentResults($_GET['printScore'], $mysqli);
@@ -1240,6 +1245,49 @@ else {
 		return $array;
 	}
 	
+	function exportResultsCSV($mysqli) {
+	
+	 	// filename for download
+  		$filename = "score_center_" . date('Ymd') . ".csv";
+  		header("Content-Disposition: attachment; filename=\"$filename\"");
+  		header("Content-Type: text/csv; charset=utf-8");
+  		
+  		$output = fopen('php://output', 'w');
+
+		$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
+		$headings = array();
+		array_push($headings,"TEAM NAME");
+		array_push($headings,"TEAM #");
+		if ($tournamentResultsHeader != null) {
+			foreach ($tournamentResultsHeader as $resultHeader) {				
+				array_push($headings,$resultHeader);
+			}
+		}
+		array_push($headings,"Total Score");
+		array_push($headings,"Final Rank");
+		
+		fputcsv($output, $headings);
+
+
+		 $tournamentResults = $_SESSION['tournamentResults'];
+         if ($tournamentResults != null) {
+			 foreach ($tournamentResults as $resultRow) {
+				$row = array();
+				array_push($row,$resultRow['1']);
+				array_push($row,$resultRow['2']);
+				$i = 3;
+				while ($i < sizeof($resultRow)-1) {
+					array_push($row,$resultRow[$i]);
+					$i++;
+				}
+				fputcsv($output, $row);
+		 	}
+    	}
+    	
+		fclose($output);
+		exit;
+	}
+	
 	
 	// USER MANAGEMENT ------------------------------------------------
 	function loadAllUsers($mysqli) {
@@ -1467,8 +1515,8 @@ else {
 	** Results Order By OPTION
 	** Manual Reminder email to supervisor
 	
-	
-	
+	-- Acknowledgements --
+		// Chirp Internet: www.chirp.com.au
 	
 	**** TODO / GENERAL ISSUES *********/
 ?>

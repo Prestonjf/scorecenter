@@ -98,6 +98,8 @@
 	 <h4>Tournament: <?php echo $_SESSION["tournamentName"] . ' - ' . $_SESSION["tournamentDate"]; ?></h4>
      <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
 	 <hr>
+	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsCSV" value='.$row['0'].'>Export CSV</button>
+	 <hr>
 
         <table class="table table-bordered table-hover" data-sortable data-sort-name="rank" data-sort-order="desc">
         <thead>
