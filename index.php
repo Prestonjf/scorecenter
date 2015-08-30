@@ -51,9 +51,12 @@ include_once('logon_check.php');
   <h1></h1>
   
      <div class="container">
-
+      
+      <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
+      <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
+     
+     
       <div class="row row-offcanvas row-offcanvas-right">
-
         <div class="col-xs-12 col-sm-9">
           <p class="pull-right visible-xs">
             <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas">Toggle nav</button>
@@ -97,7 +100,7 @@ include_once('logon_check.php');
 						echo '<td>'; echo $row['2']; echo '</td>';
 						echo '<td>'; echo $row['4']; echo '</td>';
 						echo '<td>';
-						echo '<button type="submit" class="btn btn-xs btn-primary" name="enterScores" value="'.$row['0'].'">Enter Scores</button> &nbsp;'; 				
+						echo '<button type="submit" class="btn btn-xs btn-primary" name="enterScoresIndex" value="'.$row['0'].'">Enter Scores</button> &nbsp;'; 				
 						echo '<button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$row['0'].'>View Scores</button>';
 						echo '</td>';						
 						echo '</tr>';	
@@ -254,13 +257,13 @@ include_once('logon_check.php');
     </div><!--/.container-->
     
     
-    
-      <!--   <form class="navbar-form navbar-left" role="search">
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search">
-        </div>
-        <button type="submit" class="btn btn-default">Submit</button>
-      </form> -->
+    <?php if ($_SESSION['savesuccessScore'] != null and $_SESSION['savesuccessScore'] == '1') { ?>
+    	<script type="text/javascript">displaySuccess('<strong>Saved: </strong>Event Scores have been saved successfully!');</script>
+   	<?php $_SESSION['savesuccessScore'] = null; $_SESSION["accountUpdateSuccess"] = null; } ?> 
+   	
+   	<?php if ($_SESSION['accountCreationSuccess'] != null and $_SESSION['accountCreationSuccess'] == '1') { ?>
+    	<script type="text/javascript">displaySuccess('<strong>Saved: </strong>Account has been created successfully!');</script>
+   	<?php $_SESSION['accountCreationSuccess'] = null; } ?>
       
       
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

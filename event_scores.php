@@ -143,10 +143,10 @@ include_once('logon_check.php');
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Enter Event Scores</h1>
-     <h4>Tournament: <?php echo $_SESSION["tournamentName"]. ' - ' . $_SESSION["tournamentDate"]; ?></h4>
-     <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
-     <h4>Event: <?php echo $_SESSION["eventName"]; ?></h4>
-	 <h4>Supervisor: <?php echo $_SESSION["eventSupervisor"]; ?></h4> 	 
+     <h4>Tournament: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentName"]. ' - ' . $_SESSION["tournamentDate"]; ?></span></h4>
+     <h4>Division: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentDivision"]; ?></span></h4>
+     <h4>Event: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventName"]; ?></span></h4>
+	 <h4>Supervisor: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventSupervisor"]; ?></span></h4> 	 
      <br />
      <h6>*Instructions: Enter the finishing position/score for each team on the list below. The maximum score for events at this tournament is <?php echo $_SESSION["tournamentHighestScore"];?>. Select the submitted checkbox to complete the scores. The score verifier can modify the scores after they are submitted.</h6>    
 	 <hr>

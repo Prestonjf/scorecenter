@@ -1,7 +1,7 @@
 <?php
 session_start();
 include_once('score_center_objects.php');
-
+include_once('mail_functions.php');
 
 // DB Connection --------------
 require_once('login.php');
@@ -119,6 +119,17 @@ else if (isset($_GET['cancelEvent'])) {
 	header("Location: event.php");
 	exit();
 }
+else if (isset($_GET['saveUser'])) {
+	saveUser($mysqli);	
+	loadAllUsers($mysqli);
+	header("Location: user.php");
+	exit();
+}
+
+else if (isset($_GET['cancelUser'])) {	
+	header("Location: user.php");
+	exit();
+}
 else if (isset($_GET['addNewTeam'])) {	
 	clearTeam();
 	header("Location: team_detail.php");
@@ -187,6 +198,22 @@ else if (isset($_GET['searchTeam']) or ($_GET['command'] != null and $_GET['comm
 	header("Location: team.php");
 	exit();	
 }
+else if (isset($_GET['searchUsers']) or ($_GET['command'] != null and $_GET['command'] == 'loadAllUsers')) {
+	$_SESSION["userFirstName"] = $_GET['userFirstName'];
+	$_SESSION["userLastName"] = $_GET['userLastName'];
+	$_SESSION["userRole"] = $_GET['userRole'];
+	$_SESSION["userFilterNumber"] = $_GET['userFilterNumber'];
+
+	loadAllUsers($mysqli);
+	header("Location: user.php");
+	exit();	
+}
+else if (isset($_GET['editUser'])) {
+	clearUser();	
+	loadUser($_GET['editUser'], $mysqli);
+	header("Location: user_detail.php");
+	exit();
+}
 
 else if (isset($_GET['loadTournament'])) {
 	clearTournament();
@@ -197,6 +224,14 @@ else if (isset($_GET['loadTournament'])) {
 }
 else if (isset($_GET['enterScores'])) {
 	$_SESSION["tournamentId"] = $_GET['enterScores'];
+	$_SESSION["tournamentScoresIndexReturn"] = null;
+	loadTournamentEvents($mysqli);
+	header("Location: tournament_events.php");
+	exit();
+}
+else if (isset($_GET['enterScoresIndex'])) {
+	$_SESSION["tournamentId"] = $_GET['enterScoresIndex'];
+	$_SESSION["tournamentScoresIndexReturn"] = '1';
 	loadTournamentEvents($mysqli);
 	header("Location: tournament_events.php");
 	exit();
@@ -247,6 +282,11 @@ else if (isset($_GET['saveTournament'])) {
 
 else if (isset($_GET['cancelTournament'])) {
 	clearTournament();
+	if ($_SESSION["tournamentScoresIndexReturn"] != null && $_SESSION["tournamentScoresIndexReturn"] == '1') {
+		$_SESSION["tournamentScoresIndexReturn"] = null;
+		header("Location: index.php");
+		exit();
+	}
 	header("Location: tournament.php");
 	exit();
 }
@@ -1201,13 +1241,84 @@ else {
 	}
 	
 	
+	// USER MANAGEMENT ------------------------------------------------
+	function loadAllUsers($mysqli) {
+			$userList = array();
+			$query = "Select * from USER WHERE 1=1 ";
+			if ($_SESSION["userFirstName"] != null) {
+				$query = $query . " AND FIRST_NAME LIKE '".$_SESSION["userFirstName"]."%' " ;
+			}
+			if ($_SESSION["userLastName"] != null) {
+				$query = $query . " AND LAST_NAME LIKE '".$_SESSION["userLastName"]."%' " ;
+			}
+			if ($_SESSION["userRole"] != null) {
+				$query = $query . " AND ROLE_CODE = '".$_SESSION["userRole"]."' " ;
+			}
+			$query = $query . " ORDER BY UPPER(LAST_NAME) ASC ";
+			if ($_SESSION["userFilterNumber"] != null and $_SESSION["userFilterNumber"] != '0') {
+				$query = $query . " LIMIT ".$_SESSION["userFilterNumber"];
+			}
+			
+			$result = $mysqli->query($query); 
+ 			if ($result) {
+				while($userRow = $result->fetch_array()) {
+ 					$userRecord = array();	
+					array_push($userRecord, $userRow['0']);
+					array_push($userRecord, $userRow['4']);
+					array_push($userRecord, $userRow['5']);
+					array_push($userRecord, $userRow['1']);
+					array_push($userRecord, $userRow['3']);
+ 				
+					array_push($userList, $userRecord);
+				}
+			}
+		$_SESSION["userList"] = $userList;
+	
+	}
+	
+	function clearUser() {
+		$_SESSION["userId"] = null;
+		$_SESSION["userName"] = null;
+		$_SESSION["userFirstLastName"] = null;
+		$_SESSION["userRoleCode"] = null;
+		$_SESSION["userActiveFlag"] = null;
+		$_SESSION["userPhoneNumber"] = null;
+	}
+
+
+	function loadUser($id, $mysqli) {
+		$result = $mysqli->query("SELECT USER_ID, USERNAME, CONCAT(FIRST_NAME,' ', LAST_NAME) as name, ROLE_CODE, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER
+							  FROM USER WHERE USER_ID = " .$id); 
+ 			if ($result) {
+ 				$userRow = $result->fetch_row();	
+ 				$_SESSION["userId"] = $userRow['0'];
+ 				$_SESSION["userName"] = $userRow['1'];
+ 				$_SESSION["userFirstLastName"] = $userRow['2'];
+ 				$_SESSION["userRoleCode"] = $userRow['3'];
+ 				$_SESSION["userActiveFlag"] = $userRow['4'];
+ 				$_SESSION["userPhoneNumber"] = $userRow['5'];				
+    		}
+	}
+	
+	function saveUser($mysqli) {
+		$query = $mysqli->prepare("UPDATE USER SET ROLE_CODE=?, ACCOUNT_ACTIVE_FLAG=? WHERE USER_ID=".$_SESSION["userId"]);
+			
+		$query->bind_param('si',$_GET["userRoleCode"], $_GET["userActiveFlag"]);
+		$query->execute();
+		$query->free_result();
+		
+		// save Confirmation
+		$_SESSION['savesuccessUser'] = "1";	
+	}
+	
+	
 	
 	// LOGIN AND ACCOUNT MANAGEMENT ---------------------------------------
 	function login($mysqli) {
 		$myusername=$_POST['userName']; 
 		$mypassword=$_POST['password']; 
 		
-		$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? and PASSWORD=? ");
+		$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? and PASSWORD=? AND ACCOUNT_ACTIVE_FLAG=1 ");
 		if ($_SESSION["accountMode"] == 'update') {
 			$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? ");
 		}	
@@ -1253,6 +1364,7 @@ else {
 			$_SESSION["userName"] = $userSessionInfo->getUserName();
 			$_SESSION["firstName"] = $userSessionInfo->getFirstName();
 			$_SESSION["lastName"] = $userSessionInfo->getLastName();
+			$_SESSION["userPhoneNumber"] = $userSessionInfo->getPhoneNumber();
 		}
 	}
 	
@@ -1262,14 +1374,14 @@ else {
 		$firstName = $_POST['firstName'];
 		$lastName = $_POST['lastName'];
 		$regCode = $_POST['regCode'];
-		$phoneNumber = $_POST['phoneNumber'];
+		$phoneNumber = $_POST['userPhoneNumber'];
 		
 		$_SESSION["userName"] = $userName;
 		$_SESSION["password"] = $password;
 		$_SESSION["firstName"] = $firstName;
 		$_SESSION["lastName"] = $lastName;
 		$_SESSION["vPassword"] = $password;
-		$_SESSION["phoneNumber"] = $phoneNumber;
+		$_SESSION["userPhoneNumber"] = $phoneNumber;
 		
 		// check email / username not already registered
 		if ($mode == 'create') {
@@ -1297,14 +1409,17 @@ else {
 			$id = 0;
 			if ($row != null) $id = $row['0'];  
 			
-			$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, PHONE_NUMBER) 
-				VALUES (".$id.",?,?,?,?,?) ");
-			$role = 'SUPERVISOR';	
-			$query->bind_param('sssss',$userName, $password, $role,$firstName, $lastName, $phoneNumber);		
+			$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER) 
+				VALUES (".$id.",?,?,?,?,?,?,?) ");
+			$role = 'SUPERVISOR';
+			$activeFlag = 1;	
+			$query->bind_param('sssssis',$userName, $password, $role,$firstName, $lastName, $activeFlag, $phoneNumber);		
 			$query->execute();
 			$query->free_result();	
 			$_SESSION["accountCreationSuccess"] = "1";
 	
+			// Send Creation Email
+			sendAccountCreationEmail($userName, $firstName, $lastName, $password);
 		}
 		
 		else {
@@ -1336,28 +1451,21 @@ else {
 			$_SESSION["accountUpdateSuccess"] = "1";
 		}
 		
-	
-
-		
-		// on success return true.
-		// send confirmation email
-		
 		return true;
 	}
 
 
 	/**** TODO / GENERAL ISSUES ********
 	
-	1. Score Verification Checkbox for each Event
-	3. Create Supervisor Interface to Enter scores for only their events
-	3a. User Management Screen for ADMIN to assign roles.
-	5. Notification Emails (Reminder Notifications to Supervisors?)
-	6. Generate Results as Excel / CSV / XML
+	+ User Management Screen for ADMIN to assign roles.
+	+ Generate Results as Excel / CSV / XML
+	+ Create Utilties Panel For Settings Configuration (reg code)
 	
 	
-	1. Handles 100 Teams / Events Per TOURNAMENT
-	2. Results: Ties Broken to 20 positions
-	3. Results Order By OPTION
+	** Handles 100 Teams / Events Per TOURNAMENT
+	** Results: Ties Broken to 20 positions
+	** Results Order By OPTION
+	** Manual Reminder email to supervisor
 	
 	
 	

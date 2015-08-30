@@ -52,6 +52,7 @@
             <li><a href="controller.php?command=loadAllTournaments&">Manage Tournaments</a></li>
             <li><a href="controller.php?command=loadAllTeams&">Manage Teams</a></li>
             <li><a href="controller.php?command=loadAllEvents&">Manage Events</a></li>
+            <?php if ($role == 'ADMIN') { ?><li><a href="controller.php?command=loadAllUsers&">Manage Users</a></li> <?php } ?>
             <li role="separator" class="divider"></li>
             <li><a href="#">Utilities</a></li>
             <?php } ?>

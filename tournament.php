@@ -146,6 +146,7 @@
          //echo $_SESSION["allTournaments"];
          	$result = $mysqli->query($_SESSION["allTournaments"]);			
  			if ($result) {
+ 				if (mysqli_num_rows($result) == 0) { echo '<tr><td colspan="5">No Tournaments Found</td></tr>';}
       			while($row = $result->fetch_array()) {
       			echo '<tr>';
       			echo '<td>'; echo $row['1']; echo '</td>';

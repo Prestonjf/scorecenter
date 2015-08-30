@@ -91,8 +91,8 @@
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Enter Scores</h1>
-     <h4>Tournament: <?php echo $_SESSION["tournamentName"] . ' - ' . $_SESSION["tournamentDate"]; ?></h4>
-     <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
+     <h4>Tournament: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentName"] . ' - ' . $_SESSION["tournamentDate"]; ?></span></h4>
+     <h4>Division: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentDivision"]; ?></span></h4>
      <br />
      <h6>Events Completed: <?php echo $_SESSION["tournamentEventsCompleted"]; ?></h6>
      <?php

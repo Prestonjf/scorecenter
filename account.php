@@ -47,7 +47,7 @@
 		if (mode == 'create') {
 			if ($("#firstName").val().trim() == '' || $("#lastName").val().trim() == '' || $("#userName").val().trim() == ''
 			|| $("#regCode").val().trim() == '' || $("#password").val().trim() == '' || $("#vPassword").val().trim() == '') {
-				displayError("<strong>Required Fields:</strong> All fields are required.");
+				displayError("<strong>Required Fields:</strong> First Name, Last Name, Password, and User Name are required.");
 				return false;
 			}
 			
@@ -81,7 +81,26 @@
 	
 		return false;
 	}
-
+	
+	function validatePhoneNumber(ele) {
+ 		var regex = /^\d{10}$/;  
+ 			if (ele.value.match(regex)) {
+ 				return;
+ 			}
+ 			else {
+ 				ele.value = '';
+ 			}	
+	}
+	
+	function validateEmail(ele) {
+	 	var regex = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;  
+ 		if (ele.value.match(regex)) {
+ 			return;
+ 		}
+ 		else {
+ 			ele.value = '';
+ 		}
+	}
   
   </script>
     <style>
@@ -109,7 +128,8 @@
 		</tr>
 		<tr>
 			<td width="25%"><label for="userName">User Name / Email: </label></td>
-			<td width="25%"><input type="text" size="40" class="form-control" name="userName" id="userName" value="<?php echo $_SESSION["userName"]; ?>"></td>
+			<td width="25%"><input type="text" size="40" class="form-control" name="userName" id="userName" onblur="validateEmail(this)" 
+							placeholder="john@doe.com"	value="<?php echo $_SESSION["userName"]; ?>"></td>
 			<?php if ($_SESSION["accountMode"] == 'create') { ?>
 				<td width="25%"><label for="regCode">Registration Code: </label></td>
 				<td width="25%"><input type="text" size="40" class="form-control" name="regCode" id="regCode"></td>
@@ -117,6 +137,13 @@
 				<td width="25%"></td>
 				<td width="25%"></td>
 			<?php } ?>
+		</tr>
+		<tr>
+			<td width="25%"><label for="userName">Phone Number: </label></td>
+			<td width="25%"><input type="text" size="40" class="form-control" name="userPhoneNumber" id="userPhoneNumber" onblur="validatePhoneNumber(this)"
+							placeholder="xxx-xxx-xxxx" value="<?php echo $_SESSION["userPhoneNumber"]; ?>"></td>
+			<td width="25%"></td>
+			<td width="25%"></td>
 		</tr>
 		<tr>
 			<td width="25%"><label for="password">Password: </label></td>
