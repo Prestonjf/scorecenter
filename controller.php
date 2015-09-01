@@ -1528,8 +1528,11 @@ else {
 
 	/**** TODO / GENERAL ISSUES ********
 	
-	+ User Management Screen for ADMIN to assign roles.
-	+ Generate Results as Excel / CSV / XML
+	+ DO not calculate Trial Event in Final SCORE
+	+ DO not calculate Trial Event for tie breaking
+	+ Do not Rank Alternate Team
+	
+	+ Generate Results as Excel / XML
 	+ Create Utilties Panel For Settings Configuration (reg code)
 	
 	

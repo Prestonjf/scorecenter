@@ -17,6 +17,18 @@ include_once('logon_check.php');
 	checkUserRole(3);
 
 ?>
+<?php
+	 	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+		$userRole = $userSessionInfo->getRole();
+		$disable = '';
+		$disableVerfiy = '';
+		$submitted = '';
+		$verified = '';
+        if ($userRole == 'SUPERVISOR' and $_SESSION["submittedFlag"] == '1') $disable = 'disabled';
+        if ($userRole == 'SUPERVISOR') $disableVerfiy = 'disabled';
+        if ($_SESSION["submittedFlag"] == '1') $submitted = 'checked';
+	 	if ($_SESSION["verifiedFlag"] == '1') $verified = 'checked';
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -69,11 +81,17 @@ include_once('logon_check.php');
 		var error = false;
 		var error2 = false;
 		var error3 = false;
+		var error4 = false;
 		var max = <?php echo $_SESSION["tournamentHighestScore"];?>;
 		var count = 0;
 		var maxScore = <?php echo $_SESSION["tournamentHighestScore"];?>;
 		var scoreArr = [];
 		var exists = false;
+		var userRole = '<?php echo $userRole; ?>';
+		
+		if (document.getElementById('verifiedFlag').checked && !document.getElementById('submittedFlag').checked) {
+			error4 = true;
+		}
 		
 		while (count < 1000) {
 			exists = false;
@@ -112,8 +130,14 @@ include_once('logon_check.php');
 			displayError("<strong>Cannot Save Scores:</strong> All teams must be scored to submit or verify scores.");
 			return false;
 		}
+		if (error4) {
+			displayError("<strong>Cannot Save Scores:</strong> Submitted checkbox must be checked to verify scores.");
+			return false;
+		}
 		 if (document.getElementById('submittedFlag').checked) {
-		 	if (!confirm('This event has been marked as submitted. Only a score verifier will be able to modify them once saved. Do you wish to continue?')) return false;
+			 if (userRole == 'SUPERVISOR') {
+				if (!confirm('This event has been marked as submitted. Only a score verifier will be able to modify them once saved. Do you wish to continue?')) return false;
+			 }
 		 }
 		 return true;		
 	}
@@ -150,18 +174,7 @@ include_once('logon_check.php');
      <br />
      <h6>*Instructions: Enter the finishing position/score for each team on the list below. The maximum score for events at this tournament is <?php echo $_SESSION["tournamentHighestScore"];?>. Select the submitted checkbox to complete the scores. The score verifier can modify the scores after they are submitted.</h6>    
 	 <hr>
-	 <?php
-	 	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
-		$userRole = $userSessionInfo->getRole();
-		$disable = '';
-		$disableVerfiy = '';
-		$submitted = '';
-		$verified = '';
-        if ($userRole == 'SUPERVISOR' and $_SESSION["submittedFlag"] == '1') $disable = 'disabled';
-        if ($userRole == 'SUPERVISOR') $disableVerfiy = 'disabled';
-        if ($_SESSION["submittedFlag"] == '1') $submitted = 'checked';
-	 	if ($_SESSION["verifiedFlag"] == '1') $verified = 'checked';
-	 ?>
+
 	 <table width="75%"><tr>
 	 <td><label for="submittedFlag">Submitted</label> &nbsp;&nbsp;<input type="checkbox" id="submittedFlag" name="submittedFlag" <?php echo $disable.' '.$submitted; ?>  echo value="1"></td>
 	 <td><label for="verifiedFlag">Verified</label> &nbsp;&nbsp;<input type="checkbox" id="verifiedFlag" name="verifiedFlag" <?php echo $disableVerfiy.' '.$verified; ?> value="1"></td>
