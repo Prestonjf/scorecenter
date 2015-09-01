@@ -69,7 +69,7 @@ else if (isset($_POST['cancelAccount'])) {
 		exit();
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'resetPassword') {
-
+	forgotPassword($mysqli);
 	header("Location: logon.php");	
 	exit();
 }
@@ -1366,12 +1366,12 @@ else {
 		$myusername=$_POST['userName']; 
 		$mypassword=$_POST['password']; 
 		
-		$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? and PASSWORD=? AND ACCOUNT_ACTIVE_FLAG=1 ");
+		$query = $mysqli->prepare("SELECT * FROM USER WHERE UPPER(USERNAME)=? and PASSWORD=? AND ACCOUNT_ACTIVE_FLAG=1 ");
 		if ($_SESSION["accountMode"] == 'update') {
-			$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? ");
+			$query = $mysqli->prepare("SELECT * FROM USER WHERE UPPER(USERNAME)=? ");
 		}	
-		if ($_SESSION["accountMode"] == 'update') $query->bind_param('s',$myusername);
-		else $query->bind_param('ss',$myusername, $mypassword);
+		if ($_SESSION["accountMode"] == 'update') $query->bind_param('s',strtoupper($myusername));
+		else $query->bind_param('ss',strtoupper($myusername), $mypassword);
 			
 		$query->execute();
 		$result = $query->get_result();
@@ -1381,7 +1381,7 @@ else {
 		
 		if($count == 1){
 			$account = $result->fetch_row();	
-			$userSessionInfo = new UserSessionInfo($myusername);
+			$userSessionInfo = new UserSessionInfo($account['1']);
 			$userSessionInfo->setAuthenticatedFlag(1);
 			$userSessionInfo->setUserId($account['0']);
 			$userSessionInfo->setFirstName($account['4']);
@@ -1396,6 +1396,29 @@ else {
 		// Throw Error Message
 		$_SESSION["loginError1"] = "1";
 		return false;
+	}
+	
+	function forgotPassword($mysqli) {
+		if ($_POST['userName'] == null or $_POST['userName'] == '') {
+			$_SESSION["resetPasswordError"] = "1";
+			return;
+		}
+		$query = $mysqli->prepare("SELECT * FROM USER WHERE UPPER(USERNAME)=?");
+		$query->bind_param('s',strtoupper($_POST['userName']));
+		$query->execute();
+		$result = $query->get_result();
+		$count = $result->num_rows;
+		$query->free_result();
+		
+		if($count == 1) {
+			$account = $result->fetch_row();
+			emailPassword($_POST['userName'], $account['2']);
+			$_SESSION["resetPasswordSuccess"] = "1";
+		}
+		else {
+			$_SESSION["resetPasswordError"] = "2";
+		}
+	
 	}
 	
 	function clearAccount() {	

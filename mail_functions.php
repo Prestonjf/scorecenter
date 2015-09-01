@@ -21,7 +21,14 @@
 	
 	}
 
-
+	function emailPassword($address, $password) {
+		$msg = "Hello, \n\n";
+		$msg = $msg . "The password for account ". $address . " has been requested from the Science Olympiad Score Center application. \n\n";
+		$msg = $msg . "Your password is: ".$password;
+	
+	
+		mail($address,"Score Center Forgotten Password",$msg);
+	}
 
 
 ?>

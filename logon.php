@@ -42,15 +42,11 @@
   <script src="js/jquery-ui-1.11.4/jquery-ui.js"></script>
   <script src="js/scorecenter.js"></script>
   <script type="text/javascript">
-  $(document).ready(function(){
   
-    //	$("#addTournament").click(function(){
-     //   	alert("add");
-    //	});
-
-    	
-    	
-	});
+	function forgotPassword() {
+		document.forms[0].action = document.forms[0].action + "?command=resetPassword&";
+		document.forms[0].submit();
+	}
 
   
   </script>
@@ -90,7 +86,7 @@
 		<td>
 		<input type="password" size="40" class="form-control" name="password" id="password">
 		</td>
-		<td style="padding-left: 2em;"><a href="controller.php?command=resetPassword&"><h6>Forgot Password?</h6></a></td>
+		<td style="padding-left: 2em;"><a href="#" onclick="forgotPassword()"><h6>Forgot Password?</h6></a></td>
 		</tr>
 		<tr><td>&nbsp;</td><td></td><td></td></tr>
 		</table>
@@ -123,11 +119,20 @@
     <script src="js/jquery-1.11.3.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript">
 	<?php if ($_SESSION["loginError1"] != null and $_SESSION["loginError1"] == '1') { ?>
-	<script type="text/javascript">
-		displayError("<strong>Login Failed:</strong> Username or Password incorrect.");
-	</script>
+		displayError("<strong>Login Failed:</strong> Username or Password incorrect.");	
 	<?php $_SESSION["loginError1"] = null; } ?>
+	<?php if ($_SESSION["resetPasswordError"] != null and $_SESSION["resetPasswordError"] == '1') { ?>
+		displayError("<strong>Password Notification Failed:</strong> Username is required.");	
+	<?php $_SESSION["resetPasswordError"] = null; } ?>
+	<?php if ($_SESSION["resetPasswordError"] != null and $_SESSION["resetPasswordError"] == '2') { ?>
+		displayError("<strong>Password Notification Failed:</strong> Username is incorrect.");	
+	<?php $_SESSION["resetPasswordError"] = null; } ?>
+	<?php if ($_SESSION["resetPasswordSuccess"] != null and $_SESSION["resetPasswordSuccess"] == '1') { ?>
+		displaySuccess("<strong>Password Notification Sent:</strong> User Password has been sent to user's email.");	
+	<?php $_SESSION["resetPasswordSuccess"] = null; } ?>
+	</script>
     
   </body>
 </html>
