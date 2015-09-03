@@ -97,6 +97,7 @@
      <h1>Tournament Results</h1>
 	 <h4>Tournament: <?php echo $_SESSION["tournamentName"] . ' - ' . $_SESSION["tournamentDate"]; ?></h4>
      <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
+	 <h4>Events Completed: <?php echo $_SESSION["tournamentEventsCompleted"]; ?></h4>
 	 <hr>
 	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsCSV" value='.$row['0'].'>Export CSV</button>
 	 <hr>
@@ -138,6 +139,9 @@
           </tbody>
           </table>
 
+		  * = Trial Event <br />
+		  + = Alternate Team <br /><br />
+		  <button type="submit" class="btn btn-xs btn-primary" name="cancelTournament">Cancel</button>
       <hr>
 	<?php include_once 'footer.php'; ?>
 

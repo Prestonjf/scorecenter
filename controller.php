@@ -1106,7 +1106,7 @@ else {
 		$tournamentResultsHeader = array();
 		$tournamentResults = array();
 		
-		$query1 = "SELECT E.NAME, TE.TOURN_EVENT_ID
+		$query1 = "SELECT E.NAME, TE.TOURN_EVENT_ID, TE.TRIAL_EVENT_FLAG
 					FROM TOURNAMENT TM
 					INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURNAMENT_ID=TM.TOURNAMENT_ID 
 					INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID 
@@ -1116,12 +1116,14 @@ else {
 		$result = $mysqli->query($query1); 
  		if ($result) {
 			while($events = $result->fetch_array()) {
-					array_push($tournamentResultsHeader, $events['0']);
+					$eventName = $events['0'];
+					if ($events['2'] != null and $events['2'] == 1) $eventName .= ' *';
+					array_push($tournamentResultsHeader, $eventName);
 			}
 		}	
 		$_SESSION['tournamentResultsHeader'] = $tournamentResultsHeader;	
 		
-		$query2 = "  SELECT T.NAME, TT.TEAM_NUMBER, TT.TOURN_TEAM_ID 
+		$query2 = "  SELECT T.NAME, TT.TEAM_NUMBER, TT.TOURN_TEAM_ID, TT.ALTERNATE_FLAG 
 					FROM TOURNAMENT TM
 					INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID
 					INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
@@ -1131,11 +1133,13 @@ else {
  		if ($result) {
 			while($teams = $result->fetch_array()) {
 					$resultRow = array();
+					$teamName = $teams['0'];
+					if ($teams['3'] != null and $teams['3'] == 1) $teamName .= ' +';
 					array_push($resultRow, $teams['2']);
-					array_push($resultRow, $teams['0']);
+					array_push($resultRow, $teamName);
 					array_push($resultRow, $teams['1']);
 					
-					$query3 = "SELECT TES.SCORE, E.NAME
+					$query3 = "SELECT TES.SCORE, E.NAME, TE.TRIAL_EVENT_FLAG
 								FROM TOURNAMENT_TEAM TT
                                 INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TT.TOURNAMENT_ID
 								INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURNAMENT_ID=T.TOURNAMENT_ID
@@ -1151,10 +1155,12 @@ else {
 						while($scores = $scoreSet->fetch_array()) {
 							$value = $scores['0'];
 							array_push($resultRow, $value);
-							if ($value < sizeof($resultRow)) {
-								$positionCounts[$value] = $positionCounts[$value] + 1;
+							if ($value <= 20 ) { // sizeof($resultRow)
+								if ($scores['0'] != null and $scores['2'] != 1) // Trial Events not included in position count/tiebreaker
+									$positionCounts[$value] = $positionCounts[$value] + 1;
 							}
-							$total = $total + $value;
+							if ($scores['0'] != null and $scores['2'] != 1) // Trial Events not included in total
+								$total = $total + $value;
 						}
 					}
 					array_push($resultRow, $total); // Total
@@ -1206,7 +1212,7 @@ else {
 				$vCounts = $v[sizeof($v)-1];
 				$pivotCounts = $pivot[sizeof($pivot)-1];
 				
-				if ($vCounts[1] >  $pivotCounts[1]) $left[$k] = $v; else if ($vCounts[1] > $pivotCounts[1]) $right[$k] = $v;
+				if ($vCounts[1] >  $pivotCounts[1]) $left[$k] = $v; else if ($vCounts[1] < $pivotCounts[1]) $right[$k] = $v;
 				else if ($vCounts[2] >  $pivotCounts[2]) $left[$k] = $v; else if ($vCounts[2] <  $pivotCounts[2]) $right[$k] = $v;
 				else if ($vCounts[3] >  $pivotCounts[3]) $left[$k] = $v; else if ($vCounts[3] <  $pivotCounts[3]) $right[$k] = $v;
 				else if ($vCounts[4] >  $pivotCounts[4]) $left[$k] = $v; else if ($vCounts[4] <  $pivotCounts[4]) $right[$k] = $v;
@@ -1366,21 +1372,25 @@ else {
 		$myusername=$_POST['userName']; 
 		$mypassword=$_POST['password']; 
 		
-		$query = $mysqli->prepare("SELECT * FROM USER WHERE UPPER(USERNAME)=? and PASSWORD=? AND ACCOUNT_ACTIVE_FLAG=1 ");
+		$query = $mysqli->prepare("SELECT * FROM USER WHERE UPPER(USERNAME)=? AND ACCOUNT_ACTIVE_FLAG=1 ");
 		if ($_SESSION["accountMode"] == 'update') {
 			$query = $mysqli->prepare("SELECT * FROM USER WHERE UPPER(USERNAME)=? ");
 		}	
 		if ($_SESSION["accountMode"] == 'update') $query->bind_param('s',strtoupper($myusername));
-		else $query->bind_param('ss',strtoupper($myusername), $mypassword);
+		else $query->bind_param('s',strtoupper($myusername));
 			
 		$query->execute();
 		$result = $query->get_result();
 		$count = $result->num_rows;
+		$account = $result->fetch_row();
 		$query->free_result();
-		$_SESSION["accountMode"] == '';
+
 		
-		if($count == 1){
-			$account = $result->fetch_row();	
+		
+		
+		if($_SESSION["accountMode"] == 'update' or $account['2'] === crypt($mypassword, $account['2'])) {
+			$_SESSION["accountMode"] == '';
+				
 			$userSessionInfo = new UserSessionInfo($account['1']);
 			$userSessionInfo->setAuthenticatedFlag(1);
 			$userSessionInfo->setUserId($account['0']);
@@ -1394,6 +1404,7 @@ else {
 			return true;
 		}
 		// Throw Error Message
+		$_SESSION["accountMode"] == '';
 		$_SESSION["loginError1"] = "1";
 		return false;
 	}
@@ -1454,6 +1465,9 @@ else {
 		$_SESSION["vPassword"] = $password;
 		$_SESSION["userPhoneNumber"] = $phoneNumber;
 		
+		// Encrypt Password
+		$encryptedPassword = crypt($password);
+		
 		// check email / username not already registered
 		if ($mode == 'create') {
 			$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? ");
@@ -1484,7 +1498,7 @@ else {
 				VALUES (".$id.",?,?,?,?,?,?,?) ");
 			$role = 'SUPERVISOR';
 			$activeFlag = 1;	
-			$query->bind_param('sssssis',$userName, $password, $role,$firstName, $lastName, $activeFlag, $phoneNumber);		
+			$query->bind_param('sssssis',$userName, $encryptedPassword, $role,$firstName, $lastName, $activeFlag, $phoneNumber);		
 			$query->execute();
 			$query->free_result();	
 			$_SESSION["accountCreationSuccess"] = "1";
@@ -1515,7 +1529,7 @@ else {
 			if ($password == null or $password == '') $sql = "UPDATE USER SET USERNAME=?, FIRST_NAME=?, LAST_NAME=?,PHONE_NUMBER=? WHERE USER_ID=? ";
 			$query = $mysqli->prepare($sql);
 			if ($password == null or $password == '') $query->bind_param('ssssi',$userName, $firstName,$lastName,$phoneNumber, $userId);		
-			else  $query->bind_param('sssssi',$userName, $password, $firstName,$lastName,$phoneNumber, $userId);		
+			else  $query->bind_param('sssssi',$userName, $encryptedPassword, $firstName,$lastName,$phoneNumber, $userId);		
 			$query->execute();
 			$query->free_result();	
 		
@@ -1530,7 +1544,7 @@ else {
 	
 	+ DO not calculate Trial Event in Final SCORE
 	+ DO not calculate Trial Event for tie breaking
-	+ Do not Rank Alternate Team
+	
 	
 	+ Generate Results as Excel / XML
 	+ Create Utilties Panel For Settings Configuration (reg code)
@@ -1540,6 +1554,7 @@ else {
 	** Results: Ties Broken to 20 positions
 	** Results Order By OPTION
 	** Manual Reminder email to supervisor
+	** Rank Alternate Team?
 	
 	-- Acknowledgements --
 		// Chirp Internet: www.chirp.com.au
