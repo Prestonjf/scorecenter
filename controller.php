@@ -81,7 +81,22 @@ else if ($_GET['command'] != null and $_GET['command'] == 'passwordResetProcess'
 	header("Location: logon.php");	
 	exit();
 }
-
+else if ($_GET['command'] != null and $_GET['command'] == 'loadUtilities') {
+	// Load Utilities
+	header("Location: utilities.php");	
+	exit();
+}
+else if (isset($_GET['saveUtilities'])) {
+	
+	// clear utilities
+	header("Location: index.php");	
+	exit();
+}
+else if (isset($_GET['cancelUtilities'])) {
+	// clearUtilities
+	header("Location: index.php");	
+	exit();	
+}
 else if (isset($_GET['searchUserEvent'])) {
 		$_SESSION["userEventDate"] = $_GET['userEventDate'];
 		$_SESSION["userTournament"] = $_GET['userTournament'];
@@ -1602,10 +1617,6 @@ else {
 
 	/**** TODO / GENERAL ISSUES ********
 	
-	+ DO not calculate Trial Event in Final SCORE
-	+ DO not calculate Trial Event for tie breaking
-	
-	
 	+ Generate Results as Excel / XML
 	+ Create Utilties Panel For Settings Configuration (reg code)
 	
@@ -1617,7 +1628,7 @@ else {
 	** Rank Alternate Team?
 	
 	-- Acknowledgements --
-		// Chirp Internet: www.chirp.com.au
+		
 	
 	**** TODO / GENERAL ISSUES *********/
 ?>
