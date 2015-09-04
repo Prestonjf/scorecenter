@@ -21,13 +21,14 @@
 	
 	}
 
-	function emailPassword($address, $password) {
-		$msg = "Hello, \n\n";
-		$msg = $msg . "The password for account ". $address . " has been requested from the Science Olympiad Score Center application. \n\n";
-		$msg = $msg . "Your password is: ".$password;
+	function emailPasswordReset($address, $name, $userId, $encryptedPassword, $salt) {
+		$host = $_SERVER['HTTP_HOST'];
+		$msg = "Hello ".$name.", \n\n";
+		$msg = $msg . "A password reset for account ". $address . " has been requested from the Science Olympiad Score Center application. To reset your password, select the hyperlink below and update your password on the account screen. If this message was sent in error, please disregard this email. \n\n\n";
+		$msg = $msg . "Reset Password Link: \n http://".$host."/scorecenter/controller.php?command=passwordResetProcess&id=".$userId."&ep=".$encryptedPassword."&sa=".$salt."&nn=".uniqid();
 	
 	
-		mail($address,"Score Center Forgotten Password",$msg);
+		mail($address,"Score Center Password Reset",$msg);
 	}
 
 

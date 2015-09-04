@@ -44,8 +44,10 @@
   <script type="text/javascript">
   
 	function forgotPassword() {
-		document.forms[0].action = document.forms[0].action + "?command=resetPassword&";
-		document.forms[0].submit();
+		if (confirm('Selecting OK will send a password reset email to the email entered in the username field. Do you want to continue?')) {
+			document.forms[0].action = document.forms[0].action + "?command=resetPassword&";
+			document.forms[0].submit();
+		}
 	}
 
   
@@ -130,7 +132,7 @@
 		displayError("<strong>Password Notification Failed:</strong> Username is incorrect.");	
 	<?php $_SESSION["resetPasswordError"] = null; } ?>
 	<?php if ($_SESSION["resetPasswordSuccess"] != null and $_SESSION["resetPasswordSuccess"] == '1') { ?>
-		displaySuccess("<strong>Password Notification Sent:</strong> User Password has been sent to user's email.");	
+		displaySuccess("<strong>Password Notification Sent:</strong> User Password reset link has been sent to your email.");	
 	<?php $_SESSION["resetPasswordSuccess"] = null; } ?>
 	</script>
     

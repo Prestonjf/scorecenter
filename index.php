@@ -264,6 +264,12 @@ include_once('logon_check.php');
    	<?php if ($_SESSION['accountCreationSuccess'] != null and $_SESSION['accountCreationSuccess'] == '1') { ?>
     	<script type="text/javascript">displaySuccess('<strong>Saved: </strong>Account has been created successfully!');</script>
    	<?php $_SESSION['accountCreationSuccess'] = null; } ?>
+   	
+   	<?php if ($_SESSION['accountUpdateSuccess'] != null and $_SESSION['accountUpdateSuccess'] == '1') { ?>
+    	<script type="text/javascript">displaySuccess('<strong>Saved: </strong>Account has been updated successfully!');</script>
+   	<?php $_SESSION['accountUpdateSuccess'] = null; } ?>
+   	
+   	
       
       
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

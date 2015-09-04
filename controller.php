@@ -73,6 +73,14 @@ else if ($_GET['command'] != null and $_GET['command'] == 'resetPassword') {
 	header("Location: logon.php");	
 	exit();
 }
+else if ($_GET['command'] != null and $_GET['command'] == 'passwordResetProcess') {
+	if (checkPasswordReset($mysqli)) {
+		header("Location: account.php");	
+		exit();
+	}
+	header("Location: logon.php");	
+	exit();
+}
 
 else if (isset($_GET['searchUserEvent'])) {
 		$_SESSION["userEventDate"] = $_GET['userEventDate'];
@@ -1341,7 +1349,7 @@ else {
 
 
 	function loadUser($id, $mysqli) {
-		$result = $mysqli->query("SELECT USER_ID, USERNAME, CONCAT(FIRST_NAME,' ', LAST_NAME) as name, ROLE_CODE, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER
+		$result = $mysqli->query("SELECT USER_ID, USERNAME, CONCAT(FIRST_NAME,' ', LAST_NAME) as name, ROLE_CODE, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER, FIRST_NAME, LAST_NAME
 							  FROM USER WHERE USER_ID = " .$id); 
  			if ($result) {
  				$userRow = $result->fetch_row();	
@@ -1350,7 +1358,9 @@ else {
  				$_SESSION["userFirstLastName"] = $userRow['2'];
  				$_SESSION["userRoleCode"] = $userRow['3'];
  				$_SESSION["userActiveFlag"] = $userRow['4'];
- 				$_SESSION["userPhoneNumber"] = $userRow['5'];				
+ 				$_SESSION["userPhoneNumber"] = $userRow['5'];
+ 				$_SESSION["firstName"] = $userRow['6'];
+				$_SESSION["lastName"] = $userRow['7'];				
     		}
 	}
 	
@@ -1397,7 +1407,7 @@ else {
 			$userSessionInfo->setFirstName($account['4']);
 			$userSessionInfo->setLastName($account['5']);
 			$userSessionInfo->setRole($account['3']);
-			$userSessionInfo->setPhoneNumber($account['9']);
+			$userSessionInfo->setPhoneNumber($account['8']);
 			
 			$_SESSION["userSessionInfo"] = serialize($userSessionInfo);
 			$_SESSION["userEventDate"] = date("m/d/y");
@@ -1419,17 +1429,64 @@ else {
 		$query->execute();
 		$result = $query->get_result();
 		$count = $result->num_rows;
+		$resultRow = $result->fetch_row();
+		$name = $resultRow['4'] . ' ' . $resultRow['5'];
+		$userId = $resultRow['0'];
 		$query->free_result();
 		
 		if($count == 1) {
-			$account = $result->fetch_row();
-			emailPassword($_POST['userName'], $account['2']);
+			$query = $mysqli->prepare("SELECT DISPLAY_TEXT FROM REF_DATA WHERE DOMAIN_CODE='PASSWORDRESET' AND REF_DATA_CODE='SALT' ");
+			$query->execute();
+			$result = $query->get_result();
+			$query->free_result();
+			$resetPassword = $result->fetch_row();
+			
+			$salt = crypt(uniqid());
+			$encryptedPassword = crypt($resetPassword['0'], $salt);
+			
+			$query = $mysqli->prepare("UPDATE USER SET PASSWORD_RESET_SALT=? WHERE USERNAME=?");
+			$query->bind_param('ss',$salt, $_POST['userName']);
+			$query->execute();
+			$query->free_result();			
+			
+			emailPasswordReset($_POST['userName'], $name, $userId, $encryptedPassword, $salt);
 			$_SESSION["resetPasswordSuccess"] = "1";
 		}
 		else {
 			$_SESSION["resetPasswordError"] = "2";
 		}
+	}
 	
+	function checkPasswordReset($mysqli) {
+		$userId = $_GET['id'];
+		$encryptedPassword = $_GET['ep'];
+		
+		$query = $mysqli->prepare("SELECT PASSWORD_RESET_SALT FROM USER WHERE USER_ID=".$userId);
+		$query->execute();
+		$result = $query->get_result();
+		$query->free_result();
+		$passwordSalt = $result->fetch_row();
+		
+		
+		$query = $mysqli->prepare("SELECT DISPLAY_TEXT FROM REF_DATA WHERE DOMAIN_CODE='PASSWORDRESET' AND REF_DATA_CODE='SALT' ");
+		$query->execute();
+		$result = $query->get_result();
+		$query->free_result();
+		$resetPassword = $result->fetch_row();
+		
+		if ($encryptedPassword === crypt($resetPassword['0'], $passwordSalt['0'])) {
+			$query = $mysqli->prepare("UPDATE USER SET PASSWORD_RESET_SALT=null WHERE USER_ID=?");
+			$query->bind_param('s',$userId);
+			$query->execute();
+			$query->free_result();
+			
+			// Load User Info
+			$_SESSION["accountMode"] = 'update';
+			loadUser($userId, $mysqli);
+			return true;
+		}
+	
+		return false;
 	}
 	
 	function clearAccount() {	
@@ -1508,8 +1565,11 @@ else {
 		}
 		
 		else {
+			$userId = "";
 			$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
-			$userId = $userSessionInfo->getUserId();
+			if ($userSessionInfo != null)
+				$userId = $userSessionInfo->getUserId();
+			else $userId = $_SESSION["userId"];
 			
 			
 			$query = $mysqli->prepare("SELECT * FROM USER WHERE USERNAME=? AND USER_ID<>?");
