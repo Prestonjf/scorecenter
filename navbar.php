@@ -54,7 +54,7 @@
             <li><a href="controller.php?command=loadAllEvents&">Manage Events</a></li>
             <?php if ($role == 'ADMIN') { ?><li><a href="controller.php?command=loadAllUsers&">Manage Users</a></li> <?php } ?>
             <li role="separator" class="divider"></li>
-            <li><a href="#">Utilities</a></li>
+            <?php if ($role == 'ADMIN') { ?> <li><a href="controller.php?command=loadUtilities&">Utilities</a></li><?php } ?>
             <?php } ?>
             <li><a href="#" onclick="about();return false;" >About</a></li>
 			<li role="separator" class="divider"></li>
