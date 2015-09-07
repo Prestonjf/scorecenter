@@ -83,7 +83,7 @@
 	}
 	
 	function validatePhoneNumber(ele) {
- 		var regex = /^\d{10}$/;  
+ 		var regex = /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$/i;  
  			if (ele.value.match(regex)) {
  				return;
  			}

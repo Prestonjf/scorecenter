@@ -3,9 +3,7 @@
 	function sendAccountCreationEmail($userName, $firstName, $lastName, $password) {
 		// the message
 		$msg = "Hello ".$firstName." ".$lastName. ", \n\n";
-		$msg = $msg . "Thanks you for creating an account on Michigan Science Olympiad's Score Center. You will now be able to enter scores for events 
-		assigned to you. If you are a score verifier, you will be able to enter scores for entire tournaments. You may access Score Center as the follow 
-		address with the user name and password below.\n\n\n";
+		$msg = $msg . "Thank you for creating an account on Michigan Science Olympiad's Score Center. You will now be able to enter scores for events assigned to you. If you are a score verifier, you will be able to enter scores for entire tournaments. You may access Score Center at the following address with the user name and password below.\n\n\n";
 		
 		// Select url from db
 		$msg = $msg . "URL: " . "http://www.prestonsproductions.com/scorecenter \n";

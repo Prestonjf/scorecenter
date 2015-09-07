@@ -1539,10 +1539,20 @@ else {
 				$_SESSION["createAccountError"] = "error1";
 				return false;
 			}
-			// validate registration code
-			if ($regCode != 'science101') {
+			// validate registration code / Get Role
+			$role = 'SUPERVISOR';
+			$query = $mysqli->prepare("SELECT REF_DATA_CODE FROM REF_DATA WHERE DOMAIN_CODE='REGISTRATIONCODE' AND DISPLAY_TEXT = ? ");
+			$query->bind_param('s',$regCode);
+			$query->execute();
+			$result = $query->get_result();
+			$roleRow = $result->fetch_row(); 
+			$query->free_result();
+			if ($roleRow == null || $roleRow['0'] == null || $roleRow['0'] == '') {
 				$_SESSION["createAccountError"] = "error2";
 				return false;
+			}
+			else {
+				$role = $roleRow['0'];
 			}
 			
 			// save account info
@@ -1553,7 +1563,7 @@ else {
 			
 			$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER) 
 				VALUES (".$id.",?,?,?,?,?,?,?) ");
-			$role = 'SUPERVISOR';
+
 			$activeFlag = 1;	
 			$query->bind_param('sssssis',$userName, $encryptedPassword, $role,$firstName, $lastName, $activeFlag, $phoneNumber);		
 			$query->execute();
@@ -1602,12 +1612,10 @@ else {
 
 	/**** TODO / GENERAL ISSUES ********
 	
-	+ DO not calculate Trial Event in Final SCORE
-	+ DO not calculate Trial Event for tie breaking
-	
-	
+	+ Delete Buttons
 	+ Generate Results as Excel / XML
 	+ Create Utilties Panel For Settings Configuration (reg code)
+	+ LOW VS. HIGH SCORE WINS
 	
 	
 	** Handles 100 Teams / Events Per TOURNAMENT

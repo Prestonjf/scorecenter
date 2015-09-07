@@ -62,7 +62,33 @@
 				error = true;
 			}
 		}	
-		// validate max events/teams
+		// validate Unique Team Number
+		var scoreArr = [];
+		var errorDuplicateNumber = false;
+		var count = 0;
+		while (count < 1000) {
+			if  ($('#teamNumber'+count) != null && $('#teamNumber'+count).val() != null) {
+				var score = $('#teamNumber'+count).val();
+				
+				scoreArr.forEach(function(entry) {
+					if (score == entry) errorDuplicateNumber = true;
+				});
+				if (errorDuplicateNumber) {
+					break;
+				}
+				else if (score != '' && score != '0') {
+					scoreArr.push(score);
+				}
+			} else {
+				break;
+			}
+			count++;
+		}
+		
+		if (errorDuplicateNumber) {
+			displayError("<strong>Validation Error:</strong> Teams must have a unique team number.");
+			return false;
+		}		
 		if (error) {
 			displayError("<strong>Required Fields:</strong> Please complete the required fields denoted with an ' * '.");
 			return false;			
