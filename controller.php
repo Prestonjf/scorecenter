@@ -13,7 +13,7 @@ require_once('login.php');
 		printf("Connect failed: %s\n", mysqli_connect_error());
 		exit();
 	}
-
+// if user not logged in. forward to login.php
 
 // Begin MAIN METHOD -------------------------->	
 if (isset($_POST['login'])) {		
@@ -83,17 +83,19 @@ else if ($_GET['command'] != null and $_GET['command'] == 'passwordResetProcess'
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'loadUtilities') {
 	// Load Utilities
+	clearUtilities();
+	loadUtilities($mysqli);
 	header("Location: utilities.php");	
 	exit();
 }
 else if (isset($_GET['saveUtilities'])) {
-	
-	// clear utilities
+	saveUtilities($mysqli);
+	clearUtilities();
 	header("Location: index.php");	
 	exit();
 }
 else if (isset($_GET['cancelUtilities'])) {
-	// clearUtilities
+	clearUtilities();
 	header("Location: index.php");	
 	exit();	
 }
@@ -1390,6 +1392,72 @@ else {
 		$_SESSION['savesuccessUser'] = "1";	
 	}
 	
+	// UTILITIES MANAGEMENT --------------------------------------------------
+	function clearUtilities() {
+		$_SESSION["registerCodeSupervisor"] = "";
+		$_SESSION["registerCodeVerifier"] = "";
+		$_SESSION["registerCodeAdmin"] = "";
+		$_SESSION["resetPassword"] = "";
+		
+		$_SESSION["emailHost"] = "";
+		$_SESSION["emailPort"] = "";
+		$_SESSION["emailUsername"] = "";
+		$_SESSION["emailPassword"] = "";
+		$_SESSION["smtpSecure"] = "";
+		
+	}
+	
+	function loadUtilities($mysqli) {		
+		$result = $mysqli->query("SELECT DOMAIN_CODE,REF_DATA_CODE,DISPLAY_TEXT FROM REF_DATA WHERE DOMAIN_CODE IN ('REGISTRATIONCODE', 'MAILSERVER','PASSWORDRESET') ORDER BY DOMAIN_CODE ASC"); 
+ 		if ($result) {
+			while($utilityRow = $result->fetch_array()) {
+				if ($utilityRow != null) {
+					if ($utilityRow['0'] == 'REGISTRATIONCODE' and $utilityRow['1'] == 'SUPERVISOR') $_SESSION["registerCodeSupervisor"] = $utilityRow['2'];
+					else if ($utilityRow['0'] == 'REGISTRATIONCODE' and $utilityRow['1'] == 'VERIFIER') $_SESSION["registerCodeVerifier"] = $utilityRow['2'];
+					else if ($utilityRow['0'] == 'REGISTRATIONCODE' and $utilityRow['1'] == 'ADMIN') $_SESSION["registerCodeAdmin"] = $utilityRow['2'];	
+					else if ($utilityRow['0'] == 'MAILSERVER' and $utilityRow['1'] == 'HOST') $_SESSION["emailHost"] = $utilityRow['2'];
+					else if ($utilityRow['0'] == 'MAILSERVER' and $utilityRow['1'] == 'PORT') $_SESSION["emailPort"] = $utilityRow['2'];
+					else if ($utilityRow['0'] == 'MAILSERVER' and $utilityRow['1'] == 'USERNAME') $_SESSION["emailUsername"] = $utilityRow['2'];
+					else if ($utilityRow['0'] == 'MAILSERVER' and $utilityRow['1'] == 'PASSWORD') $_SESSION["emailPassword"] = $utilityRow['2'];
+					else if ($utilityRow['0'] == 'MAILSERVER' and $utilityRow['1'] == 'SMTPSECURE') $_SESSION["smtpSecure"] = $utilityRow['2'];
+					else if ($utilityRow['0'] == 'PASSWORDRESET' and $utilityRow['1'] == 'SALT') $_SESSION["resetPassword"] = $utilityRow['2'];
+				}
+			}
+		}		
+	}
+	
+	function saveUtilities($mysqli) {
+		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='REGISTRATIONCODE' AND REF_DATA_CODE='SUPERVISOR' ");			
+		$query->bind_param('s',$_GET["registerCodeSupervisor"]); $query->execute();$query->free_result();
+		
+		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='REGISTRATIONCODE' AND REF_DATA_CODE='VERIFIER' ");			
+		$query->bind_param('s',$_GET["registerCodeVerifier"]); $query->execute();$query->free_result();
+		
+		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='REGISTRATIONCODE' AND REF_DATA_CODE='ADMIN' ");			
+		$query->bind_param('s',$_GET["registerCodeAdmin"]); $query->execute();$query->free_result();
+		
+		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='PASSWORDRESET' AND REF_DATA_CODE='SALT' ");			
+		$query->bind_param('s',$_GET["resetPassword"]); $query->execute();$query->free_result();
+		
+		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='MAILSERVER' AND REF_DATA_CODE='HOST' ");			
+		$query->bind_param('s',$_GET["emailHost"]); $query->execute();$query->free_result();
+		
+		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='MAILSERVER' AND REF_DATA_CODE='PORT' ");			
+		$query->bind_param('s',$_GET["emailPort"]); $query->execute();$query->free_result();
+		
+		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='MAILSERVER' AND REF_DATA_CODE='USERNAME' ");			
+		$query->bind_param('s',$_GET["emailUsername"]); $query->execute();$query->free_result();
+		
+		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='MAILSERVER' AND REF_DATA_CODE='PASSWORD' ");			
+		$query->bind_param('s',$_GET["emailPassword"]); $query->execute();$query->free_result();
+		
+		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='MAILSERVER' AND REF_DATA_CODE='SMTPSECURE' ");			
+		$query->bind_param('s',$_GET["smtpSecure"]); $query->execute();$query->free_result();
+		
+		// save Confirmation
+		$_SESSION['savesuccessUtilities'] = "1";	
+	}
+	
 	
 	
 	// LOGIN AND ACCOUNT MANAGEMENT ---------------------------------------
@@ -1464,7 +1532,7 @@ else {
 			$query->execute();
 			$query->free_result();			
 			
-			emailPasswordReset($_POST['userName'], $name, $userId, $encryptedPassword, $salt);
+			emailPasswordReset($mysqli, $_POST['userName'], $name, $userId, $encryptedPassword, $salt);
 			$_SESSION["resetPasswordSuccess"] = "1";
 		}
 		else {
@@ -1586,7 +1654,7 @@ else {
 			$_SESSION["accountCreationSuccess"] = "1";
 	
 			// Send Creation Email
-			sendAccountCreationEmail($userName, $firstName, $lastName, $password);
+			sendAccountCreationEmail($mysqli, $userName, $firstName, $lastName, $password);
 		}
 		
 		else {
@@ -1627,22 +1695,22 @@ else {
 
 	/**** TODO / GENERAL ISSUES ********
 	
-<<<<<<< HEAD
-	+ Delete Buttons
-=======
->>>>>>> origin/master
-	+ Generate Results as Excel / XML
-	+ Create Utilties Panel For Settings Configuration (reg code)
-	+ LOW VS. HIGH SCORE WINS
+	-- ISSUES TO IMPLEMENT / FIX -- 
+	++ Delete Buttons (for admins)
+	++ Generate Results as Excel / XML
 	
 	
+	-- APP LIMITATIONS / LOW PRIORITY ISSUES --
 	** Handles 100 Teams / Events Per TOURNAMENT
 	** Results: Ties Broken to 20 positions
 	** Results Order By OPTION
 	** Manual Reminder email to supervisor
+	** Low Score wins (options for high score?)
 	** Rank Alternate Team?
 	
-	-- Acknowledgements --
+	
+	-- ACKNOWLEDGEMENTS --
+	^^ PHPMAILER
 		
 	
 	**** TODO / GENERAL ISSUES *********/

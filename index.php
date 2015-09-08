@@ -13,20 +13,8 @@ include_once('logon_check.php');
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Score Center - Michigan Science Olympiad</title>
-
-    <!-- Bootstrap -->
-     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="js/jquery-ui-1.11.4/jquery-ui.css" rel="stylesheet">
-
-  	<!-- JS -->
-  <script src="js/jquery-1.11.3.js"></script>
-  <script src="js/jquery-ui-1.11.4/jquery-ui.js"></script>
-  <script src="js/scorecenter.js"></script>
+	<?php include_once('libs/head_tags.php'); ?>
+	
   <script type="text/javascript">
   	function clearDates() {
 		document.getElementById('userEventDate').value = '';
@@ -268,6 +256,9 @@ include_once('logon_check.php');
    	<?php if ($_SESSION['accountUpdateSuccess'] != null and $_SESSION['accountUpdateSuccess'] == '1') { ?>
     	<script type="text/javascript">displaySuccess('<strong>Saved: </strong>Account has been updated successfully!');</script>
    	<?php $_SESSION['accountUpdateSuccess'] = null; } ?>
+	<?php if ($_SESSION['savesuccessUtilities'] != null and $_SESSION['savesuccessUtilities'] == '1') { ?>
+    	<script type="text/javascript">displaySuccess('<strong>Saved: </strong>Utilities have been updated successfully!');</script>
+   	<?php $_SESSION['savesuccessUtilities'] = null; } ?>
    	
    	
       
