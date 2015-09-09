@@ -7,16 +7,15 @@
 		$msg = "Hello ".$firstName." ".$lastName. ", \n\n";
 		$msg = $msg . "Thank you for creating an account on Michigan Science Olympiad's Score Center. You will now be able to enter scores for events assigned to you. If you are a score verifier, you will be able to enter scores for entire tournaments. You may access Score Center at the following address with the user name and password below.\n\n\n";
 		
-		// Select url from db
-		$msg = $msg . "URL: " . "http://www.prestonsproductions.com/scorecenter \n";
+		$host = $_SERVER['HTTP_HOST'];
+		$msg = $msg . "URL: " . "http://".$host."/scorecenter \n";
 		$msg = $msg . "User Name: " .$userName." \n";
 		$msg = $msg . "Password: " .$password." \n";
 		
 		$msgHtml = "Hello ".$firstName." ".$lastName. ", <br /><br />";
 		$msgHtml = $msgHtml . "Thank you for creating an account on Michigan Science Olympiad's Score Center. You will now be able to enter scores for events assigned to you. If you are a score verifier, you will be able to enter scores for entire tournaments. You may access Score Center at the following address with the user name and password below.<br /><br /><br />";
 		
-		// Select url from db
-		$msgHtml = $msgHtml . "URL: " . "http://www.prestonsproductions.com/scorecenter <br />";
+		$msgHtml = $msgHtml . "URL: " . "http://".$host."/scorecenter <br />";
 		$msgHtml = $msgHtml . "User Name: " .$userName." <br />";
 		$msgHtml = $msgHtml . "Password: " .$password." <br />";
 

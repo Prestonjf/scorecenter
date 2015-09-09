@@ -2,6 +2,7 @@
 session_start();
 include_once('score_center_objects.php');
 include_once('mail_functions.php');
+require_once('libs/PHPExcel.php');
 
 // DB Connection --------------
 require_once('login.php');
@@ -287,6 +288,11 @@ else if (isset($_GET['cancelEventScores'])) {
 
 else if (isset($_GET['exportResultsCSV'])) {
 	exportResultsCSV($mysqli);
+	header("Location: tournament_results.php");
+	exit();
+}
+else if (isset($_GET['exportResultsEXCEL'])) {
+	exportResultsEXCEL($mysqli);
 	header("Location: tournament_results.php");
 	exit();
 }
@@ -1279,7 +1285,7 @@ else {
 	function exportResultsCSV($mysqli) {
 	
 	 	// filename for download
-  		$filename = "score_center_" . date('Ymd') . ".csv";
+  		$filename = $_SESSION["tournamentName"]." Results " . $_SESSION["tournamentDivision"] . ".csv";
   		header("Content-Disposition: attachment; filename=\"$filename\"");
   		header("Content-Type: text/csv; charset=utf-8");
   		
@@ -1317,6 +1323,68 @@ else {
     	
 		fclose($output);
 		exit;
+	}
+	
+	function exportResultsEXCEL($mysqli) {
+		$filename = $_SESSION["tournamentName"]." Results " . $_SESSION["tournamentDivision"] . ".xlsx";
+		$objPHPExcel = new PHPExcel();
+		
+		$objPHPExcel->getProperties()->setCreator("Score Center")
+							 ->setLastModifiedBy("Score Center")
+							 ->setTitle("PHPExcel Test Document")
+							 ->setSubject("PHPExcel Test Document")
+							 ->setDescription("Score Center Science Olympiad Results Spreadsheet")
+							 ->setKeywords("Science Olympiad Score Center Results Scores")
+							 ->setCategory("Score Center Results");
+							 
+		$objPHPExcel->setActiveSheetIndex(0)->setCellValue('A1', 'TEAM NAME')
+											->setCellValue('A2', 'TEAM #');
+		$count = 3;	
+		$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];								
+		if ($tournamentResultsHeader != null) {		
+			foreach ($tournamentResultsHeader as $resultHeader) {				
+				$objPHPExcel->setActiveSheetIndex(0)->setCellValue('A'.$count, $resultHeader);
+				$count++;
+			}
+		}
+		$objPHPExcel->setActiveSheetIndex(0)->setCellValue('A'.($count+1), 'Total Score')
+											->setCellValue('A'.($count+2), 'Final Rank');
+
+	/**	 $tournamentResults = $_SESSION['tournamentResults'];
+         if ($tournamentResults != null) {
+			 foreach ($tournamentResults as $resultRow) {
+				$row = array();
+				array_push($row,$resultRow['1']);
+				array_push($row,$resultRow['2']);
+				$i = 3;
+				while ($i < sizeof($resultRow)-1) {
+					array_push($row,$resultRow[$i]);
+					$i++;
+				}
+				fputcsv($output, $row);
+		 	}
+    	} **/
+							 
+        $objPHPExcel->getActiveSheet()->getRowDimension(8)->setRowHeight(3);
+		$objPHPExcel->getActiveSheet()->getStyle('A8')->getAlignment()->setWrapText(true);
+		$objPHPExcel->getActiveSheet()->setTitle($_SESSION["tournamentName"] . ' Results ' . $_SESSION["tournamentDivision"]);
+	
+		$objPHPExcel->setActiveSheetIndex(0);
+		
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header('Content-Disposition: attachment;filename="'.$filename.'"');
+		header('Cache-Control: max-age=1');
+		
+		// If you're serving to IE over SSL, then the following may be needed
+		header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+		header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+		header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+		header ('Pragma: public'); // HTTP/1.0
+
+		$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+		$objWriter->save('php://output');
+		exit;
+
 	}
 	
 	
@@ -1711,6 +1779,7 @@ else {
 	
 	-- ACKNOWLEDGEMENTS --
 	^^ PHPMAILER
+	^^ PHPEXCEL
 		
 	
 	**** TODO / GENERAL ISSUES *********/
