@@ -85,8 +85,8 @@
         <table class="table table-bordered table-hover" data-sortable data-sort-name="rank" data-sort-order="desc">
         <thead>
             <tr>
-				<th width="20%" class="rotate" data-field="name" data-sortable="true"><div><span></span></div></th>
-				<th class="rotate" data-field="number" data-sortable="true"><div><span></span></div></th>
+				<th  class="rotate" data-field="name" data-sortable="true"><div><span></span></div></th>
+				<th width="20%" class="rotate" data-field="number" data-sortable="true"><div><span></span></div></th>
 				<?php
 				$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
 				if ($tournamentResultsHeader != null) {

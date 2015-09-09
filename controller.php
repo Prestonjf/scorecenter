@@ -1154,7 +1154,7 @@ else {
 		}	
 		$_SESSION['tournamentResultsHeader'] = $tournamentResultsHeader;	
 		
-		$query2 = "  SELECT T.NAME, TT.TEAM_NUMBER, TT.TOURN_TEAM_ID, TT.ALTERNATE_FLAG 
+		$query2 = "  SELECT TT.TEAM_NUMBER,T.NAME, TT.TOURN_TEAM_ID, TT.ALTERNATE_FLAG 
 					FROM TOURNAMENT TM
 					INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID
 					INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
@@ -1164,11 +1164,11 @@ else {
  		if ($result) {
 			while($teams = $result->fetch_array()) {
 					$resultRow = array();
-					$teamName = $teams['0'];
+					$teamName = $teams['1'];
 					if ($teams['3'] != null and $teams['3'] == 1) $teamName .= ' +';
 					array_push($resultRow, $teams['2']);
+					array_push($resultRow, $teams['0']);
 					array_push($resultRow, $teamName);
-					array_push($resultRow, $teams['1']);
 					
 					$query3 = "SELECT TES.SCORE, E.NAME, TE.TRIAL_EVENT_FLAG
 								FROM TOURNAMENT_TEAM TT
@@ -1293,8 +1293,8 @@ else {
 
 		$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
 		$headings = array();
-		array_push($headings,"TEAM NAME");
-		array_push($headings,"TEAM #");
+		array_push($headings,"#");
+		array_push($headings,$_SESSION["tournamentName"]."\nDivision: ".$_SESSION["tournamentDivision"]."\nDate: ".$_SESSION["tournamentDate"]);
 		if ($tournamentResultsHeader != null) {
 			foreach ($tournamentResultsHeader as $resultHeader) {				
 				array_push($headings,$resultHeader);
@@ -1320,55 +1320,111 @@ else {
 				fputcsv($output, $row);
 		 	}
     	}
-    	
+		$row = array();
+		fputcsv($output, $row);
+		array_push($row,'');array_push($row,'* = Trial Event');
+		fputcsv($output, $row);
+		$row = array();
+    	array_push($row,'');array_push($row,'+ = Alternate Team');
+		fputcsv($output, $row);
+		
 		fclose($output);
 		exit;
 	}
 	
 	function exportResultsEXCEL($mysqli) {
 		$filename = $_SESSION["tournamentName"]." Results " . $_SESSION["tournamentDivision"] . ".xlsx";
+		$title = $_SESSION["tournamentName"]." Results " . $_SESSION["tournamentDivision"];
+		
+		$filename = str_replace(" ", "_", $filename);$filename = str_replace("/", "", $filename);$filename = str_replace("\\", "", $filename);$filename = str_replace("'", "", $filename);
+		$title = str_replace(" ", "_", $title);$title = str_replace("/", "", $title);$title = str_replace("\\", "", $title);$title = str_replace("'", "", $title);
+		
 		$objPHPExcel = new PHPExcel();
 		
 		$objPHPExcel->getProperties()->setCreator("Score Center")
 							 ->setLastModifiedBy("Score Center")
-							 ->setTitle("PHPExcel Test Document")
-							 ->setSubject("PHPExcel Test Document")
+							 ->setTitle($title)
+							 ->setSubject($title)
 							 ->setDescription("Score Center Science Olympiad Results Spreadsheet")
 							 ->setKeywords("Science Olympiad Score Center Results Scores")
 							 ->setCategory("Score Center Results");
-							 
-		$objPHPExcel->setActiveSheetIndex(0)->setCellValue('A1', 'TEAM NAME')
-											->setCellValue('A2', 'TEAM #');
-		$count = 3;	
+		
+		// Format Sheet
+		$objExcelSheet = $objPHPExcel->getSheet(0);
+		// ASCII 65 - 90 (A-Z)
+		$asciiValue = 67;
+		$rowCount = 2;
+		$colPrefixAscii = 65;
+		$colPrefix = '';
+
+		// Header
+		$objExcelSheet->setCellValue('A1', '#')->setCellValue('B1', $_SESSION["tournamentName"]."\nDivision: ".$_SESSION["tournamentDivision"]."\nDate: ".$_SESSION["tournamentDate"]);
+		$objExcelSheet->getColumnDimension('A')->setWidth(4);
+		$objExcelSheet->getColumnDimension('B')->setAutoSize(true);
+		$objExcelSheet->getStyle('A1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1D1D1');
+		$objExcelSheet->getStyle('B1')->getAlignment()->setWrapText(true);
+		$objExcelSheet->getStyle("A1")->getAlignment()->applyFromArray(array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_RIGHT,));
+
 		$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];								
-		if ($tournamentResultsHeader != null) {		
-			foreach ($tournamentResultsHeader as $resultHeader) {				
-				$objPHPExcel->setActiveSheetIndex(0)->setCellValue('A'.$count, $resultHeader);
-				$count++;
+		if ($tournamentResultsHeader != null) {
+			foreach ($tournamentResultsHeader as $resultHeader) {		
+				if ($asciiValue > 90) {$asciiValue = 65; $colPrefix .= chr($colPrefixAsci); $colPrefixAscii++;}
+				if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1D1D1');
+				$objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getAlignment()->setTextRotation(90);
+				$objExcelSheet->setCellValue($colPrefix.chr($asciiValue).'1', $resultHeader);
+				$objExcelSheet->getColumnDimension($colPrefix.chr($asciiValue))->setWidth(4);
+				$asciiValue++;
 			}
 		}
-		$objPHPExcel->setActiveSheetIndex(0)->setCellValue('A'.($count+1), 'Total Score')
-											->setCellValue('A'.($count+2), 'Final Rank');
+		if ($asciiValue > 90) {$asciiValue = 65; $colPrefix .= chr($colPrefixAsci); $colPrefixAscii++;}
+		$objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getAlignment()->setTextRotation(90);
+		if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1D1D1');
+		$objExcelSheet->setCellValue($colPrefix.chr($asciiValue).'1', 'Total Score');
+		$objExcelSheet->getColumnDimension($colPrefix.chr($asciiValue))->setWidth(4);
+		
+		$asciiValue++;
+		if ($asciiValue > 90) {$asciiValue = 65; $colPrefix .= chr($colPrefixAsci); $colPrefixAscii++;}
+		if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1D1D1');
+		$objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getAlignment()->setTextRotation(90);
+		$objExcelSheet->setCellValue($colPrefix.chr($asciiValue).'1', 'Final Rank');
+		$objExcelSheet->getColumnDimension($colPrefix.chr($asciiValue))->setWidth(4);
 
-	/**	 $tournamentResults = $_SESSION['tournamentResults'];
+		$asciiValue = 67;
+		$rowCount = 2;
+		$colPrefixAscii = 65;
+		$colPrefix = '';
+		
+		// Team Scores
+		$tournamentResults = $_SESSION['tournamentResults'];
          if ($tournamentResults != null) {
 			 foreach ($tournamentResults as $resultRow) {
-				$row = array();
-				array_push($row,$resultRow['1']);
-				array_push($row,$resultRow['2']);
+				$objExcelSheet->setCellValue('A'.$rowCount, $resultRow['1'])->setCellValue('B'.$rowCount, $resultRow['2']);
+				$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CCCCCC');	
+				if ($rowCount % 2 == 0) {
+					$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CEDCCE');
+					$objExcelSheet->getStyle('B'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1ECD1');
+				}
+				
 				$i = 3;
 				while ($i < sizeof($resultRow)-1) {
-					array_push($row,$resultRow[$i]);
+					if ($asciiValue > 90) {$asciiValue = 65; $colPrefix .= chr($colPrefixAsci); $colPrefixAscii++;}
+					$objExcelSheet->setCellValue($colPrefix.chr($asciiValue).$rowCount, $resultRow[$i]);
+					if ($asciiValue % 2 != 0 && $rowCount % 2 == 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CEDCCE');
+					else if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CCCCCC');
+					else if ($rowCount % 2 == 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1ECD1');
 					$i++;
+					$asciiValue++;
 				}
-				fputcsv($output, $row);
+				$rowCount++;
+				$asciiValue = 67;
 		 	}
-    	} **/
-							 
-        $objPHPExcel->getActiveSheet()->getRowDimension(8)->setRowHeight(3);
-		$objPHPExcel->getActiveSheet()->getStyle('A8')->getAlignment()->setWrapText(true);
-		$objPHPExcel->getActiveSheet()->setTitle($_SESSION["tournamentName"] . ' Results ' . $_SESSION["tournamentDivision"]);
-	
+    	}
+		$objExcelSheet->setCellValue('B'.($rowCount+2), '* = Trial Event');
+		$objExcelSheet->setCellValue('B'.($rowCount+3), '+ = Alternate Team');
+
+							 					 
+		// Additional Sheet Attributes					 
+		$objExcelSheet->setTitle($_SESSION["tournamentName"] . ' Results ' . $_SESSION["tournamentDivision"]);
 		$objPHPExcel->setActiveSheetIndex(0);
 		
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
