@@ -1,6 +1,6 @@
 <script type="text/javascript">
 	function about() { 
-		alert('Score Center \n \n Developed by Michigan Science Olympiad \n An open source scoring application for Science Olympiad Tournaments. \n \n Version: 1.0 (Alpha) - August 2015'); 
+		alert('Score Center \n \nDeveloped by Michigan Science Olympiad \nAn open source scoring application for Science Olympiad Tournaments. \n \nVersion: 1.0 (Alpha) - August 2015'); 
 	}
 
 </script>
@@ -29,7 +29,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.php">Score Center &nbsp;&nbsp;
+      <a class="navbar-brand" href="controller.php?command=loadIndex&">Score Center &nbsp;&nbsp;
       	<img alt="MISO Logo" src="img/misologo.png"  width="25" height="25" style="float: right;"></a>
     </div>
 
@@ -37,7 +37,7 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
         <li class="<?php if ($_SERVER['REQUEST_URI'] == '/scorecenter/index.php' or $_SERVER['REQUEST_URI'] == '/scorecenter/') echo 'active';  ?>">
-        <a href="index.php">Home<span class="sr-only">(current)</span></a></li>
+        <a href="controller.php?command=loadIndex&">Home<span class="sr-only">(current)</span></a></li>
         <?php if ($role == 'ADMIN' or $role == 'VERIFIER') { ?>
         <li class="<?php if ($_SERVER['REQUEST_URI'] != '/scorecenter/index.php' and $_SERVER['REQUEST_URI'] != '/scorecenter/') echo 'active';  ?>">
         <a href="controller.php?command=loadAllTournaments&">Tournaments</a></li>

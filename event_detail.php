@@ -23,15 +23,38 @@ include_once('logon_check.php');
 	<?php include_once('libs/head_tags.php'); ?>
 	
   <script type="text/javascript">
-  $(document).ready(function(){
-  
-    //	$("#addTournament").click(function(){
-     //   	alert("add");
-    //	});
+   $(document).ready(function(){
+	   
+   });
 
-    	
-    	
-	});
+	function validate() {
+		var eventId = <?php if ($_SESSION["eventId"] == null or $_SESSION["eventId"] == '') echo '-1'; else echo $_SESSION["eventId"]; ?>;
+		if ($('#eventName').val().trim() == '') {
+			displayError("<strong>Validation Error:</strong> Event name is required.");
+			return false;
+		}
+		
+	/**	var xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				clearError();
+				clearSuccess();
+				alert(xmlhttp.responseText);
+				if (xmlhttp.responseText == 'error') {
+					displayError("<strong>Cannot Add Event:</strong> Event has already been added.");
+					return false;
+				}	
+				else {
+					displaySuccess("<strong>Cannot Add Event:</strong> Event has already been added.");
+					return true;
+				}
+			}
+		}	
+
+        xmlhttp.open("GET","controller.php?command=validateNewEvent&eventName="+$('#eventName').val()+"&eventId="+eventId,true);
+        xmlhttp.send(); **/
+		return true;
+	}
 
   
   </script>

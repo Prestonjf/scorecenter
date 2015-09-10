@@ -37,13 +37,6 @@ else if ($_GET['command'] != null and $_GET['command'] == 'createAccount') {
 	header("Location: account.php");	
 	exit();
 }
-else if ($_GET['command'] != null and $_GET['command'] == 'updateAccount') {
-    clearAccount();
-	loadAccount();
-	$_SESSION["accountMode"] = 'update';
-	header("Location: account.php");	
-	exit();
-}
 else if ($_GET['command'] != null and $_GET['command'] == 'createNewAccount') {
 	if (manageAccount($mysqli,'create')) {
 		login($mysqli);
@@ -53,17 +46,6 @@ else if ($_GET['command'] != null and $_GET['command'] == 'createNewAccount') {
 	header("Location: account.php");	
 	exit();
 }
-else if ($_GET['command'] != null and $_GET['command'] == 'updateExistingAccount') {
-	if (manageAccount($mysqli,'update')) {
-		login($mysqli);
-		header("Location: index.php");
-		exit();
-	}
-	header("Location: account.php");	
-	exit();
-}
-
-
 else if (isset($_POST['cancelAccount'])) {
 		$_SESSION["accountMode"] = null;
 		header("Location: logon.php");
@@ -80,6 +62,41 @@ else if ($_GET['command'] != null and $_GET['command'] == 'passwordResetProcess'
 		exit();
 	}
 	header("Location: logon.php");	
+	exit();
+}
+
+// All Commands Below Require An Active Session
+// Session Timeout 30 Minutes
+if ($_SESSION['sessionTimeout'] + 30 * 60 < time()) {
+	session_destroy();
+	session_start();
+	$_SESSION['errorSessionTimeout'] = '1';
+	header("Location: logon.php");	
+	exit();
+}
+else {
+	$_SESSION['sessionTimeout'] = time();
+}
+
+
+if ($_GET['command'] != null and $_GET['command'] == 'loadIndex') {
+	header("Location: index.php");	
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'updateAccount') {
+    clearAccount();
+	loadAccount();
+	$_SESSION["accountMode"] = 'update';
+	header("Location: account.php");	
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'updateExistingAccount') {
+	if (manageAccount($mysqli,'update')) {
+		login($mysqli);
+		header("Location: index.php");
+		exit();
+	}
+	header("Location: account.php");	
 	exit();
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'loadUtilities') {
@@ -121,6 +138,10 @@ else if (isset($_GET['deleteTournament'])) {
 else if (isset($_GET['addNewEvent'])) {	
 	clearEvent();
 	header("Location: event_detail.php");
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'validateNewEvent') {
+	isEventCreated($mysqli);
 	exit();
 }
 else if (isset($_GET['editEvent'])) {
@@ -329,15 +350,11 @@ else if (isset($_GET['cancelTournament'])) {
 else if ($_GET['command'] != null and $_GET['command'] == 'addEvent') {
 	cacheTournamnent();
 	addEvent($_GET['eventAdded'], $mysqli);
-	
-	//header("Location: tournament_detail.php");
 	exit();
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'addTeam') {
 	cacheTournamnent();
 	addTeam($_GET['teamAdded'], $mysqli);
-	
-	//header("Location: tournament_detail.php");
 	exit();
 }
 
@@ -349,6 +366,7 @@ else {
 
 ?>
 <!-- END MAIN METHOD -->
+
 
 
 
@@ -1054,6 +1072,14 @@ else {
 		// save Confirmation
 		$_SESSION['savesuccessEvent'] = "1";	
 	}
+	
+	function isEventCreated($mysqli) {
+		$result = $mysqli->query("SELECT EVENT_ID FROM EVENT WHERE EVENT_ID <> ".$_GET["eventId"]." AND UPPER(NAME) = '".strtoupper($_GET["eventName"])."' "); 
+		$count = $result->num_rows;
+		
+		if ($count > 0) echo 'error';
+		else echo 'success';
+	}
 
 
 
@@ -1626,6 +1652,7 @@ else {
 			
 			$_SESSION["userSessionInfo"] = serialize($userSessionInfo);
 			$_SESSION["userEventDate"] = date("m/d/y");
+			$_SESSION['sessionTimeout'] = time(); // Session Timeout
 			return true;
 		}
 		// Throw Error Message

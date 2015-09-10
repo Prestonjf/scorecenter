@@ -114,6 +114,10 @@
 	<?php if ($_SESSION["resetPasswordSuccess"] != null and $_SESSION["resetPasswordSuccess"] == '1') { ?>
 		displaySuccess("<strong>Password Notification Sent:</strong> User Password reset link has been sent to your email.");	
 	<?php $_SESSION["resetPasswordSuccess"] = null; } ?>
+	<?php if ($_SESSION['errorSessionTimeout'] != null and $_SESSION['errorSessionTimeout'] == '1') { ?>
+		displayError("<strong>Session Timed Out:</strong> Your session has timed out. Please login to continue working.");	
+	<?php $_SESSION['errorSessionTimeout'] = null; } ?>
+	
 	</script>
     
   </body>
