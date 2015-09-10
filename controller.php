@@ -1363,7 +1363,9 @@ else {
 		$objExcelSheet->getColumnDimension('B')->setAutoSize(true);
 		$objExcelSheet->getStyle('A1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1D1D1');
 		$objExcelSheet->getStyle('B1')->getAlignment()->setWrapText(true);
-		$objExcelSheet->getStyle("A1")->getAlignment()->applyFromArray(array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_RIGHT,));
+		$objExcelSheet->getStyle('A1')->getAlignment()->applyFromArray(array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_RIGHT,));
+		$objExcelSheet->getStyle('A1')->getBorders()->getBottom()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+		$objExcelSheet->getStyle('B1')->getBorders()->getBottom()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
 
 		$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];								
 		if ($tournamentResultsHeader != null) {
@@ -1373,6 +1375,7 @@ else {
 				$objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getAlignment()->setTextRotation(90);
 				$objExcelSheet->setCellValue($colPrefix.chr($asciiValue).'1', $resultHeader);
 				$objExcelSheet->getColumnDimension($colPrefix.chr($asciiValue))->setWidth(4);
+				$objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getBorders()->getBottom()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
 				$asciiValue++;
 			}
 		}
@@ -1381,6 +1384,7 @@ else {
 		if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1D1D1');
 		$objExcelSheet->setCellValue($colPrefix.chr($asciiValue).'1', 'Total Score');
 		$objExcelSheet->getColumnDimension($colPrefix.chr($asciiValue))->setWidth(4);
+		$objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getBorders()->getBottom()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
 		
 		$asciiValue++;
 		if ($asciiValue > 90) {$asciiValue = 65; $colPrefix .= chr($colPrefixAsci); $colPrefixAscii++;}
@@ -1388,6 +1392,7 @@ else {
 		$objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getAlignment()->setTextRotation(90);
 		$objExcelSheet->setCellValue($colPrefix.chr($asciiValue).'1', 'Final Rank');
 		$objExcelSheet->getColumnDimension($colPrefix.chr($asciiValue))->setWidth(4);
+		$objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getBorders()->getBottom()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
 
 		$asciiValue = 67;
 		$rowCount = 2;
@@ -1399,7 +1404,8 @@ else {
          if ($tournamentResults != null) {
 			 foreach ($tournamentResults as $resultRow) {
 				$objExcelSheet->setCellValue('A'.$rowCount, $resultRow['1'])->setCellValue('B'.$rowCount, $resultRow['2']);
-				$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CCCCCC');	
+				$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CCCCCC');
+				$objExcelSheet->getStyle('B'.$rowCount)->getBorders()->getRight()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);	
 				if ($rowCount % 2 == 0) {
 					$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CEDCCE');
 					$objExcelSheet->getStyle('B'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1ECD1');
@@ -1412,6 +1418,8 @@ else {
 					if ($asciiValue % 2 != 0 && $rowCount % 2 == 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CEDCCE');
 					else if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CCCCCC');
 					else if ($rowCount % 2 == 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1ECD1');
+					if ($i == sizeof($resultRow) - 4)	
+						$objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getBorders()->getRight()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
 					$i++;
 					$asciiValue++;
 				}
@@ -1820,8 +1828,10 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
-	++ Delete Buttons (for admins)
-	++ Generate Results as Excel / XML
+	++ Delete Tournament - Event - Team
+	++ Validate Add Team - Event (Cannot have Same Name) (team desciption issue)
+	++ Generate Results as Print / XML
+	++ controller class security
 	
 	
 	-- APP LIMITATIONS / LOW PRIORITY ISSUES --

@@ -24,11 +24,6 @@
 	
   <script type="text/javascript">
   $(document).ready(function(){
-  
-    //	$("#addTournament").click(function(){
-     //   	alert("add");
-    //	});
-
     	
     	
 	});
@@ -137,7 +132,7 @@
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="enterScores" value="'.$row['0'].'">Enter Scores</button> &nbsp;'; 				
 				echo '<button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$row['0'].'>View Scores</button>&nbsp;';
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="loadTournament" value='.$row['0'].'>Edit Tournament</button>&nbsp;';
-				echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTournament" onclick="return confirmDelete(\'tournament\')" value='.$row['0'].'>Delete</button>&nbsp;';
+				if (getCurrentRole() == 'ADMIN') echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTournament" onclick="return confirmDelete(\'tournament\')" value='.$row['0'].'>Delete</button>&nbsp;';
 				echo '</td>';
 					
 				echo '</tr>';	
@@ -148,7 +143,7 @@
           </tbody>
           </table>
            
-		<button type="submit" class="btn btn-xs btn-primary" name="addTournament">Add Tournament</button>
+		<?php if (getCurrentRole() == 'ADMIN') echo '<button type="submit" class="btn btn-xs btn-primary" name="addTournament">Add Tournament</button>'; ?>
 
       <hr>
 	<?php include_once 'footer.php'; ?>

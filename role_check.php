@@ -34,4 +34,13 @@ function checkUserRole($level) {
 		exit(); 
 	}
 }
+
+function getCurrentRole() {
+	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+
+	if ($userSessionInfo->getRole() != null and $userSessionInfo->getRole() != '') {
+		return $userSessionInfo->getRole();
+	}
+	return '';
+}
 ?>
