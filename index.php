@@ -231,8 +231,8 @@ include_once('logon_check.php');
         <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar">
           <div class="list-group">
             <a href="#" class="list-group-item active">Quick Links</a>
-            <a href="#" class="list-group-item">Michigan Science Olympiad Website</a>
-            <a href="#" class="list-group-item">MSU State Tournament Website</a>
+            <a href="http://miscioly.org/" target="_blank" class="list-group-item">Michigan Science Olympiad Website</a>
+            <a href="http://scienceolympiad.msu.edu/" target="_blank" class="list-group-item">Michigan State Tournament Website</a>
 
           </div>
         </div><!--/.sidebar-offcanvas-->

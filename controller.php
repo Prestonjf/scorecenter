@@ -1913,6 +1913,7 @@ else {
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
 	++ Delete Tournament
+	++ Add Division Attribute to Teams
 	++ Generate Results as Print / XML
 	++ controller class security
 	
