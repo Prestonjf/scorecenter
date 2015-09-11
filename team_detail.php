@@ -30,6 +30,13 @@ include_once('logon_check.php');
     	
     	
 	});
+	function validate() {
+		if ($('#teamName').val().trim() == '') {
+			displayError("<strong>Validation Error:</strong> Team name is required.");
+			return false;
+		}
+		return true;
+	}
 
   
   </script>
@@ -60,7 +67,7 @@ include_once('logon_check.php');
 	 <hr>
 	<table width="100%" class="borderless">
 	<tr>
-	<td width="20%"><label for="eventName">Team Name: </label></td>
+	<td width="20%"><label for="eventName">Team Name:<span class="red">*</span></label></td>
 	<td width="30%">
 	<input type="text" size="40" class="form-control" name="teamName" id="teamName" value="<?php echo $_SESSION["teamName"];?>">
 	</td>
@@ -110,9 +117,9 @@ include_once('logon_check.php');
     <script src="js/bootstrap.min.js"></script>
     
     <?php 
-    	if ($_SESSION['savesuccessTournament'] != null and $_SESSION['savesuccessTournament'] == '1') { ?>
-    	<script type="text/javascript">saveMessage('Tournament');</script>
-   	<?php $_SESSION['savesuccessTournament'] = null; } ?> 	
+    	if ($_SESSION['saveTeamError'] != null and $_SESSION['saveTeamError'] == '1') { ?>
+    	<script type="text/javascript">displayError("<strong>Cannot Add Team:</strong> Team has already been added.");</script>
+   	<?php $_SESSION['saveTeamError'] = null; } ?>
     
   </body>
 </html>

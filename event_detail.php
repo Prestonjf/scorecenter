@@ -85,7 +85,7 @@ include_once('logon_check.php');
 	 <hr>
 	<table width="90%" class="borderless">
 	<tr>
-	<td width="40%"><label for="eventName">Event Name: </label></td>
+	<td width="40%"><label for="eventName">Event Name:<span class="red">*</span></label></td>
 	<td width="60%">
 	<input type="text" size="40" class="form-control" name="eventName" id="eventName" value="<?php echo $_SESSION["eventName"];?>">
 	</td>
@@ -121,9 +121,9 @@ include_once('logon_check.php');
     <script src="js/bootstrap.min.js"></script>
     
     <?php 
-    	if ($_SESSION['savesuccessTournament'] != null and $_SESSION['savesuccessTournament'] == '1') { ?>
-    	<script type="text/javascript">saveMessage('Tournament');</script>
-   	<?php $_SESSION['savesuccessTournament'] = null; } ?> 	
+    	if ($_SESSION['saveEventError'] != null and $_SESSION['saveEventError'] == '1') { ?>
+    	<script type="text/javascript">displayError("<strong>Cannot Add Event:</strong> Event has already been added.");</script>
+   	<?php $_SESSION['saveEventError'] = null; } ?> 	
     
   </body>
 </html>

@@ -140,10 +140,6 @@ else if (isset($_GET['addNewEvent'])) {
 	header("Location: event_detail.php");
 	exit();
 }
-else if ($_GET['command'] != null and $_GET['command'] == 'validateNewEvent') {
-	isEventCreated($mysqli);
-	exit();
-}
 else if (isset($_GET['editEvent'])) {
 	clearEvent();	
 	loadEvent($_GET['editEvent'], $mysqli);
@@ -151,11 +147,16 @@ else if (isset($_GET['editEvent'])) {
 	exit();
 }
 else if (isset($_GET['deleteEvent'])) {
-	//deleteEvent($_GET['deleteEvent'], $mysqli);	
+	if(deleteEvent($_GET['deleteEvent'], $mysqli)) 
+		loadAllEvents($mysqli);
 	header("Location: event.php");
 	exit();
 }
 else if (isset($_GET['saveEvent'])) {
+	if (isEventCreated($mysqli)) {
+		header("Location: event_detail.php");
+		exit();
+	}
 	saveEvent($mysqli);	
 	loadAllEvents($mysqli);
 	header("Location: event.php");
@@ -189,11 +190,16 @@ else if (isset($_GET['editTeam'])) {
 	exit();
 }
 else if (isset($_GET['deleteTeam'])) {
-	//deleteTeam($_GET['deleteTeam'], $mysqli);	
+	if(deleteTeam($_GET['deleteTeam'], $mysqli))
+		loadAllTeams($mysqli);
 	header("Location: team.php");
 	exit();
 }
 else if (isset($_GET['saveTeam'])) {
+	if (isTeamCreated($mysqli)) {
+		header("Location: team_detail.php");
+		exit();
+	}
 	saveTeam($mysqli);	
 	loadAllTeams($mysqli);
 	header("Location: team.php");
@@ -1073,12 +1079,31 @@ else {
 		$_SESSION['savesuccessEvent'] = "1";	
 	}
 	
-	function isEventCreated($mysqli) {
-		$result = $mysqli->query("SELECT EVENT_ID FROM EVENT WHERE EVENT_ID <> ".$_GET["eventId"]." AND UPPER(NAME) = '".strtoupper($_GET["eventName"])."' "); 
+	function deleteEvent($id, $mysqli) {
+		$result = $mysqli->query("SELECT TOURN_EVENT_ID FROM TOURNAMENT_EVENT WHERE EVENT_ID = ".$id); 
 		$count = $result->num_rows;
 		
-		if ($count > 0) echo 'error';
-		else echo 'success';
+		if ($count > 0) { $_SESSION['deleteEventError'] = "1";	return false; }
+
+		$query = $mysqli->prepare("DELETE FROM EVENT WHERE EVENT_ID = ?");	
+		$query->bind_param('i',$id);	
+		$query->execute();
+		$_SESSION['deleteEventSuccess'] = "1";
+		return true;
+	
+	}
+	
+	function isEventCreated($mysqli) {
+		$_SESSION["eventName"] = $_GET["eventName"];
+		$_SESSION["eventDescription"] = $_GET["eventDescription"];
+		$id = -1;
+		if ($_SESSION["eventId"] != null and $_SESSION["eventId"] != '') $id = $_SESSION["eventId"];
+		
+		$result = $mysqli->query("SELECT EVENT_ID FROM EVENT WHERE EVENT_ID <> ".$id." AND UPPER(NAME) = '".strtoupper($_GET["eventName"])."' "); 
+		$count = $result->num_rows;
+		
+		if ($count > 0) { $_SESSION['saveEventError'] = "1";	return true; }
+		return false;
 	}
 
 
@@ -1126,7 +1151,8 @@ else {
  				$_SESSION["teamName"] = $eventRow['1'];
  				$_SESSION["teamCity"] = $eventRow['2']; 
 				$_SESSION["teamPhone"] = $eventRow['4'];
-				$_SESSION["teamEmail"] = $eventRow['3'];				
+				$_SESSION["teamEmail"] = $eventRow['3'];
+				$_SESSION["teamDescription"] = $eventRow['5'];			
     		}
 	}
 	
@@ -1139,22 +1165,53 @@ else {
 			if ($row != null) $id = $row['0'];  
 			$_SESSION["teamId"] = $id;
 			
-			$query = $mysqli->prepare("INSERT INTO TEAM (TEAM_ID, NAME, CITY, PHONE_NUMBER, EMAIL_ADDRESS) VALUES (".$id.",?,?,?,?) ");
+			$query = $mysqli->prepare("INSERT INTO TEAM (TEAM_ID, NAME, CITY, PHONE_NUMBER, EMAIL_ADDRESS, DESCRIPTION) VALUES (".$id.",?,?,?,?,?) ");
 			
-			$query->bind_param('ssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"]);
+			$query->bind_param('sssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"], $_GET["teamDescription"]);
 			
 			$query->execute();
 			$query->free_result();
 		}
 		else {
-			$query = $mysqli->prepare("UPDATE TEAM SET NAME=?, CITY=?, PHONE_NUMBER=?, EMAIL_ADDRESS=? WHERE TEAM_ID=".$_SESSION["teamId"]);
+			$query = $mysqli->prepare("UPDATE TEAM SET NAME=?, CITY=?, PHONE_NUMBER=?, EMAIL_ADDRESS=?, DESCRIPTION=? WHERE TEAM_ID=".$_SESSION["teamId"]);
 			
-			$query->bind_param('ssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"]);
+			$query->bind_param('sssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"], $_GET["teamDescription"]);
 			$query->execute();
 			$query->free_result();
 		}
 		// save Confirmation
 		$_SESSION['savesuccessTeam'] = "1";	
+	}
+	
+	function deleteTeam($id, $mysqli) {
+		$result = $mysqli->query("SELECT TOURN_TEAM_ID FROM TOURNAMENT_TEAM WHERE TEAM_ID = ".$id); 
+		$count = $result->num_rows;
+		
+		if ($count > 0) { $_SESSION['deleteTeamError'] = "1";	return false; }
+
+		$query = $mysqli->prepare("DELETE FROM TEAM WHERE TEAM_ID = ?");	
+		$query->bind_param('i',$id);	
+		$query->execute();
+		$_SESSION['deleteTeamSuccess'] = "1";
+		return true;
+	
+	}
+	
+	function isTeamCreated($mysqli) {
+		$_SESSION["teamName"] = $_GET["teamName"];
+		$_SESSION["teamDescription"] = $_GET["teamDescription"];
+		$_SESSION["teamCity"] = $_GET["teamCity"];
+		$_SESSION["teamPhone"] = $_GET["teamPhone"];
+		$_SESSION["teamEmail"] = $_GET["teamEmail"];
+		
+		$id = -1;
+		if ($_SESSION["teamId"] != null and $_SESSION["teamId"] != '') $id = $_SESSION["teamId"];
+		
+		$result = $mysqli->query("SELECT TEAM_ID FROM TEAM WHERE TEAM_ID <> ".$id." AND UPPER(NAME) = '".strtoupper($_GET["teamName"])."' "); 
+		$count = $result->num_rows;
+		
+		if ($count > 0) { $_SESSION['saveTeamError'] = "1";	return true; }
+		return false;
 	}
 
 	
@@ -1855,8 +1912,7 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
-	++ Delete Tournament - Event - Team
-	++ Validate Add Team - Event (Cannot have Same Name) (team desciption issue)
+	++ Delete Tournament
 	++ Generate Results as Print / XML
 	++ controller class security
 	

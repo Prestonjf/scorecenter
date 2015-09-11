@@ -110,7 +110,7 @@
       			echo '<td>'; echo $team['1']; echo '</td>';
 				echo '<td>';
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="editTeam" value="'.$team['0'].'">Edit Team</button> &nbsp;'; 				
-				echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTeam" onclick="return confirmDelete(\'team\')" value='.$event['0'].'>Delete</button>&nbsp;';
+				echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTeam" onclick="return confirmDelete(\'team\')" value='.$team['0'].'>Delete</button>&nbsp;';
 				echo '</td>';	
 				echo '</tr>';	
     		}
@@ -136,7 +136,13 @@
     <?php 
     	if ($_SESSION['savesuccessTeam'] != null and $_SESSION['savesuccessTeam'] == '1') { ?>
     	<script type="text/javascript">saveMessage('Team');</script>
-   	<?php $_SESSION['savesuccessTeam'] = null; } ?> 	
+   	<?php $_SESSION['savesuccessTeam'] = null; } ?>
+   	   	<?php if ($_SESSION['deleteTeamSuccess'] != null and $_SESSION['deleteTeamSuccess'] == '1') { ?>
+    	<script type="text/javascript">displaySuccess("<strong>Team Deleted:</strong> Team has been deleted.");</script>
+   	<?php $_SESSION['deleteTeamSuccess'] = null; } ?>  
+   	<?php if ($_SESSION['deleteTeamError'] != null and $_SESSION['deleteTeamError'] == '1') { ?>
+    	<script type="text/javascript">displayError("<strong>Cannot Delete Team:</strong> Team is linked to existing tournaments.");</script>
+   	<?php $_SESSION['deleteTeamError'] = null; } ?> 
     
   </body>
 </html>

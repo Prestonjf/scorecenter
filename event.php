@@ -133,10 +133,15 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
     
-    <?php 
-    	if ($_SESSION['savesuccessEvent'] != null and $_SESSION['savesuccessEvent'] == '1') { ?>
+    <?php if ($_SESSION['savesuccessEvent'] != null and $_SESSION['savesuccessEvent'] == '1') { ?>
     	<script type="text/javascript">saveMessage('Event');</script>
-   	<?php $_SESSION['savesuccessEvent'] = null; } ?> 	
+   	<?php $_SESSION['savesuccessEvent'] = null; } ?>
+   	<?php if ($_SESSION['deleteEventSuccess'] != null and $_SESSION['deleteEventSuccess'] == '1') { ?>
+    	<script type="text/javascript">displaySuccess("<strong>Event Deleted:</strong> Event has been deleted.");</script>
+   	<?php $_SESSION['deleteEventSuccess'] = null; } ?>  
+   	<?php if ($_SESSION['deleteEventError'] != null and $_SESSION['deleteEventError'] == '1') { ?>
+    	<script type="text/javascript">displayError("<strong>Cannot Delete Event:</strong> Event is linked to existing tournaments.");</script>
+   	<?php $_SESSION['deleteEventError'] = null; } ?> 	
     
   </body>
 </html>
