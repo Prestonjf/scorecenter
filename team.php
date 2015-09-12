@@ -40,6 +40,7 @@
 	function clearFilterCriteria() {
 		document.getElementById('teamName').value = '';
 		document.getElementById('teamNumber').value = '';
+		document.getElementById('filterDivision').value = '';
 	}
   
   </script>
@@ -76,7 +77,13 @@
 	</td>
 	
 	<td width="15"></td>
-	<td width="35">
+	<td width="35">	
+			<select class="form-control" name="filterDivision" id="filterDivision" >
+			<option value=""></option>
+			<option value="A" <?php if($_SESSION["filterDivision"] == 'A'){echo("selected");}?>>A</option>
+			<option value="B" <?php if($_SESSION["filterDivision"] == 'B'){echo("selected");}?>>B</option>
+			<option value="C" <?php if($_SESSION["filterDivision"] == 'C'){echo("selected");}?>>C</option>
+	</select>
 	</td>
 	</tr>
 	<tr>
@@ -98,6 +105,7 @@
         <thead>
             <tr>
                 <th data-field="name" data-align="right" data-sortable="true">Team Name</th>
+                <th data-field="division" data-align="right" data-sortable="true">Team Division</th>
                 <th data-field="actions" data-sortable="true">Actions</th>
             </tr>
         </thead>
@@ -108,6 +116,7 @@
 			foreach ($_SESSION["teamsList"] as $team) {
       			echo '<tr>';
       			echo '<td>'; echo $team['1']; echo '</td>';
+      			echo '<td>'; echo $team['2']; echo '</td>';
 				echo '<td>';
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="editTeam" value="'.$team['0'].'">Edit Team</button> &nbsp;'; 				
 				echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTeam" onclick="return confirmDelete(\'team\')" value='.$team['0'].'>Delete</button>&nbsp;';

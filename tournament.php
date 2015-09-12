@@ -39,6 +39,14 @@
 		document.getElementById('toDate').value = '';
 		document.getElementById('tournamentsNumber').value = '20';		
 	}
+  	
+  	function confirm2Delete(id) {
+  		var name = $('#tournamentName'+id).val();
+  		var value = prompt("To delete tournament '"+name+"', type 'DELETE'. You will not be able to undo this action once clicking ok.");
+  		if (value == 'DELETE') 
+  			return true;
+  		return false;
+  	}
   
   </script>
     <style>
@@ -132,10 +140,10 @@
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="enterScores" value="'.$row['0'].'">Enter Scores</button> &nbsp;'; 				
 				echo '<button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$row['0'].'>View Scores</button>&nbsp;';
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="loadTournament" value='.$row['0'].'>Edit Tournament</button>&nbsp;';
-				if (getCurrentRole() == 'ADMIN') echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTournament" onclick="return confirmDelete(\'tournament\')" value='.$row['0'].'>Delete</button>&nbsp;';
-				echo '</td>';
-					
-				echo '</tr>';	
+				if (getCurrentRole() == 'ADMIN') echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTournament" onclick="return confirm2Delete(\''.$row['0'].'\')" value='.$row['0'].'>Delete</button>&nbsp;';
+				echo '</td>';				
+				echo '</tr>';
+				echo '<input type="hidden" value="'.$row['1'].'" id="tournamentName'.$row['0'].'" />';
       			}
     		}
     	}
@@ -161,6 +169,9 @@
     	if ($_SESSION['savesuccessTournament'] != null and $_SESSION['savesuccessTournament'] == '1') { ?>
     	<script type="text/javascript">saveMessage('Tournament');</script>
    	<?php $_SESSION['savesuccessTournament'] = null; } ?> 	
-    
+    <?php 
+    	if ($_SESSION['deleteTournamentSuccess'] != null and $_SESSION['deleteTournamentSuccess'] == '1') { ?>
+    	<script type="text/javascript">displaySuccess('<strong>Deleted: </strong>Tournament has been deleted successfully!');</script>
+   	<?php $_SESSION['deleteTournamentSuccess'] = null; } ?> 
   </body>
 </html>

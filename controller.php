@@ -131,7 +131,8 @@ else if (isset($_GET['addTournament'])) {
 }
 else if (isset($_GET['deleteTournament'])) {	
 	$_SESSION["tournamentId"] = $_GET['deleteTournament'];
-	//deleteTournament($_GET['deleteTournament'], $mysqli);
+	deleteTournament($_GET['deleteTournament'], $mysqli);
+	loadAllTournaments($mysqli);
 	header("Location: tournament.php");
 	exit();
 }
@@ -246,6 +247,7 @@ else if (isset($_GET['searchTeam']) or ($_GET['command'] != null and $_GET['comm
 	if (isset($_GET['searchTeam'])) {
 		$_SESSION["teamFilterNumber"] = $_GET['teamNumber'];
 		$_SESSION["teamFilterName"] = $_GET['teamName'];
+		$_SESSION["filterDivision"] = $_GET['filterDivision'];
 	}
 	loadAllTeams($mysqli);
 	header("Location: team.php");
@@ -405,16 +407,22 @@ else {
 	
 	
 	function deleteTournament($id, $mysqli) {
-		
-		// delete score_table
+		// Delete From TEAM_EVENT_SCORE
+		$result = $mysqli->query("DELETE FROM TEAM_EVENT_SCORE TES 
+										INNER JOIN TOURNAMENT_TEAM TT ON TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID 
+ 										INNER JOIN TOURNAMENT T ON TT.TOURNAMENT_ID=T.TOURNAMENT_ID 
+										WHERE T.TOURNAMENT_ID=".$id);
 		
 		// delete TOURN_EVENT_LINK
+		$result = $mysqli->query("DELETE FROM TOURNAMENT_EVENT TE INNER JOIN TOURNAMENT T ON TE.TOURNAMENT_ID=T.TOURNAMENT_ID WHERE T.TOURNAMENT_ID=".$id);
 		
 		// delete TOURN_TEAM_LINK
+		$result = $mysqli->query("DELETE FROM TOURNAMENT_TEAM TT INNER JOIN TOURNAMENT T ON TT.TOURNAMENT_ID=T.TOURNAMENT_ID WHERE T.TOURNAMENT_ID=".$id);
 		
 		// DELETE TOURNAMENT
-		//$result = $mysqli->query("DELETE FROM TOURNAMENT WHERE TOURNAMENT_ID = " .$id); 
+		$mysqli->query("DELETE FROM TOURNAMENT WHERE TOURNAMENT_ID = " .$id); 
 		
+		$_SESSION["deleteTournamentSuccess"] = '1';	
 	}
 
 
@@ -1116,6 +1124,7 @@ else {
 		$_SESSION["teamCity"] = null;
 		$_SESSION["teamPhone"] = null;
 		$_SESSION["teamEmail"] = null;
+		$_SESSION["teamDivision"] = null;
 		$_SESSION["teamDescription"] = null;
 	}
 	
@@ -1124,6 +1133,9 @@ else {
 			$query = "Select * from TEAM WHERE 1=1 ";
 			if ($_SESSION["teamFilterName"] != null) {
 				$query = $query . " AND NAME LIKE '".$_SESSION["teamFilterName"]."%' " ;
+			}
+			if ($_SESSION["filterDivision"] != null and $_SESSION["filterDivision"] != '') {
+				$query = $query . " AND DIVISION = '".$_SESSION["filterDivision"]."' " ;
 			}
 			$query = $query . " ORDER BY NAME ASC ";
 			if ($_SESSION["teamFilterNumber"] != null) {
@@ -1136,6 +1148,7 @@ else {
  					$teamRecord = array();	
 					array_push($teamRecord, $teamRow['0']);
 					array_push($teamRecord, $teamRow['1']);
+					array_push($teamRecord, $teamRow['6']);
  				
 					array_push($teamList, $teamRecord);
 				}
@@ -1152,7 +1165,8 @@ else {
  				$_SESSION["teamCity"] = $eventRow['2']; 
 				$_SESSION["teamPhone"] = $eventRow['4'];
 				$_SESSION["teamEmail"] = $eventRow['3'];
-				$_SESSION["teamDescription"] = $eventRow['5'];			
+				$_SESSION["teamDescription"] = $eventRow['5'];
+				$_SESSION["teamDivision"] = $eventRow['6'];			
     		}
 	}
 	
@@ -1165,17 +1179,17 @@ else {
 			if ($row != null) $id = $row['0'];  
 			$_SESSION["teamId"] = $id;
 			
-			$query = $mysqli->prepare("INSERT INTO TEAM (TEAM_ID, NAME, CITY, PHONE_NUMBER, EMAIL_ADDRESS, DESCRIPTION) VALUES (".$id.",?,?,?,?,?) ");
+			$query = $mysqli->prepare("INSERT INTO TEAM (TEAM_ID, NAME, CITY, PHONE_NUMBER, EMAIL_ADDRESS, DESCRIPTION, DIVISION) VALUES (".$id.",?,?,?,?,?,?) ");
 			
-			$query->bind_param('sssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"], $_GET["teamDescription"]);
+			$query->bind_param('ssssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"], $_GET["teamDescription"], $_GET["teamDivision"]);
 			
 			$query->execute();
 			$query->free_result();
 		}
 		else {
-			$query = $mysqli->prepare("UPDATE TEAM SET NAME=?, CITY=?, PHONE_NUMBER=?, EMAIL_ADDRESS=?, DESCRIPTION=? WHERE TEAM_ID=".$_SESSION["teamId"]);
+			$query = $mysqli->prepare("UPDATE TEAM SET NAME=?, CITY=?, PHONE_NUMBER=?, EMAIL_ADDRESS=?, DESCRIPTION=?, DIVISION=? WHERE TEAM_ID=".$_SESSION["teamId"]);
 			
-			$query->bind_param('sssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"], $_GET["teamDescription"]);
+			$query->bind_param('ssssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"], $_GET["teamDescription"], $_GET["teamDivision"]);
 			$query->execute();
 			$query->free_result();
 		}
@@ -1203,6 +1217,7 @@ else {
 		$_SESSION["teamCity"] = $_GET["teamCity"];
 		$_SESSION["teamPhone"] = $_GET["teamPhone"];
 		$_SESSION["teamEmail"] = $_GET["teamEmail"];
+		$_SESSION["teamDivision"] = $_GET["teamDivision"];
 		
 		$id = -1;
 		if ($_SESSION["teamId"] != null and $_SESSION["teamId"] != '') $id = $_SESSION["teamId"];
@@ -1912,16 +1927,16 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
-	++ Delete Tournament
 	++ Add Division Attribute to Teams
 	++ Generate Results as Print / XML
-	++ controller class security
+
 	
 	
 	-- APP LIMITATIONS / LOW PRIORITY ISSUES --
 	** Handles 100 Teams / Events Per TOURNAMENT
 	** Results: Ties Broken to 20 positions
 	** Results Order By OPTION
+	** controller class security
 	** Manual Reminder email to supervisor
 	** Low Score wins (options for high score?)
 	** Rank Alternate Team?

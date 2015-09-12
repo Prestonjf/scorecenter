@@ -34,13 +34,17 @@
 		clearError();
 		clearSuccess();
 		var error = false;
+		var error2 = false;
 		var fields = ["tournamentName", "tournamentDivision", "tournamentLocation","tournamentDate","numberEvents","numberTeams","highestScore"];
 		var str;
 		for (str in fields) {
 			if (document.getElementById(fields[str]).value.length === 0 || !document.getElementById(fields[str]).value.trim()) {
 				error = true;
 			}
-		}	
+		}
+		if($('#tournamentName').val().indexOf('"') != -1) {	
+			error2 = true;
+		}
 		// validate Unique Team Number
 		var scoreArr = [];
 		var errorDuplicateNumber = false;
@@ -71,6 +75,10 @@
 		if (error) {
 			displayError("<strong>Required Fields:</strong> Please complete the required fields denoted with an ' * '.");
 			return false;			
+		}
+		if (error2) {
+			displayError("<strong>Validation Error:</strong> Tournament Name and Location fields cannot contain the symbol ' \" '.");
+			return false;	
 		}
 		else {
 			clearError();

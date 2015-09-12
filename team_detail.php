@@ -32,7 +32,11 @@ include_once('logon_check.php');
 	});
 	function validate() {
 		if ($('#teamName').val().trim() == '') {
-			displayError("<strong>Validation Error:</strong> Team name is required.");
+			displayError("<strong>Validation Error:</strong> Team Name is required.");
+			return false;
+		}
+		if ($('#teamDivision').val().trim() == '') {
+			displayError("<strong>Validation Error:</strong> Team Divison is required.");
 			return false;
 		}
 		return true;
@@ -85,6 +89,19 @@ include_once('logon_check.php');
 	<td>
 	<input type="text" size="40" class="form-control" name="teamEmail" id="teamEmail" value="<?php echo $_SESSION["teamEmail"];?>">
 	</td>
+	</tr>
+	<tr>
+	<td><label for="eventName">Division:<span class="red">*</span></label></td>
+	<td>
+	<select class="form-control" name="teamDivision" id="teamDivision" >
+			<option value=""></option>
+			<option value="A" <?php if($_SESSION["teamDivision"] == 'A'){echo("selected");}?>>A</option>
+			<option value="B" <?php if($_SESSION["teamDivision"] == 'B'){echo("selected");}?>>B</option>
+			<option value="C" <?php if($_SESSION["teamDivision"] == 'C'){echo("selected");}?>>C</option>
+	</select>
+	</td>
+	<td></td>
+	<td></td>
 	</tr>
 	
 	<tr>
