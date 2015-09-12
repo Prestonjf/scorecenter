@@ -210,6 +210,19 @@
 		return "&numberEvents="+document.getElementById('numberEvents').value+"&numberTeams="+document.getElementById('numberTeams').value;
 	}
 	
+	function loadDivisonTeams(ele) {
+		var division = ele.value;
+		xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				document.getElementById('teamsSelectDiv').innerHTML = xmlhttp.responseText;
+			}
+		}	
+        xmlhttp.open("GET","controller.php?command=loadDivisionTeams&division="+division,true);
+        xmlhttp.send();
+		
+	}
+	
   
   </script>
   <style>
@@ -236,8 +249,10 @@
  			if (!db_server) die("Unable to connect to MySQL: " . mysql_error());			
  			mysql_select_db($db_database);
     		
+    		$teams = null;
     		$events = mysql_query("SELECT DISTINCT * FROM EVENT ORDER BY NAME ASC");
-    		$teams = mysql_query("SELECT DISTINCT * FROM TEAM ORDER BY NAME ASC");
+    		if ($_SESSION["tournamentDivision"] == null or $_SESSION["tournamentDivision"] == '') $teams = mysql_query("SELECT DISTINCT * FROM TEAM ORDER BY NAME ASC");
+    		else $teams = mysql_query("SELECT DISTINCT * FROM TEAM WHERE DIVISION = '".$_SESSION["tournamentDivision"]."' ORDER BY NAME ASC"); 
     		$supervisors = mysql_query("SELECT DISTINCT USER_ID, CONCAT(LAST_NAME,', ',FIRST_NAME,' (', USERNAME,')') AS USER
     									 FROM USER WHERE ROLE_CODE='SUPERVISOR' ORDER BY UPPER(LAST_NAME) ASC");
         ?>
@@ -256,7 +271,7 @@
 		<td width="15%"><label for="tournamentName">Tournament Name:<span class="red">*</span></label></td>
 		<td width="35%"><input type="text" class="form-control" name="tournamentName" id="tournamentName" size="50" value=<?php echo '"'.$_SESSION["tournamentName"].'"' ?>></td>
 		<td width="15%"><label for="tournamentDivision">Division:<span class="red">*</span></label></td>
-		<td width="35%"><select class="form-control" name="tournamentDivision" id="tournamentDivision" >
+		<td width="35%"><select class="form-control" name="tournamentDivision" id="tournamentDivision" onchange="loadDivisonTeams(this)">
 			<option value=""></option>
 			<option value="A" <?php if($_SESSION["tournamentDivision"] == 'A'){echo("selected");}?>>A</option>
 			<option value="B" <?php if($_SESSION["tournamentDivision"] == 'B'){echo("selected");}?>>B</option>
@@ -421,7 +436,7 @@
 	<span class="input-group-btn">
 	<button type="button" class="btn btn-xs btn-primary" onclick="addTournTeam()" name="addTeam">Add Team</button>
 	</span>
-	<div class="col-xs-4 col-md-4">
+	<div class="col-xs-4 col-md-4" id="teamsSelectDiv">
 		<select class="form-control" name="teamAdded" id="teamAdded">
 			<option value=""></option>
 			<?php

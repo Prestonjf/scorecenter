@@ -355,6 +355,10 @@ else if (isset($_GET['cancelTournament'])) {
 	header("Location: tournament.php");
 	exit();
 }
+else if ($_GET['command'] != null and $_GET['command'] == 'loadDivisionTeams') {
+	loadDivisionTeams($_GET['division'], $mysqli);
+	exit();
+}
 else if ($_GET['command'] != null and $_GET['command'] == 'addEvent') {
 	cacheTournamnent();
 	addEvent($_GET['eventAdded'], $mysqli);
@@ -639,6 +643,21 @@ else {
 				$count++;		
 			}
 		}
+	}
+	
+	function loadDivisionTeams($division, $mysqli) {
+		$query = "SELECT DISTINCT * FROM TEAM ";
+		if ($division != null and $division != '') $query .= " WHERE DIVISION = '".$division. "' ";
+		$query .= " ORDER BY NAME ASC ";
+		$results = $mysqli->query($query);
+		echo '<select class="form-control" name="teamAdded" id="teamAdded">';
+		echo '<option value=""></option>';
+		if ($results) {
+        	while($teamRow = $results->fetch_array()) {
+            	echo '<option value="'.$teamRow['0'].'">'.$teamRow['1'].'</option>';		
+             }
+        }
+		echo '</select>';
 	}
 	
 	function reloadTournamentTeam() {
@@ -1927,7 +1946,6 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
-	++ Add Division Attribute to Teams
 	++ Generate Results as Print / XML
 
 	
