@@ -46,14 +46,17 @@ include_once('logon_check.php');
      
       <div class="row row-offcanvas row-offcanvas-right">
         <div class="col-xs-12 col-sm-9">
-          <p class="pull-right visible-xs">
-            <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas">Toggle nav</button>
-          </p>
-          <div class="jumbotron">
-            <h2>Welcome to Score Center!</h2>
-            <p>This is a new electronic scoring system designed for Michigan Science Olympiad.
-            The tool allows tournament organizers the ability to manage multiple tournaments including
-            customizable teams and events per tournament.</p>
+		
+          <div class="jumbotron" style="overflow: auto;">
+		  	<div style="float: left; width: 80%;">
+            <h2 style="margin-top:0px;">Welcome to Score Center!</h2>
+            <p style="padding-right: 10px;">This is a new electronic scoring system designed for Michigan Science Olympiad.
+            This application allows tournament organizers the ability to manage tournaments, teams, and events
+			in an secure, efficient, and flexible process.</p>
+			</div>
+			<div style="float: left; width: 20%;">
+				<img src="img/misologo.png" alt="misciologo" >
+			</div>
           </div>
           
           <form action="controller.php" method="GET">
