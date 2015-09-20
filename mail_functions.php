@@ -4,17 +4,20 @@
 	require 'libs/class.pop3.php';
 	
 	function sendAccountCreationEmail($mysqli, $userName, $firstName, $lastName, $password) {
-		$msg = "Hello ".$firstName." ".$lastName. ", \n\n";
-		$msg = $msg . "Thank you for creating an account on Michigan Science Olympiad's Score Center. You will now be able to enter scores for events assigned to you. If you are a score verifier, you will be able to enter scores for entire tournaments. You may access Score Center at the following address with the user name and password below.\n\n\n";
-		
+		$result = $mysqli->query("SELECT DISPLAY_TEXT FROM REF_DATA WHERE DOMAIN_CODE='EMAILMESSAGE' AND REF_DATA_CODE='ACCOUNTCREATE' ");
+		$row = $result->fetch_row();	
+	
+		$msg = "Hello ".$firstName." ".$lastName. ", \n\n";	
+		$msg = $msg . $row['0'];
+		$msg = $msg . "\n\n\n";	
 		$host = $_SERVER['HTTP_HOST'];
 		$msg = $msg . "URL: " . "http://".$host."/scorecenter \n";
 		$msg = $msg . "User Name: " .$userName." \n";
 		$msg = $msg . "Password: " .$password." \n";
 		
-		$msgHtml = "Hello ".$firstName." ".$lastName. ", <br /><br />";
-		$msgHtml = $msgHtml . "Thank you for creating an account on Michigan Science Olympiad's Score Center. You will now be able to enter scores for events assigned to you. If you are a score verifier, you will be able to enter scores for entire tournaments. You may access Score Center at the following address with the user name and password below.<br /><br /><br />";
-		
+		$msgHtml = "Hello ".$firstName." ".$lastName. ", <br /><br />";	
+		$msgHtml = $msgHtml . $row['0'];
+		$msgHtml = $msgHtml . "<br /><br /><br />";
 		$msgHtml = $msgHtml . "URL: " . "http://".$host."/scorecenter <br />";
 		$msgHtml = $msgHtml . "User Name: " .$userName." <br />";
 		$msgHtml = $msgHtml . "Password: " .$password." <br />";
@@ -24,13 +27,20 @@
 	}
 
 	function emailPasswordReset($mysqli, $address, $name, $userId, $encryptedPassword, $salt) {
+		$result = $mysqli->query("SELECT DISPLAY_TEXT FROM REF_DATA WHERE DOMAIN_CODE='EMAILMESSAGE' AND REF_DATA_CODE='PASSWORDRESET' ");
+		$row = $result->fetch_row();
+	
 		$host = $_SERVER['HTTP_HOST'];
 		$msg = "Hello ".$name.", \n\n";
-		$msg .= "A password reset for account ". $address . " has been requested from the Science Olympiad Score Center application. To reset your password, select the hyperlink below and update your password on the account screen. If this message was sent in error, please disregard this email. <br /><br /><br />";
+		$msg .= $row['0'];	
+		$msg .= "\n\n\n";
+		$msg = str_replace('<account name>',$address,$msg);
 		$msg .= "Reset Password Link: \n http://".$host."/scorecenter/controller.php?command=passwordResetProcess&id=".$userId."&ep=".$encryptedPassword."&sa=".$salt."&nn=".uniqid();
 	
 		$msgHtml = "Hello ".$name.", <br /><br />";
-		$msgHtml .= "A password reset for account ". $address . " has been requested from the Science Olympiad Score Center application. To reset your password, select the hyperlink below and update your password on the account screen. If this message was sent in error, please disregard this email. <br /><br /><br />";
+		$msgHtml .= $row['0'];	
+		$msgHtml .= "<br /><br /><br />";
+		$msgHtml = str_replace('<account name>',$address,$msgHtml);
 		$msgHtml .= "Reset Password Link: <br /> http://".$host."/scorecenter/controller.php?command=passwordResetProcess&id=".$userId."&ep=".$encryptedPassword."&sa=".$salt."&nn=".uniqid();
 	
 		sendMail($mysqli, $address,"Score Center Password Reset",$msg, $msgHtml);

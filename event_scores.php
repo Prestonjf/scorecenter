@@ -152,7 +152,11 @@ include_once('logon_check.php');
      <h4>Event: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventName"]; ?></span></h4>
 	 <h4>Supervisor: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventSupervisor"]; ?></span></h4> 	 
      <br />
-     <h6>*Instructions: Enter the finishing position/score for each team on the list below. The maximum score for events at this tournament is <?php echo $_SESSION["tournamentHighestScore"];?>. Select the submitted checkbox to complete the scores. The score verifier can modify the scores after they are submitted.</h6>    
+     <h6>*Instructions:<br /><br />
+     1. Enter the finishing position/score for each team on the list below. (The maximum score for events at this tournament is <?php echo $_SESSION["tournamentHighestScore"];?>.)<br /><br />
+     2. Check the submitted checkbox to finish scoring the event. Once submitted, supervisors will not be able to modify scores. A score verifier can modify the scores after they are submitted.<br /><br />
+     3. Click save to save the event's scores. Event scores can be modified after the initial save if they have not yet been submitted.
+     </h6>    
 	 <hr>
 
 	 <table width="75%"><tr>
@@ -179,7 +183,7 @@ include_once('logon_check.php');
       				echo '<td>'; echo $scoreRecord['1']; echo '</td>';
 					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
 					echo '<td><div class="col-xs-5 col-md-5">';
-      				echo '<input type="text"  class="form-control" size="10" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);" '.$disable.'    
+      				echo '<input type="text"  class="form-control" size="10" autocomplete="off" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);" '.$disable.'    
       						name="teamScore'.$teamCount.'" id="teamScore'.$teamCount.'" value="'.$scoreRecord['2'].'">';
       				echo '</div></td>';					
 					echo '</tr>';

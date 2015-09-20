@@ -64,6 +64,15 @@ else if ($_GET['command'] != null and $_GET['command'] == 'passwordResetProcess'
 	header("Location: logon.php");	
 	exit();
 }
+else if ($_GET['command'] != null and $_GET['command'] == 'updateExistingAccount') {
+	if (manageAccount($mysqli,'update')) {
+		login($mysqli);
+		header("Location: index.php");
+		exit();
+	}
+	header("Location: account.php");	
+	exit();
+}
 
 // All Commands Below Require An Active Session
 // Session Timeout 30 Minutes
@@ -87,15 +96,6 @@ else if ($_GET['command'] != null and $_GET['command'] == 'updateAccount') {
     clearAccount();
 	loadAccount();
 	$_SESSION["accountMode"] = 'update';
-	header("Location: account.php");	
-	exit();
-}
-else if ($_GET['command'] != null and $_GET['command'] == 'updateExistingAccount') {
-	if (manageAccount($mysqli,'update')) {
-		login($mysqli);
-		header("Location: index.php");
-		exit();
-	}
 	header("Location: account.php");	
 	exit();
 }
@@ -1654,10 +1654,13 @@ else {
 		$_SESSION["emailPassword"] = "";
 		$_SESSION["smtpSecure"] = "";
 		
+		$_SESSION["accountCreationEmail"] = "";
+		$_SESSION["passwordResetMessage"] = "";
+		
 	}
 	
 	function loadUtilities($mysqli) {		
-		$result = $mysqli->query("SELECT DOMAIN_CODE,REF_DATA_CODE,DISPLAY_TEXT FROM REF_DATA WHERE DOMAIN_CODE IN ('REGISTRATIONCODE', 'MAILSERVER','PASSWORDRESET') ORDER BY DOMAIN_CODE ASC"); 
+		$result = $mysqli->query("SELECT DOMAIN_CODE,REF_DATA_CODE,DISPLAY_TEXT FROM REF_DATA WHERE DOMAIN_CODE IN ('REGISTRATIONCODE', 'MAILSERVER','PASSWORDRESET','EMAILMESSAGE') ORDER BY DOMAIN_CODE ASC"); 
  		if ($result) {
 			while($utilityRow = $result->fetch_array()) {
 				if ($utilityRow != null) {
@@ -1670,6 +1673,8 @@ else {
 					else if ($utilityRow['0'] == 'MAILSERVER' and $utilityRow['1'] == 'PASSWORD') $_SESSION["emailPassword"] = $utilityRow['2'];
 					else if ($utilityRow['0'] == 'MAILSERVER' and $utilityRow['1'] == 'SMTPSECURE') $_SESSION["smtpSecure"] = $utilityRow['2'];
 					else if ($utilityRow['0'] == 'PASSWORDRESET' and $utilityRow['1'] == 'SALT') $_SESSION["resetPassword"] = $utilityRow['2'];
+					else if ($utilityRow['0'] == 'EMAILMESSAGE' and $utilityRow['1'] == 'ACCOUNTCREATE') $_SESSION["accountCreationEmail"] = $utilityRow['2'];
+					else if ($utilityRow['0'] == 'EMAILMESSAGE' and $utilityRow['1'] == 'PASSWORDRESET') $_SESSION["passwordResetMessage"] = $utilityRow['2'];
 				}
 			}
 		}		
@@ -1702,6 +1707,12 @@ else {
 		
 		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='MAILSERVER' AND REF_DATA_CODE='SMTPSECURE' ");			
 		$query->bind_param('s',$_GET["smtpSecure"]); $query->execute();$query->free_result();
+		
+		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='EMAILMESSAGE' AND REF_DATA_CODE='ACCOUNTCREATE' ");			
+		$query->bind_param('s',$_GET["accountCreationEmail"]); $query->execute();$query->free_result();
+		
+		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='EMAILMESSAGE' AND REF_DATA_CODE='PASSWORDRESET' ");			
+		$query->bind_param('s',$_GET["passwordResetMessage"]); $query->execute();$query->free_result();
 		
 		// save Confirmation
 		$_SESSION['savesuccessUtilities'] = "1";	

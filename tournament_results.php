@@ -78,8 +78,8 @@
      <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
 	 <h4>Events Completed: <?php echo $_SESSION["tournamentEventsCompleted"]; ?></h4>
 	 <hr>
-	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsCSV" value='.$row['0'].'>Export CSV</button>
-	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsEXCEL" value='.$row['0'].'>Export Excel</button>
+	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsCSV" value='.$row['0'].'>Export to .csv</button>
+	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsEXCEL" value='.$row['0'].'>Export to .xlsx</button>
 	 <hr>
 
         <table class="table table-bordered table-hover" data-sortable data-sort-name="rank" data-sort-order="desc">

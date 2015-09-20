@@ -414,7 +414,7 @@
       				echo '<td><div class="col-xs-5 col-md-5">';
       				echo '<input type="text"  class="form-control" size="10" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);" 
       						min="0" max="100" step="1" 
-      						name="teamNumber'.$teamCount.'" id="teamNumber'.$teamCount.'" value="'.$team['2'].'">';
+      						name="teamNumber'.$teamCount.'" id="teamNumber'.$teamCount.'" autocomplete="off" value="'.$team['2'].'">';
       				echo '</div></td>';
 					echo '<td><div class="col-xs-5 col-md-5">'; 
 					echo '<select   class="form-control" name="alternateTeam'.$teamCount.'" id="alternateTeam'.$teamCount.'" >';

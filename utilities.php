@@ -99,12 +99,12 @@
 	</fieldset>
 	
 	<fieldset class="utility-border">
-	<legend class="utility-border">Mail</legend>
+	<legend class="utility-border">Email</legend>
 	<table width="100%" class="borderless">
 	<tr>
 	<td width="15%"><label for="emailHost">Host: </label></td>
 	<td width="35%">
-	<input type="text" size="20" class="form-control" name="emailHost" id="emailHost" placeholder="smtp.gmail.com" value=<?php echo '"'.$_SESSION["emailHost"].'"' ?>></td>
+	<input type="text" size="20" class="form-control" name="emailHost" id="emailHost" placeholder="smtp.scorecenter.com" value=<?php echo '"'.$_SESSION["emailHost"].'"' ?>></td>
 	<td width="15%"><label for="emailPort">Port: </label></td>
 	<td width="35%">
 	<input type="text" size="20" class="form-control" name="emailPort" id="emailPort" placeholder="587" value=<?php echo '"'.$_SESSION["emailPort"].'"' ?>></td>
@@ -131,6 +131,19 @@
 	<label>Note: If mail settings are not configured correctly, mail will be sent by the application server's default mail server.</label>
 	</fieldset>
 	
+	<fieldset class="utility-border">
+	<legend class="utility-border">Email Messages</legend>
+	<table width="100%" class="borderless">
+	<tr><td width="100%"><label for="accountCreationEmail">Account Creation Message: </label></td></tr>
+	<tr><td width="100%">
+	<textarea class="form-control"  name="accountCreationEmail" id="accountCreationEmail" spellcheck="true" rows="5" cols="100"><?php echo $_SESSION["accountCreationEmail"];?></textarea>
+	</td></tr>
+	<tr><td width="100%"><label for="passwordResetMessage">Password Reset Message: </label></td></tr>
+	<tr><td width="100%">
+	<textarea class="form-control"  name="passwordResetMessage" id="passwordResetMessage" spellcheck="true" rows="5" cols="100"><?php echo $_SESSION["passwordResetMessage"];?></textarea>
+	</td></tr>
+	</table>
+	</fieldset>
 	
 	<br />
 	<br />
