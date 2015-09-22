@@ -170,7 +170,12 @@ include_once('logon_check.php');
             <tr>
                 <th data-field="name" data-align="right" data-sortable="true">Team Number</th>
                 <th data-field="teamNumber" data-align="center" data-sortable="true">Team Name</th>
-                <th data-field="score" data-align="center" data-sortable="true">Score / Rank</th>
+				<th data-field="score" data-align="center" data-sortable="true">Raw Score</th>
+				<th data-field="score" data-align="center" data-sortable="true">Tier/Rank Group</th>
+				<th data-field="score" data-align="center" data-sortable="true">Tie Break</th>
+				
+                <th data-field="score" data-align="center" data-sortable="true">Rank</th>
+				<th data-field="score" data-align="center" data-sortable="true">Points Earned</th>
             </tr>
         </thead>
         <tbody>
@@ -182,10 +187,13 @@ include_once('logon_check.php');
       				echo '<tr>';
       				echo '<td>'; echo $scoreRecord['1']; echo '</td>';
 					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
-					echo '<td><div class="col-xs-5 col-md-5">';
-      				echo '<input type="text"  class="form-control" size="10" autocomplete="off" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);" '.$disable.'    
+					echo '<td></td>';
+					echo '<td></td>';
+					echo '<td></td>';
+					echo '<td></td>';
+      				echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);" '.$disable.'    
       						name="teamScore'.$teamCount.'" id="teamScore'.$teamCount.'" value="'.$scoreRecord['2'].'">';
-      				echo '</div></td>';					
+      				echo '</td>';					
 					echo '</tr>';
 					
 					$teamCount++;	

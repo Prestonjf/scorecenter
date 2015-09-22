@@ -310,7 +310,7 @@
 			value=<?php echo '"'.$_SESSION["numberTeams"].'"' ?>></td>
 	</tr>
 	<tr>
-		<td><label for="highestScore">Highest Event Score:<span class="red">*</span></label></td>
+		<td><label for="highestScore">Max Score per Event:<span class="red">*</span></label></td>
 		<td><input type="text" class="form-control" name="highestScore" id="highestScore" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
 			value=<?php echo '"'.$_SESSION["highestScore"].'"' ?>></td>
 		<td><label for="highestScore">Total Points:<span class="red">*</span></label></td>
