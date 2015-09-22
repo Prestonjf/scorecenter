@@ -440,6 +440,7 @@ else {
 		if ($_GET['numberTeams'] != null) $_SESSION["numberTeams"] = $_GET['numberTeams'];
 		if ($_GET['highestScore'] != null) $_SESSION["highestScore"] = $_GET['highestScore'];
 		if ($_GET['tournamentDescription'] != null) $_SESSION["tournamentDescription"] = $_GET['tournamentDescription'];
+		if ($_GET['totalPointsWins'] != null) $_SESSION["totalPointsWins"] = $_GET['totalPointsWins'];
 		
 		// Team Cache - teamNumber, alternateTeam
 		$count = 0;
@@ -739,6 +740,7 @@ else {
  				$_SESSION["numberTeams"] = $tournamentRow['6'];
  				$_SESSION["highestScore"] = $tournamentRow['7'];
  				$_SESSION["tournamentDescription"] = $tournamentRow['8'];
+ 				$_SESSION["totalPointsWins"] = $tournamentRow['9'];
  				
  				$date = strtotime($tournamentRow['4']);
  				$_SESSION["tournamentDate"] = date('m/d/Y', $date);
@@ -810,6 +812,7 @@ else {
 			$numberTeams = $_SESSION['numberTeams'];
 			$highestScore = $_SESSION["highestScore"];
 			$description = $_SESSION['tournamentDescription'];
+			$highLowWins = $_SESSION["totalPointsWins"];
 	
 		// if Tournament id is null create new
 		if ($_SESSION["tournamentId"] == null) { 
@@ -820,9 +823,9 @@ else {
 			$_SESSION["tournamentId"] = $id;
 			
 			$query = $mysqli->prepare("INSERT INTO TOURNAMENT (TOURNAMENT_ID, NAME, LOCATION, DIVISION, DATE, NUMBER_EVENTS, NUMBER_TEAMS, 
-			HIGHEST_SCORE_POSSIBLE, DESCRIPTION) VALUES (".$id.", ?, ?, ?, ?, ?, ?, ?,?) ");
+			HIGHEST_SCORE_POSSIBLE, DESCRIPTION, HIGH_LOW_WIN_FLAG) VALUES (".$id.", ?, ?, ?, ?, ?, ?, ?,?) ");
 			
-			$query->bind_param('ssssiiis',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description);
+			$query->bind_param('ssssiiisi',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins);
 			
 			$query->execute();
 			$query->free_result();
@@ -831,9 +834,9 @@ else {
 		}
 		else {
 			$query = $mysqli->prepare("UPDATE TOURNAMENT SET NAME=?, LOCATION=?, DIVISION=?, DATE=?, NUMBER_EVENTS=?,NUMBER_TEAMS=?,
-			HIGHEST_SCORE_POSSIBLE=?, DESCRIPTION=? WHERE TOURNAMENT_ID=".$_SESSION["tournamentId"]);
+			HIGHEST_SCORE_POSSIBLE=?, DESCRIPTION=?, HIGH_LOW_WIN_FLAG=? WHERE TOURNAMENT_ID=".$_SESSION["tournamentId"]);
 			
-			$query->bind_param('ssssiiis',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description);
+			$query->bind_param('ssssiiisi',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins);
 			$query->execute();
 			$query->free_result();
 			//$result = mysql_query($query);		
@@ -1957,6 +1960,11 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
+	++ RAW Scores and Points Earned and Rank. Validate Raw Score Ties
+	++ Tournament Details: High vs. Low Score wins
+	++ Assign Verifiers to events
+	++ commas in csv file.
+	
 	++ Generate Results as Print / XML
 
 	

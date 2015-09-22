@@ -42,6 +42,7 @@
 				error = true;
 			}
 		}
+		if (!document.getElementById("totalPointsWins0").checked && !document.getElementById("totalPointsWins1").checked) error = true;
 		if($('#tournamentName').val().indexOf('"') != -1) {	
 			error2 = true;
 		}
@@ -312,8 +313,11 @@
 		<td><label for="highestScore">Highest Event Score:<span class="red">*</span></label></td>
 		<td><input type="text" class="form-control" name="highestScore" id="highestScore" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
 			value=<?php echo '"'.$_SESSION["highestScore"].'"' ?>></td>
-		<td></td>
-		<td></td>
+		<td><label for="highestScore">Total Points:<span class="red">*</span></label></td>
+		<td><input type="radio" name="totalPointsWins" id="totalPointsWins0" value="0" <?php if($_SESSION["totalPointsWins"] == '0'){echo("checked");}?>>
+			<label for="totalPointsWins0">Low Score Wins</label> &nbsp;&nbsp;
+			<input type="radio" name="totalPointsWins" id="totalPointsWins1" value="1" <?php if($_SESSION["totalPointsWins"] == '1'){echo("checked");}?>>
+			<label for="totalPointsWins1">High Score Wins</label></td>
 	</tr>
 	<tr>
 		<td><label for="tournamentDescription">Description: </label></td>
