@@ -26,7 +26,7 @@
 		if (mode == 'create') {
 			if ($("#firstName").val().trim() == '' || $("#lastName").val().trim() == '' || $("#userName").val().trim() == ''
 			|| $("#regCode").val().trim() == '' || $("#password").val().trim() == '' || $("#vPassword").val().trim() == '') {
-				displayError("<strong>Required Fields:</strong> First Name, Last Name, Password, and User Name are required.");
+				displayError("<strong>Required Fields:</strong> First Name, Last Name, Password, User Name, and Registration Code are required.");
 				return false;
 			}
 			
@@ -82,7 +82,10 @@
 	}
   
   </script>
-    <style>
+        <style>
+	.red {
+		color: red;
+	}
   
   
   </style>
@@ -100,17 +103,17 @@
      <h4>Action: <?php if ($_SESSION["accountMode"] != null and $_SESSION["accountMode"] == 'create') echo 'Create'; else echo 'Update';?></h4>
 	<table class="table table-hover"> 
 		<tr>
-			<td width="25%"><label for="firstName">First Name: </label></td>
+			<td width="25%"><label for="firstName">First Name:<span class="red">*</span></label></td>
 			<td width="25%"><input type="text" size="40" class="form-control" name="firstName" id="firstName" value="<?php echo $_SESSION["firstName"]; ?>"></td>
-			<td width="25%"><label for="lastName">Last Name: </label></td>
+			<td width="25%"><label for="lastName">Last Name:<span class="red">*</span></label></td>
 			<td width="25%"><input type="text" size="40" class="form-control" name="lastName" id="lastName" value="<?php echo $_SESSION["lastName"]; ?>"></td>
 		</tr>
 		<tr>
-			<td width="25%"><label for="userName">User Name / Email: </label></td>
+			<td width="25%"><label for="userName">User Name / Email:<span class="red">*</span></label></td>
 			<td width="25%"><input type="text" size="40" class="form-control" name="userName" id="userName" onblur="validateEmail(this)" 
 							placeholder="john@doe.com"	value="<?php echo $_SESSION["userName"]; ?>"></td>
 			<?php if ($_SESSION["accountMode"] == 'create') { ?>
-				<td width="25%"><label for="regCode">Registration Code: </label></td>
+				<td width="25%"><label for="regCode">Registration Code:<span class="red">*</span></label></td>
 				<td width="25%"><input type="text" size="40" class="form-control" name="regCode" id="regCode"></td>
 			<?php } else { ?>
 				<td width="25%"></td>
@@ -125,9 +128,9 @@
 			<td width="25%"></td>
 		</tr>
 		<tr>
-			<td width="25%"><label for="password">Password: </label></td>
+			<td width="25%"><label for="password">Password:<?php if ($_SESSION["accountMode"] == 'create') { ?><span class="red">*</span><?php } ?></label></td>
 			<td width="25%"><input type="password" size="40" class="form-control" name="password" id="password" value="<?php echo $_SESSION["password"]; ?>"></td>
-			<td width="25%"><label for="vPassword">Verify Password: </label></td>
+			<td width="25%"><label for="vPassword">Verify Password:<?php if ($_SESSION["accountMode"] == 'create') { ?><span class="red">*</span><?php } ?></label></td>
 			<td width="25%"><input type="password" size="40" class="form-control" name="vPassword" id="vPassword" value="<?php echo $_SESSION["vPassword"]; ?>"></td>
 		</tr>
 

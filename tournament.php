@@ -138,7 +138,7 @@
 				echo '<td>'; echo $row['4']; echo '</td>';
 				echo '<td>';
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="enterScores" value="'.$row['0'].'">Enter Scores</button> &nbsp;'; 				
-				echo '<button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$row['0'].'>View Scores</button>&nbsp;';
+				echo '<button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$row['0'].'>View Results</button>&nbsp;';
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="loadTournament" value='.$row['0'].'>Edit Tournament</button>&nbsp;';
 				if (getCurrentRole() == 'ADMIN') echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTournament" onclick="return confirm2Delete(\''.$row['0'].'\')" value='.$row['0'].'>Delete</button>&nbsp;';
 				echo '</td>';				

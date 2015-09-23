@@ -92,7 +92,7 @@ include_once('logon_check.php');
 						echo '<td>'; echo $row['4']; echo '</td>';
 						echo '<td>';
 						echo '<button type="submit" class="btn btn-xs btn-primary" name="enterScoresIndex" value="'.$row['0'].'">Enter Scores</button> &nbsp;'; 				
-						echo '<button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$row['0'].'>View Scores</button>';
+						echo '<button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$row['0'].'>View Results</button>';
 						echo '</td>';						
 						echo '</tr>';	
       				}

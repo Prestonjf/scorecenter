@@ -916,7 +916,7 @@ else {
 	function loadTournamentEvents($mysqli) {
 	
 		$query = "SELECT TE.EVENT_ID, E.NAME, TE.TRIAL_EVENT_FLAG, TE.TOURN_EVENT_ID, COUNT(TES.TEAM_EVENT_SCORE_ID) as SCORES_COMPLETED, 
-					T.NUMBER_TEAMS, TE.SUBMITTED_FLAG, TE.VERIFIED_FLAG FROM TOURNAMENT_EVENT TE 
+					T.NUMBER_TEAMS, TE.SUBMITTED_FLAG, TE.VERIFIED_FLAG, T.HIGH_LOW_WIN_FLAG FROM TOURNAMENT_EVENT TE 
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
 					INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID 
 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TES.SCORE IS NOT NULL									
@@ -937,6 +937,10 @@ else {
  				$_SESSION["numberTeams"] = $tournamentRow['6'];
  				$_SESSION["highestScore"] = $tournamentRow['7'];
  				$_SESSION["tournamentDescription"] = $tournamentRow['8'];
+				if ($tournamentRow['9'] == '0' ) $_SESSION["pointsSystem"] = 'Low Score Wins';
+				else $_SESSION["pointsSystem"] = 'High Score Wins';
+				
+				
  				
  			$result = $mysqli->query("SELECT COUNT(TE.VERIFIED_FLAG) as completed, COUNT(TE.TOURN_EVENT_ID) as total 
     									FROM TOURNAMENT_EVENT TE WHERE TE.TOURNAMENT_ID=".$_SESSION["tournamentId"]);
@@ -1267,8 +1271,9 @@ else {
 	function generateTournamentResults($id, $mysqli) {
 		$tournamentResultsHeader = array();
 		$tournamentResults = array();
+		$highLowWin = '0';
 		
-		$query1 = "SELECT E.NAME, TE.TOURN_EVENT_ID, TE.TRIAL_EVENT_FLAG
+		$query1 = "SELECT E.NAME, TE.TOURN_EVENT_ID, TE.TRIAL_EVENT_FLAG, TM.HIGH_LOW_WIN_FLAG
 					FROM TOURNAMENT TM
 					INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURNAMENT_ID=TM.TOURNAMENT_ID 
 					INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID 
@@ -1281,6 +1286,7 @@ else {
 					$eventName = $events['0'];
 					if ($events['2'] != null and $events['2'] == 1) $eventName .= ' *';
 					array_push($tournamentResultsHeader, $eventName);
+					$highLowWin = $events['3'];
 			}
 		}	
 		$_SESSION['tournamentResultsHeader'] = $tournamentResultsHeader;	
@@ -1301,7 +1307,7 @@ else {
 					array_push($resultRow, $teams['0']);
 					array_push($resultRow, $teamName);
 					
-					$query3 = "SELECT TES.SCORE, E.NAME, TE.TRIAL_EVENT_FLAG
+					$query3 = "SELECT TES.SCORE, E.NAME, TE.TRIAL_EVENT_FLAG, TES.POINTS_EARNED
 								FROM TOURNAMENT_TEAM TT
                                 INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TT.TOURNAMENT_ID
 								INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURNAMENT_ID=T.TOURNAMENT_ID
@@ -1316,13 +1322,13 @@ else {
 					if ($scoreSet) {
 						while($scores = $scoreSet->fetch_array()) {
 							$value = $scores['0'];
-							array_push($resultRow, $value);
+							array_push($resultRow, $scores['3']);
 							if ($value <= 20 ) { // sizeof($resultRow)
-								if ($scores['0'] != null and $scores['2'] != 1) // Trial Events not included in position count/tiebreaker
+								if ($scores['3'] != null and $scores['2'] != 1) // Trial Events not included in position count/tiebreaker
 									$positionCounts[$value] = $positionCounts[$value] + 1;
 							}
-							if ($scores['0'] != null and $scores['2'] != 1) // Trial Events not included in total
-								$total = $total + $value;
+							if ($scores['3'] != null and $scores['2'] != 1) // Trial Events not included in total
+								$total = $total + $scores['3'];
 						}
 					}
 					array_push($resultRow, $total); // Total
@@ -1337,7 +1343,7 @@ else {
 			}
 		}	
 		// Determine Final Rank With Tie Breakers
-		$tournamentResults = quicksort($tournamentResults); 
+		$tournamentResults = quicksort($tournamentResults, $highLowWin); 
 		
 		// Set Final Rank VALUE
 		$count = 1;
@@ -1359,7 +1365,7 @@ else {
 	
 	
 	// QuickSort Results on Total Score + Tie Breakers
-	function quicksort($array) {
+	function quicksort($array, $highLowWin) {
 		if(count($array) < 2) {
 			return $array;
 		}
@@ -1368,8 +1374,10 @@ else {
 		$pivot_key = key($array);
 		$pivot  = array_shift($array);
 		foreach($array as $k => $v) {
-			if ($v[sizeof($v)-3] < $pivot[sizeof($pivot)-3])
+			if (($v[sizeof($v)-3] < $pivot[sizeof($pivot)-3]) and $highLowWin == '0')
 				$left[$k] = $v;
+			else if (($v[sizeof($v)-3] > $pivot[sizeof($pivot)-3]) and $highLowWin == '1')
+				$right[$k] = $v;
 			else if ($v[sizeof($v)-3] == $pivot[sizeof($pivot)-3])  {
 				$vCounts = $v[sizeof($v)-1];
 				$pivotCounts = $pivot[sizeof($pivot)-1];
@@ -1400,7 +1408,7 @@ else {
 			else
 				$right[$k] = $v;
 		}
-		return array_merge(quicksort($left), array($pivot_key => $pivot), quicksort($right));
+		return array_merge(quicksort($left, $highLowWin), array($pivot_key => $pivot), quicksort($right, $highLowWin));
 	
 	}
 	
@@ -1972,10 +1980,9 @@ else {
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
 	++ RAW Scores and Points Earned and Rank. Validate Raw Score Ties
-	++ Tournament Details: High vs. Low Score wins
 	++ Assign Verifiers to events
 	++ commas in csv file.
-	
+	++ Rank Alternate Team
 	++ Generate Results as Print / XML
 
 	
@@ -1986,8 +1993,7 @@ else {
 	** Results Order By OPTION
 	** controller class security
 	** Manual Reminder email to supervisor
-	** Low Score wins (options for high score?)
-	** Rank Alternate Team?
+
 	
 	
 	-- ACKNOWLEDGEMENTS --

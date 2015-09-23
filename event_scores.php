@@ -67,7 +67,37 @@ include_once('logon_check.php');
 			
 		}
 		else {
-			document.getElementById('teamPointsEarned'+id).value = max + 1 - element.value
+			if ((max + 1 - element.value) > 0)
+				document.getElementById('teamPointsEarned'+id).value = max + 1 - element.value;
+			else 
+				document.getElementById('teamPointsEarned'+id).value = 0;
+		}
+		
+	}
+	
+	function highlightRawScoreDuplication() {
+		var count = 0;
+		var scoreArr = [];
+		while (count < 1000) {
+			if  ($('#teamRawScore'+count) != null && $('#teamRawScore'+count).val() != null) {
+				var score = $('#teamRawScore'+count).val();
+			
+				scoreArr.forEach(function(entry) {
+					if (score == entry) {
+						document.getElementById('teamRawScore'+count).style.backgroundColor = "#FFFFCC";
+					}
+				});
+			
+				if (score != '') {
+					scoreArr.push(score);
+				}
+			
+			}
+			else {
+				break;
+			}
+			
+			count++;
 		}
 		
 	}
@@ -98,7 +128,7 @@ include_once('logon_check.php');
 						error3 = true;
 				}
 				scoreArr.forEach(function(entry) {
-					if (score == entry) exists = true;
+					if (score == entry && max != score) exists = true;
 				});
 				
 				if (exists) {
@@ -117,7 +147,7 @@ include_once('logon_check.php');
 		var sequence = 1;
 		scoreArr.forEach(function(entry) {
 			if (entry == 0) { error2 = true;}
-			if (sequence != entry) { error2 = true;}
+			if (sequence != entry && max != entry) { error2 = true;}
 			sequence++;
 		});
 
@@ -174,10 +204,24 @@ include_once('logon_check.php');
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Enter Event Scores</h1>
-     <h4>Tournament: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentName"]. ' - ' . $_SESSION["tournamentDate"]; ?></span></h4>
-     <h4>Division: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentDivision"]; ?></span></h4>
-     <h4>Event: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventName"]; ?></span></h4>
-	 <h4>Supervisor: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventSupervisor"]; ?></span></h4> 	 
+	 <table>
+	 <tr>
+     <td><h4>Tournament: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentName"]. ' - ' . $_SESSION["tournamentDate"]; ?></span></h4></td>
+	<td></td>
+	 </tr>
+	 <tr>
+     <td><h4>Division: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentDivision"]; ?></span></h4></td>
+	 <td></td>
+	 </tr>
+	 <tr>
+	 <td><h4>Event: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventName"]; ?></span></h4></td>
+	 <td></td>
+	 </tr>
+	 <tr>
+	 <td><h4>Supervisor: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventSupervisor"]; ?></span></h4></td>
+	 <td></td>
+	 </tr>
+	 </table>
      <br />
      <h6>*Instructions:<br /><br />
      1. Step 1 (Needed).<br /><br />
@@ -215,7 +259,7 @@ include_once('logon_check.php');
       				echo '<td>'; echo $scoreRecord['1']; echo '</td>';
 					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
-      						name="teamRawScore'.$teamCount.'" id="teamRawScore'.$teamCount.'" value="'.$scoreRecord['6'].'"></td>';
+      						name="teamRawScore'.$teamCount.'" id="teamRawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" onkeyup="highlightRawScoreDuplication()" onkeydown="highlightRawScoreDuplication()"></td>';
 					echo '<td><select class="form-control" name="teamScoreTier'.$teamCount.'" id="teamScoreTier'.$teamCount.'">
 			<option value=""></option>
 			<option value="I" ';  if($scoreRecord['7'] == "I"){echo("selected");} echo '>I</option>

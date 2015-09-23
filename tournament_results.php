@@ -74,9 +74,20 @@
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Tournament Results</h1>
-	 <h4>Tournament: <?php echo $_SESSION["tournamentName"] . ' - ' . $_SESSION["tournamentDate"]; ?></h4>
-     <h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4>
-	 <h4>Events Completed: <?php echo $_SESSION["tournamentEventsCompleted"]; ?></h4>
+	 <table width="100%">
+	 <tr>
+	 <td><h4>Tournament: <?php echo $_SESSION["tournamentName"] . ' - ' . $_SESSION["tournamentDate"]; ?></h4></td>
+	 <td><h4>Overall Points: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["pointsSystem"]; ?></span></h4></td>
+	 </tr>
+	 <tr>
+     <td><h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4></td>
+	 <td><h4>Max Points Earned Per Event: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["highestScore"]; ?></span></h4></td>
+	 </tr>
+	 <tr>
+	 <td><h4>Events Completed: <?php echo $_SESSION["tournamentEventsCompleted"]; ?></h4></td>
+	 <td></td>
+	 </tr>
+	 </table>
 	 <hr>
 	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsCSV" value='.$row['0'].'>Export to .csv</button>
 	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsEXCEL" value='.$row['0'].'>Export to .xlsx</button>

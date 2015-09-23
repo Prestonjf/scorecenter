@@ -71,13 +71,21 @@
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Enter Scores</h1>
-     <h4>Tournament: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentName"] . ' - ' . $_SESSION["tournamentDate"]; ?></span></h4>
-     <h4>Division: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentDivision"]; ?></span></h4>
-     <br />
+	 <table width="100%">
+	 <tr>
+     <td><h4>Tournament: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentName"] . ' - ' . $_SESSION["tournamentDate"]; ?></span></h4></td>
+	 <td><h4>Overall Points: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["pointsSystem"]; ?></span></h4></td>
+	</tr>
+	 <tr>
+	 <td><h4>Division: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentDivision"]; ?></span></h4></td>
+     <td><h4>Max Points Earned Per Event: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["highestScore"]; ?></span></h4></td>	
+	</tr>
+	</table>
+	<br />
      <h6>Events Completed: <?php echo $_SESSION["tournamentEventsCompleted"]; ?></h6>
      <?php
-     echo' <button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$_SESSION["tournamentId"].'>View Scores</button>&nbsp;';
-     echo '<button type="submit" class="btn btn-xs btn-success" name="viewStatistics" value='.$_SESSION["tournamentId"].'>View Statistics</button>&nbsp;';
+     echo' <button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$_SESSION["tournamentId"].'>View Results</button>&nbsp;';
+     //echo '<button type="submit" class="btn btn-xs btn-success" name="viewStatistics" value='.$_SESSION["tournamentId"].'>View Statistics</button>&nbsp;';
      ?>
 	 <hr>
 
