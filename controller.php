@@ -959,7 +959,7 @@ else {
 	function loadEventScores($mysqli) {
 				
 		 $result = $mysqli->query("SELECT E.NAME, T.HIGHEST_SCORE_POSSIBLE, T.TOURNAMENT_ID, T.DIVISION, T.NAME,TE.SUBMITTED_FLAG,TE.VERIFIED_FLAG,
-							CONCAT(U.FIRST_NAME, ' ', U.LAST_NAME, ' - ',U.USERNAME,' - ',coalesce(U.PHONE_NUMBER,'')) as supervisor, T.DATE 
+							CONCAT(U.FIRST_NAME, ' ', U.LAST_NAME, ' - ',U.USERNAME,' - ',coalesce(U.PHONE_NUMBER,'')) as supervisor, T.DATE, T.HIGH_LOW_WIN_FLAG 
 		 					FROM EVENT E INNER JOIN TOURNAMENT_EVENT TE ON TE.EVENT_ID=E.EVENT_ID 
 		 					INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
 							LEFT JOIN USER U ON TE.USER_ID=U.USER_ID
@@ -968,6 +968,7 @@ else {
  				$tournamentRow = $result->fetch_row(); 				
  				$_SESSION["eventName"] = $tournamentRow['0'];
  				$_SESSION["tournamentHighestScore"] = $tournamentRow['1'];
+ 				$_SESSION["highLowWinFlag"] = $tournamentRow['9'];
  				$_SESSION["tournamentId"] = $tournamentRow['2'];
  				
  				$_SESSION["tournamentDivision"] = $tournamentRow['3'];
@@ -979,7 +980,7 @@ else {
  				$_SESSION["tournamentDate"] = date('m/d/Y', $date);	
     		}
     		
-    	 $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID 
+    	 $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT 
     	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID 
     	 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID AND TES.TOURN_EVENT_ID = " .$_SESSION["tournEventId"].
     	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY TEAM_NUMBER ASC "); 
@@ -991,7 +992,11 @@ else {
  					array_push($scoreRecord, $scoreRow['1']);
  					array_push($scoreRecord, $scoreRow['2']);
  					array_push($scoreRecord, $scoreRow['3']);
- 					array_push($scoreRecord, $scoreRow['4']);	
+ 					array_push($scoreRecord, $scoreRow['4']);
+ 					array_push($scoreRecord, $scoreRow['5']);
+ 					array_push($scoreRecord, $scoreRow['6']);
+ 					array_push($scoreRecord, $scoreRow['7']);
+ 					array_push($scoreRecord, $scoreRow['8']);	
  						
  					array_push($teamEventScoreList, $scoreRecord);
  				}
@@ -1006,6 +1011,12 @@ else {
 			$teamCount = 0;
 			foreach ($scoreList as $score) {
 				$value = $_GET['teamScore'.$teamCount];
+				$rawScore = $_GET['teamRawScore'.$teamCount];
+				$tier = $_GET['teamScoreTier'.$teamCount];
+				$tieBreak = $_GET['teamTieBreak'.$teamCount];
+				$pointsEarned = $_GET['teamPointsEarned'.$teamCount];
+				
+				
 				if ($value == '' || $value == '0') $value = null;
 					
 				if ($score['3'] == null or $score['3'] == '') {
@@ -1014,14 +1025,14 @@ else {
 					$id = 0;
 					if ($row['0'] != null) $id = $row['0']; 
 				
-					$query = $mysqli->prepare("INSERT INTO TEAM_EVENT_SCORE (TEAM_EVENT_SCORE_ID, TOURN_TEAM_ID, TOURN_EVENT_ID, SCORE) VALUES (".$id.", ?, ?, ?) ");
-					$query->bind_param('iii',$score['4'],$_SESSION["tournEventId"], $value); 
+					$query = $mysqli->prepare("INSERT INTO TEAM_EVENT_SCORE (TEAM_EVENT_SCORE_ID, TOURN_TEAM_ID, TOURN_EVENT_ID, SCORE, POINTS_EARNED, RAW_SCORE, TIER_TEXT, 											TIE_BREAK_TEXT) VALUES (".$id.", ?, ?, ?,?,?,?,?) ");
+					$query->bind_param('iiiisss',$score['4'],$_SESSION["tournEventId"], $value,$pointsEarned,$rawScore,$tier,$tieBreak); 
 					$query->execute();
 					$score['3'] = $id;
 				}
 				else {
-					$query = $mysqli->prepare("UPDATE TEAM_EVENT_SCORE SET SCORE=? WHERE TEAM_EVENT_SCORE_ID=".$score['3']);			
-					$query->bind_param('i',$value);
+					$query = $mysqli->prepare("UPDATE TEAM_EVENT_SCORE SET SCORE=?, POINTS_EARNED=?, RAW_SCORE=?,TIER_TEXT=?,TIE_BREAK_TEXT=? WHERE TEAM_EVENT_SCORE_ID=".$score['3']);			
+					$query->bind_param('iisss',$value,$pointsEarned,$rawScore,$tier,$tieBreak);
 					$query->execute();
 				}
 				$teamCount++;	

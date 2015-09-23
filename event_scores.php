@@ -57,6 +57,21 @@ include_once('logon_check.php');
 		if (element.value > max || element.value < 1) element.value = '';
 	}
 	
+	function updatePointsEarned(element, id) {
+		//limitNumber(element);
+		var max = <?php echo $_SESSION["tournamentHighestScore"];?>;
+		var lowHighFlag = <?php echo $_SESSION["highLowWinFlag"];?>;
+		if (lowHighFlag == 0) {
+			if (element.value > max) document.getElementById('teamPointsEarned'+id).value = max;
+			else document.getElementById('teamPointsEarned'+id).value = element.value;
+			
+		}
+		else {
+			document.getElementById('teamPointsEarned'+id).value = max + 1 - element.value
+		}
+		
+	}
+	
 	function validate() {
 		var error = false;
 		var error2 = false;
@@ -90,24 +105,32 @@ include_once('logon_check.php');
 					error = true;
 					break;
 				}
-				else if (score != '' && score != '0' && score != maxScore) {
+				else if (score != '') {
 					scoreArr.push(score);
-					if (score > max) error2 = true;
 				}
 			} 
 			else { break;}
 			count++;
 		}
+		// Validate Numbers are sequential and no 0 - error2
+		scoreArr.sort(sortNumber);
+		var sequence = 1;
+		scoreArr.forEach(function(entry) {
+			if (entry == 0) { error2 = true;}
+			if (sequence != entry) { error2 = true;}
+			sequence++;
+		});
+
 		if (error) {
-			displayError("<strong>Cannot Save Scores:</strong> Team cannot have the same score / rank as another unless the value entered is the maximum allowed score.");
+			displayError("<strong>Cannot Save Scores:</strong> Team cannot have the same rank as another.");
 			return false;
 		}
 		if (error2) {
-			displayError("<strong>Cannot Save Scores:</strong> Team cannot have score / rank greater than the maximum score.");
+			displayError("<strong>Cannot Save Scores:</strong> Ranks must be sequential (no rank skipped) and cannot be 0.");
 			return false;
 		}
 		if (error3) {
-			displayError("<strong>Cannot Save Scores:</strong> All teams must be scored to submit or verify scores.");
+			displayError("<strong>Cannot Save Scores:</strong> All teams must be ranked to submit or verify scores.");
 			return false;
 		}
 		if (error4) {
@@ -120,6 +143,10 @@ include_once('logon_check.php');
 			 }
 		 }
 		 return true;		
+	}
+	
+	function sortNumber(a,b) {
+    	return a - b;
 	}
   
   </script>
@@ -153,9 +180,9 @@ include_once('logon_check.php');
 	 <h4>Supervisor: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventSupervisor"]; ?></span></h4> 	 
      <br />
      <h6>*Instructions:<br /><br />
-     1. Enter the finishing position/score for each team on the list below. (The maximum score for events at this tournament is <?php echo $_SESSION["tournamentHighestScore"];?>.)<br /><br />
-     2. Check the submitted checkbox to finish scoring the event. Once submitted, supervisors will not be able to modify scores. A score verifier can modify the scores after they are submitted.<br /><br />
-     3. Click save to save the event's scores. Event scores can be modified after the initial save if they have not yet been submitted.
+     1. Step 1 (Needed).<br /><br />
+     2. Step 2 (Needed).<br /><br />
+     3. Click save to save the event's scores. Event scores can be modified after the initial save if they have not yet been submitted. Once submitted, only a score verifier can modify the scores.
      </h6>    
 	 <hr>
 
@@ -174,7 +201,7 @@ include_once('logon_check.php');
 				<th data-field="score" data-align="center" data-sortable="true">Tier/Rank Group</th>
 				<th data-field="score" data-align="center" data-sortable="true">Tie Break</th>
 				
-                <th data-field="score" data-align="center" data-sortable="true">Rank</th>
+                <th data-field="score" data-align="center" data-sortable="true">Rank<span class="red">*</span></th>
 				<th data-field="score" data-align="center" data-sortable="true">Points Earned</th>
             </tr>
         </thead>
@@ -187,13 +214,23 @@ include_once('logon_check.php');
       				echo '<tr>';
       				echo '<td>'; echo $scoreRecord['1']; echo '</td>';
 					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
-					echo '<td></td>';
-					echo '<td></td>';
-					echo '<td></td>';
-					echo '<td></td>';
-      				echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);" '.$disable.'    
-      						name="teamScore'.$teamCount.'" id="teamScore'.$teamCount.'" value="'.$scoreRecord['2'].'">';
-      				echo '</td>';					
+					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
+      						name="teamRawScore'.$teamCount.'" id="teamRawScore'.$teamCount.'" value="'.$scoreRecord['6'].'"></td>';
+					echo '<td><select class="form-control" name="teamScoreTier'.$teamCount.'" id="teamScoreTier'.$teamCount.'">
+			<option value=""></option>
+			<option value="I" ';  if($scoreRecord['7'] == "I"){echo("selected");} echo '>I</option>
+			<option value="II" '; if($scoreRecord['7'] == "II"){echo("selected");} echo '>II</option>
+			<option value="III" ';if($scoreRecord['7'] == "III"){echo("selected");} echo '>III</option>
+			<option value="IV" '; if($scoreRecord['7'] == "IV"){echo("selected");} echo '>IV</option>
+			<option value="V" ';  if($scoreRecord['7'] == "V"){echo("selected");} echo '>V</option>
+			</select></td>';
+					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
+      						name="teamTieBreak'.$teamCount.'" id="teamTieBreak'.$teamCount.'" value="'.$scoreRecord['8'].'"></td>';
+      				echo '<td style="background-color: #FFCCCC;"><input type="text"  class="form-control" size="4" autocomplete="off" onkeydown="updatePointsEarned(this, \''.$teamCount.'\');" onkeyup="updatePointsEarned(this, \''.$teamCount.'\');" '.$disable.'    
+      						name="teamScore'.$teamCount.'" id="teamScore'.$teamCount.'" value="'.$scoreRecord['2'].'">'; // set background color
+      				echo '</td>';
+      				echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" readonly   
+      						name="teamPointsEarned'.$teamCount.'" id="teamPointsEarned'.$teamCount.'" value="'.$scoreRecord['5'].'"></td>';					
 					echo '</tr>';
 					
 					$teamCount++;	
