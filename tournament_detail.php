@@ -180,6 +180,28 @@
         xmlhttp.send();
 	}
 	
+	  function addTournVerifier() {
+		xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			clearError();
+			clearSuccess();
+			if (xmlhttp.responseText == 'error1' || xmlhttp.responseText == 'error2') {
+				//error message 
+				if (xmlhttp.responseText == 'error1') displayError("<strong>Cannot Add Verifier:</strong> Verifier already added or no verifier selected.");
+			}
+			else {
+				// success message
+				document.getElementById('verifierTableBody').innerHTML = xmlhttp.responseText;
+
+				}					
+		}
+		}	
+        xmlhttp.open("GET","controller.php?command=addVerifier&verifierAdded="+document.getElementById('verifierAdded').value+generateTeamParamsString()
+						+getNumberEventsTeams(),true);
+        xmlhttp.send();
+	}
+	
 	function generateEventParamsString() {
 		var str = "";
 		var count = 0;
@@ -251,6 +273,8 @@
  			mysql_select_db($db_database);
     		
     		$teams = null;
+			$verifiers = mysql_query("SELECT DISTINCT USER_ID, CONCAT(LAST_NAME,', ',FIRST_NAME,' (', USERNAME,')') AS USER
+    									 FROM USER WHERE ROLE_CODE='VERIFIER' ORDER BY UPPER(LAST_NAME) ASC");
     		$events = mysql_query("SELECT DISTINCT * FROM EVENT ORDER BY NAME ASC");
     		if ($_SESSION["tournamentDivision"] == null or $_SESSION["tournamentDivision"] == '') $teams = mysql_query("SELECT DISTINCT * FROM TEAM ORDER BY NAME ASC");
     		else $teams = mysql_query("SELECT DISTINCT * FROM TEAM WHERE DIVISION = '".$_SESSION["tournamentDivision"]."' ORDER BY NAME ASC"); 
@@ -447,6 +471,54 @@
 			    if ($teams) {
              		while($teamRow = mysql_fetch_array($teams)) {
              			echo '<option value="'.$teamRow['0'].'">'.$teamRow['1'].'</option>';
+             			
+             		}
+             	}
+        	?>
+		</select>
+	</div>
+	</div>
+	<hr>
+	
+	<h2>Verifiers</h2>
+        <table class="table table-hover" id="verifierTable">
+        <thead>
+            <tr>
+                <th width="30%" data-field="name" data-align="right" data-sortable="true">Verifier Name</th>
+                <th width="60%" data-field="name" data-align="right" data-sortable="true">Verifier Email</th>
+				<th width="10%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="verifierTableBody">
+         <?php
+			$verifierList = $_SESSION["verifierList"];
+			$verifierCount = 0;
+			if ($verifierList) {
+				foreach ($verifierList as $verifier) {
+					echo '<tr>';
+      				echo '<td>'; echo $verifier['1']; echo '</td>';
+					echo '<td>'; echo $verifier['2']; echo '</td>';
+					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteVerifier" onclick="validateDeleteVerifier(this)" value='.$verifier['0'].'>Delete</button></td>';
+					echo '</tr>';
+					
+					$verifierCount++;
+				}
+			}        
+        ?>  
+        </tbody>
+        </table>
+
+	<div class="input-group">
+	<span class="input-group-btn">
+	<button type="button" class="btn btn-xs btn-primary" onclick="addTournVerifier()" name="addVerifier">Add Verifier</button>
+	</span>
+	<div class="col-xs-4 col-md-4" id="verifierSelectDiv">
+		<select class="form-control" name="verifierAdded" id="verifierAdded">
+			<option value=""></option>
+			<?php
+			    if ($verifiers) {
+             		while($verifierRow = mysql_fetch_array($verifiers)) {
+             			echo '<option value="'.$verifierRow['0'].'">'.$verifierRow['1'].'</option>';
              			
              		}
              	}

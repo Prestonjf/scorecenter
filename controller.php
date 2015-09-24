@@ -369,6 +369,11 @@ else if ($_GET['command'] != null and $_GET['command'] == 'addTeam') {
 	addTeam($_GET['teamAdded'], $mysqli);
 	exit();
 }
+else if ($_GET['command'] != null and $_GET['command'] == 'addVerifier') {
+	cacheTournamnent();
+	addVerifier($_GET['verifierAdded'], $mysqli);
+	exit();
+}
 
 // No commands were met. Return to Home Page
 else {	
@@ -500,6 +505,7 @@ else {
 		$_SESSION["tournamentId"] = null;
 		$_SESSION["eventList"] = null;
 		$_SESSION["teamList"] = null;
+		$_SESSION["verifierList"] = null;
 	}
 	
 	function addTeam($selectedTeam,$mysqli) {
@@ -537,6 +543,39 @@ else {
 				array_push($teamList, $team);
 				$_SESSION["teamList"] = $teamList;
 				reloadTournamentTeam();
+			}
+			else {
+				echo $errorStr;
+			}
+	}
+	
+		function addVerifier($selectedVerifier,$mysqli) {
+		// Validation: cannot add existing Team or blank	
+			$verifierList = null;
+			if ($_SESSION["verifierList"] == null) $verifierList = array();
+			else $verifierList = $_SESSION["verifierList"];
+		
+			$error = FALSE;
+			$errorStr = "";			
+			$count = 0;
+			
+			if ($selectedVerifier == '') { $error = TRUE; $errorStr = 'error1';}	
+			if ($verifierList) {
+				foreach ($verifierList as $verifier) { 
+					$count++;
+					if ($selectedVerifier == $verifier['0']) { $error = TRUE; $errorStr = 'error1';}	
+				}
+			}
+			if (!$error) {
+				//echo $_SERVER['REQUEST_URI'];
+				// Load Event Name
+				$result = $mysqli->query("SELECT CONCAT(LAST_NAME,', ',FIRST_NAME) AS USER, USERNAME FROM USER WHERE USER_ID = ".$selectedVerifier); 
+				$row1 = $result->fetch_row();
+	
+				$verifier = array($selectedVerifier, $row1['0'], $row1['1']); // 0: TEAM_ID 1: NAME 2:TEAM_NUMBER 3: ALTERNATE 4: TOURN_TEAM_ID 5: NEW TEAM 0/1
+				array_push($verifierList, $verifier);
+				$_SESSION["verifierList"] = $verifierList;
+				reloadTournamentVerifier();
 			}
 			else {
 				echo $errorStr;
@@ -669,8 +708,8 @@ else {
 					echo '<tr>';
       				echo '<td>'; echo $team['1']; echo '</td>';
       				echo '<td><div class="col-xs-5 col-md-5">';
-      				echo '<input type="number"  class="form-control" size="10" onkeydown="limit(this);" onkeyup="limit(this);" 
-      						min="0" max="100" step="1" 
+      				echo '<input type="number"  class="form-control" size="10" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);" 
+      						min="0" max="100" step="1" autocomplete="off"
       						name="teamNumber'.$teamCount.'" id="teamNumber'.$teamCount.'" value="'.$team['2'].'">';
       				echo '</div></td>';
 					echo '<td><div class="col-xs-5 col-md-5">'; 
@@ -683,6 +722,21 @@ else {
 					echo '</tr>';
 					
 					$teamCount++;
+				}
+			} 
+	}
+		function reloadTournamentVerifier() {
+			$verifierList = $_SESSION["verifierList"];
+			$verifierCount = 0;
+			if ($verifierList) {		
+				foreach ($verifierList as $verifier) {
+					echo '<tr>';
+      				echo '<td>'; echo $verifier['1']; echo '</td>';
+					echo '<td>'; echo $verifier['2']; echo '</td>';
+					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteVerifier" onclick="validateDeleteVerifier(this)" value='.$verifier['0'].'>Delete</button></td>';
+					echo '</tr>';
+					
+					$verifierCount++;
 				}
 			} 
 	}
