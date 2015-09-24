@@ -963,7 +963,7 @@ else {
 	function loadEventScores($mysqli) {
 				
 		 $result = $mysqli->query("SELECT E.NAME, T.HIGHEST_SCORE_POSSIBLE, T.TOURNAMENT_ID, T.DIVISION, T.NAME,TE.SUBMITTED_FLAG,TE.VERIFIED_FLAG,
-							CONCAT(U.FIRST_NAME, ' ', U.LAST_NAME, ' - ',U.USERNAME,' - ',coalesce(U.PHONE_NUMBER,'')) as supervisor, T.DATE, T.HIGH_LOW_WIN_FLAG 
+							CONCAT(U.FIRST_NAME, ' ', U.LAST_NAME, ' - ',U.USERNAME,' - ',coalesce(U.PHONE_NUMBER,'')) as supervisor, T.DATE, T.HIGH_LOW_WIN_FLAG, TE.COMMENTS 
 		 					FROM EVENT E INNER JOIN TOURNAMENT_EVENT TE ON TE.EVENT_ID=E.EVENT_ID 
 		 					INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
 							LEFT JOIN USER U ON TE.USER_ID=U.USER_ID
@@ -982,6 +982,7 @@ else {
 				$_SESSION["eventSupervisor"] = $tournamentRow['7'];
 				$date = strtotime($tournamentRow['8']);
  				$_SESSION["tournamentDate"] = date('m/d/Y', $date);	
+ 				$_SESSION["eventComments"] = $tournamentRow['10'];
     		}
     		
     	 $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT 
@@ -1043,8 +1044,8 @@ else {
 			}
 		}
 		// Update Submitted/Verified Flags
-		$query = $mysqli->prepare("UPDATE TOURNAMENT_EVENT SET SUBMITTED_FLAG=?, VERIFIED_FLAG=? WHERE TOURN_EVENT_ID=".$_SESSION["tournEventId"]);			
-		$query->bind_param('ii',$_GET['submittedFlag'], $_GET['verifiedFlag']);
+		$query = $mysqli->prepare("UPDATE TOURNAMENT_EVENT SET SUBMITTED_FLAG=?, VERIFIED_FLAG=?, COMMENTS=? WHERE TOURN_EVENT_ID=".$_SESSION["tournEventId"]);			
+		$query->bind_param('iis',$_GET['submittedFlag'], $_GET['verifiedFlag'], $_GET['eventComments']); 
 		$query->execute();
 			
 		$_SESSION["teamEventScoreList"] = $scoreList;
@@ -1979,7 +1980,6 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
-	++ RAW Scores and Points Earned and Rank. Validate Raw Score Ties
 	++ Assign Verifiers to events
 	++ commas in csv file.
 	++ Rank Alternate Team

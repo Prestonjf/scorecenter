@@ -78,28 +78,38 @@ include_once('logon_check.php');
 	function highlightRawScoreDuplication() {
 		var count = 0;
 		var scoreArr = [];
+		var dupArr = [];
 		while (count < 1000) {
 			if  ($('#teamRawScore'+count) != null && $('#teamRawScore'+count).val() != null) {
 				var score = $('#teamRawScore'+count).val();
-			
+				document.getElementById('teamRawScore'+count).style.backgroundColor = "#FFFFFF";
 				scoreArr.forEach(function(entry) {
-					if (score == entry) {
-						document.getElementById('teamRawScore'+count).style.backgroundColor = "#FFFFCC";
-					}
+					if (score == entry) dupArr.push(score);
 				});
-			
 				if (score != '') {
 					scoreArr.push(score);
 				}
-			
 			}
-			else {
-				break;
-			}
-			
+			else break;		
 			count++;
 		}
 		
+		count = 0;
+		while (count < 1000) {
+			if  ($('#teamRawScore'+count) != null && $('#teamRawScore'+count).val() != null) {
+				var score = $('#teamRawScore'+count).val();
+				var count2 = 0;
+				while (count2 < dupArr.length) {
+					if (score == dupArr[count2]) {
+						document.getElementById('teamRawScore'+count).style.backgroundColor = "#FFFFCC";
+						break;
+					}
+					count2++;
+				}
+			}
+			else break;
+			count++;
+		}
 	}
 	
 	function validate() {
@@ -239,14 +249,14 @@ include_once('logon_check.php');
         <table class="table table-hover">
         <thead>
             <tr>
-                <th data-field="name" data-align="right" data-sortable="true">Team Number</th>
-                <th data-field="teamNumber" data-align="center" data-sortable="true">Team Name</th>
-				<th data-field="score" data-align="center" data-sortable="true">Raw Score</th>
-				<th data-field="score" data-align="center" data-sortable="true">Tier/Rank Group</th>
-				<th data-field="score" data-align="center" data-sortable="true">Tie Break</th>
+                <th width="10%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
+                <th width="20%" data-field="teamNumber" data-align="center" data-sortable="true">Team Name</th>
+				<th width="10%"data-field="score" data-align="center" data-sortable="true">Raw Score</th>
+				<th width="10%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group</th>
+				<th width="30%"data-field="score" data-align="center" data-sortable="true">Tie Break</th>
 				
-                <th data-field="score" data-align="center" data-sortable="true">Rank<span class="red">*</span></th>
-				<th data-field="score" data-align="center" data-sortable="true">Points Earned</th>
+                <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank<span class="red">*</span></th>
+				<th width="10%" data-field="score" data-align="center" data-sortable="true">Points Earned</th>
             </tr>
         </thead>
         <tbody>
@@ -259,7 +269,7 @@ include_once('logon_check.php');
       				echo '<td>'; echo $scoreRecord['1']; echo '</td>';
 					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
-      						name="teamRawScore'.$teamCount.'" id="teamRawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" onkeyup="highlightRawScoreDuplication()" onkeydown="highlightRawScoreDuplication()"></td>';
+      						name="teamRawScore'.$teamCount.'" id="teamRawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" onkeyup="highlightRawScoreDuplication()" ></td>';
 					echo '<td><select class="form-control" name="teamScoreTier'.$teamCount.'" id="teamScoreTier'.$teamCount.'">
 			<option value=""></option>
 			<option value="I" ';  if($scoreRecord['7'] == "I"){echo("selected");} echo '>I</option>
@@ -284,6 +294,10 @@ include_once('logon_check.php');
         ?>
           </tbody>
           </table>
+          <label for="eventComments">Supervisor's Comments</label><br />
+          <textarea class="form-control"  name="eventComments" id="eventComments" spellcheck="true" rows="5" cols="100"><?php echo $_SESSION["eventComments"];?></textarea>
+          <br /> <br />
+
         <?php if ($disable != 'disabled')   { ?>
 		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"' ?>>Save</button>
 		<?php } ?>
@@ -300,6 +314,9 @@ include_once('logon_check.php');
     <script src="js/jquery-1.11.3.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>	
+    <script type="text/javascript">
+    	highlightRawScoreDuplication();
+    </script>
     
   </body>
 </html>
