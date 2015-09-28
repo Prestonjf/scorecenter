@@ -43,4 +43,13 @@ function getCurrentRole() {
 	}
 	return '';
 }
+
+function getCurrentUserId() {
+	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+
+	if ($userSessionInfo->getUserId() != null and $userSessionInfo->getUserId() != '') {
+		return $userSessionInfo->getUserId();
+	}
+	return '';
+}
 ?>

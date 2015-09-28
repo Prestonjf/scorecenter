@@ -133,6 +133,28 @@
         xmlhttp.send();
 	}
 	
+	function validateDeleteVerifier(element) {
+		if (!confirmDelete('verifier')) return;
+			xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+					clearError();
+					clearSuccess();
+					if (xmlhttp.responseText == 'error') {
+						//error message	
+					}
+					else {
+						// success message
+						displaySuccess("<strong>Deleted:</strong> Verifier has been deleted successfully!");
+						// remove from table
+						document.getElementById('verifierTableBody').innerHTML = xmlhttp.responseText;
+					}					
+				}
+			}	
+        xmlhttp.open("GET","controller.php?command=validateDeleteVerifier&verifierTournId="+$(element).closest('tr').index(),true);
+        xmlhttp.send();	
+	}
+	
 	
 	function addTournEvent() {
 		xmlhttp = new XMLHttpRequest();
@@ -498,7 +520,11 @@
 					echo '<tr>';
       				echo '<td>'; echo $verifier['1']; echo '</td>';
 					echo '<td>'; echo $verifier['2']; echo '</td>';
-					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteVerifier" onclick="validateDeleteVerifier(this)" value='.$verifier['0'].'>Delete</button></td>';
+					echo '<td>';
+					if (getCurrentRole() != 'VERIFIER') {
+						echo '<button type="button" class="btn btn-xs btn-danger" name="deleteVerifier" onclick="validateDeleteVerifier(this)" value='.$verifier['0'].'>Delete</button>';
+					}
+					echo '</td>';
 					echo '</tr>';
 					
 					$verifierCount++;
@@ -507,7 +533,7 @@
         ?>  
         </tbody>
         </table>
-
+	<?php if (getCurrentRole() != 'VERIFIER') { ?>
 	<div class="input-group">
 	<span class="input-group-btn">
 	<button type="button" class="btn btn-xs btn-primary" onclick="addTournVerifier()" name="addVerifier">Add Verifier</button>
@@ -526,6 +552,7 @@
 		</select>
 	</div>
 	</div>
+	<?php } ?>
 	<hr>
 
      <button type="submit" class="btn btn-xs btn-danger" name="saveTournament" onclick="return validate();" value=<?php echo '"'.$tournamentRow['0'].'"' ?>>Save</button>

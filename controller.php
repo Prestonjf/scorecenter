@@ -2,7 +2,9 @@
 session_start();
 include_once('score_center_objects.php');
 include_once('mail_functions.php');
+include_once('role_check.php');
 require_once('libs/PHPExcel.php');
+
 
 // DB Connection --------------
 require_once('login.php');
@@ -217,9 +219,14 @@ else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteTeam') 
 	deleteTournamentTeam($mysqli, $_GET['TournTeamRowId']);
 	exit();
 }
-else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteEvent') {
+else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteVerifier') {
 	cacheTournamnent();
-	deleteTournamentEvent($mysqli, $_GET['TournEventRowId']);
+	deleteTournamentTeam($mysqli, $_GET['TournTeamRowId']);
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteVerifier') {
+	cacheTournamnent();
+	deleteTournamentVerifier($mysqli, $_GET['verifierTournId']);
 	exit();
 }
 else if (isset($_GET['searchTournament']) or ($_GET['command'] != null and $_GET['command'] == 'loadAllTournaments')) {
@@ -395,17 +402,23 @@ else {
 
 // TOURNAMENT DISPLAY SCREEN ---------------------------------------
 	function loadAllTournaments($mysqli) {
-		$query = "SELECT TOURNAMENT_ID, NAME, LOCATION,DIVISION, DATE_FORMAT(DATE,'%m/%d/%Y') 'DATE1' FROM TOURNAMENT WHERE 1=1 ";	
+		$query = "SELECT T.TOURNAMENT_ID, T.NAME, T.LOCATION,T.DIVISION, DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE1' FROM TOURNAMENT T ";
+		// Verifier Can only see assigned TOURNAMENTS
+		if (getCurrentRole() == 'VERIFIER') {
+			$query .= " INNER JOIN TOURNAMENT_VERIFIER TV ON TV.TOURNAMENT_ID=T.TOURNAMENT_ID AND TV.USER_ID =" .getCurrentUserId();
+		}
+		
+		$query .= " WHERE 1=1 ";	
 		if ($_SESSION["fromTournamentDate"] !=null and $_SESSION["fromTournamentDate"] != '') {
 			$date1 = strtotime($_SESSION["fromTournamentDate"]); $date = date('Y-m-d', $date1 );
-			$query = $query . " and DATE >= '".$date."' ";
+			$query = $query . " and T.DATE >= '".$date."' ";
 		}
 		if ($_SESSION["toTournamentDate"] !=null and $_SESSION["toTournamentDate"] != '') {
 			$date1 = strtotime($_SESSION["toTournamentDate"]); $date = date('Y-m-d', $date1 );
-			$query = $query . " and DATE <= '".$date."' ";
+			$query = $query . " and T.DATE <= '".$date."' ";
 		}
 		 
-		$query = $query . " ORDER BY DATE DESC ";
+		$query = $query . " ORDER BY T.DATE DESC ";
 		
 		if ($_SESSION["tournamentsNumber"] !=null and $_SESSION["tournamentsNumber"] != '') {
 			$query = $query . " LIMIT ".$_SESSION["tournamentsNumber"];
@@ -572,7 +585,7 @@ else {
 				$result = $mysqli->query("SELECT CONCAT(LAST_NAME,', ',FIRST_NAME) AS USER, USERNAME FROM USER WHERE USER_ID = ".$selectedVerifier); 
 				$row1 = $result->fetch_row();
 	
-				$verifier = array($selectedVerifier, $row1['0'], $row1['1']); // 0: TEAM_ID 1: NAME 2:TEAM_NUMBER 3: ALTERNATE 4: TOURN_TEAM_ID 5: NEW TEAM 0/1
+				$verifier = array($selectedVerifier, $row1['0'], $row1['1'],""); // 0: USER_ID 1: NAME 2: USERNAME 3: TOURN_VERIFIER_ID
 				array_push($verifierList, $verifier);
 				$_SESSION["verifierList"] = $verifierList;
 				reloadTournamentVerifier();
@@ -684,6 +697,37 @@ else {
 			}
 		}
 	}
+	
+		function deleteTournamentVerifier($mysqli, $row) {
+		// Remove From Cache
+		$verifierList = $_SESSION["verifierList"];
+		$count = 0;
+		if ($verifierList) {
+			foreach ($verifierList as $key => $verifier) { 
+				if ($row == $count) {
+					if ($verifier[3] != null and verifier[3] != "") {
+						// delete tourn event
+						$result = $mysqli->query("DELETE FROM TOURNAMENT_VERIFIER WHERE TOURN_VERIFIER_ID = " .$verifier[3]);
+						unset($verifierList[$key]);
+						$verifierList = array_values($verifierList);
+						$_SESSION["verifierList"] = $verifierList;
+						reloadTournamentVerifier($mysqli);
+					} 
+					else {
+						unset($verifierList[$key]);
+						$verifierList = array_values($verifierList);
+						$_SESSION["verifierList"] = $verifierList;
+						reloadTournamentVerifier($mysqli);
+					}			
+					break;
+				}
+				$count++;		
+			}
+		}
+	}
+	
+	
+	
 	
 	function loadDivisionTeams($division, $mysqli) {
 		$query = "SELECT DISTINCT * FROM TEAM ";
@@ -845,6 +889,25 @@ else {
  				}
 			}			
 			$_SESSION["teamList"] = $teamList;
+			
+			// Load Verifiers
+			$verifierList = array();
+			$result = $mysqli->query("SELECT TV.USER_ID, TV.TOURN_VERIFIER_ID, U.USERNAME, CONCAT(U.LAST_NAME,', ',U.FIRST_NAME) AS USER 
+									FROM TOURNAMENT_VERIFIER TV INNER JOIN TOURNAMENT T on 		
+									T.TOURNAMENT_ID=TV.TOURNAMENT_ID 
+									INNER JOIN USER U on U.USER_ID=TV.USER_ID WHERE T.TOURNAMENT_ID= " .$id. " ORDER BY UPPER(U.LAST_NAME) ASC "); 
+ 			if ($result) {
+ 				while($verifierRow = $result->fetch_array()) {
+ 					$verifier = array();
+ 					array_push($verifier, $verifierRow['0']);
+ 					array_push($verifier, $verifierRow['3']);
+ 					array_push($verifier, $verifierRow['2']);
+ 					array_push($verifier, $verifierRow['1']);
+				
+ 					array_push($verifierList, $verifier);
+ 				}
+			}			
+			$_SESSION["verifierList"] = $verifierList;
 	}
 	
 	
@@ -957,6 +1020,29 @@ else {
 				
 			}
 		}
+		
+		// save verifiers
+		// 0: USER_ID 1: NAME 2: USERNAME 3: TOURN_VERIFIER_ID
+		$verifierList = $_SESSION["verifierList"];
+		if ($verifierList) {
+			foreach ($verifierList as $verifier) {
+				if ($verifier['3'] == null or $verifier['3'] == '') {
+					// Generate Next TOURN_VERIFIER_ID
+					$result = $mysqli->query("select max(TOURN_VERIFIER_ID) + 1 from TOURNAMENT_VERIFIER");
+					$row = $result->fetch_row();
+					$id = 0;
+					if ($row['0'] != null) $id = $row['0'];
+					 
+					$query = $mysqli->prepare("INSERT INTO TOURNAMENT_VERIFIER (TOURN_VERIFIER_ID, TOURNAMENT_ID, USER_ID) VALUES (".$id.", ?, ?) ");
+					$query->bind_param('ii',$_SESSION["tournamentId"],$verifier['0']); 
+					$query->execute();
+				}
+				else {
+					// DO NOTHING
+				}	
+			}
+		}
+		
 		
 		// save Confirmation
 		$_SESSION['savesuccessTournament'] = "1";	

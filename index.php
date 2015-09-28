@@ -2,6 +2,7 @@
 session_start(); 
 include_once('score_center_objects.php');
 include_once('logon_check.php');
+include_once('role_check.php');
 
             require_once('login.php');
 		 	$db_server = mysql_connect($db_hostname, $db_username, $db_password);
@@ -79,8 +80,14 @@ include_once('logon_check.php');
         </thead>
         <tbody>
         <?php
- 			$result = mysql_query("SELECT TOURNAMENT_ID, NAME, LOCATION,DIVISION, DATE_FORMAT(DATE,'%m/%d/%Y') 'DATE' FROM TOURNAMENT WHERE
- 			DATE_FORMAT(DATE, '%Y-%m-%d') = DATE_FORMAT(CURDATE(), '%Y-%m-%d')"); 
+		$query = "SELECT T.TOURNAMENT_ID, T.NAME, T.LOCATION,T.DIVISION, DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE' FROM TOURNAMENT T ";
+		if (getCurrentRole() == 'VERIFIER') {
+			$query .= " INNER JOIN TOURNAMENT_VERIFIER TV ON TV.TOURNAMENT_ID=T.TOURNAMENT_ID AND TV.USER_ID =" .getCurrentUserId();
+		}
+		$query .= " WHERE DATE_FORMAT(T.DATE, '%Y-%m-%d') = DATE_FORMAT(CURDATE(), '%Y-%m-%d') ";
+ 		$result = mysql_query($query); 
+			
+
  			if ($result) {
  				if (mysql_num_rows($result) == 0) { echo '<tr><td colspan="5">No Tournaments Today</td></tr>';}
  				else {
