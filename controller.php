@@ -3,6 +3,7 @@ session_start();
 include_once('score_center_objects.php');
 include_once('mail_functions.php');
 include_once('role_check.php');
+include_once('libs/score_center_global_settings.php');
 require_once('libs/PHPExcel.php');
 
 
@@ -219,9 +220,9 @@ else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteTeam') 
 	deleteTournamentTeam($mysqli, $_GET['TournTeamRowId']);
 	exit();
 }
-else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteVerifier') {
+else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteEvent') {
 	cacheTournamnent();
-	deleteTournamentTeam($mysqli, $_GET['TournTeamRowId']);
+	deleteTournamentEvent($mysqli, $_GET['TournEventRowId']);
 	exit();
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteVerifier') {
@@ -329,6 +330,11 @@ else if (isset($_GET['exportResultsCSV'])) {
 }
 else if (isset($_GET['exportResultsEXCEL'])) {
 	exportResultsEXCEL($mysqli);
+	header("Location: tournament_results.php");
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'updatePRowColor') {
+	$_SESSION["primaryRowColor"] = $_GET['color'];
 	header("Location: tournament_results.php");
 	exit();
 }
@@ -1577,7 +1583,7 @@ else {
 		array_push($headings,$_SESSION["tournamentName"]."\nDivision: ".$_SESSION["tournamentDivision"]."\nDate: ".$_SESSION["tournamentDate"]);
 		if ($tournamentResultsHeader != null) {
 			foreach ($tournamentResultsHeader as $resultHeader) {				
-				array_push($headings,$resultHeader);
+				array_push($headings,str_replace(',','',$resultHeader));
 			}
 		}
 		array_push($headings,"Total Score");
@@ -1591,7 +1597,7 @@ else {
 			 foreach ($tournamentResults as $resultRow) {
 				$row = array();
 				array_push($row,$resultRow['1']);
-				array_push($row,$resultRow['2']);
+				array_push($row,str_replace(',','',$resultRow['2']));
 				$i = 3;
 				while ($i < sizeof($resultRow)-1) {
 					array_push($row,$resultRow[$i]);
@@ -2120,12 +2126,8 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
-	++ Assign Verifiers to events
-	++ commas in csv file.
 	++ Rank Alternate Team
-	++ Generate Results as Print / XML
 
-	
 	
 	-- APP LIMITATIONS / LOW PRIORITY ISSUES --
 	** Handles 100 Teams / Events Per TOURNAMENT
@@ -2133,6 +2135,7 @@ else {
 	** Results Order By OPTION
 	** controller class security
 	** Manual Reminder email to supervisor
+	** Generate Results as XML
 
 	
 	

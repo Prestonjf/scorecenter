@@ -522,7 +522,7 @@
 					echo '<td>'; echo $verifier['2']; echo '</td>';
 					echo '<td>';
 					if (getCurrentRole() != 'VERIFIER') {
-						echo '<button type="button" class="btn btn-xs btn-danger" name="deleteVerifier" onclick="validateDeleteVerifier(this)" value='.$verifier['0'].'>Delete</button>';
+						echo '<button type="button" class="btn btn-xs btn-danger" name="deleteVerifier" onclick="validateDeleteVerifier(this)" value='.$verifier['3'].'>Delete</button>';
 					}
 					echo '</td>';
 					echo '</tr>';
