@@ -86,7 +86,7 @@
   <body>
   <?php include_once 'navbar.php'; ?>
   
-  	<form action="controller.php" method="GET">
+  	<form action="controller.php" method="GET" id="form1">
      <div class="container">
      
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
@@ -120,22 +120,23 @@
         <table class="table table-bordered table-hover" data-sortable data-sort-name="rank" data-sort-order="desc">
         <thead>
             <tr>
-				<th <?php echo 'style="background-color: #D1D1D1;border-bottom: 1px solid #000000;"'; ?>  data-field="name" data-sortable="true"><div><span>#</span></div></th>
-				<th <?php echo 'style="background-color: #FFFFFF;border-bottom: 1px solid #000000;"'; ?> width="20%"  data-field="number" data-sortable="true"><div><span><?php echo $_SESSION["tournamentName"]; ?><br /><?php echo 'Division: '.$_SESSION["tournamentDivision"]; ?><br /><?php echo 'Date: '.$_SESSION["tournamentDate"]; ?></span></div></th>
+				<th <?php echo 'style="background-color: #'.$_SESSION["primaryColumnColor"].';border-bottom: 1px solid #000000;"'; ?>  data-field="name" data-sortable="true"><div><span>#</span></div></th>
+				<th <?php echo 'style="background-color: #'.$_SESSION["secondaryRowColor"].';border-bottom: 1px solid #000000;"'; ?> width="20%"  data-field="number" data-sortable="true"><div><span><?php echo $_SESSION["tournamentName"]; ?><br /><?php echo 'Division: '.$_SESSION["tournamentDivision"]; ?><br /><?php echo 'Date: '.$_SESSION["tournamentDate"]; ?></span></div></th>
 				<?php
 				$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
 				if ($tournamentResultsHeader != null) {
 					foreach ($tournamentResultsHeader as $resultHeader) {
 						echo '<th style="border-bottom: 1px solid #000000;'; 
-						if ($rowCount % 2 == 0) echo ' background-color: #D1D1D1;';
+						if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].';';
+						else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';
 						echo '" class="rotate" data-field="score" data-align="center" data-sortable="true"><div><span>'.$resultHeader.'</span></div></th>';						
 						$rowCount++;
 					}
 				}
 				?>
-                <th style="border-bottom: 1px solid #000000; <?php if ($rowCount % 2 == 0) echo ' background-color: #D1D1D1; ';?>" class="rotate" data-field="total" data-align="center" data-sortable="true"><div><span>Total Score</span></div></th>
+                <th style="border-bottom: 1px solid #000000; <?php if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';?>" class="rotate" data-field="total" data-align="center" data-sortable="true"><div><span>Total Score</span></div></th>
 				<?php $rowCount++; ?>
-			   <th style="border-bottom: 1px solid #000000; <?php if ($rowCount % 2 == 0) echo ' background-color: #D1D1D1; ';?>" class="rotate" data-field="rank" data-align="center" data-sortable="true"><div><span>Final Rank</span></div></th>
+			   <th style="border-bottom: 1px solid #000000; <?php if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';?>" class="rotate" data-field="rank" data-align="center" data-sortable="true"><div><span>Final Rank</span></div></th>
             </tr>
         </thead>
         <tbody>
@@ -148,20 +149,22 @@
 				$colCount = 0;
       			echo '<tr>'; //style="border-right: 1px solid #000000;
 				echo '<td '; 
-					if ($rowCount % 2 == 0 && $colCount % 2 == 0) echo 'style="background-color: #CEDCCE;"'; 
-					else if ($rowCount % 2 != 0 && $colCount % 2 == 0) echo 'style="background-color: #D1D1D1;"'; 
-					else if ($rowCount % 2 == 0 && $colCount % 2 != 0) echo 'style="background-color: #D1ECD1;"';	
+					if ($rowCount % 2 == 0 && $colCount % 2 == 0) echo 'style="background-color: #'.$_SESSION["secondaryColumnColor"].';"'; 
+					else if ($rowCount % 2 != 0 && $colCount % 2 == 0) echo 'style="background-color: #'.$_SESSION["primaryColumnColor"].';"'; 
+					else if ($rowCount % 2 == 0 && $colCount % 2 != 0) echo 'style="background-color: #'.$_SESSION["primaryRowColor"].';"';	
+					else echo 'style="background-color: #'.$_SESSION["secondaryRowColor"].';"';
 				echo '><b>'.$resultRow['1'].'</b></td>';
 				$colCount++;
-				echo '<td style="border-right: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: '.$_SESSION["primaryRowColor"]; echo '"><b>'.$resultRow['2'].'</b></td>';
+				echo '<td style="border-right: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryRowColor"]; else echo ' background-color: #'.$_SESSION["secondaryRowColor"]; echo '"><b>'.$resultRow['2'].'</b></td>';
 				$i = 3;
 				$colCount++;
 				while ($i < sizeof($resultRow)-1) {
 					echo '<td style="'; 
 						if ($i == (sizeof($resultRow)-4)) echo 'border-right: 1px solid #000000; ';
-						if ($rowCount % 2 == 0 && $colCount % 2 == 0) echo 'background-color: #CEDCCE;'; 
-						else if ($rowCount % 2 != 0 && $colCount % 2 == 0) echo 'background-color: #D1D1D1;';	
-						else if ($rowCount % 2 == 0 && $colCount % 2 != 0) echo 'background-color: #D1ECD1;';
+						if ($rowCount % 2 == 0 && $colCount % 2 == 0) echo 'background-color: #'.$_SESSION["secondaryColumnColor"].';'; 
+						else if ($rowCount % 2 != 0 && $colCount % 2 == 0) echo 'background-color: #'.$_SESSION["primaryColumnColor"].';';	
+						else if ($rowCount % 2 == 0 && $colCount % 2 != 0) echo 'background-color: #'.$_SESSION["primaryRowColor"].';';
+						else echo 'background-color: #'.$_SESSION["secondaryRowColor"].';';
 					echo '">'.$resultRow[$i].'</td>';
 					$i++;
 					$colCount++;
@@ -183,8 +186,11 @@
 		  	$(".primaryRowColor").spectrum({
 				color: "<?php echo $_SESSION["primaryRowColor"]; ?>",
 				change: function(color) {
-					alert(color.toHexString());
-					document.forms[0].action = document.forms[0].action + "?command=updatePRowColor&color="+color.toHexString();
+					var str = color.toHexString();			
+					var input = $("<input>").attr("type", "hidden").attr("name", "command").val("updatePRowColor");
+					var input2 = $("<input>").attr("type", "hidden").attr("name", "color").val(str.replace("#", ""));
+					$('#form1').append($(input));
+					$('#form1').append($(input2));
 					document.forms[0].submit();
 				}
 			});
@@ -194,7 +200,12 @@
 			$(".primaryColumnColor").spectrum({
 				color: "<?php echo $_SESSION["primaryColumnColor"]; ?>",
 				change: function(color) {
-					alert(color.toHexString());
+					var str = color.toHexString();			
+					var input = $("<input>").attr("type", "hidden").attr("name", "command").val("updatePColColor");
+					var input2 = $("<input>").attr("type", "hidden").attr("name", "color").val(str.replace("#", ""));
+					$('#form1').append($(input));
+					$('#form1').append($(input2));
+					document.forms[0].submit();
 				}
 			});
 			</script>
@@ -203,7 +214,12 @@
 		  	$(".secondaryRowColor").spectrum({
 				color: "<?php echo $_SESSION["secondaryRowColor"]; ?>",
 				change: function(color) {
-					alert(color.toHexString());
+					var str = color.toHexString();			
+					var input = $("<input>").attr("type", "hidden").attr("name", "command").val("updateSRowColor");
+					var input2 = $("<input>").attr("type", "hidden").attr("name", "color").val(str.replace("#", ""));
+					$('#form1').append($(input));
+					$('#form1').append($(input2));
+					document.forms[0].submit();
 				}
 			});
 			</script>
@@ -212,12 +228,18 @@
 		  	$(".secondaryColumnColor").spectrum({
 				color: "<?php echo $_SESSION["secondaryColumnColor"]; ?>",
 				change: function(color) {
-					alert(color.toHexString());
+					var str = color.toHexString();			
+					var input = $("<input>").attr("type", "hidden").attr("name", "command").val("updateSColColor");
+					var input2 = $("<input>").attr("type", "hidden").attr("name", "color").val(str.replace("#", ""));
+					$('#form1').append($(input));
+					$('#form1').append($(input2));
+					document.forms[0].submit();				
 				}
 			});
 			</script>
 		  <br /><br />
 		  <button type="submit" class="btn btn-xs btn-primary" name="cancelTournament">Cancel</button>
+		  <button type="submit" class="btn btn-xs btn-primary" name="resetResultsColors">Reset Colors</button>
       <hr>
 	<?php include_once 'footer.php'; ?>
 

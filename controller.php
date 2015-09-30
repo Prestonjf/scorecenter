@@ -22,6 +22,7 @@ require_once('login.php');
 // Begin MAIN METHOD -------------------------->	
 if (isset($_POST['login'])) {		
 	if (login($mysqli)) {
+		loadDefaultSettings();
 		header("Location: index.php");
 		exit();
 	} else {
@@ -335,6 +336,26 @@ else if (isset($_GET['exportResultsEXCEL'])) {
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'updatePRowColor') {
 	$_SESSION["primaryRowColor"] = $_GET['color'];
+	header("Location: tournament_results.php");
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'updatePColColor') {
+	$_SESSION["primaryColumnColor"] = $_GET['color'];
+	header("Location: tournament_results.php");
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'updateSRowColor') {
+	$_SESSION["secondaryRowColor"] = $_GET['color'];
+	header("Location: tournament_results.php");
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'updateSColColor') {
+	$_SESSION["secondaryColumnColor"] = $_GET['color'];
+	header("Location: tournament_results.php");
+	exit();
+}
+else if (isset($_GET['resetResultsColors'])) {
+	loadDefaultSettings();
 	header("Location: tournament_results.php");
 	exit();
 }
@@ -1647,7 +1668,8 @@ else {
 		$objExcelSheet->setCellValue('A1', '#')->setCellValue('B1', $_SESSION["tournamentName"]."\nDivision: ".$_SESSION["tournamentDivision"]."\nDate: ".$_SESSION["tournamentDate"]);
 		$objExcelSheet->getColumnDimension('A')->setWidth(4);
 		$objExcelSheet->getColumnDimension('B')->setAutoSize(true);
-		$objExcelSheet->getStyle('A1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1D1D1');
+		$objExcelSheet->getStyle('A1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["primaryColumnColor"]);
+		$objExcelSheet->getStyle('B1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["secondaryRowColor"]);
 		$objExcelSheet->getStyle('B1')->getAlignment()->setWrapText(true);
 		$objExcelSheet->getStyle('A1')->getAlignment()->applyFromArray(array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_RIGHT,));
 		$objExcelSheet->getStyle('A1')->getBorders()->getBottom()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
@@ -1657,7 +1679,8 @@ else {
 		if ($tournamentResultsHeader != null) {
 			foreach ($tournamentResultsHeader as $resultHeader) {		
 				if ($asciiValue > 90) {$asciiValue = 65; $colPrefix .= chr($colPrefixAsci); $colPrefixAscii++;}
-				if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1D1D1');
+				if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["primaryColumnColor"]);
+				else $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["secondaryRowColor"]);
 				$objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getAlignment()->setTextRotation(90);
 				$objExcelSheet->setCellValue($colPrefix.chr($asciiValue).'1', $resultHeader);
 				$objExcelSheet->getColumnDimension($colPrefix.chr($asciiValue))->setWidth(4);
@@ -1667,14 +1690,16 @@ else {
 		}
 		if ($asciiValue > 90) {$asciiValue = 65; $colPrefix .= chr($colPrefixAsci); $colPrefixAscii++;}
 		$objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getAlignment()->setTextRotation(90);
-		if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1D1D1');
+		if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["primaryColumnColor"]);
+		else $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["secondaryRowColor"]);
 		$objExcelSheet->setCellValue($colPrefix.chr($asciiValue).'1', 'Total Score');
 		$objExcelSheet->getColumnDimension($colPrefix.chr($asciiValue))->setWidth(4);
 		$objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getBorders()->getBottom()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
 		
 		$asciiValue++;
 		if ($asciiValue > 90) {$asciiValue = 65; $colPrefix .= chr($colPrefixAsci); $colPrefixAscii++;}
-		if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1D1D1');
+		if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["primaryColumnColor"]);
+		else $objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["secondaryRowColor"]);
 		$objExcelSheet->getStyle($colPrefix.chr($asciiValue).'1')->getAlignment()->setTextRotation(90);
 		$objExcelSheet->setCellValue($colPrefix.chr($asciiValue).'1', 'Final Rank');
 		$objExcelSheet->getColumnDimension($colPrefix.chr($asciiValue))->setWidth(4);
@@ -1693,17 +1718,21 @@ else {
 				$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CCCCCC');
 				$objExcelSheet->getStyle('B'.$rowCount)->getBorders()->getRight()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);	
 				if ($rowCount % 2 == 0) {
-					$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CEDCCE');
-					$objExcelSheet->getStyle('B'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1ECD1');
+					$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["secondaryColumnColor"]);
+					$objExcelSheet->getStyle('B'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["primaryRowColor"]);
+				} else {
+					$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["primaryColumnColor"]);
+					$objExcelSheet->getStyle('B'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["secondaryRowColor"]);
 				}
 				
 				$i = 3;
 				while ($i < sizeof($resultRow)-1) {
 					if ($asciiValue > 90) {$asciiValue = 65; $colPrefix .= chr($colPrefixAsci); $colPrefixAscii++;}
 					$objExcelSheet->setCellValue($colPrefix.chr($asciiValue).$rowCount, $resultRow[$i]);
-					if ($asciiValue % 2 != 0 && $rowCount % 2 == 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CEDCCE');
-					else if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CCCCCC');
-					else if ($rowCount % 2 == 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('D1ECD1');
+					if ($asciiValue % 2 != 0 && $rowCount % 2 == 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["secondaryColumnColor"]);
+					else if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["primaryColumnColor"]);
+					else if ($rowCount % 2 == 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["primaryRowColor"]);
+					else $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["secondaryRowColor"]);
 					if ($i == sizeof($resultRow) - 4)	
 						$objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getBorders()->getRight()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
 					$i++;
@@ -1926,6 +1955,7 @@ else {
 			$_SESSION['sessionTimeout'] = time(); // Session Timeout
 			return true;
 		}
+				
 		// Throw Error Message
 		$_SESSION["accountMode"] == '';
 		$_SESSION["loginError1"] = "1";
@@ -2120,6 +2150,13 @@ else {
 		}
 		
 		return true;
+	}
+	
+	function loadDefaultSettings() {
+		$_SESSION["primaryRowColor"] = "D1ECD1"; // Default Green. Primary Row
+		$_SESSION["primaryColumnColor"] = "D1D1D1"; // Default Gray. Primary Column
+		$_SESSION["secondaryRowColor"] = "FFFFFF"; // Default White. Secondary Row
+		$_SESSION["secondaryColumnColor"] = "CEDCCE"; // Default Green/Gray. Secondary Column
 	}
 
 
