@@ -34,6 +34,8 @@ include_once('logon_check.php');
   <head>
 	<?php include_once('libs/head_tags.php'); ?>
 	
+	
+	
   <script type="text/javascript">
   $(document).ready(function(){
   
@@ -57,20 +59,20 @@ include_once('logon_check.php');
 		if (element.value > max || element.value < 1) element.value = '';
 	}
 	
-	function updatePointsEarned(element, id) {
+	function updatePointsEarned(element, id, type) {
 		//limitNumber(element);
 		var max = <?php echo $_SESSION["tournamentHighestScore"];?>;
 		var lowHighFlag = <?php echo $_SESSION["highLowWinFlag"];?>;
 		if (lowHighFlag == 0) {
-			if (element.value > max) document.getElementById('teamPointsEarned'+id).value = max;
-			else document.getElementById('teamPointsEarned'+id).value = element.value;
+			if (element.value > max) document.getElementById(type+id).value = max;
+			else document.getElementById(type+id).value = element.value;
 			
 		}
 		else {
 			if ((max + 1 - element.value) > 0)
-				document.getElementById('teamPointsEarned'+id).value = max + 1 - element.value;
+				document.getElementById(type+id).value = max + 1 - element.value;
 			else 
-				document.getElementById('teamPointsEarned'+id).value = 0;
+				document.getElementById(type+id).value = 0;
 		}
 		
 	}
@@ -155,6 +157,7 @@ include_once('logon_check.php');
 		// Validate Numbers are sequential and no 0 - error2
 		scoreArr.sort(sortNumber);
 		var sequence = 1;
+
 		scoreArr.forEach(function(entry) {
 			if (entry == 0) { error2 = true;}
 			if (sequence != entry && max != entry) { error2 = true;}
@@ -198,6 +201,24 @@ include_once('logon_check.php');
   	}
 	.red {
 		color: red;
+	}
+	
+		fieldset.utility-border {
+		border: 1px solid #eee !important;
+		padding: 0 1.4em 1.4em 1.4em !important;
+		margin: 0 0 1.5em 0 !important;
+		-webkit-box-shadow:  0px 0px 0px 0px #eee;
+        box-shadow:  0px 0px 0px 0px #eee;
+	}
+
+	legend.utility-border {
+		font-size: 1.2em !important;
+		font-weight: bold !important;
+		text-align: left !important;
+		
+		width:inherit;
+		 padding:0 10px;
+		 border-bottom:none;
 	}
   
   
@@ -245,7 +266,9 @@ include_once('logon_check.php');
 	 <td><label for="verifiedFlag">Verified</label> &nbsp;&nbsp;<input type="checkbox" id="verifiedFlag" name="verifiedFlag" <?php echo $disableVerfiy.' '.$verified; ?> value="1"></td>
 	 </tr></table>
 	 <hr>
-
+		<?php if ($_SESSION["teamAlternateEventScoreList"] != null) {?>		
+		<fieldset class="utility-border"><legend class="utility-border">Primary Teams</legend>
+		<?php } ?>
         <table class="table table-hover">
         <thead>
             <tr>
@@ -280,7 +303,7 @@ include_once('logon_check.php');
 			</select></td>';
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
       						name="teamTieBreak'.$teamCount.'" id="teamTieBreak'.$teamCount.'" value="'.$scoreRecord['8'].'"></td>';
-      				echo '<td style="background-color: #FFCCCC;"><input type="text"  class="form-control" size="4" autocomplete="off" onkeydown="updatePointsEarned(this, \''.$teamCount.'\');" onkeyup="updatePointsEarned(this, \''.$teamCount.'\');" '.$disable.'    
+      				echo '<td style="background-color: #FFCCCC;"><input type="text"  class="form-control" size="4" autocomplete="off" onkeydown="updatePointsEarned(this, \''.$teamCount.'\',\'teamPointsEarned\');" onkeyup="updatePointsEarned(this, \''.$teamCount.'\',\'teamPointsEarned\');" '.$disable.'    
       						name="teamScore'.$teamCount.'" id="teamScore'.$teamCount.'" value="'.$scoreRecord['2'].'">'; // set background color
       				echo '</td>';
       				echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" readonly   
@@ -294,6 +317,59 @@ include_once('logon_check.php');
         ?>
           </tbody>
           </table>
+		  
+		<?php if ($_SESSION["teamAlternateEventScoreList"] != null) {?>
+		</fieldset>
+		<fieldset class="utility-border"><legend class="utility-border">Alternate Teams</legend>
+		<table class="table table-hover">
+        <thead>
+            <tr>
+                <th width="10%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
+                <th width="20%" data-field="teamNumber" data-align="center" data-sortable="true">Team Name</th>
+				<th width="10%"data-field="score" data-align="center" data-sortable="true">Raw Score</th>
+				<th width="10%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group</th>
+				<th width="30%"data-field="score" data-align="center" data-sortable="true">Tie Break</th>	
+                <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank</th>
+				<th width="10%" data-field="score" data-align="center" data-sortable="true">Points Earned</th>
+            </tr>
+        </thead>
+        <tbody>
+         <?php
+         if ($_SESSION["teamAlternateEventScoreList"] != null and $_SESSION["teamAlternateEventScoreList"] != '') {			
+ 			if ($_SESSION["teamAlternateEventScoreList"] ) {
+ 				$teamCount = 0;
+      			foreach ($_SESSION["teamAlternateEventScoreList"] as $scoreRecord) {
+      				echo '<tr>';
+      				echo '<td>'; echo $scoreRecord['1']; echo '</td>';
+					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
+					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
+      						name="teamARawScore'.$teamCount.'" id="teamARawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" ></td>';
+					echo '<td><select class="form-control" name="teamAScoreTier'.$teamCount.'" id="teamAScoreTier'.$teamCount.'">
+			<option value=""></option>
+			<option value="I" ';  if($scoreRecord['7'] == "I"){echo("selected");} echo '>I</option>
+			<option value="II" '; if($scoreRecord['7'] == "II"){echo("selected");} echo '>II</option>
+			<option value="III" ';if($scoreRecord['7'] == "III"){echo("selected");} echo '>III</option>
+			<option value="IV" '; if($scoreRecord['7'] == "IV"){echo("selected");} echo '>IV</option>
+			<option value="V" ';  if($scoreRecord['7'] == "V"){echo("selected");} echo '>V</option>
+			</select></td>';
+					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
+      						name="teamATieBreak'.$teamCount.'" id="teamATieBreak'.$teamCount.'" value="'.$scoreRecord['8'].'"></td>';
+      				echo '<td style="background-color: #FFCCCC;"><input type="text"  class="form-control" size="4" autocomplete="off"  '.$disable.'    
+      						name="teamAScore'.$teamCount.'" id="teamAScore'.$teamCount.'" value="'.$scoreRecord['2'].'" onkeydown="updatePointsEarned(this, \''.$teamCount.'\',\'teamAPointsEarned\');" onkeyup="updatePointsEarned(this, \''.$teamCount.'\',\'teamAPointsEarned\');" >'; // set background color
+      				echo '</td>'; // 
+      				echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" readonly   
+      						name="teamAPointsEarned'.$teamCount.'" id="teamAPointsEarned'.$teamCount.'" value="'.$scoreRecord['5'].'"></td>';					
+					echo '</tr>';
+					
+					$teamCount++;	
+      			}
+    		}
+    	}
+        ?>
+          </tbody>
+          </table>
+		  </fieldset>
+		<?php } ?>
           <label for="eventComments">Supervisor's Comments</label><br />
           <textarea class="form-control"  name="eventComments" id="eventComments" spellcheck="true" rows="5" cols="100"><?php echo $_SESSION["eventComments"];?></textarea>
           <br /> <br />

@@ -1151,9 +1151,10 @@ else {
  				$_SESSION["tournamentDate"] = date('m/d/Y', $date);	
  				$_SESSION["eventComments"] = $tournamentRow['10'];
     		}
-    		
+    	
+		// Primary Teams
     	 $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT 
-    	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID 
+    	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID AND TT.ALTERNATE_FLAG = 0 
     	 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID AND TES.TOURN_EVENT_ID = " .$_SESSION["tournEventId"].
     	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY TEAM_NUMBER ASC "); 
  			$teamEventScoreList = array();
@@ -1175,9 +1176,36 @@ else {
     		}
     									
     		$_SESSION["teamEventScoreList"] = $teamEventScoreList;
+			
+		// Alternate Teams
+		$_SESSION["teamAlternateEventScoreList"] = null;
+		    $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT 
+    	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID AND TT.ALTERNATE_FLAG = 1
+    	 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID AND TES.TOURN_EVENT_ID = " .$_SESSION["tournEventId"].
+    	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY TEAM_NUMBER ASC "); 
+ 			$teamAlternateEventScoreList = array();
+ 			if ($result) {
+ 				while($scoreRow = $result->fetch_array()) {
+ 					$scoreRecord = array();	
+ 					array_push($scoreRecord, $scoreRow['0']);
+ 					array_push($scoreRecord, $scoreRow['1']);
+ 					array_push($scoreRecord, $scoreRow['2']);
+ 					array_push($scoreRecord, $scoreRow['3']);
+ 					array_push($scoreRecord, $scoreRow['4']);
+ 					array_push($scoreRecord, $scoreRow['5']);
+ 					array_push($scoreRecord, $scoreRow['6']);
+ 					array_push($scoreRecord, $scoreRow['7']);
+ 					array_push($scoreRecord, $scoreRow['8']);	
+ 						
+ 					array_push($teamAlternateEventScoreList, $scoreRecord);
+ 				}
+    		}
+    									
+    		$_SESSION["teamAlternateEventScoreList"] = $teamAlternateEventScoreList;
 	}
 	
 	function saveEventScores($mysqli) {	
+	// Primary Teams
 		$scoreList = $_SESSION["teamEventScoreList"];
 		if ($scoreList) {
 			$teamCount = 0;
@@ -1210,6 +1238,42 @@ else {
 				$teamCount++;	
 			}
 		}
+		
+	// Alternate Teams
+		$scoreList = $_SESSION["teamAlternateEventScoreList"];
+		if ($scoreList) {
+			$teamCount = 0;
+			foreach ($scoreList as $score) {
+				$value = $_GET['teamAScore'.$teamCount];
+				$rawScore = $_GET['teamARawScore'.$teamCount];
+				$tier = $_GET['teamAScoreTier'.$teamCount];
+				$tieBreak = $_GET['teamATieBreak'.$teamCount];
+				$pointsEarned = $_GET['teamAPointsEarned'.$teamCount];
+				
+				
+				if ($value == '' || $value == '0') $value = null;
+					
+				if ($score['3'] == null or $score['3'] == '') {
+					$result = $mysqli->query("select max(TEAM_EVENT_SCORE_ID) + 1 from TEAM_EVENT_SCORE");
+					$row = $result->fetch_row();
+					$id = 0;
+					if ($row['0'] != null) $id = $row['0']; 
+				
+					$query = $mysqli->prepare("INSERT INTO TEAM_EVENT_SCORE (TEAM_EVENT_SCORE_ID, TOURN_TEAM_ID, TOURN_EVENT_ID, SCORE, POINTS_EARNED, RAW_SCORE, TIER_TEXT, 											TIE_BREAK_TEXT) VALUES (".$id.", ?, ?, ?,?,?,?,?) ");
+					$query->bind_param('iiiisss',$score['4'],$_SESSION["tournEventId"], $value,$pointsEarned,$rawScore,$tier,$tieBreak); 
+					$query->execute();
+					$score['3'] = $id;
+				}
+				else {
+					$query = $mysqli->prepare("UPDATE TEAM_EVENT_SCORE SET SCORE=?, POINTS_EARNED=?, RAW_SCORE=?,TIER_TEXT=?,TIE_BREAK_TEXT=? WHERE TEAM_EVENT_SCORE_ID=".$score['3']);			
+					$query->bind_param('iisss',$value,$pointsEarned,$rawScore,$tier,$tieBreak);
+					$query->execute();
+				}
+				$teamCount++;	
+			}
+		}
+	
+	
 		// Update Submitted/Verified Flags
 		$query = $mysqli->prepare("UPDATE TOURNAMENT_EVENT SET SUBMITTED_FLAG=?, VERIFIED_FLAG=?, COMMENTS=? WHERE TOURN_EVENT_ID=".$_SESSION["tournEventId"]);			
 		$query->bind_param('iis',$_GET['submittedFlag'], $_GET['verifiedFlag'], $_GET['eventComments']); 
@@ -1511,6 +1575,8 @@ else {
 			}
 		}	
 		// Determine Final Rank With Tie Breakers
+		//echo $highLowWin . '<br />';
+		//echo print_r($tournamentResults);
 		$tournamentResults = quicksort($tournamentResults, $highLowWin); 
 		
 		// Set Final Rank VALUE
@@ -1542,15 +1608,16 @@ else {
 		$pivot_key = key($array);
 		$pivot  = array_shift($array);
 		foreach($array as $k => $v) {
-			if (($v[sizeof($v)-3] < $pivot[sizeof($pivot)-3]) and $highLowWin == '0')
+			//echo $v[sizeof($v)-3] . ' ' . $pivot[sizeof($pivot)-3]  . '<br />';
+			if (($v[sizeof($v)-3] < $pivot[sizeof($pivot)-3]) and $highLowWin == 0)
 				$left[$k] = $v;
-			else if (($v[sizeof($v)-3] > $pivot[sizeof($pivot)-3]) and $highLowWin == '1')
-				$right[$k] = $v;
+			else if (($v[sizeof($v)-3] > $pivot[sizeof($pivot)-3]) and $highLowWin == 1)
+				$left[$k] = $v;
 			else if ($v[sizeof($v)-3] == $pivot[sizeof($pivot)-3])  {
 				$vCounts = $v[sizeof($v)-1];
 				$pivotCounts = $pivot[sizeof($pivot)-1];
 				
-				if ($vCounts[1] >  $pivotCounts[1]) $left[$k] = $v; else if ($vCounts[1] < $pivotCounts[1]) $right[$k] = $v;
+					 if ($vCounts[1] >  $pivotCounts[1]) $left[$k] = $v; else if ($vCounts[1] < $pivotCounts[1]) $right[$k] = $v;
 				else if ($vCounts[2] >  $pivotCounts[2]) $left[$k] = $v; else if ($vCounts[2] <  $pivotCounts[2]) $right[$k] = $v;
 				else if ($vCounts[3] >  $pivotCounts[3]) $left[$k] = $v; else if ($vCounts[3] <  $pivotCounts[3]) $right[$k] = $v;
 				else if ($vCounts[4] >  $pivotCounts[4]) $left[$k] = $v; else if ($vCounts[4] <  $pivotCounts[4]) $right[$k] = $v;
@@ -2179,6 +2246,7 @@ else {
 	-- ACKNOWLEDGEMENTS --
 	^^ PHPMAILER
 	^^ PHPEXCEL
+	^^ Spectrum Color Picker
 		
 	
 	**** TODO / GENERAL ISSUES *********/
