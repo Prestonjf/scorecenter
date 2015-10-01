@@ -64,15 +64,14 @@ include_once('logon_check.php');
 		var max = <?php echo $_SESSION["tournamentHighestScore"];?>;
 		var lowHighFlag = <?php echo $_SESSION["highLowWinFlag"];?>;
 		if (lowHighFlag == 0) {
-			if (element.value > max) document.getElementById(type+id).value = max;
-			else document.getElementById(type+id).value = element.value;
-			
+			if (element.value == 0) document.getElementById(type+id).value = max;
+			else if (element.value > max) document.getElementById(type+id).value = max;
+			else document.getElementById(type+id).value = element.value;			
 		}
 		else {
-			if ((max + 1 - element.value) > 0)
-				document.getElementById(type+id).value = max + 1 - element.value;
-			else 
-				document.getElementById(type+id).value = 0;
+			if (element.value == 0) document.getElementById(type+id).value = 0;
+			else if ((max + 1 - element.value) > 0) document.getElementById(type+id).value = max + 1 - element.value;
+			else document.getElementById(type+id).value = 0;
 		}
 		
 	}
@@ -147,7 +146,7 @@ include_once('logon_check.php');
 					error = true;
 					break;
 				}
-				else if (score != '') {
+				else if (score != '' && score != '0') {
 					scoreArr.push(score);
 				}
 			} 
@@ -159,9 +158,12 @@ include_once('logon_check.php');
 		var sequence = 1;
 
 		scoreArr.forEach(function(entry) {
-			if (entry == 0) { error2 = true;}
-			if (sequence != entry && max != entry) { error2 = true;}
-			sequence++;
+			if (entry != 0) { // 0 Means Team did not Participate or DQ
+				//if (entry == 0) { error2 = true;}
+				if (sequence != entry && sequence < max) { error2 = true;}
+				if (sequence != entry && max != entry) { error2 = true;}
+				sequence++;
+			}
 		});
 
 		if (error) {
@@ -169,7 +171,7 @@ include_once('logon_check.php');
 			return false;
 		}
 		if (error2) {
-			displayError("<strong>Cannot Save Scores:</strong> Ranks must be sequential (no rank skipped) and cannot be 0.");
+			displayError("<strong>Cannot Save Scores:</strong> Ranks must be sequential (no rank skipped)."); // and cannot be 0
 			return false;
 		}
 		if (error3) {
@@ -253,11 +255,13 @@ include_once('logon_check.php');
 	 <td></td>
 	 </tr>
 	 </table>
-     <br />
-     <h6>*Instructions:<br /><br />
-     1. Step 1 (Needed).<br /><br />
-     2. Step 2 (Needed).<br /><br />
-     3. Click save to save the event's scores. Event scores can be modified after the initial save if they have not yet been submitted. Once submitted, only a score verifier can modify the scores.
+     <h6>* Instructions:<br /><br />
+     1. Enter the Raw Score (Exam Score, Time, Points Earned etc) for each team. Not Required.<br /><br />
+     2. Enter the Tier or Rank Group if applicable for each team. Not Required<br /><br />
+	 3. If the team has a tie, enter a short desciprtion of the tie breaker for the tied teams. Not Required<br /><br />
+	 4. Enter the finishing rank each team earned. If the team did not participate or was disqualified, enter 0. REQUIRED<br /><br />
+	 5. Points earned will be calculated automatically.<br /><br />
+     6. Click save to save the event's scores. Event scores can be modified after the initial save if they have not yet been submitted. Once submitted, only a score verifier can modify the scores.
      </h6>    
 	 <hr>
 

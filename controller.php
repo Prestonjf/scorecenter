@@ -1217,7 +1217,7 @@ else {
 				$pointsEarned = $_GET['teamPointsEarned'.$teamCount];
 				
 				
-				if ($value == '' || $value == '0') $value = null;
+				if ($value == '') $value = null;
 					
 				if ($score['3'] == null or $score['3'] == '') {
 					$result = $mysqli->query("select max(TEAM_EVENT_SCORE_ID) + 1 from TEAM_EVENT_SCORE");
@@ -1251,7 +1251,7 @@ else {
 				$pointsEarned = $_GET['teamAPointsEarned'.$teamCount];
 				
 				
-				if ($value == '' || $value == '0') $value = null;
+				if ($value == '') $value = null;
 					
 				if ($score['3'] == null or $score['3'] == '') {
 					$result = $mysqli->query("select max(TEAM_EVENT_SCORE_ID) + 1 from TEAM_EVENT_SCORE");
@@ -1505,6 +1505,7 @@ else {
 		$tournamentResults = array();
 		$highLowWin = '0';
 		
+		// Load Event Headers
 		$query1 = "SELECT E.NAME, TE.TOURN_EVENT_ID, TE.TRIAL_EVENT_FLAG, TM.HIGH_LOW_WIN_FLAG
 					FROM TOURNAMENT TM
 					INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURNAMENT_ID=TM.TOURNAMENT_ID 
@@ -1523,11 +1524,12 @@ else {
 		}	
 		$_SESSION['tournamentResultsHeader'] = $tournamentResultsHeader;	
 		
+		// Load Primary Teams
 		$query2 = "  SELECT TT.TEAM_NUMBER,T.NAME, TT.TOURN_TEAM_ID, TT.ALTERNATE_FLAG 
 					FROM TOURNAMENT TM
 					INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID
 					INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
-					WHERE TM.TOURNAMENT_ID=".$id."
+					WHERE TT.ALTERNATE_FLAG=0 AND TM.TOURNAMENT_ID=".$id."
 					 ORDER BY TEAM_NUMBER ASC ";
 		$result = $mysqli->query($query2); 
  		if ($result) {
@@ -1585,13 +1587,62 @@ else {
 			$row[sizeof($row)-2] = $count;
 			$tournamentResults[$k] = $row;
 			$count++;
-		}
-		
-		
+		}	
 		// Additional Ordering OPTIONS
-		
-		
 		$_SESSION['tournamentResults'] = $tournamentResults;
+		
+		
+		// Load Alternate Teams
+		$query2 = "  SELECT TT.TEAM_NUMBER,T.NAME, TT.TOURN_TEAM_ID, TT.ALTERNATE_FLAG 
+					FROM TOURNAMENT TM
+					INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID
+					INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
+					WHERE TT.ALTERNATE_FLAG=1 AND TM.TOURNAMENT_ID=".$id."
+					 ORDER BY TEAM_NUMBER ASC ";
+		$result = $mysqli->query($query2); 
+		$_SESSION['tournamentAlternateResults'] = null;
+ 		if ($result) {
+			$tournamentAlternateResults = array();
+			while($teams = $result->fetch_array()) {
+					$resultRow = array();
+					$teamName = $teams['1'];
+					if ($teams['3'] != null and $teams['3'] == 1) $teamName .= ' +';
+					array_push($resultRow, $teams['2']);
+					array_push($resultRow, $teams['0']);
+					array_push($resultRow, $teamName);
+					
+					$query3 = "SELECT TES.SCORE, E.NAME, TE.TRIAL_EVENT_FLAG, TES.POINTS_EARNED
+								FROM TOURNAMENT_TEAM TT
+                                INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TT.TOURNAMENT_ID
+								INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURNAMENT_ID=T.TOURNAMENT_ID
+								INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID
+                                LEFT JOIN TEAM_EVENT_SCORE TES ON TES.TOURN_EVENT_ID=TE.TOURN_EVENT_ID 
+								AND TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID
+								WHERE TT.TOURN_TEAM_ID=".$teams['2']."
+                                ORDER BY NAME ASC ";
+					$scoreSet = $mysqli->query($query3); 
+					$total = 0;
+					$positionCounts = getNewPositionCountMap();
+					if ($scoreSet) {
+						while($scores = $scoreSet->fetch_array()) {
+							$value = $scores['0'];
+							array_push($resultRow, $scores['3']);
+							if ($value <= 20 ) { // sizeof($resultRow)
+								if ($scores['3'] != null and $scores['2'] != 1) // Trial Events not included in position count/tiebreaker
+									$positionCounts[$value] = $positionCounts[$value] + 1;
+							}
+							if ($scores['3'] != null and $scores['2'] != 1) // Trial Events not included in total
+								$total = $total + $scores['3'];
+						}
+					}
+					array_push($resultRow, $total); // Total
+					array_push($resultRow, '-'); // Rank
+					array_push($resultRow, $positionCounts);					
+					array_push($tournamentAlternateResults, $resultRow);
+					
+			}
+			$_SESSION['tournamentAlternateResults'] = $tournamentAlternateResults;
+		}
 	}
 	
 	// Results Structure:
@@ -1679,7 +1730,7 @@ else {
 		
 		fputcsv($output, $headings);
 
-
+		// Primary Teams
 		 $tournamentResults = $_SESSION['tournamentResults'];
          if ($tournamentResults != null) {
 			 foreach ($tournamentResults as $resultRow) {
@@ -1694,6 +1745,26 @@ else {
 				fputcsv($output, $row);
 		 	}
     	}
+		
+		// Alternate Teams
+		$tournamentAlternateResults = $_SESSION['tournamentAlternateResults'];
+		 if ($tournamentAlternateResults != null) {		
+			$row = array();
+			fputcsv($output, $row);
+			 foreach ($tournamentAlternateResults as $resultRow) {
+				$row = array();
+				array_push($row,$resultRow['1']);
+				array_push($row,str_replace(',','',$resultRow['2']));
+				$i = 3;
+				while ($i < sizeof($resultRow)-1) {
+					array_push($row,$resultRow[$i]);
+					$i++;
+				}
+				fputcsv($output, $row);
+		 	}
+    	}
+		
+		
 		$row = array();
 		fputcsv($output, $row);
 		array_push($row,'');array_push($row,'* = Trial Event');
@@ -1777,10 +1848,44 @@ else {
 		$colPrefixAscii = 65;
 		$colPrefix = '';
 		
-		// Team Scores
+		// Primary Team Scores
 		$tournamentResults = $_SESSION['tournamentResults'];
          if ($tournamentResults != null) {
 			 foreach ($tournamentResults as $resultRow) {
+				$objExcelSheet->setCellValue('A'.$rowCount, $resultRow['1'])->setCellValue('B'.$rowCount, $resultRow['2']);
+				$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CCCCCC');
+				$objExcelSheet->getStyle('B'.$rowCount)->getBorders()->getRight()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);	
+				if ($rowCount % 2 == 0) {
+					$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["secondaryColumnColor"]);
+					$objExcelSheet->getStyle('B'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["primaryRowColor"]);
+				} else {
+					$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["primaryColumnColor"]);
+					$objExcelSheet->getStyle('B'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["secondaryRowColor"]);
+				}
+				
+				$i = 3;
+				while ($i < sizeof($resultRow)-1) {
+					if ($asciiValue > 90) {$asciiValue = 65; $colPrefix .= chr($colPrefixAsci); $colPrefixAscii++;}
+					$objExcelSheet->setCellValue($colPrefix.chr($asciiValue).$rowCount, $resultRow[$i]);
+					if ($asciiValue % 2 != 0 && $rowCount % 2 == 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["secondaryColumnColor"]);
+					else if ($asciiValue % 2 != 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["primaryColumnColor"]);
+					else if ($rowCount % 2 == 0) $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["primaryRowColor"]);
+					else $objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB($_SESSION["secondaryRowColor"]);
+					if ($i == sizeof($resultRow) - 4)	
+						$objExcelSheet->getStyle($colPrefix.chr($asciiValue).$rowCount)->getBorders()->getRight()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+					$i++;
+					$asciiValue++;
+				}
+				$rowCount++;
+				$asciiValue = 67;
+		 	}
+    	}
+		
+		// Alternate Team Scores
+		$tournamentAlternateResults = $_SESSION['tournamentAlternateResults'];
+         if ($tournamentAlternateResults != null) {
+			 $rowCount++;
+			 foreach ($tournamentAlternateResults as $resultRow) {
 				$objExcelSheet->setCellValue('A'.$rowCount, $resultRow['1'])->setCellValue('B'.$rowCount, $resultRow['2']);
 				$objExcelSheet->getStyle('A'.$rowCount)->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setARGB('CCCCCC');
 				$objExcelSheet->getStyle('B'.$rowCount)->getBorders()->getRight()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);	
@@ -1813,8 +1918,10 @@ else {
 		$objExcelSheet->setCellValue('B'.($rowCount+3), '+ = Alternate Team');
 
 							 					 
-		// Additional Sheet Attributes					 
-		$objExcelSheet->setTitle($_SESSION["tournamentName"] . ' Results ' . $_SESSION["tournamentDivision"]);
+		// Additional Sheet Attributes	
+		$title = 'Results - ' . str_replace ("/"," ",$_SESSION["tournamentName"]) . ' ' . $_SESSION["tournamentDivision"];
+		if (strlen($title) > 30) $title = substr($title, 0, 29); 
+		$objExcelSheet->setTitle($title);
 		$objPHPExcel->setActiveSheetIndex(0);
 		
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
