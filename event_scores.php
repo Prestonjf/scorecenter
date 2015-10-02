@@ -193,6 +193,22 @@ include_once('logon_check.php');
 	function sortNumber(a,b) {
     	return a - b;
 	}
+	
+	function showInstructions(shID) {
+    if (document.getElementById(shID)) {
+        if (document.getElementById('showInstructions').style.display != 'none') {
+            document.getElementById('showInstructions').style.display = 'none';
+            document.getElementById('hideInstructions').style.display = 'inline';
+            document.getElementById(shID).style.height = '165px';
+        }
+        else {
+            document.getElementById('showInstructions').style.display = 'inline';
+            document.getElementById('hideInstructions').style.display = 'none';
+            document.getElementById(shID).style.height = '0px';
+        }
+    }
+	}	
+	
   
   </script>
     <style>
@@ -222,7 +238,20 @@ include_once('logon_check.php');
 		 padding:0 10px;
 		 border-bottom:none;
 	}
+	
+	a.hideLink {
+		display: none;
+	}
   
+  	#instructionsText {
+    	height: 0px;
+    	overflow: hidden;
+    	overflow-y: visible;
+    	transition: height 2s;
+    	-moz-transition: height 2s; /* Firefox 4 */
+    	-webkit-transition: height 2s; /* Safari and Chrome */
+    	-o-transition: height 2s; /* Opera */
+	}
   
   </style>
   </head>
@@ -255,14 +284,21 @@ include_once('logon_check.php');
 	 <td></td>
 	 </tr>
 	 </table>
-     <h6>* Instructions:<br /><br />
+	 <div class="instructions">
+     <h6>* Instructions: 
+     <a href="#" id="showInstructions" class="showLink" onclick="showInstructions('instructionsText');return false;">Click to Show</a> 
+     <a href="#" id="hideInstructions" class="hideLink" onclick="showInstructions('instructionsText');return false;">Click to Hide</a>
+     
+     <div id="instructionsText" class="instructionsText">
      1. Enter the Raw Score (Exam Score, Time, Points Earned etc) for each team. Not Required.<br /><br />
      2. Enter the Tier or Rank Group if applicable for each team. Not Required<br /><br />
 	 3. If the team has a tie, enter a short desciprtion of the tie breaker for the tied teams. Not Required<br /><br />
 	 4. Enter the finishing rank each team earned. If the team did not participate or was disqualified, enter 0. REQUIRED<br /><br />
 	 5. Points earned will be calculated automatically.<br /><br />
      6. Click save to save the event's scores. Event scores can be modified after the initial save if they have not yet been submitted. Once submitted, only a score verifier can modify the scores.
-     </h6>    
+     </div>
+     </h6>  
+     </div>  
 	 <hr>
 
 	 <table width="75%"><tr>

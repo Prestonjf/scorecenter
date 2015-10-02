@@ -25,9 +25,7 @@
 	<link rel='stylesheet' href='css/spectrum.css' />
   
   <script type="text/javascript">
-  $(document).ready(function(){
 
-	});
 	
 
   
@@ -117,11 +115,11 @@
 		$colWidth = 1;
 	?>
 	<div id="resultsGrid">
-        <table class="table table-bordered table-hover" data-sortable data-sort-name="rank" data-sort-order="desc">
+        <table id="primaryResultsGrid" class="table table-bordered table-hover tablesorter">
         <thead>
             <tr>
-				<th <?php echo 'style="background-color: #'.$_SESSION["primaryColumnColor"].';border-bottom: 1px solid #000000;"'; ?>  data-field="name" data-sortable="true"><div><span>#</span></div></th>
-				<th <?php echo 'style="background-color: #'.$_SESSION["secondaryRowColor"].';border-bottom: 1px solid #000000;"'; ?> width="20%"  data-field="number" data-sortable="true"><div><span><?php echo $_SESSION["tournamentName"]; ?><br /><?php echo 'Division: '.$_SESSION["tournamentDivision"]; ?><br /><?php echo 'Date: '.$_SESSION["tournamentDate"]; ?></span></div></th>
+				<th <?php echo 'style="background-color: #'.$_SESSION["primaryColumnColor"].';border-bottom: 1px solid #000000;"'; ?>  ><div><span>#</span></div></th>
+				<th <?php echo 'style="background-color: #'.$_SESSION["secondaryRowColor"].';border-bottom: 1px solid #000000;"'; ?> width="20%"><div><span><?php echo $_SESSION["tournamentName"]; ?><br /><?php echo 'Division: '.$_SESSION["tournamentDivision"]; ?><br /><?php echo 'Date: '.$_SESSION["tournamentDate"]; ?></span></div></th>
 				<?php
 				$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
 				if ($tournamentResultsHeader != null) {
@@ -129,14 +127,14 @@
 						echo '<th style="border-bottom: 1px solid #000000;'; 
 						if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].';';
 						else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';
-						echo '" class="rotate" data-field="score" data-align="center" data-sortable="true"><div><span>'.$resultHeader.'</span></div></th>';						
+						echo '" class="rotate"><div><span>'.$resultHeader.'</span></div></th>';						
 						$rowCount++;
 					}
 				}
 				?>
-                <th style="border-bottom: 1px solid #000000; <?php if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';?>" class="rotate" data-field="total" data-align="center" data-sortable="true"><div><span>Total Score</span></div></th>
+                <th style="border-bottom: 1px solid #000000; <?php if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';?>" class="rotate"><div><span>Total Score</span></div></th>
 				<?php $rowCount++; ?>
-			   <th style="border-bottom: 1px solid #000000; <?php if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';?>" class="rotate" data-field="rank" data-align="center" data-sortable="true"><div><span>Final Rank</span></div></th>
+			   <th style="border-bottom: 1px solid #000000; <?php if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';?>" class="rotate"><div><span>Final Rank</span></div></th>
             </tr>
         </thead>
         <tbody>
@@ -287,10 +285,14 @@
     </div><!--/.container-->
     </form>
       
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="js/jquery-1.11.3.js"></script>
+    
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
+    <script>
+      $(document).ready(function(){
+		$("#primaryResultsGrid").tablesorter(); 
+	});
+    </script>
     
     <?php 
     	if ($_SESSION['savesuccessEvent'] != null and $_SESSION['savesuccessEvent'] == '1') { ?>

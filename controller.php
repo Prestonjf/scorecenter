@@ -2353,6 +2353,7 @@ else {
 	-- ACKNOWLEDGEMENTS --
 	^^ PHPMAILER
 	^^ PHPEXCEL
+	^^ JQUERY Table Sorter
 	^^ Spectrum Color Picker
 		
 	
