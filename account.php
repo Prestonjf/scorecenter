@@ -58,7 +58,7 @@
 			document.forms[0].submit();
 		}
 	
-		return false;
+		return true;
 	}
 	
 	function validatePhoneNumber(ele) {
@@ -137,9 +137,9 @@
 		</table>
 		
 		<?php if ($_SESSION["accountMode"] == 'create') { ?>
-			<input type="button" class="btn btn-xs btn-danger" name="createNewAccount" onclick="validate();" value="Create Account"/>
+			<input type="submit" class="btn btn-xs btn-danger" name="createNewAccount" onclick="return validate();" accesskey="" value="Create Account"/>
 		<?php } else { ?>
-			<input type="button" class="btn btn-xs btn-danger" name="updateAccount" onclick="validate();" value="Update Account"/>
+			<input type="submit" class="btn btn-xs btn-danger" name="updateAccount" onclick="return validate();" value="Update Account"/>
 		<?php } ?>
 			<button type="submit" class="btn btn-xs btn-primary" name="cancelAccount">Cancel</button>
       

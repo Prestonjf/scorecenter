@@ -32,3 +32,10 @@ function clearSuccess() {
 	document.getElementById('messages').style.display = "none";
 	document.getElementById('messages').innerHTML = "";
 }
+
+	// calculate event score logic (specific per event)
+	function calculateScorez(name) {
+				if (confirm('Score Center will attempt to calculate team ranks based on the inputed data. Current ranks will be overwritten. Ranks can still be set manually. Scores are not saved until the save button is clicked. Do you wish to continue?')) {
+
+		}
+	}

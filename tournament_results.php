@@ -59,6 +59,33 @@
 
         return true;		
 	}
+	
+	function changeResultColor(command, color) {
+			xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+					clearError();
+					clearSuccess();
+					if (xmlhttp.responseText == 'error') {
+						//error message	
+					}
+					else {
+						// success message
+						document.getElementById('resultsGrid').innerHTML = xmlhttp.responseText;
+						$("#primaryResultsGrid").tablesorter(); 
+						if (color == '-1') {
+							$("#primaryRowColor").spectrum("set", "#D1ECD1");
+							$("#primaryColumnColor").spectrum("set", "#D1D1D1");
+							$("#secondaryRowColor").spectrum("set", "#FFFFFF");
+							$("#secondaryColumnColor").spectrum("set", "#CEDCCE");
+							
+						}
+					}					
+				}
+			}	
+        xmlhttp.open("GET","controller.php?command="+command+"&color="+color,true);
+        xmlhttp.send();	
+	}
   
   </script>
     <style>
@@ -110,11 +137,12 @@
 	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsEXCEL" value='.$row['0'].'>Export to .xlsx</button>
 		<input type="button" class="btn btn-xs btn-success" name="printResults" onclick="print();" value='Print'/>
 	 <hr>
-	<?php
-		$rowCount = 2;
-		$colWidth = 1;
-	?>
+
 	<div id="resultsGrid">
+		<?php
+			$rowCount = 2;
+			$colWidth = 1;
+		?>
         <table id="primaryResultsGrid" class="table table-bordered table-hover tablesorter">
         <thead>
             <tr>
@@ -224,13 +252,12 @@
 		  <script>
 		  	$(".primaryRowColor").spectrum({
 				color: "<?php echo $_SESSION["primaryRowColor"]; ?>",
+				showInitial: true,
+				showPalette: true,
+				palette: [ ['#D1ECD1', '#D1D1D1', '#FFFFFF'], ['#CEDCCE'] ],
 				change: function(color) {
-					var str = color.toHexString();			
-					var input = $("<input>").attr("type", "hidden").attr("name", "command").val("updatePRowColor");
-					var input2 = $("<input>").attr("type", "hidden").attr("name", "color").val(str.replace("#", ""));
-					$('#form1').append($(input));
-					$('#form1').append($(input2));
-					document.forms[0].submit();
+					var str = color.toHexString();	
+					changeResultColor('updatePRowColor', str.replace("#", ""));		
 				}
 			});
 			</script>
@@ -238,13 +265,12 @@
 			<script>
 			$(".primaryColumnColor").spectrum({
 				color: "<?php echo $_SESSION["primaryColumnColor"]; ?>",
+				showInitial: true,
+				showPalette: true,
+				palette: [ ['#D1ECD1', '#D1D1D1', '#FFFFFF'], ['#CEDCCE'] ],
 				change: function(color) {
-					var str = color.toHexString();			
-					var input = $("<input>").attr("type", "hidden").attr("name", "command").val("updatePColColor");
-					var input2 = $("<input>").attr("type", "hidden").attr("name", "color").val(str.replace("#", ""));
-					$('#form1').append($(input));
-					$('#form1').append($(input2));
-					document.forms[0].submit();
+					var str = color.toHexString();	
+					changeResultColor('updatePColColor', str.replace("#", ""));			
 				}
 			});
 			</script>
@@ -252,13 +278,12 @@
 		  <script>
 		  	$(".secondaryRowColor").spectrum({
 				color: "<?php echo $_SESSION["secondaryRowColor"]; ?>",
+				showInitial: true,
+				showPalette: true,
+				palette: [ ['#D1ECD1', '#D1D1D1', '#FFFFFF'], ['#CEDCCE'] ],
 				change: function(color) {
-					var str = color.toHexString();			
-					var input = $("<input>").attr("type", "hidden").attr("name", "command").val("updateSRowColor");
-					var input2 = $("<input>").attr("type", "hidden").attr("name", "color").val(str.replace("#", ""));
-					$('#form1').append($(input));
-					$('#form1').append($(input2));
-					document.forms[0].submit();
+					var str = color.toHexString();	
+					changeResultColor('updateSRowColor', str.replace("#", ""));		
 				}
 			});
 			</script>
@@ -266,19 +291,18 @@
 		  <script>
 		  	$(".secondaryColumnColor").spectrum({
 				color: "<?php echo $_SESSION["secondaryColumnColor"]; ?>",
+				showInitial: true,
+				showPalette: true,
+				palette: [ ['#D1ECD1', '#D1D1D1', '#FFFFFF'], ['#CEDCCE'] ],
 				change: function(color) {
-					var str = color.toHexString();			
-					var input = $("<input>").attr("type", "hidden").attr("name", "command").val("updateSColColor");
-					var input2 = $("<input>").attr("type", "hidden").attr("name", "color").val(str.replace("#", ""));
-					$('#form1').append($(input));
-					$('#form1').append($(input2));
-					document.forms[0].submit();				
+					var str = color.toHexString();	
+					changeResultColor('updateSColColor', str.replace("#", ""));				
 				}
 			});
 			</script>
 		  <br /><br />
 		  <button type="submit" class="btn btn-xs btn-primary" name="cancelTournament">Cancel</button>
-		  <button type="submit" class="btn btn-xs btn-primary" name="resetResultsColors">Reset Colors</button>
+		  <button type="button" class="btn btn-xs btn-primary" name="resetResultsColors" onclick="changeResultColor('resetResultsColors','-1'); ">Reset Colors</button>
       <hr>
 	<?php include_once 'footer.php'; ?>
 

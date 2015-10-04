@@ -35,17 +35,7 @@ include_once('logon_check.php');
 	<?php include_once('libs/head_tags.php'); ?>
 	
 	
-	
   <script type="text/javascript">
-  $(document).ready(function(){
-  
-    //	$("#addTournament").click(function(){
-     //   	alert("add");
-    //	});
-
-    	
-    	
-	});
   
   function saveMessage(message) {
 		document.getElementById('messages').style.display = "block";
@@ -208,7 +198,7 @@ include_once('logon_check.php');
         }
     }
 	}	
-	
+
   
   </script>
     <style>
@@ -294,7 +284,7 @@ include_once('logon_check.php');
      2. Enter the Tier or Rank Group if applicable for each team. Not Required<br /><br />
 	 3. If the team has a tie, enter a short desciprtion of the tie breaker for the tied teams. Not Required<br /><br />
 	 4. Enter the finishing rank each team earned. If the team did not participate or was disqualified, enter 0. REQUIRED<br /><br />
-	 5. Points earned will be calculated automatically.<br /><br />
+	 5. Points earned will be calculated automatically. (Max points per event: <?php echo $_SESSION["highestScore"]; ?>. Tournament Winner: <?php echo $_SESSION["pointsSystem"]; ?>.)<br /><br />
      6. Click save to save the event's scores. Event scores can be modified after the initial save if they have not yet been submitted. Once submitted, only a score verifier can modify the scores.
      </div>
      </h6>  
@@ -304,6 +294,7 @@ include_once('logon_check.php');
 	 <table width="75%"><tr>
 	 <td><label for="submittedFlag">Submitted</label> &nbsp;&nbsp;<input type="checkbox" id="submittedFlag" name="submittedFlag" <?php echo $disable.' '.$submitted; ?>  echo value="1"></td>
 	 <td><label for="verifiedFlag">Verified</label> &nbsp;&nbsp;<input type="checkbox" id="verifiedFlag" name="verifiedFlag" <?php echo $disableVerfiy.' '.$verified; ?> value="1"></td>
+	 <td></td>
 	 </tr></table>
 	 <hr>
 		<?php if ($_SESSION["teamAlternateEventScoreList"] != null) {?>		
@@ -355,6 +346,7 @@ include_once('logon_check.php');
     		}
     	}
         ?>
+        
           </tbody>
           </table>
 		  
@@ -416,6 +408,7 @@ include_once('logon_check.php');
 
         <?php if ($disable != 'disabled')   { ?>
 		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"' ?>>Save</button>
+		<button type="button" class="btn btn-xs btn-danger" name="calculateEventScores" onclick="calculateScorez('<?php echo $_SESSION["eventName"]; ?>');" >Calculate Ranks</button>
 		<?php } ?>
  	 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores">Cancel</button>
 
