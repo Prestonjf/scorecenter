@@ -49,8 +49,8 @@ include_once('logon_check.php');
 		if (element.value > max || element.value < 1) element.value = '';
 	}
 	
-	function updatePointsEarned(element, id, type) {
-		//limitNumber(element);
+	function updatePointsEarned(section, id, type) {
+		var element = document.getElementById(section+id);
 		var max = <?php echo $_SESSION["tournamentHighestScore"];?>;
 		var lowHighFlag = <?php echo $_SESSION["highLowWinFlag"];?>;
 		if (lowHighFlag == 0) {
@@ -189,7 +189,7 @@ include_once('logon_check.php');
         if (document.getElementById('showInstructions').style.display != 'none') {
             document.getElementById('showInstructions').style.display = 'none';
             document.getElementById('hideInstructions').style.display = 'inline';
-            document.getElementById(shID).style.height = '165px';
+            document.getElementById(shID).style.height = '170px';
         }
         else {
             document.getElementById('showInstructions').style.display = 'inline';
@@ -279,7 +279,7 @@ include_once('logon_check.php');
      <a href="#" id="showInstructions" class="showLink" onclick="showInstructions('instructionsText');return false;">Click to Show</a> 
      <a href="#" id="hideInstructions" class="hideLink" onclick="showInstructions('instructionsText');return false;">Click to Hide</a>
      
-     <div id="instructionsText" class="instructionsText">
+     <div id="instructionsText" class="instructionsText"><br /><br />
      1. Enter the Raw Score (Exam Score, Time, Points Earned etc) for each team. Not Required.<br /><br />
      2. Enter the Tier or Rank Group if applicable for each team. Not Required<br /><br />
 	 3. If the team has a tie, enter a short desciprtion of the tie breaker for the tied teams. Not Required<br /><br />
@@ -334,7 +334,7 @@ include_once('logon_check.php');
 			</select></td>';
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
       						name="teamTieBreak'.$teamCount.'" id="teamTieBreak'.$teamCount.'" value="'.$scoreRecord['8'].'"></td>';
-      				echo '<td style="background-color: #FFCCCC;"><input type="text"  class="form-control" size="4" autocomplete="off" onkeydown="updatePointsEarned(this, \''.$teamCount.'\',\'teamPointsEarned\');" onkeyup="updatePointsEarned(this, \''.$teamCount.'\',\'teamPointsEarned\');" '.$disable.'    
+      				echo '<td style="background-color: #FFCCCC;"><input type="text"  class="form-control" size="4" autocomplete="off" onkeydown="updatePointsEarned(\'teamScore\',\''.$teamCount.'\',\'teamPointsEarned\');" onkeyup="updatePointsEarned(\'teamScore\',\''.$teamCount.'\',\'teamPointsEarned\');" '.$disable.'    
       						name="teamScore'.$teamCount.'" id="teamScore'.$teamCount.'" value="'.$scoreRecord['2'].'">'; // set background color
       				echo '</td>';
       				echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" readonly   
@@ -387,7 +387,7 @@ include_once('logon_check.php');
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
       						name="teamATieBreak'.$teamCount.'" id="teamATieBreak'.$teamCount.'" value="'.$scoreRecord['8'].'"></td>';
       				echo '<td style="background-color: #FFCCCC;"><input type="text"  class="form-control" size="4" autocomplete="off"  '.$disable.'    
-      						name="teamAScore'.$teamCount.'" id="teamAScore'.$teamCount.'" value="'.$scoreRecord['2'].'" onkeydown="updatePointsEarned(this, \''.$teamCount.'\',\'teamAPointsEarned\');" onkeyup="updatePointsEarned(this, \''.$teamCount.'\',\'teamAPointsEarned\');" >'; // set background color
+      						name="teamAScore'.$teamCount.'" id="teamAScore'.$teamCount.'" value="'.$scoreRecord['2'].'" onkeydown="updatePointsEarned(\'teamAScore\',\''.$teamCount.'\',\'teamAPointsEarned\');" onkeyup="updatePointsEarned(\'teamAScore\',\''.$teamCount.'\',\'teamAPointsEarned\');" >'; // set background color
       				echo '</td>'; // 
       				echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" readonly   
       						name="teamAPointsEarned'.$teamCount.'" id="teamAPointsEarned'.$teamCount.'" value="'.$scoreRecord['5'].'"></td>';					
@@ -408,7 +408,7 @@ include_once('logon_check.php');
 
         <?php if ($disable != 'disabled')   { ?>
 		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"' ?>>Save</button>
-		<button type="button" class="btn btn-xs btn-danger" name="calculateEventScores" onclick="calculateScorez('<?php echo $_SESSION["eventName"]; ?>');" >Calculate Ranks</button>
+		<button type="button" class="btn btn-xs btn-danger" name="calculateEventScores" onclick="calculateScorez('<?php echo $_SESSION["eventName"]; ?>','<?php echo $_SESSION["tournamentDivision"]; ?>');" >Calculate Ranks</button>
 		<?php } ?>
  	 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores">Cancel</button>
 
