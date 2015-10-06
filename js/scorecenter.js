@@ -90,7 +90,7 @@ function calc(type) {
 			rank++;
 		});
 		scoreArr.sort(compare);
-		alert(scoreArr.toString());
+		//alert(scoreArr.toString());
 		
 		scoreArr.forEach(function(entry) {
 			$('#teamScore'+entry[0]).val(entry[1]);
