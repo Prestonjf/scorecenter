@@ -283,7 +283,9 @@ include_once('logon_check.php');
      1. Enter the Raw Score (Exam Score, Time, Points Earned etc) for each team. Not Required.<br /><br />
      2. Enter the Tier or Rank Group if applicable for each team. Not Required<br /><br />
 	 3. If the team has a tie, enter a short desciprtion of the tie breaker for the tied teams. Not Required<br /><br />
-	 4. Enter the finishing rank each team earned. If the team did not participate or was disqualified, enter 0. REQUIRED<br /><br />
+	 4. Enter the finishing rank each team earned. If the team did not participate or was disqualified, enter 0.
+	 -OR- Click the Calculate Ranks button below to allow the system to automatically calculate event ranks. Tied teams cannot be automatically calculated and
+	 will require manually modifying of the rank. All ranks can be modified manually after clicking the Calculate Ranks button. REQUIRED<br /><br />
 	 5. Points earned will be calculated automatically. (Max points per event: <?php echo $_SESSION["highestScore"]; ?>. Tournament Winner: <?php echo $_SESSION["pointsSystem"]; ?>.)<br /><br />
      6. Click save to save the event's scores. Event scores can be modified after the initial save if they have not yet been submitted. Once submitted, only a score verifier can modify the scores.
      </div>
@@ -325,12 +327,12 @@ include_once('logon_check.php');
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
       						name="teamRawScore'.$teamCount.'" id="teamRawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" onkeyup="highlightRawScoreDuplication()" ></td>';
 					echo '<td><select class="form-control" name="teamScoreTier'.$teamCount.'" id="teamScoreTier'.$teamCount.'">
-			<option value=""></option>
-			<option value="I" ';  if($scoreRecord['7'] == "I"){echo("selected");} echo '>I</option>
-			<option value="II" '; if($scoreRecord['7'] == "II"){echo("selected");} echo '>II</option>
-			<option value="III" ';if($scoreRecord['7'] == "III"){echo("selected");} echo '>III</option>
-			<option value="IV" '; if($scoreRecord['7'] == "IV"){echo("selected");} echo '>IV</option>
-			<option value="V" ';  if($scoreRecord['7'] == "V"){echo("selected");} echo '>V</option>
+			<option value="0"></option>
+			<option value="1" ';  if($scoreRecord['7'] == "1"){echo("selected");} echo '>I</option>
+			<option value="2" '; if($scoreRecord['7'] == "2"){echo("selected");} echo '>II</option>
+			<option value="3" ';if($scoreRecord['7'] == "3"){echo("selected");} echo '>III</option>
+			<option value="4" '; if($scoreRecord['7'] == "4"){echo("selected");} echo '>IV</option>
+			<option value="5" ';  if($scoreRecord['7'] == "5"){echo("selected");} echo '>V</option>
 			</select></td>';
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
       						name="teamTieBreak'.$teamCount.'" id="teamTieBreak'.$teamCount.'" value="'.$scoreRecord['8'].'"></td>';
@@ -377,12 +379,12 @@ include_once('logon_check.php');
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
       						name="teamARawScore'.$teamCount.'" id="teamARawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" ></td>';
 					echo '<td><select class="form-control" name="teamAScoreTier'.$teamCount.'" id="teamAScoreTier'.$teamCount.'">
-			<option value=""></option>
-			<option value="I" ';  if($scoreRecord['7'] == "I"){echo("selected");} echo '>I</option>
-			<option value="II" '; if($scoreRecord['7'] == "II"){echo("selected");} echo '>II</option>
-			<option value="III" ';if($scoreRecord['7'] == "III"){echo("selected");} echo '>III</option>
-			<option value="IV" '; if($scoreRecord['7'] == "IV"){echo("selected");} echo '>IV</option>
-			<option value="V" ';  if($scoreRecord['7'] == "V"){echo("selected");} echo '>V</option>
+			<option value="0"></option>
+			<option value="1" ';  if($scoreRecord['7'] == "1"){echo("selected");} echo '>I</option>
+			<option value="2" '; if($scoreRecord['7'] == "2"){echo("selected");} echo '>II</option>
+			<option value="3" ';if($scoreRecord['7'] == "3"){echo("selected");} echo '>III</option>
+			<option value="4" '; if($scoreRecord['7'] == "4"){echo("selected");} echo '>IV</option>
+			<option value="5" ';  if($scoreRecord['7'] == "5"){echo("selected");} echo '>V</option>
 			</select></td>';
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
       						name="teamATieBreak'.$teamCount.'" id="teamATieBreak'.$teamCount.'" value="'.$scoreRecord['8'].'"></td>';
@@ -408,7 +410,7 @@ include_once('logon_check.php');
 
         <?php if ($disable != 'disabled')   { ?>
 		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"' ?>>Save</button>
-		<button type="button" class="btn btn-xs btn-danger" name="calculateEventScores" onclick="calculateScorez('<?php echo $_SESSION["eventName"]; ?>','<?php echo $_SESSION["tournamentDivision"]; ?>');" >Calculate Ranks</button>
+		<button type="button" class="btn btn-xs btn-danger" name="calculateEventScores" onclick="calculateScorez('<?php echo addslashes($_SESSION["eventName"]); ?>','<?php echo $_SESSION["tournamentDivision"]; ?>');" >Calculate Ranks</button>
 		<?php } ?>
  	 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores">Cancel</button>
 

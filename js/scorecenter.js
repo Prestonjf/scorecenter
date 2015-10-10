@@ -36,16 +36,32 @@ function clearSuccess() {
 // calculate event score logic (specific per event)
 function calculateScorez(name, division) {
 	if (confirm('Score Center will attempt to calculate team ranks based on the inputed data. Current ranks will be overwritten. Ranks can still be set manually. Scores are not saved until the save button is clicked. Do you wish to continue?')) {
-		//alert(name.trim().toUpperCase());
+		alert(name.trim().toUpperCase());
 		switch (name.trim().toUpperCase()) {
-			case "AIR TRAJECTORY":
-				calc('HIGHRAW');
-			break;
-			case "ASTRONOMY":
-				
-			break;
-			default:
-				displayError("<strong>Error:</strong> Unable to calculate ranks for this event. Please Manually enter ranks.");
+			case "AIR TRAJECTORY": calc('HIGHRAW'); break;
+			case "ANATOMY & PHYSIOLOGY": calc('HIGHRAW'); break;
+			case "ASTRONOMY": calc('HIGHRAW'); break;
+			case "BRIDGE BUILDING": calc('HIGHRAWTIER'); break;
+			case "CELL BIOLOGY": calc('HIGHRAW'); break;
+			case "CHEMISTRY LAB": calc('HIGHRAW'); break;
+			case "DISEASE DETECTIVES": calc('HIGHRAW'); break;
+			case "DYNAMIC PLANET": calc('HIGHRAW'); break;
+			case "ELECTRIC VEHICLE": calc('LOWRAW'); break;
+			case "EXPERIMENTAL DESIGN": calc('HIGHRAWTIER'); break;
+			case "FORENSICS": calc('HIGHRAW'); break;
+			case "FOSSILS": calc('HIGHRAW'); break;
+			case "GAME ON": calc('HIGHRAWTIER'); break;
+			case "GEOLOGIC MAPPING": calc('HIGHRAW'); break;
+			case "GREEN GENERATION": calc('HIGHRAW'); break;
+			case "HYDROGEOLOGY": calc('HIGHRAW'); break;
+			case "INVASIVE SPECIES": calc('HIGHRAW'); break;
+			case "IT'S ABOUT TIME": calc('HIGHRAW'); break;
+			case "PROTEIN MODELING": calc('HIGHRAW'); break;
+			case "ROBOT ARM": calc('HIGHRAWTIER'); break;
+			case "WIND POWER": calc('HIGHRAW'); break;
+			case "WRIGHT STUFF": calc('HIGHRAWTIER'); break;
+			case "WRITE IT, DO IT": calc('HIGHRAWTIER'); break;
+			default: displayError("<strong>Error:</strong> Unable to calculate ranks for this event. Please enter ranks manually.");
 		}
 	
 	
@@ -58,8 +74,8 @@ function calculateScorez(name, division) {
 
 // calc
 // 1. HIGHRAW
-//
-//
+// 2 HIGHRAWTIER
+// 3. LOWRAW
 function calc(type) {
 		var count = 0;
 		var rank = 1;
@@ -69,6 +85,7 @@ function calc(type) {
 				var record = [];
 				var score = $('#teamRawScore'+count).val();
 				if (score == '') score == -1;
+				// [TEAM NUMBER, TEAM RANK, RAW SCORE, TIER, TIE BREAK, ####]
 				record.push(count); // Team Row Number
 				record.push(""); // Team Rank
 				record.push(Number(score)); // Raw Score
@@ -82,6 +99,8 @@ function calc(type) {
 		}
 		// Use Correct Sort Function
 		if (type == 'HIGHRAW') scoreArr.sort(compare1);
+		else if (type == 'HIGHRAWTIER') scoreArr.sort(compare2);
+		else if (type == 'LOWRAW') scoreArr.sort(compare3);
 		
 		
 		// Set Ranks, ReOrder, Set Points Earned
@@ -116,5 +135,27 @@ function compare1(a,b) {
   return 0;	
 }
 
+// 2. HIGHRAWTIER
+function compare2(a,b) {
+  if (a[3] < b[3])
+    return -1;
+  if (a[3] > b[3])
+    return 1;
+  if (a[3] == b[3]) {
+  	if (a[2] > b[2]) return -1;
+  	if (a[2] < b[2]) return 1;
+  }
+  return 0;	
+}
 
+// 3. LOWRAW
+function compare3(a,b) {
+  var x = a[2]; if (a[2] == '') x = 100000;
+  var y = b[2]; if (b[2] == '') y = 100000;
+  if (x < y)
+    return -1;
+  if (x > y)
+    return 1;
+  return 0;	
+}
 

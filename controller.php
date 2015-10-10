@@ -2453,14 +2453,16 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
-	++ Calculate function for specific events
+	++ Calculate function for specific events B
 	++ Result Grid Paginination
-	++ Print Results
+	
+	++ AJAX on TIMEOUT
+	+ Different Colors per Tie in raw score
+	+ Handles 100 Teams / Events Per TOURNAMENT
 
 	
 	-- APP LIMITATIONS / LOW PRIORITY ISSUES --
 	** Calculations based on specific Event Name (not a code)
-	** Handles 100 Teams / Events Per TOURNAMENT
 	** Results: Ties Broken to 20 positions
 	** Results Order By OPTION
 	** controller class security

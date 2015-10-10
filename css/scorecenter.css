@@ -1,0 +1,15 @@
+.red {
+		color: red;
+}
+	
+th.rotate {
+		height: 185px;
+		white-space: nowrap;
+}
+
+th.rotate > div {
+		transform: translate(-10px, 0px) rotate(270deg);
+		-webkit-transform: translate(-10px, 0px) rotate(270deg);
+		-ms-transform: translate(-10px, 0px) rotate(270deg);
+		width: 30px;
+}

@@ -44,10 +44,9 @@
 		var mywindow = window.open('', 'Tournament Results', 'height=600,width=800');
         mywindow.document.write('<html><head><titleTournament Results</title>');
         mywindow.document.write('<link href="css/bootstrap.min.css" rel="stylesheet">');
-		mywindow.document.write('<link rel="stylesheet" href="js/sortable-0.5.0/css/sortable-theme-bootstrap.css" />');
 		mywindow.document.write('<link href="js/jquery-ui-1.11.4/jquery-ui.css" rel="stylesheet">');
-		mywindow.document.write('<link rel="icon" type="image/png" href="img/favicon.png" />');
-        mywindow.document.write('</head><body >');
+		mywindow.document.write('<style>th.rotate {height: 185px;white-space: nowrap;} th.rotate > div {transform: translate(-10px, 0px) rotate(270deg);-webkit-transform: translate(-10px, 0px) rotate(270deg);-ms-transform: translate(-10px, 0px) rotate(270deg);width: 30px;}</style>');
+        mywindow.document.write('</head><body>');
         mywindow.document.write($('#resultsGrid').html());
         mywindow.document.write('</body></html>');
 
