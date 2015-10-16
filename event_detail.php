@@ -90,6 +90,15 @@ include_once('logon_check.php');
 	<input type="text" size="40" class="form-control" name="eventName" id="eventName" value="<?php echo $_SESSION["eventName"];?>">
 	</td>
 	</tr>
+	<tr>
+	<td><label for="eventName">Winning Scoring System (For Auto Calculation):<span class="red">*</span></label></td>
+	<td>
+	<input type="radio" name="scoreSystemCode" id="scoreSystemCode1" value="HIGHRAW" <?php if ($_SESSION["scoreSystemCode"] =='HIGHRAW' or $_SESSION["scoreSystemCode"] == null) echo 'checked';?>> <label for="scoreSystemCode1">High Raw Score</label><br />
+	<input type="radio" name="scoreSystemCode" id="scoreSystemCode2" value="HIGHRAWTIER" <?php if ($_SESSION["scoreSystemCode"] =='HIGHRAWTIER') echo 'checked';?>> <label for="scoreSystemCode2">High Raw Score / Tier Ranked</label><br />
+	<input type="radio" name="scoreSystemCode" id="scoreSystemCode3" value="LOWRAW" <?php if ($_SESSION["scoreSystemCode"] =='LOWRAW') echo 'checked';?>> <label for="scoreSystemCode3">Low Raw Score</label><br />
+	<input type="radio" name="scoreSystemCode" id="scoreSystemCode4" value="LOWRAWTIER" <?php if ($_SESSION["scoreSystemCode"] =='LOWRAWTIER') echo 'checked';?>> <label for="scoreSystemCode4">Low Raw Score / Tier Ranked</label><br />
+	</td>
+	</tr>
 	
 	<tr>
 	<td><label>Event Description: </label></td>

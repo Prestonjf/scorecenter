@@ -1114,12 +1114,14 @@ else {
 				
 				
  				
- 			$result = $mysqli->query("SELECT COUNT(TE.VERIFIED_FLAG) as completed, COUNT(TE.TOURN_EVENT_ID) as total 
-    									FROM TOURNAMENT_EVENT TE WHERE TE.TOURNAMENT_ID=".$_SESSION["tournamentId"]);
+ 			$result = $mysqli->query($query);
+ 			$completedCount = 0;
  			if ($result) {
- 				$scoreRow = $result->fetch_row(); 
- 				$_SESSION["tournamentEventsCompleted"] = $scoreRow['0'].' / '.$scoreRow['1'];
+ 				while($scoreRow = $result->fetch_array()) { 
+ 					if ($scoreRow['7'] == 1 and $scoreRow['4'] == $scoreRow['5']) $completedCount++;
+ 				}
  			}
+ 			$_SESSION["tournamentEventsCompleted"] = $completedCount.' / '.$_SESSION["numberEvents"];
  				
  				$date = strtotime($tournamentRow['4']);
  				$_SESSION["tournamentDate"] = date('m/d/Y', $date);		
@@ -1135,10 +1137,12 @@ else {
 	function loadEventScores($mysqli) {
 				
 		 $result = $mysqli->query("SELECT E.NAME, T.HIGHEST_SCORE_POSSIBLE, T.TOURNAMENT_ID, T.DIVISION, T.NAME,TE.SUBMITTED_FLAG,TE.VERIFIED_FLAG,
-							CONCAT(U.FIRST_NAME, ' ', U.LAST_NAME, ' - ',U.USERNAME,' - ',coalesce(U.PHONE_NUMBER,'')) as supervisor, T.DATE, T.HIGH_LOW_WIN_FLAG, TE.COMMENTS 
+							CONCAT(U.FIRST_NAME, ' ', U.LAST_NAME, ' - ',U.USERNAME,' - ',coalesce(U.PHONE_NUMBER,'')) as supervisor, T.DATE, T.HIGH_LOW_WIN_FLAG, TE.COMMENTS, 
+							E.SCORE_SYSTEM_CODE, RD.DISPLAY_TEXT 
 		 					FROM EVENT E INNER JOIN TOURNAMENT_EVENT TE ON TE.EVENT_ID=E.EVENT_ID 
 		 					INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
 							LEFT JOIN USER U ON TE.USER_ID=U.USER_ID
+							LEFT JOIN REF_DATA RD on RD.REF_DATA_CODE=E.SCORE_SYSTEM_CODE AND RD.DOMAIN_CODE='SCOREALGORITHM' 
 							WHERE TE.TOURN_EVENT_ID = " .$_SESSION["tournEventId"]); 
  			if ($result) {
  				$tournamentRow = $result->fetch_row(); 				
@@ -1155,6 +1159,8 @@ else {
 				$date = strtotime($tournamentRow['8']);
  				$_SESSION["tournamentDate"] = date('m/d/Y', $date);	
  				$_SESSION["eventComments"] = $tournamentRow['10'];
+ 				$_SESSION["scoreSystemCode"] = $tournamentRow['11'];
+ 				$_SESSION["scoreSystemText"] = $tournamentRow['12'];
     		}
     	
 		// Primary Teams
@@ -1329,7 +1335,8 @@ else {
  				$eventRow = $result->fetch_row();	
  				$_SESSION["eventId"] = $eventRow['0'];
  				$_SESSION["eventName"] = $eventRow['1'];
- 				$_SESSION["eventDescription"] = $eventRow['2']; 				
+ 				$_SESSION["eventDescription"] = $eventRow['2'];
+ 				$_SESSION["scoreSystemCode"] = $eventRow['3'];			
     		}
 	}
 
@@ -1343,17 +1350,17 @@ else {
 			if ($row != null) $id = $row['0'];  
 			$_SESSION["eventId"] = $id;
 			
-			$query = $mysqli->prepare("INSERT INTO EVENT (EVENT_ID, NAME, COMMENTS) VALUES (".$id.", ?, ?) ");
+			$query = $mysqli->prepare("INSERT INTO EVENT (EVENT_ID, NAME, COMMENTS, SCORE_SYSTEM_CODE) VALUES (".$id.", ?, ?,?) ");
 			
-			$query->bind_param('ss',$_GET["eventName"], $_GET["eventDescription"]);
+			$query->bind_param('sss',$_GET["eventName"], $_GET["eventDescription"], $_GET["scoreSystemCode"]);
 			
 			$query->execute();
 			$query->free_result();
 		}
 		else {
-			$query = $mysqli->prepare("UPDATE EVENT SET NAME=?, COMMENTS=? WHERE EVENT_ID=".$_SESSION["eventId"]);
+			$query = $mysqli->prepare("UPDATE EVENT SET NAME=?, COMMENTS=?, SCORE_SYSTEM_CODE=? WHERE EVENT_ID=".$_SESSION["eventId"]);
 			
-			$query->bind_param('ss',$_GET["eventName"], $_GET["eventDescription"]);
+			$query->bind_param('sss',$_GET["eventName"], $_GET["eventDescription"], $_GET["scoreSystemCode"]);
 			$query->execute();
 			$query->free_result();
 		}
@@ -2453,7 +2460,6 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
-	++ Calculate function for specific events B
 	++ Result Grid Paginination
 	
 	++ AJAX on TIMEOUT

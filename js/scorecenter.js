@@ -34,20 +34,34 @@ function clearSuccess() {
 }
 
 // calculate event score logic (specific per event)
-function calculateScorez(name, division) {
+function calculateScorez(name, division, algorithm) {
 	if (confirm('Score Center will attempt to calculate team ranks based on the inputed data. Current ranks will be overwritten. Ranks can still be set manually. Scores are not saved until the save button is clicked. Do you wish to continue?')) {
-		alert(name.trim().toUpperCase());
+		//alert(name.trim().toUpperCase());
+		//alert(algorithm);
+		if (algorithm != null && algorithm != '') {
+			if (algorithm == 'HIGHRAW') calc('HIGHRAW');
+			else if (algorithm == 'HIGHRAWTIER') calc('HIGHRAWTIER');
+			else if (algorithm == 'LOWRAW') calc('LOWRAW');
+			else if (algorithm == 'LOWRAWTIER') calc('LOWRAWTIER');
+		}
+		else {
 		switch (name.trim().toUpperCase()) {
-			case "AIR TRAJECTORY": calc('HIGHRAW'); break;
+			case "AIR TRAJECTORY": calc('HIGHRAWTIER'); break;
 			case "ANATOMY & PHYSIOLOGY": calc('HIGHRAW'); break;
 			case "ASTRONOMY": calc('HIGHRAW'); break;
+			case "BIO-PROCESS LAB": calc('HIGHRAW'); break;
+			case "BOTTLE ROCKET": calc('HIGHRAWTIER'); break;
 			case "BRIDGE BUILDING": calc('HIGHRAWTIER'); break;
 			case "CELL BIOLOGY": calc('HIGHRAW'); break;
 			case "CHEMISTRY LAB": calc('HIGHRAW'); break;
+			case "CRAVE THE WAVE": calc('HIGHRAW'); break;
+			case "CRIME BUSTERS": calc('HIGHRAW'); break;
 			case "DISEASE DETECTIVES": calc('HIGHRAW'); break;
 			case "DYNAMIC PLANET": calc('HIGHRAW'); break;
 			case "ELECTRIC VEHICLE": calc('LOWRAW'); break;
+			case "ELASTIC LAUNCHED GLIDER": calc('HIGHRAWTIER'); break;
 			case "EXPERIMENTAL DESIGN": calc('HIGHRAWTIER'); break;
+			case "FOOD SCIENCE": calc('HIGHRAW'); break;
 			case "FORENSICS": calc('HIGHRAW'); break;
 			case "FOSSILS": calc('HIGHRAW'); break;
 			case "GAME ON": calc('HIGHRAWTIER'); break;
@@ -56,14 +70,20 @@ function calculateScorez(name, division) {
 			case "HYDROGEOLOGY": calc('HIGHRAW'); break;
 			case "INVASIVE SPECIES": calc('HIGHRAW'); break;
 			case "IT'S ABOUT TIME": calc('HIGHRAW'); break;
+			case "METEOROLOGY": calc('HIGHRAW'); break;
+			case "MISSION POSSIBLE": calc('HIGHRAWTIER'); break;
+			case "PICTURE THIS": calc('HIGHRAW'); break;
 			case "PROTEIN MODELING": calc('HIGHRAW'); break;
+			case "REACH FOR THE STARS": calc('HIGHRAW'); break;
+			case "ROAD SCHOLAR": calc('HIGHRAW'); break;
 			case "ROBOT ARM": calc('HIGHRAWTIER'); break;
+			case "SCRAMBLER": calc('LOWRAW'); break;
 			case "WIND POWER": calc('HIGHRAW'); break;
 			case "WRIGHT STUFF": calc('HIGHRAWTIER'); break;
 			case "WRITE IT, DO IT": calc('HIGHRAWTIER'); break;
 			default: displayError("<strong>Error:</strong> Unable to calculate ranks for this event. Please enter ranks manually.");
 		}
-	
+		}
 	
 	
 	
@@ -76,6 +96,7 @@ function calculateScorez(name, division) {
 // 1. HIGHRAW
 // 2 HIGHRAWTIER
 // 3. LOWRAW
+// 4. LOWRAWTIER
 function calc(type) {
 		var count = 0;
 		var rank = 1;
@@ -101,6 +122,7 @@ function calc(type) {
 		if (type == 'HIGHRAW') scoreArr.sort(compare1);
 		else if (type == 'HIGHRAWTIER') scoreArr.sort(compare2);
 		else if (type == 'LOWRAW') scoreArr.sort(compare3);
+		else if (type == 'LOWRAWTIER') scoreArr.sort(compare4);
 		
 		
 		// Set Ranks, ReOrder, Set Points Earned
@@ -156,6 +178,21 @@ function compare3(a,b) {
     return -1;
   if (x > y)
     return 1;
+  return 0;	
+}
+
+// 4. LOWRAWTIER
+function compare4(a,b) {
+  if (a[3] < b[3])
+    return -1;
+  if (a[3] > b[3])
+    return 1;
+  if (a[3] == b[3]) {  
+  	var x = a[2]; if (a[2] == '') x = 100000;
+  	var y = b[2]; if (b[2] == '') y = 100000;
+  	if (x < y) return -1;
+  	if (x > y) return 1;
+  }
   return 0;	
 }
 
