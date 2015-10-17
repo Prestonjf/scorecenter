@@ -76,7 +76,7 @@
 	<input type="text" size="20" class="form-control" name="teamName" id="teamName" value=<?php echo '"'.$_SESSION["teamFilterName"].'"' ?>>
 	</td>
 	
-	<td width="15"></td>
+	<td width="15"><label for="eventName">Division: </label></td>
 	<td width="35">	
 			<select class="form-control" name="filterDivision" id="filterDivision" >
 			<option value=""></option>

@@ -1164,7 +1164,7 @@ else {
     		}
     	
 		// Primary Teams
-    	 $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT 
+    	 $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT, TES.TEAM_STATUS 
     	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID AND TT.ALTERNATE_FLAG = 0 
     	 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID AND TES.TOURN_EVENT_ID = " .$_SESSION["tournEventId"].
     	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY TEAM_NUMBER ASC "); 
@@ -1180,7 +1180,8 @@ else {
  					array_push($scoreRecord, $scoreRow['5']);
  					array_push($scoreRecord, $scoreRow['6']);
  					array_push($scoreRecord, $scoreRow['7']);
- 					array_push($scoreRecord, $scoreRow['8']);	
+ 					array_push($scoreRecord, $scoreRow['8']);
+ 					array_push($scoreRecord, $scoreRow['9']);	
  						
  					array_push($teamEventScoreList, $scoreRecord);
  				}
@@ -1190,7 +1191,7 @@ else {
 			
 		// Alternate Teams
 		$_SESSION["teamAlternateEventScoreList"] = null;
-		    $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT 
+		    $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT, TES.TEAM_STATUS 
     	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID AND TT.ALTERNATE_FLAG = 1
     	 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID AND TES.TOURN_EVENT_ID = " .$_SESSION["tournEventId"].
     	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY TEAM_NUMBER ASC "); 
@@ -1206,7 +1207,8 @@ else {
  					array_push($scoreRecord, $scoreRow['5']);
  					array_push($scoreRecord, $scoreRow['6']);
  					array_push($scoreRecord, $scoreRow['7']);
- 					array_push($scoreRecord, $scoreRow['8']);	
+ 					array_push($scoreRecord, $scoreRow['8']);
+ 					array_push($scoreRecord, $scoreRow['9']);	
  						
  					array_push($teamAlternateEventScoreList, $scoreRecord);
  				}
@@ -1223,6 +1225,7 @@ else {
 			foreach ($scoreList as $score) {
 				$value = $_GET['teamScore'.$teamCount];
 				$rawScore = $_GET['teamRawScore'.$teamCount];
+				$status = $_GET['teamStatus'.$teamCount];
 				$tier = $_GET['teamScoreTier'.$teamCount];
 				$tieBreak = $_GET['teamTieBreak'.$teamCount];
 				$pointsEarned = $_GET['teamPointsEarned'.$teamCount];
@@ -1236,14 +1239,14 @@ else {
 					$id = 0;
 					if ($row['0'] != null) $id = $row['0']; 
 				
-					$query = $mysqli->prepare("INSERT INTO TEAM_EVENT_SCORE (TEAM_EVENT_SCORE_ID, TOURN_TEAM_ID, TOURN_EVENT_ID, SCORE, POINTS_EARNED, RAW_SCORE, TIER_TEXT, 											TIE_BREAK_TEXT) VALUES (".$id.", ?, ?, ?,?,?,?,?) ");
-					$query->bind_param('iiiisss',$score['4'],$_SESSION["tournEventId"], $value,$pointsEarned,$rawScore,$tier,$tieBreak); 
+					$query = $mysqli->prepare("INSERT INTO TEAM_EVENT_SCORE (TEAM_EVENT_SCORE_ID, TOURN_TEAM_ID, TOURN_EVENT_ID, SCORE, POINTS_EARNED, RAW_SCORE, TIER_TEXT, 											TIE_BREAK_TEXT, TEAM_STATUS) VALUES (".$id.", ?, ?, ?,?,?,?,?) ");
+					$query->bind_param('iiiissss',$score['4'],$_SESSION["tournEventId"], $value,$pointsEarned,$rawScore,$tier,$tieBreak,$status); 
 					$query->execute();
 					$score['3'] = $id;
 				}
 				else {
-					$query = $mysqli->prepare("UPDATE TEAM_EVENT_SCORE SET SCORE=?, POINTS_EARNED=?, RAW_SCORE=?,TIER_TEXT=?,TIE_BREAK_TEXT=? WHERE TEAM_EVENT_SCORE_ID=".$score['3']);			
-					$query->bind_param('iisss',$value,$pointsEarned,$rawScore,$tier,$tieBreak);
+					$query = $mysqli->prepare("UPDATE TEAM_EVENT_SCORE SET SCORE=?, POINTS_EARNED=?, RAW_SCORE=?,TIER_TEXT=?,TIE_BREAK_TEXT=?,TEAM_STATUS=? WHERE TEAM_EVENT_SCORE_ID=".$score['3']);			
+					$query->bind_param('iissss',$value,$pointsEarned,$rawScore,$tier,$tieBreak,$status);
 					$query->execute();
 				}
 				$teamCount++;	
@@ -1256,6 +1259,7 @@ else {
 			$teamCount = 0;
 			foreach ($scoreList as $score) {
 				$value = $_GET['teamAScore'.$teamCount];
+				$status = $_GET['teamAStatus'.$teamCount];
 				$rawScore = $_GET['teamARawScore'.$teamCount];
 				$tier = $_GET['teamAScoreTier'.$teamCount];
 				$tieBreak = $_GET['teamATieBreak'.$teamCount];
@@ -1270,14 +1274,14 @@ else {
 					$id = 0;
 					if ($row['0'] != null) $id = $row['0']; 
 				
-					$query = $mysqli->prepare("INSERT INTO TEAM_EVENT_SCORE (TEAM_EVENT_SCORE_ID, TOURN_TEAM_ID, TOURN_EVENT_ID, SCORE, POINTS_EARNED, RAW_SCORE, TIER_TEXT, 											TIE_BREAK_TEXT) VALUES (".$id.", ?, ?, ?,?,?,?,?) ");
-					$query->bind_param('iiiisss',$score['4'],$_SESSION["tournEventId"], $value,$pointsEarned,$rawScore,$tier,$tieBreak); 
+					$query = $mysqli->prepare("INSERT INTO TEAM_EVENT_SCORE (TEAM_EVENT_SCORE_ID, TOURN_TEAM_ID, TOURN_EVENT_ID, SCORE, POINTS_EARNED, RAW_SCORE, TIER_TEXT, 											TIE_BREAK_TEXT, TEAM_STATUS) VALUES (".$id.", ?, ?, ?,?,?,?,?) ");
+					$query->bind_param('iiiissss',$score['4'],$_SESSION["tournEventId"], $value,$pointsEarned,$rawScore,$tier,$tieBreak,$status); 
 					$query->execute();
 					$score['3'] = $id;
 				}
 				else {
-					$query = $mysqli->prepare("UPDATE TEAM_EVENT_SCORE SET SCORE=?, POINTS_EARNED=?, RAW_SCORE=?,TIER_TEXT=?,TIE_BREAK_TEXT=? WHERE TEAM_EVENT_SCORE_ID=".$score['3']);			
-					$query->bind_param('iisss',$value,$pointsEarned,$rawScore,$tier,$tieBreak);
+					$query = $mysqli->prepare("UPDATE TEAM_EVENT_SCORE SET SCORE=?, POINTS_EARNED=?, RAW_SCORE=?,TIER_TEXT=?,TIE_BREAK_TEXT=?,TEAM_STATUS=? WHERE TEAM_EVENT_SCORE_ID=".$score['3']);			
+					$query->bind_param('iissss',$value,$pointsEarned,$rawScore,$tier,$tieBreak,$status);
 					$query->execute();
 				}
 				$teamCount++;	
@@ -2462,7 +2466,6 @@ else {
 	-- ISSUES TO IMPLEMENT / FIX -- 
 	++ Result Grid Paginination
 	++ Print Broke Again
-	++ Label Manage Teams 
 	
 	+ AJAX on TIMEOUT
 	+ Different Colors per Tie in raw score

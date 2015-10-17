@@ -3,6 +3,10 @@ function confirmDelete(name) {
 	return confirm('Are you sure you wish to delete this '+name+'?');
 }
 
+function confirmCancel() {
+	return confirm('All unsaved data will be lost. Do you wish to continue?');
+}
+
 // Text Field Limit
 function limit(element) {
     var max_chars = 3;
@@ -31,6 +35,37 @@ function displaySuccess(message) {
 function clearSuccess() {
 	document.getElementById('messages').style.display = "none";
 	document.getElementById('messages').innerHTML = "";
+}
+
+function resetScores() {
+	if (confirm('Are you sure you want to clear all data for this event? Existing data can be retrieved be clicking cancel.')) {
+	var count = 0;
+	while (count < 1000) {
+		if  ($('#teamRawScore'+count) != null && $('#teamRawScore'+count).val() != null) {
+				$('#teamRawScore'+count).val('');
+				$('#teamStatus'+count).val('P');
+				$('#teamScoreTier'+count).val(0);
+				$('#teamTieBreak'+count).val('');
+				$('#teamScore'+count).val('');
+				$('#teamPointsEarned'+count).val('');
+		}
+		else break;		
+		count++;
+	}
+	count = 0;
+	while (count < 1000) {
+		if  ($('#teamARawScore'+count) != null && $('#teamARawScore'+count).val() != null) {
+				$('#teamARawScore'+count).val('');
+				$('#teamAStatus'+count).val('P');
+				$('#teamAScoreTier'+count).val(0);
+				$('#teamATieBreak'+count).val('');
+				$('#teamAScore'+count).val('');
+				$('#teamAPointsEarned'+count).val('');
+		}
+		else break;		
+		count++;
+	}
+	}
 }
 
 // calculate event score logic (specific per event)
@@ -105,13 +140,17 @@ function calc(type) {
 			if  ($('#teamRawScore'+count) != null && $('#teamRawScore'+count).val() != null) {
 				var record = [];
 				var score = $('#teamRawScore'+count).val();
+				var status = $('#teamStatus'+count).val();
+				var tier = $('#teamScoreTier'+count).val();
+				var tieBreak = $('#teamTieBreak'+count).val();
 				if (score == '') score == -1;
-				// [TEAM NUMBER, TEAM RANK, RAW SCORE, TIER, TIE BREAK, ####]
+				// [TEAM NUMBER, TEAM RANK, RAW SCORE, TIER, STATUS, TIE BREAK, ####]
 				record.push(count); // Team Row Number
 				record.push(""); // Team Rank
 				record.push(Number(score)); // Raw Score
-				record.push($('#teamScoreTier'+count).val()); // Tier
-				//record.push($('#teamTieBreak'+count).val()); // Tie Break		
+				record.push(tier); // Tier
+				record.push(status); // Status
+				record.push(tieBreak); // Tie Break		
 				record.push("####");			
 				scoreArr.push(record);
 			}
@@ -125,10 +164,15 @@ function calc(type) {
 		else if (type == 'LOWRAWTIER') scoreArr.sort(compare4);
 		
 		
-		// Set Ranks, ReOrder, Set Points Earned
+		// Set Ranks, ReOrder, Set Points Earned (Status of P gets ranked. N and D get 0 Rank)
 		scoreArr.forEach(function(entry) {
-			entry[1] = rank;
-			rank++;
+			if (entry[4] == 'P') {
+				entry[1] = rank;
+				rank++;
+			}
+			else {
+				entry[1] = 0;
+			}
 		});
 		scoreArr.sort(compare);
 		//alert(scoreArr.toString());
