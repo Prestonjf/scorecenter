@@ -2461,8 +2461,10 @@ else {
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
 	++ Result Grid Paginination
+	++ Print Broke Again
+	++ Label Manage Teams 
 	
-	++ AJAX on TIMEOUT
+	+ AJAX on TIMEOUT
 	+ Different Colors per Tie in raw score
 	+ Handles 100 Teams / Events Per TOURNAMENT
 
@@ -2470,7 +2472,7 @@ else {
 	-- APP LIMITATIONS / LOW PRIORITY ISSUES --
 	** Calculations based on specific Event Name (not a code)
 	** Results: Ties Broken to 20 positions
-	** Results Order By OPTION
+	** Results Order By OPTION / Keep Color PAttern per Row
 	** controller class security
 	** Manual Reminder email to supervisor
 	** Generate Results as XML
