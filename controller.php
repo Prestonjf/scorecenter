@@ -1239,7 +1239,7 @@ else {
 					$id = 0;
 					if ($row['0'] != null) $id = $row['0']; 
 				
-					$query = $mysqli->prepare("INSERT INTO TEAM_EVENT_SCORE (TEAM_EVENT_SCORE_ID, TOURN_TEAM_ID, TOURN_EVENT_ID, SCORE, POINTS_EARNED, RAW_SCORE, TIER_TEXT, 											TIE_BREAK_TEXT, TEAM_STATUS) VALUES (".$id.", ?, ?, ?,?,?,?,?) ");
+					$query = $mysqli->prepare("INSERT INTO TEAM_EVENT_SCORE (TEAM_EVENT_SCORE_ID, TOURN_TEAM_ID, TOURN_EVENT_ID, SCORE, POINTS_EARNED, RAW_SCORE, TIER_TEXT, 											TIE_BREAK_TEXT, TEAM_STATUS) VALUES (".$id.",?,?,?,?,?,?,?,?) ");
 					$query->bind_param('iiiissss',$score['4'],$_SESSION["tournEventId"], $value,$pointsEarned,$rawScore,$tier,$tieBreak,$status); 
 					$query->execute();
 					$score['3'] = $id;
@@ -1274,7 +1274,7 @@ else {
 					$id = 0;
 					if ($row['0'] != null) $id = $row['0']; 
 				
-					$query = $mysqli->prepare("INSERT INTO TEAM_EVENT_SCORE (TEAM_EVENT_SCORE_ID, TOURN_TEAM_ID, TOURN_EVENT_ID, SCORE, POINTS_EARNED, RAW_SCORE, TIER_TEXT, 											TIE_BREAK_TEXT, TEAM_STATUS) VALUES (".$id.", ?, ?, ?,?,?,?,?) ");
+					$query = $mysqli->prepare("INSERT INTO TEAM_EVENT_SCORE (TEAM_EVENT_SCORE_ID, TOURN_TEAM_ID, TOURN_EVENT_ID, SCORE, POINTS_EARNED, RAW_SCORE, TIER_TEXT, 											TIE_BREAK_TEXT, TEAM_STATUS) VALUES (".$id.",?,?,?,?,?,?,?,?) ");
 					$query->bind_param('iiiissss',$score['4'],$_SESSION["tournEventId"], $value,$pointsEarned,$rawScore,$tier,$tieBreak,$status); 
 					$query->execute();
 					$score['3'] = $id;
@@ -1605,6 +1605,9 @@ else {
 			$count++;
 		}	
 		// Additional Ordering OPTIONS
+		usort($tournamentResults, "sortTeamNumberAsc");
+		
+		
 		$_SESSION['tournamentResults'] = $tournamentResults;
 		
 		
@@ -1657,6 +1660,10 @@ else {
 					array_push($tournamentAlternateResults, $resultRow);
 					
 			}
+			// Additional Ordering OPTIONS
+			usort($tournamentAlternateResults, "sortTeamNumberAsc");
+			
+			
 			$_SESSION['tournamentAlternateResults'] = $tournamentAlternateResults;
 		}
 	}
@@ -1721,6 +1728,12 @@ else {
 			12=>0,13=>0,14=>0,15=>0,16=>0,17=>0,18=>0,19=>0,20=>0,21=>0,22=>0		
 		);
 		return $array;
+	}
+	
+	function sortTeamNumberAsc($a, $b) {
+		if ($a[0] < $b[0]) return -1;
+		if ($a[0] > $b[0]) return 1;
+		return 0;
 	}
 	
 	function exportResultsCSV($mysqli) {
@@ -2454,10 +2467,10 @@ else {
 	}
 	
 	function loadDefaultSettings() {
-		$_SESSION["primaryRowColor"] = "D1ECD1"; // Default Green. Primary Row
-		$_SESSION["primaryColumnColor"] = "D1D1D1"; // Default Gray. Primary Column
-		$_SESSION["secondaryRowColor"] = "FFFFFF"; // Default White. Secondary Row
-		$_SESSION["secondaryColumnColor"] = "CEDCCE"; // Default Green/Gray. Secondary Column
+		$_SESSION["primaryRowColor"] = "FFFFFF"; // Default Green. Primary Row D1ECD1
+		$_SESSION["primaryColumnColor"] = "FFFFFF"; // Default Gray. Primary Column D1D1D1
+		$_SESSION["secondaryRowColor"] = "FFFFFF"; // Default White. Secondary Row FFFFFF
+		$_SESSION["secondaryColumnColor"] = "FFFFFF"; // Default Green/Gray. Secondary Column CEDCCE
 	}
 
 

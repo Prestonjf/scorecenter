@@ -72,11 +72,11 @@
 						// success message
 						document.getElementById('resultsGrid').innerHTML = xmlhttp.responseText;
 						$("#primaryResultsGrid").tablesorter(); 
-						if (color == '-1') {
-							$("#primaryRowColor").spectrum("set", "#D1ECD1");
-							$("#primaryColumnColor").spectrum("set", "#D1D1D1");
-							$("#secondaryRowColor").spectrum("set", "#FFFFFF");
-							$("#secondaryColumnColor").spectrum("set", "#CEDCCE");
+						if (color == '-1') { 
+							$("#primaryRowColor").spectrum("set", "#FFFFFF"); // D1ECD1
+							$("#primaryColumnColor").spectrum("set", "#FFFFFF"); // D1D1D1
+							$("#secondaryRowColor").spectrum("set", "#FFFFFF"); // FFFFFF
+							$("#secondaryColumnColor").spectrum("set", "#FFFFFF"); // CEDCCE
 							
 						}
 					}					
