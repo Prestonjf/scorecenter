@@ -305,10 +305,10 @@ include_once('logon_check.php');
         <table class="table table-hover">
         <thead>
             <tr>
-                <th width="10%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
+                <th width="6%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
                 <th width="20%" data-field="teamNumber" data-align="center" data-sortable="true">Team Name</th>
-                <th width="5%" data-field="status" data-align="center" data-sortable="true">Status</th>
-				<th width="10%"data-field="score" data-align="center" data-sortable="true">Raw Score</th>
+                <th width="9%" data-field="status" data-align="center" data-sortable="true">Status&nbsp;&nbsp;&nbsp;&nbsp;</th>
+				<th width="10%"data-field="score" data-align="center" data-sortable="true">Raw Score&nbsp;&nbsp;</th>
 				<th width="5%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group</th>
 				<th width="30%"data-field="score" data-align="center" data-sortable="true">Tie Break</th>			
                 <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank<span class="red">*</span></th>
@@ -363,10 +363,10 @@ include_once('logon_check.php');
 		<table class="table table-hover">
         <thead>
             <tr>
-                <th width="10%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
+                <th width="6%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
                 <th width="20%" data-field="teamNumber" data-align="center" data-sortable="true">Team Name</th>
-                <th width="5%" data-field="status" data-align="center" data-sortable="true">Status</th>
-				<th width="10%"data-field="score" data-align="center" data-sortable="true">Raw Score</th>
+                <th width="9%" data-field="status" data-align="center" data-sortable="true">Status&nbsp;&nbsp;&nbsp;&nbsp;</th>
+				<th width="10%"data-field="score" data-align="center" data-sortable="true">Raw Score&nbsp;&nbsp;</th>
 				<th width="5%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group</th>
 				<th width="30%"data-field="score" data-align="center" data-sortable="true">Tie Break</th>	
                 <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank</th>

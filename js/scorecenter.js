@@ -78,6 +78,7 @@ function calculateScorez(name, division, algorithm) {
 			else if (algorithm == 'HIGHRAWTIER') calc('HIGHRAWTIER');
 			else if (algorithm == 'LOWRAW') calc('LOWRAW');
 			else if (algorithm == 'LOWRAWTIER') calc('LOWRAWTIER');
+			else if (algorithm == 'HIGHRAWTIER4LOW') calc('HIGHRAWTIER4LOW');
 		}
 		else {
 		switch (name.trim().toUpperCase()) {
@@ -129,9 +130,10 @@ function calculateScorez(name, division, algorithm) {
 
 // calc
 // 1. HIGHRAW
-// 2 HIGHRAWTIER
+// 2  HIGHRAWTIER
 // 3. LOWRAW
 // 4. LOWRAWTIER
+// 5. HIGHRAWTIER4LOW
 function calc(type) {
 		var count = 0;
 		var rank = 1;
@@ -162,6 +164,7 @@ function calc(type) {
 		else if (type == 'HIGHRAWTIER') scoreArr.sort(compare2);
 		else if (type == 'LOWRAW') scoreArr.sort(compare3);
 		else if (type == 'LOWRAWTIER') scoreArr.sort(compare4);
+		else if (type == 'HIGHRAWTIER4LOW') scoreArr.sort(compare5);
 		
 		
 		// Set Ranks, ReOrder, Set Points Earned (Status of P gets ranked. N and D get 0 Rank)
@@ -236,6 +239,25 @@ function compare4(a,b) {
   	var y = b[2]; if (b[2] == '') y = 100000;
   	if (x < y) return -1;
   	if (x > y) return 1;
+  }
+  return 0;	
+}
+
+// 5. HIGHRAWTIER4LOW - 4th Tier Low Score
+function compare5(a,b) {
+  if (a[3] < b[3])
+    return -1;
+  if (a[3] > b[3])
+    return 1;
+  if (a[3] == b[3]) {
+	if (a[3] == 4) {
+		if (a[2] < b[2]) return -1;
+		if (a[2] > b[2]) return 1;
+	}
+	else {
+		if (a[2] > b[2]) return -1;
+		if (a[2] < b[2]) return 1;
+	}
   }
   return 0;	
 }

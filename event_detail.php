@@ -97,6 +97,7 @@ include_once('logon_check.php');
 	<input type="radio" name="scoreSystemCode" id="scoreSystemCode2" value="HIGHRAWTIER" <?php if ($_SESSION["scoreSystemCode"] =='HIGHRAWTIER') echo 'checked';?>> <label for="scoreSystemCode2">High Raw Score / Tier Ranked</label><br />
 	<input type="radio" name="scoreSystemCode" id="scoreSystemCode3" value="LOWRAW" <?php if ($_SESSION["scoreSystemCode"] =='LOWRAW') echo 'checked';?>> <label for="scoreSystemCode3">Low Raw Score</label><br />
 	<input type="radio" name="scoreSystemCode" id="scoreSystemCode4" value="LOWRAWTIER" <?php if ($_SESSION["scoreSystemCode"] =='LOWRAWTIER') echo 'checked';?>> <label for="scoreSystemCode4">Low Raw Score / Tier Ranked</label><br />
+	<input type="radio" name="scoreSystemCode" id="scoreSystemCode5" value="HIGHRAWTIER4LOW" <?php if ($_SESSION["scoreSystemCode"] =='HIGHRAWTIER4LOW') echo 'checked';?>> <label for="scoreSystemCode5">High Raw Score / Tier Ranked / 4th Tier Low</label><br />
 	</td>
 	</tr>
 	
