@@ -69,16 +69,29 @@ include_once('logon_check.php');
 	function highlightRawScoreDuplication() {
 		var count = 0;
 		var scoreArr = [];
-		var dupArr = [];
+		var duplicates = {};
+		var pCount = 0;
+		var colorPalette = ["#FFD5D5","#FFFFCC","#E1F7D5","#C9C9FF","#F1CBFF","#FFE7CC","#CCFFFD","#EBE8E0","#939393","#CFE4F1"];
+		
 		while (count < 1000) {
 			if  ($('#teamRawScore'+count) != null && $('#teamRawScore'+count).val() != null) {
 				var score = $('#teamRawScore'+count).val();
+				var tier = $('#teamScoreTier'+count).val();
 				document.getElementById('teamRawScore'+count).style.backgroundColor = "#FFFFFF";
 				scoreArr.forEach(function(entry) {
-					if (score == entry) dupArr.push(score);
+					//alert(entry);
+					if (score == entry[0] && tier == entry[1]) {
+						if (entry[0] in duplicates);
+						else {
+							duplicates[entry[0]] = colorPalette[pCount];
+							if (pCount == 9 )pCount = 0;
+							else pCount++;
+						}
+					}
 				});
 				if (score != '') {
-					scoreArr.push(score);
+					var obj = [score,tier];
+					scoreArr.push(obj);
 				}
 			}
 			else break;		
@@ -89,13 +102,8 @@ include_once('logon_check.php');
 		while (count < 1000) {
 			if  ($('#teamRawScore'+count) != null && $('#teamRawScore'+count).val() != null) {
 				var score = $('#teamRawScore'+count).val();
-				var count2 = 0;
-				while (count2 < dupArr.length) {
-					if (score == dupArr[count2]) {
-						document.getElementById('teamRawScore'+count).style.backgroundColor = "#FFFFCC";
-						break;
-					}
-					count2++;
+				if (score in duplicates) {
+					document.getElementById('teamRawScore'+count).style.backgroundColor = duplicates[score];			
 				}
 			}
 			else break;
@@ -127,6 +135,7 @@ include_once('logon_check.php');
 					if(!confirm("A team's score / rank has been left blank. Do you still wish to save?")) return false;
 					if (document.getElementById('submittedFlag').checked || document.getElementById('verifiedFlag').checked)
 						error3 = true;
+					break;
 				}
 				scoreArr.forEach(function(entry) {
 					if (score == entry && max != score) exists = true;
@@ -331,7 +340,7 @@ include_once('logon_check.php');
 			</select></td>';
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
       						name="teamRawScore'.$teamCount.'" id="teamRawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" onkeyup="highlightRawScoreDuplication()" ></td>';
-					echo '<td><select class="form-control" name="teamScoreTier'.$teamCount.'" id="teamScoreTier'.$teamCount.'" '.$disable.'>
+					echo '<td><select class="form-control" name="teamScoreTier'.$teamCount.'" id="teamScoreTier'.$teamCount.'" '.$disable.' onchange="highlightRawScoreDuplication()">
 			<option value="0"></option>
 			<option value="1" ';  if($scoreRecord['7'] == "1"){echo("selected");} echo '>I</option>
 			<option value="2" '; if($scoreRecord['7'] == "2"){echo("selected");} echo '>II</option>

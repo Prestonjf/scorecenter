@@ -1232,6 +1232,7 @@ else {
 				
 				
 				if ($value == '') $value = null;
+				if ($pointsEarned == '') $pointsEarned = null;
 					
 				if ($score['3'] == null or $score['3'] == '') {
 					$result = $mysqli->query("select max(TEAM_EVENT_SCORE_ID) + 1 from TEAM_EVENT_SCORE");

@@ -48,6 +48,7 @@ function resetScores() {
 				$('#teamTieBreak'+count).val('');
 				$('#teamScore'+count).val('');
 				$('#teamPointsEarned'+count).val('');
+				document.getElementById('teamRawScore'+count).style.backgroundColor = "#FFFFFF";
 		}
 		else break;		
 		count++;
@@ -61,6 +62,7 @@ function resetScores() {
 				$('#teamATieBreak'+count).val('');
 				$('#teamAScore'+count).val('');
 				$('#teamAPointsEarned'+count).val('');
+				document.getElementById('teamARawScore'+count).style.backgroundColor = "#FFFFFF";
 		}
 		else break;		
 		count++;
