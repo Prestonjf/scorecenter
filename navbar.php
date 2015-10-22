@@ -1,6 +1,6 @@
 <script type="text/javascript">
 	function about() { 
-		alert('Score Center \n \nDeveloped by Michigan Science Olympiad \nAn open source scoring application for Science Olympiad Tournaments. \n \nVersion: 1.0 (Alpha) - August 2015'); 
+		alert('Score Center \n \nDeveloped by Michigan Science Olympiad \nAn open source scoring application for Science Olympiad Tournaments. \n \nVersion: 1.0 (Beta) - October 2015'); 
 	}
 
 </script>
