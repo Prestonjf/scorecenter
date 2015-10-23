@@ -42,6 +42,12 @@
 		document.getElementById('teamNumber').value = '';
 		document.getElementById('filterDivision').value = '';
 	}
+	
+	function loadPage(p) {
+		
+		
+
+	}
   
   </script>
     <style>
@@ -93,16 +99,40 @@
 	<td></td>
 	<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchTeam">Search</button>
 		<button type="button" class="btn btn-xs btn-warning" name="clearSearchEvent" onclick="clearFilterCriteria()">Clear</button>
-	</td>
-	
+	</td>	
 	</tr>
+	
 	</table>
 
 <hr>
 <br />
-<br />
         <table class="table table-hover">
         <thead>
+		<!-- Pagination Framework -->
+		<tr>
+			<?php // Pagination Framework
+			$totalResults = sizeof($_SESSION["teamsList"]);
+			$totalPages = ceil(($totalResults+1) / 15);
+			if ($_SESSION["resultsPage"] == null) $_SESSION["resultsPage"] = 1;
+			$resultStart = ($_SESSION["resultsPage"]-1) * 15;
+			$resultEnd = (($_SESSION["resultsPage"]-1) * 15) + 14;
+			$pageCount = 1;
+			
+			echo '<td colspan="3" style="font-size: 12px; border-style:none;"><div style="float: left;">Results: <b>'.($resultStart+1).'</b> to <b>'.($resultEnd+1).'</b> of <b>'.$totalResults.'</b></div>';
+			echo '<div style="float: right;">Page: '; 
+				while ($pageCount <= $totalPages) {
+					if ($_SESSION["resultsPage"]==$pageCount) {
+						echo '<b><u>'.$pageCount.'</u></b> '; 
+					} 
+					else {
+						echo '<a href="loadPage(\''.$pageCount.'\')">'.$pageCount.'</a> ';
+					}
+					 $pageCount++;
+				}
+			echo '</div></td>';
+		?>	
+		</tr>
+		<!-- End Pagination Framework -->
             <tr>
                 <th data-field="name" data-align="right" data-sortable="true">Team Name</th>
                 <th data-field="division" data-align="right" data-sortable="true">Team Division</th>
@@ -112,16 +142,16 @@
         <tbody>
          <?php 
          if ($_SESSION["teamsList"] != null) {
-         //echo $_SESSION["allTournaments"];
-			foreach ($_SESSION["teamsList"] as $team) {
-      			echo '<tr>';
-      			echo '<td>'; echo $team['1']; echo '</td>';
-      			echo '<td>'; echo $team['2']; echo '</td>';
-				echo '<td>';
-				echo '<button type="submit" class="btn btn-xs btn-primary" name="editTeam" value="'.$team['0'].'">Edit Team</button> &nbsp;'; 				
-				echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTeam" onclick="return confirmDelete(\'team\')" value='.$team['0'].'>Delete</button>&nbsp;';
-				echo '</td>';	
-				echo '</tr>';	
+			foreach ($_SESSION["teamsList"] as $index => $team) {
+				$currentPage = ceil(($index+1) / 15);
+					echo '<tr id="resultPageRow'.$index.'" style="display: '; if ($_SESSION["resultsPage"]==$currentPage) echo ''; else echo 'none'; echo '">';
+					echo '<td>'; echo $team['1']; echo '</td>';
+					echo '<td>'; echo $team['2']; echo '</td>';
+					echo '<td>';
+					echo '<button type="submit" class="btn btn-xs btn-primary" name="editTeam" value="'.$team['0'].'">Edit Team</button> &nbsp;'; 				
+					echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTeam" onclick="return confirmDelete(\'team\')" value='.$team['0'].'>Delete</button>&nbsp;';
+					echo '</td>';	
+					echo '</tr>';		
     		}
     	}
         ?>
