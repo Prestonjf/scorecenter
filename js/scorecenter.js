@@ -37,6 +37,53 @@ function clearSuccess() {
 	document.getElementById('messages').innerHTML = "";
 }
 
+function loadPage(p, total, pages) {
+		var start = (p-1) * 15;
+		var end = ((p-1) * 15) + 14;
+		var count = 0;
+		while (count <= total) {
+			if (document.getElementById('resultPageRow'+count) != null) {
+				if (count >= start && count <= end) {
+					document.getElementById('resultPageRow'+count).style.display = "";
+				}
+				else {
+					document.getElementById('resultPageRow'+count).style.display = "none";
+				}
+			}
+			count++;
+		}	
+		var navigationHtml = "Page: ";
+		var pageCount = 1;
+		while (pageCount <= pages) {
+			if (p == pageCount) {
+				navigationHtml += "<b><u>"+pageCount+"</u></b> ";
+			} 
+			else {
+				navigationHtml += '<a href="javascript:void(0)" onclick="loadPage(\''+pageCount+'\',\''+total+'\',\''+pages+'\')">'+pageCount+' </a>';		
+			}
+				pageCount++;
+		}
+		
+		document.getElementById('pageStartId').innerHTML = start+1;
+		if (p == pages) document.getElementById('pageEndId').innerHTML = total;
+		else document.getElementById('pageEndId').innerHTML = end+1;
+		document.getElementById('pagesId').innerHTML = navigationHtml;
+		
+		document.getElementById('pageStartId2').innerHTML = start+1;
+		if (p == pages) document.getElementById('pageEndId2').innerHTML = total;
+		else document.getElementById('pageEndId2').innerHTML = end+1;
+		document.getElementById('pagesId2').innerHTML = navigationHtml;
+		
+		// Set Page Index on Server
+		xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {					
+			}
+		}	
+        xmlhttp.open("GET","controller.php?command=updateResultPage&page="+p);
+        xmlhttp.send();
+}
+
 function resetScores() {
 	if (confirm('Are you sure you want to clear all data for this event? Existing data can be retrieved be clicking cancel.')) {
 	var count = 0;

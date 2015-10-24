@@ -78,6 +78,11 @@ else if ($_GET['command'] != null and $_GET['command'] == 'updateExistingAccount
 	exit();
 }
 
+if ($_GET['command'] != null and $_GET['command'] == 'updateResultPage') {
+	$_SESSION["resultsPage"] = $_GET['page'];		
+	exit();
+}
+
 // All Commands Below Require An Active Session
 // Session Timeout 30 Minutes
 if ($_SESSION['sessionTimeout'] + 30 * 60 < time()) {
@@ -90,7 +95,6 @@ if ($_SESSION['sessionTimeout'] + 30 * 60 < time()) {
 else {
 	$_SESSION['sessionTimeout'] = time();
 }
-
 
 if ($_GET['command'] != null and $_GET['command'] == 'loadIndex') {
 	header("Location: index.php");	
@@ -1439,6 +1443,7 @@ else {
 					array_push($teamList, $teamRecord);
 				}
 			}
+		$_SESSION["resultsPage"] = 1;
 		$_SESSION["teamsList"] = $teamList;
 	}
 	

@@ -19,6 +19,7 @@
 <html lang="en">
   <head>
 	<?php include_once('libs/head_tags.php'); ?>
+	<?php include_once('libs/pagination.php'); ?>
 	
   <script type="text/javascript">
   $(document).ready(function(){
@@ -41,12 +42,6 @@
 		document.getElementById('teamName').value = '';
 		document.getElementById('teamNumber').value = '';
 		document.getElementById('filterDivision').value = '';
-	}
-	
-	function loadPage(p) {
-		
-		
-
 	}
   
   </script>
@@ -108,31 +103,7 @@
 <br />
         <table class="table table-hover">
         <thead>
-		<!-- Pagination Framework -->
-		<tr>
-			<?php // Pagination Framework
-			$totalResults = sizeof($_SESSION["teamsList"]);
-			$totalPages = ceil(($totalResults+1) / 15);
-			if ($_SESSION["resultsPage"] == null) $_SESSION["resultsPage"] = 1;
-			$resultStart = ($_SESSION["resultsPage"]-1) * 15;
-			$resultEnd = (($_SESSION["resultsPage"]-1) * 15) + 14;
-			$pageCount = 1;
-			
-			echo '<td colspan="3" style="font-size: 12px; border-style:none;"><div style="float: left;">Results: <b>'.($resultStart+1).'</b> to <b>'.($resultEnd+1).'</b> of <b>'.$totalResults.'</b></div>';
-			echo '<div style="float: right;">Page: '; 
-				while ($pageCount <= $totalPages) {
-					if ($_SESSION["resultsPage"]==$pageCount) {
-						echo '<b><u>'.$pageCount.'</u></b> '; 
-					} 
-					else {
-						echo '<a href="loadPage(\''.$pageCount.'\')">'.$pageCount.'</a> ';
-					}
-					 $pageCount++;
-				}
-			echo '</div></td>';
-		?>	
-		</tr>
-		<!-- End Pagination Framework -->
+			<?php paginationHeader($_SESSION["teamsList"]); ?>
             <tr>
                 <th data-field="name" data-align="right" data-sortable="true">Team Name</th>
                 <th data-field="division" data-align="right" data-sortable="true">Team Division</th>
@@ -143,8 +114,7 @@
          <?php 
          if ($_SESSION["teamsList"] != null) {
 			foreach ($_SESSION["teamsList"] as $index => $team) {
-				$currentPage = ceil(($index+1) / 15);
-					echo '<tr id="resultPageRow'.$index.'" style="display: '; if ($_SESSION["resultsPage"]==$currentPage) echo ''; else echo 'none'; echo '">';
+					paginationRow($index);
 					echo '<td>'; echo $team['1']; echo '</td>';
 					echo '<td>'; echo $team['2']; echo '</td>';
 					echo '<td>';
@@ -156,6 +126,7 @@
     	}
         ?>
           </tbody>
+          <?php paginationFooter($_SESSION["teamsList"]); ?>
           </table>
            
 		<button type="submit" class="btn btn-xs btn-primary" name="addNewTeam" value="0">Add Team</button>
