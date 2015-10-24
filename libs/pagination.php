@@ -1,5 +1,6 @@
 <?php
-
+	define (PAGEROWS, 15); // rows per page 
+	
 	$totalResults = 0;
 	$totalPages = 1;
 	$resultStart = 0;
@@ -8,11 +9,11 @@
 
 	function paginationHeader($results) {
 		$totalResults = sizeof($results);
-		$totalPages = ceil(($totalResults+1) / 15);
+		$totalPages = ceil(($totalResults+1) / PAGEROWS);
 		if ($_SESSION["resultsPage"] == null) $_SESSION["resultsPage"] = 1;
-		$resultStart = ($_SESSION["resultsPage"]-1) * 15;
+		$resultStart = ($_SESSION["resultsPage"]-1) * PAGEROWS;
 		if ($totalResults != 0) $resultStart = $resultStart + 1;
-		$resultEnd = (($_SESSION["resultsPage"]-1) * 15) + 14;
+		$resultEnd = (($_SESSION["resultsPage"]-1) * PAGEROWS) + 14;
 		if ($totalPages == 1) $resultEnd = $totalResults;
 		$pageCount = 1;
 		
@@ -34,11 +35,11 @@
 
 	function paginationFooter($results) {	
 		$totalResults = sizeof($results);
-		$totalPages = ceil(($totalResults+1) / 15);
+		$totalPages = ceil(($totalResults+1) / PAGEROWS);
 		if ($_SESSION["resultsPage"] == null) $_SESSION["resultsPage"] = 1;
-		$resultStart = ($_SESSION["resultsPage"]-1) * 15;
+		$resultStart = ($_SESSION["resultsPage"]-1) * PAGEROWS;
 		if ($totalResults != 0) $resultStart = $resultStart + 1;
-		$resultEnd = (($_SESSION["resultsPage"]-1) * 15) + 14;
+		$resultEnd = (($_SESSION["resultsPage"]-1) * PAGEROWS) + 14;
 		if ($totalPages == 1) $resultEnd = $totalResults;
 		$pageCount = 1;
 		
@@ -57,7 +58,7 @@
 	}
 	
 	function paginationRow($index) {
-		$currentPage = ceil(($index+1) / 15);
+		$currentPage = ceil(($index+1) / PAGEROWS);
 			echo '<tr id="resultPageRow'.$index.'" style="display: '; if ($_SESSION["resultsPage"]==$currentPage) echo ''; else echo 'none'; echo '">';
 	}
 
