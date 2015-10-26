@@ -21,6 +21,7 @@
 <html lang="en">
   <head>
 	<?php include_once('libs/head_tags.php'); ?>
+	<?php include_once('libs/pagination.php'); ?>
 	
   <script type="text/javascript">
   $(document).ready(function(){
@@ -111,8 +112,8 @@
 	</script>
 
 <hr>
-<br />
-<br />
+		<?php $result = $mysqli->query($_SESSION["allTournaments"]); ?>
+		<?php paginationHeader($result); ?>
         <table class="table table-hover">
         <thead>
             <tr>
@@ -126,31 +127,31 @@
         <tbody>
          <?php
          if ($_SESSION["allTournaments"] != null and $_SESSION["allTournaments"] != '') {
-         //echo $_SESSION["allTournaments"];
-         	$result = $mysqli->query($_SESSION["allTournaments"]);			
  			if ($result) {
  				if (mysqli_num_rows($result) == 0) { echo '<tr><td colspan="5">No Tournaments Found</td></tr>';}
+				$rowCount = 0;
       			while($row = $result->fetch_array()) {
-      			echo '<tr>';
-      			echo '<td>'; echo $row['1']; echo '</td>';
-				echo '<td>'; echo $row['3']; echo '</td>';
-				echo '<td>'; echo $row['2']; echo '</td>';
-				echo '<td>'; echo $row['4']; echo '</td>';
-				echo '<td>';
-				echo '<button type="submit" class="btn btn-xs btn-primary" name="enterScores" value="'.$row['0'].'">Enter Scores</button> &nbsp;'; 				
-				echo '<button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$row['0'].'>View Results</button>&nbsp;';
-				echo '<button type="submit" class="btn btn-xs btn-primary" name="loadTournament" value='.$row['0'].'>Edit Tournament</button>&nbsp;';
-				if (getCurrentRole() == 'ADMIN') echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTournament" onclick="return confirm2Delete(\''.$row['0'].'\')" value='.$row['0'].'>Delete</button>&nbsp;';
-				echo '</td>';				
-				echo '</tr>';
-				echo '<input type="hidden" value="'.$row['1'].'" id="tournamentName'.$row['0'].'" />';
+					paginationRow($rowCount);
+					echo '<td>'; echo $row['1']; echo '</td>';
+					echo '<td>'; echo $row['3']; echo '</td>';
+					echo '<td>'; echo $row['2']; echo '</td>';
+					echo '<td>'; echo $row['4']; echo '</td>';
+					echo '<td>';
+					echo '<button type="submit" class="btn btn-xs btn-primary" name="enterScores" value="'.$row['0'].'">Enter Scores</button> &nbsp;'; 				
+					echo '<button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$row['0'].'>View Results</button>&nbsp;';
+					echo '<button type="submit" class="btn btn-xs btn-primary" name="loadTournament" value='.$row['0'].'>Edit Tournament</button>&nbsp;';
+					if (getCurrentRole() == 'ADMIN') echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTournament" onclick="return confirm2Delete(\''.$row['0'].'\')" value='.$row['0'].'>Delete</button>&nbsp;';
+					echo '</td>';				
+					echo '</tr>';
+					echo '<input type="hidden" value="'.$row['1'].'" id="tournamentName'.$row['0'].'" />';
+					$rowCount++;
       			}
     		}
     	}
         ?>
           </tbody>
           </table>
-           
+          <?php paginationFooter($result); ?> 
 		<?php if (getCurrentRole() == 'ADMIN') echo '<button type="submit" class="btn btn-xs btn-primary" name="addTournament">Add Tournament</button>'; ?>
 
       <hr>

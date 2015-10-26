@@ -100,10 +100,9 @@
 	</table>
 
 <hr>
-<br />
+		<?php paginationHeader($_SESSION["teamsList"]); ?>
         <table class="table table-hover">
         <thead>
-			<?php paginationHeader($_SESSION["teamsList"]); ?>
             <tr>
                 <th data-field="name" data-align="right" data-sortable="true">Team Name</th>
                 <th data-field="division" data-align="right" data-sortable="true">Team Division</th>
@@ -126,9 +125,8 @@
     	}
         ?>
           </tbody>
-          <?php paginationFooter($_SESSION["teamsList"]); ?>
           </table>
-           
+           <?php paginationFooter($_SESSION["teamsList"]); ?>
 		<button type="submit" class="btn btn-xs btn-primary" name="addNewTeam" value="0">Add Team</button>
 
       <hr>

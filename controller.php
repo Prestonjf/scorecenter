@@ -78,11 +78,6 @@ else if ($_GET['command'] != null and $_GET['command'] == 'updateExistingAccount
 	exit();
 }
 
-if ($_GET['command'] != null and $_GET['command'] == 'updateResultPage') {
-	$_SESSION["resultsPage"] = $_GET['page'];		
-	exit();
-}
-
 // All Commands Below Require An Active Session
 // Session Timeout 30 Minutes
 if ($_SESSION['sessionTimeout'] + 30 * 60 < time()) {
@@ -903,7 +898,8 @@ else {
 				
  					array_push($eventList, $event);
  				}
-			}			
+			}	
+			$_SESSION["resultsPage"] = 1;
 			$_SESSION["eventList"] = $eventList;
 			
 			// Load Teams
@@ -2118,6 +2114,7 @@ else {
 					array_push($userList, $userRecord);
 				}
 			}
+		$_SESSION["resultsPage"] = 1;
 		$_SESSION["userList"] = $userList;
 	
 	}
@@ -2483,7 +2480,6 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX -- 
-	++ Result Grid Paginination
 	++ Print Broke Again
 	
 	+ AJAX on TIMEOUT

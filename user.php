@@ -19,6 +19,7 @@
 <html lang="en">
   <head>
 	<?php include_once('libs/head_tags.php'); ?>
+	<?php include_once('libs/pagination.php'); ?>
 	
   <script type="text/javascript">
   $(document).ready(function(){
@@ -99,8 +100,7 @@
 	</table>
 
 <hr>
-<br />
-<br />
+		<?php paginationHeader($_SESSION["userList"]); ?>
         <table class="table table-hover">
         <thead>
             <tr>
@@ -113,8 +113,8 @@
         <tbody>
          <?php 
          if ($_SESSION["userList"] != null) {
-			foreach ($_SESSION["userList"] as $user) {
-      			echo '<tr>';
+			foreach ($_SESSION["userList"] as $index => $user) {
+      			paginationRow($index);
       			echo '<td>'; echo $user['2'].', '. $user['1']; echo '</td>'; 
       			echo '<td>'; echo $user['3']; echo '</td>'; 
       			echo '<td>'; echo $user['4']; echo '</td>';
@@ -127,7 +127,7 @@
         ?>
           </tbody>
           </table>
-
+		<?php paginationFooter($_SESSION["userList"]); ?>
       <hr>
 	<?php include_once 'footer.php'; ?>
 

@@ -19,6 +19,7 @@
 <html lang="en">
   <head>
 	<?php include_once('libs/head_tags.php'); ?>
+	<?php include_once('libs/pagination.php'); ?>
 	
   <script type="text/javascript">
   $(document).ready(function(){
@@ -92,10 +93,9 @@
 	</table>
 
 <hr>
-<br />
-<br />
+		<?php paginationHeader($_SESSION["eventsList"]); ?>
         <table class="table table-hover">
-        <thead>
+        <thead>			
             <tr>
                 <th data-field="name" data-align="right" data-sortable="true">Event Name</th>
                 <th data-field="actions" data-sortable="true">Actions</th>
@@ -105,8 +105,8 @@
          <?php 
          if ($_SESSION["eventsList"] != null) {
          //echo $_SESSION["allTournaments"];
-			foreach ($_SESSION["eventsList"] as $event) {
-      			echo '<tr>';
+			foreach ($_SESSION["eventsList"] as $index => $event) {
+      			paginationRow($index);
       			echo '<td>'; echo $event['1']; echo '</td>';
 				echo '<td>';
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="editEvent" value="'.$event['0'].'">Edit Event</button> &nbsp;'; 				
@@ -118,7 +118,8 @@
         ?>
           </tbody>
           </table>
-           
+          <?php paginationFooter($_SESSION["eventsList"]); ?>
+		  
 		<button type="submit" class="btn btn-xs btn-primary" name="addNewEvent" value="0">Add Event</button>
 
       <hr>

@@ -38,6 +38,14 @@ function clearSuccess() {
 }
 
 function loadPage(p, total, pages) {
+		var currentPage = Number($('#selectedPage').val());
+		if (p == 'first') p = 1;
+		else if (p == 'previous') { if (currentPage == 1) p = currentPage; else p = currentPage - 1; }
+		else if (p == 'next') { if (currentPage == pages) p = currentPage; else p = currentPage + 1; }
+		else if (p == 'last') p = pages;
+		
+		$('#selectedPage').val(p);
+		
 		var start = (p-1) * 15;
 		var end = ((p-1) * 15) + 14;
 		var count = 0;
@@ -54,15 +62,20 @@ function loadPage(p, total, pages) {
 		}	
 		var navigationHtml = "Page: ";
 		var pageCount = 1;
+		navigationHtml += ' <a href="javascript:void(0)" onclick="loadPage(\'first\',\''+total+'\',\''+pages+'\')">|<</a> ';
+		navigationHtml += ' <a href="javascript:void(0)" onclick="loadPage(\'previous\',\''+total+'\',\''+pages+'\')"><</a> ';	
 		while (pageCount <= pages) {
 			if (p == pageCount) {
-				navigationHtml += "<b><u>"+pageCount+"</u></b> ";
+				navigationHtml += "<b><u><span id='selectedPage'>"+pageCount+"</span></u></b> ";
+				navigationHtml += "";
 			} 
 			else {
 				navigationHtml += '<a href="javascript:void(0)" onclick="loadPage(\''+pageCount+'\',\''+total+'\',\''+pages+'\')">'+pageCount+' </a>';		
 			}
 				pageCount++;
 		}
+		navigationHtml += ' <a href="javascript:void(0)" onclick="loadPage(\'next\',\''+total+'\',\''+pages+'\')">></a> ';
+		navigationHtml += ' <a href="javascript:void(0)" onclick="loadPage(\'last\',\''+total+'\',\''+pages+'\')">>|</a> ';
 		
 		document.getElementById('pageStartId').innerHTML = start+1;
 		if (p == pages) document.getElementById('pageEndId').innerHTML = total;
