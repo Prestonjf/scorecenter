@@ -333,6 +333,12 @@ else if (isset($_GET['exportResultsEXCEL'])) {
 	header("Location: tournament_results.php");
 	exit();
 }
+else if (isset($_GET['viewSlideShow'])) {
+	$id = $_GET['viewSlideShow'];
+	loadSlideShow($id, $mysqli);
+	header("Location: slideshow.php");
+	exit();
+}
 else if ($_GET['command'] != null and $_GET['command'] == 'updatePRowColor') {
 	$_SESSION["primaryRowColor"] = $_GET['color'];
 	reloadResults();
@@ -455,6 +461,7 @@ else {
 			$query = $query . " LIMIT ".$_SESSION["tournamentsNumber"];
 		}
 		
+		$_SESSION["resultsPage"] = 1;
 		$_SESSION["allTournaments"] = $query;
 	}
 	
@@ -2080,6 +2087,12 @@ else {
 			echo '</table>';
 			}
 		  }	
+	}
+	
+	// SLIDESHOW RESULTS ----------------------------------------------------
+	function loadSlideShow($id, $mysqli) {
+		
+		
 	}
 	
 	
