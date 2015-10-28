@@ -23,33 +23,48 @@
 	
   <script type="text/javascript">
   $(document).ready(function(){
-	  
+	  generateSlideContent('start');
 	});
 	
-	window.addEventListener("keydown", dealWithKeyboard, false);
-	window.addEventListener("keypress", dealWithKeyboard, false);
+	//window.addEventListener("keydown", dealWithKeyboard, false);
+	//window.addEventListener("keypress", dealWithKeyboard, false);
 	window.addEventListener("keyup", dealWithKeyboard, false);
 	 
 	function dealWithKeyboard(e) {
-		switch(e.keyCode) {
+		switch(e.keyCode) {	
 			case 37:
-				alert("Left");
+				generateSlideContent('previous');
 				break;
 			case 38:
-				alert("Back Up Slide Animation");
+				generateSlideContent('previousAnimation');
 				break;
 			case 39:
-				alert("Right");
+				generateSlideContent('next');
 				break;
 			case 40:
-				alert("Forward Slide Animation");
+				generateSlideContent('nextAnimation');
 				break;  
 			case 81:
 				if(confirm('Are you sure you want to exit the slideshow?')) {
-				
+					$('#controllerForm').append('<input type="hidden" name="command" value="exitSlideShow" />');
+					$("#controllerForm").submit(); 
 				}
 				break;  
 		} 
+
+	}
+	
+	function generateSlideContent(command) {
+		xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			if (xmlhttp.responseText != '') {
+				document.getElementById('slideshow').innerHTML = xmlhttp.responseText
+			}				
+		}
+		}
+        xmlhttp.open("GET","controller.php?command=generateSlideContent&action="+command,true);
+        xmlhttp.send();	
 
 	}
   
@@ -71,15 +86,17 @@
   <body>
   <?php include_once 'navbar.php'; ?>
   
-  	<form action="controller.php" method="GET">
+  	<form action="controller.php" method="GET" id="controllerForm">
      <div class="container">
      
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
-     <h3><?php echo 'Results: ' . $_SESSION["tournamentName"]; ?></h3>
-
+   <!--  <h3><?php //echo 'Results: ' . $_SESSION["tournamentName"]; ?></h3> -->
+		<div id="slideshow">
+				
 	 
+		</div>
       <hr>
 	<?php include_once 'footer.php'; ?>
 

@@ -339,6 +339,16 @@ else if (isset($_GET['viewSlideShow'])) {
 	header("Location: slideshow.php");
 	exit();
 }
+else if ($_GET['command'] != null and $_GET['command'] == 'exitSlideShow') {
+	clearSlideshow();
+	header("Location: tournament_results.php");
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'generateSlideContent') {
+	generateSlideContent($_GET['action']);
+	exit();
+}
+
 else if ($_GET['command'] != null and $_GET['command'] == 'updatePRowColor') {
 	$_SESSION["primaryRowColor"] = $_GET['color'];
 	reloadResults();
@@ -2090,9 +2100,97 @@ else {
 	}
 	
 	// SLIDESHOW RESULTS ----------------------------------------------------
-	function loadSlideShow($id, $mysqli) {
+	function loadSlideShow($id, $mysqli) { 
+		$resultSlideshow = array();
+		$slide = new slideshowSlide();
+		$slide->setType('PLACEHOLDER');
+		$slide->setHeaderText('2016 Michigan State Tournament');
+		$slide->setText('<br /><br /> At Michigan State University');
+		$slide->setLogoPath('2016 Michigan State Tournament');
+		$slide->setAnimationPosition(0);
+		array_push($resultSlideshow, serialize($slide));
+		
+		$slide = new slideshowSlide();
+		$slide->setType('PLACEHOLDER');
+		$slide->setHeaderText('2016 Michigan State Tournament');
+		$slide->setText('<br /><br /> Random Text that identifies this as the 2nd slide!!!');
+		$slide->setLogoPath('2016 Michigan State Tournament');
+		$slide->setAnimationPosition(0);
+		array_push($resultSlideshow, serialize($slide));
+		
+		$slide = new slideshowSlide();
+		$slide->setType('EVENTSCORE');
+		$slide->setHeaderText('Air Trajectory - C');
+		$teamList = array();
+			array_push($teamList, "6. Laingsburg High School");
+			array_push($teamList, "5. Bath High School");
+			array_push($teamList, "4. Kent High School");
+			array_push($teamList, "3. Grand Rapids High School");
+			array_push($teamList, "2. Crazyland Communit School");
+			array_push($teamList, "1. Jacksonville High School");
+		$slide->setTeamNames($teamList);
+		$slide->setAnimationPosition(0);
+		array_push($resultSlideshow, serialize($slide));
+		
+		$_SESSION["resultSlideshowIndex"] = 0;
+		$_SESSION["resultSlideshow"] = $resultSlideshow;
+	}
+	
+	function clearSlideshow() {
+		$_SESSION["resultSlideshow"] = null;
+	}
+	
+	function generateSlideContent($action) {
+		$slideshow = $_SESSION["resultSlideshow"];
+		$slide = null;
+		if ($action == 'start') {
+			$slide = unserialize($slideshow['0']);
+		}
+		else if ($action == 'next') {
+			if (($_SESSION["resultSlideshowIndex"] + 1) < sizeof($_SESSION["resultSlideshow"])) {
+				$_SESSION["resultSlideshowIndex"] = $_SESSION["resultSlideshowIndex"] + 1;			
+			}
+			$slide = unserialize($slideshow[$_SESSION["resultSlideshowIndex"]]);
+		}
+		else if ($action == 'previous') {
+				if (($_SESSION["resultSlideshowIndex"] - 1) >= 0) {
+				$_SESSION["resultSlideshowIndex"] = $_SESSION["resultSlideshowIndex"] - 1;			
+			}
+			$slide = unserialize($slideshow[$_SESSION["resultSlideshowIndex"]]);
+		}
+		else {
+			$slide = unserialize($slideshow[$_SESSION["resultSlideshowIndex"]]);
+		}
 		
 		
+		
+		// Render Slide
+		echo $_SESSION["resultSlideshowIndex"];
+		if ($action == 'previousAnimation') {
+			if (($slide->getAnimationPosition()-1) < 0);
+			else $slide->setAnimationPosition($slide->getAnimationPosition()-1);
+		}
+		else if ($action == 'nextAnimation') {
+			if (($slide->getAnimationPosition()+1) > sizeof($slide->getTeamNames()));
+			else $slide->setAnimationPosition($slide->getAnimationPosition()+1);
+		}
+		
+		if ($slide->getType() == 'PLACEHOLDER') {
+			echo '<h1><center>' . $slide->getHeaderText() . '</center></h1>';
+			echo '<h3><center>' . $slide->getText() . '</center></h3>';
+		}
+		else if ($slide->getType() == 'EVENTSCORE') {
+			echo '<h1><center>' . $slide->getHeaderText() . '</center></h1>';	
+			$count  = 0; 
+			while ($count < $slide->getAnimationPosition() and $count <= sizeof($slide->getTeamNames())) {
+				echo '<h3><center>' . $slide->getTeamNames()[$count] . '</center></h3>';
+				$count++;
+			}
+			
+		}
+		
+		$slideshow[$_SESSION["resultSlideshowIndex"]] = serialize($slide);
+		$_SESSION["resultSlideshow"] = $slideshow;
 	}
 	
 	

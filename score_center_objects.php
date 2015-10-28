@@ -73,4 +73,76 @@ class UserSessionInfo {
 	   
    }
 }
+
+// SLIDESHOW SLIDE OBJECT
+class slideshowSlide {
+	
+   private $type;
+   private $teamNames = array();
+   private $headerText;
+   private $headerText2;
+   private $logoPath;
+   private $text;
+   private $animationPosition;
+   
+   
+   public function __construct() {
+	
+   }
+	
+	public function setType($type) {
+		$this->type = $type;
+	}
+	public function getType() {
+		return $this->type;
+	}
+	
+	public function setTeamNames($teamNames) {
+		$this->teamNames = $teamNames;
+	}
+	public function getTeamNames() {
+		return $this->teamNames;
+	}
+	
+	public function setHeaderText($headerText) {
+		$this->headerText = $headerText;
+	}
+	public function getHeaderText() {
+		return $this->headerText;
+	}
+	
+	public function setHeaderText2($headerText2) {
+		$this->headerText2 = $headerText2;
+	}
+	public function getHeaderText2() {
+		return $this->headerText2;
+	}
+	
+	public function setLogoPath($logoPath) {
+		$this->logoPath = $logoPath;
+	}
+	public function getLogoPath() {
+		return $this->logoPath;
+	}
+	
+	public function setText($text) {
+		$this->text = $text;
+	}
+	public function getText() {
+		return $this->text;
+	}
+	
+	public function setAnimationPosition($animationPosition) {
+		$this->animationPosition = $animationPosition;
+	}
+	public function getAnimationPosition() {
+		return $this->animationPosition;
+	}
+   
+   public function loadSlideShowObject() {
+	   
+	   
+	   
+   }
+}
 ?>
