@@ -23,11 +23,13 @@
 	
   <script type="text/javascript">
   	var slideshow = eval(<?php echo $_SESSION["resultSlideshow"]; ?>);
+	var slideshowIndex = 0;
+	var slideshowLength = Object.keys(slideshow).length;
   
   $(document).ready(function(){
-  		console.log(slideshow);
-  		document.getElementById('slideshow').innerHTML = slideshow;
-	 // generateSlideContent('start');
+  		//console.log(slideshow);
+		//document.getElementById('slideshow').innerHTML = slideshow;
+		generateSlideContent();
 	});
 	
 	//window.addEventListener("keydown", dealWithKeyboard, false);
@@ -36,17 +38,23 @@
 	 
 	function dealWithKeyboard(e) {
 		switch(e.keyCode) {	
-			case 37:
-				//generateSlideContent('previous');
+			case 37: // previous
+				if (slideshowIndex -1 >= 0) slideshowIndex--; 
+				generateSlideContent();
 				break;
-			case 38:
-			//	generateSlideContent('previousAnimation');
+			case 38: // previousAnimation
+				if ((slideshow[slideshowIndex].animationPosition - 1) >= 0) slideshow[slideshowIndex].animationPosition = slideshow[slideshowIndex].animationPosition - 1;
+				generateSlideContent();
 				break;
-			case 39:
-				//generateSlideContent('next');
+			case 39: // next
+				if (slideshowIndex + 1 < slideshowLength) slideshowIndex++; 
+				generateSlideContent();
 				break;
-			case 40:
-				//generateSlideContent('nextAnimation');
+			case 40: // nextAnimation
+				var animationCount = Object.keys(slideshow[slideshowIndex].teamNames).length;
+				if (animationCount == 0) animationCount = Object.keys(slideshow[slideshowIndex].labelValues).length;
+				if ((slideshow[slideshowIndex].animationPosition + 1) <= animationCount) slideshow[slideshowIndex].animationPosition = slideshow[slideshowIndex].animationPosition + 1;
+				generateSlideContent();
 				break;  
 			case 81:
 				if(confirm('Are you sure you want to exit the slideshow?')) {
@@ -58,20 +66,49 @@
 
 	}
 	
-	/**function generateSlideContent(command) {
-		xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function() {
-		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-			if (xmlhttp.responseText != '') {
-				slideshow
-				document.getElementById('slideshow').innerHTML = xmlhttp.responseText
-			}				
+	function generateSlideContent() {
+		var slideHtml = "";
+		var slide = slideshow[slideshowIndex];
+		
+		if (slide.type == 'PLACEHOLDER') {
+			slideHtml += '<div style="width: 100%; font-size: 200%; white-space:nowrap; text-align: center;">' + '<i>Science Olympiad</i>' + '</div><br />'
+			slideHtml += '<div style="width: 100%; font-size: 500%; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />';
+			slideHtml += '<center><img alt="" src="'+slide.logoPath+'" width="200" height="200"></center><br /><br />';
+			slideHtml += '<div style="width: 100%; font-size: 300%; white-space:nowrap; text-align: center;"><i>' + slide.text + '</i></div>';
 		}
+		else if (slide.type == 'GENERAL') {
+			slideHtml += '<div style="width: 100%; font-size: 200%; white-space:nowrap; text-align: center;">' + '<i>Science Olympiad</i>' + '</div><br />'
+			slideHtml += '<div style="width: 100%; font-size: 500%; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />';
+			slideHtml += '<div style="width: 100%; font-size: 300%; white-space:nowrap; text-align: center;"><i>' + slide.text + '</i></div>';
 		}
-        xmlhttp.open("GET","controller.php?command=generateSlideContent&action="+command,true);
-        xmlhttp.send();	
-
-	} **/
+		else if (slide.type == 'EVENTSCORE') {
+			slideHtml += '<div style="width: 100%; font-size: 500%; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />'
+			var count  = 0; 
+			var animationPosition = slide.animationPosition;
+			var animationCount = Object.keys(slideshow[slideshowIndex].teamNames).length;
+			
+			while (count < animationCount) {
+				if (((animationCount-1) - animationPosition) >= count) slideHtml += '<div style="width: 100%; font-size: 300%; white-space:nowrap; text-align: center;">&nbsp;</div>';
+				else slideHtml += '<div style="width: 100%; font-size: 350%; white-space:nowrap; text-align: left;">' + slide.teamNames[count] + '</div>';
+				count++;
+			}			
+		}
+		else if (slide.type == 'OVERALLRESULTS') {
+			slideHtml += '<div style="width: 100%; font-size: 500%; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />'
+			var count  = 0;
+			var animationPosition = slide.animationPosition;			
+			//var elementCount = Object.keys(slideshow[slideshowIndex].labelValues).length;	
+			while (count < animationPosition) {
+				var element = slide.labelValues[count];
+				slideHtml += '<div style="width: 100%; font-size: 200%; white-space:nowrap; text-align: left;">' + element[0] + '</div>';
+				slideHtml += '<div style="width: 100%; font-size: 350%; white-space:nowrap; text-align: left;">' + element[1] + '</div><br /><br />';
+				count++;
+			}			
+		}
+		
+		
+		document.getElementById('slideshow').innerHTML = slideHtml;	
+	} 
   
   </script>
     <style>
@@ -89,7 +126,7 @@
   </head>
   
   <body>
-  <?php include_once 'navbar.php'; ?>
+  <?php include_once 'navbarLogin.php'; ?>
   
   	<form action="controller.php" method="GET" id="controllerForm">
      <div class="container">

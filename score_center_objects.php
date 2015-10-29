@@ -83,7 +83,8 @@ class slideshowSlide {
    public $headerText2;
    public $logoPath;
    public $text;
-   public $animationPosition;
+   public $animationPosition = 0;
+   public $labelValues = array(); 
    
    
    public function __construct() {
@@ -137,6 +138,13 @@ class slideshowSlide {
 	}
 	public function getAnimationPosition() {
 		return $this->animationPosition;
+	}
+	
+	public function setLabelValues($labelValues) {
+		$this->labelValues = $labelValues;
+	}
+	public function getLabelValues() {
+		return $this->labelValues;
 	}
    
    public function loadSlideShowObject() {
