@@ -77,13 +77,13 @@ class UserSessionInfo {
 // SLIDESHOW SLIDE OBJECT
 class slideshowSlide {
 	
-   private $type;
-   private $teamNames = array();
-   private $headerText;
-   private $headerText2;
-   private $logoPath;
-   private $text;
-   private $animationPosition;
+   public $type;
+   public $teamNames = array();
+   public $headerText;
+   public $headerText2;
+   public $logoPath;
+   public $text;
+   public $animationPosition;
    
    
    public function __construct() {

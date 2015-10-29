@@ -22,8 +22,12 @@
 	<?php include_once('libs/pagination.php'); ?>
 	
   <script type="text/javascript">
+  	var slideshow = eval(<?php echo $_SESSION["resultSlideshow"]; ?>);
+  
   $(document).ready(function(){
-	  generateSlideContent('start');
+  		console.log(slideshow);
+  		document.getElementById('slideshow').innerHTML = slideshow;
+	 // generateSlideContent('start');
 	});
 	
 	//window.addEventListener("keydown", dealWithKeyboard, false);
@@ -33,16 +37,16 @@
 	function dealWithKeyboard(e) {
 		switch(e.keyCode) {	
 			case 37:
-				generateSlideContent('previous');
+				//generateSlideContent('previous');
 				break;
 			case 38:
-				generateSlideContent('previousAnimation');
+			//	generateSlideContent('previousAnimation');
 				break;
 			case 39:
-				generateSlideContent('next');
+				//generateSlideContent('next');
 				break;
 			case 40:
-				generateSlideContent('nextAnimation');
+				//generateSlideContent('nextAnimation');
 				break;  
 			case 81:
 				if(confirm('Are you sure you want to exit the slideshow?')) {
@@ -54,11 +58,12 @@
 
 	}
 	
-	function generateSlideContent(command) {
+	/**function generateSlideContent(command) {
 		xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			if (xmlhttp.responseText != '') {
+				slideshow
 				document.getElementById('slideshow').innerHTML = xmlhttp.responseText
 			}				
 		}
@@ -66,7 +71,7 @@
         xmlhttp.open("GET","controller.php?command=generateSlideContent&action="+command,true);
         xmlhttp.send();	
 
-	}
+	} **/
   
   </script>
     <style>

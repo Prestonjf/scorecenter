@@ -2108,7 +2108,7 @@ else {
 		$slide->setText('<br /><br /> At Michigan State University');
 		$slide->setLogoPath('2016 Michigan State Tournament');
 		$slide->setAnimationPosition(0);
-		array_push($resultSlideshow, serialize($slide));
+		array_push($resultSlideshow, $slide);
 		
 		$slide = new slideshowSlide();
 		$slide->setType('PLACEHOLDER');
@@ -2116,7 +2116,7 @@ else {
 		$slide->setText('<br /><br /> Random Text that identifies this as the 2nd slide!!!');
 		$slide->setLogoPath('2016 Michigan State Tournament');
 		$slide->setAnimationPosition(0);
-		array_push($resultSlideshow, serialize($slide));
+		array_push($resultSlideshow, $slide);
 		
 		$slide = new slideshowSlide();
 		$slide->setType('EVENTSCORE');
@@ -2130,10 +2130,10 @@ else {
 			array_push($teamList, "1. Jacksonville High School");
 		$slide->setTeamNames($teamList);
 		$slide->setAnimationPosition(0);
-		array_push($resultSlideshow, serialize($slide));
+		array_push($resultSlideshow, $slide);
 		
 		$_SESSION["resultSlideshowIndex"] = 0;
-		$_SESSION["resultSlideshow"] = $resultSlideshow;
+		$_SESSION["resultSlideshow"] = json_encode($resultSlideshow);
 	}
 	
 	function clearSlideshow() {
@@ -2142,7 +2142,8 @@ else {
 	
 	function generateSlideContent($action) {
 		$slideshow = $_SESSION["resultSlideshow"];
-		$slide = null;
+		echo $slideshow;
+	/** $slide = null;
 		if ($action == 'start') {
 			$slide = unserialize($slideshow['0']);
 		}
@@ -2176,8 +2177,9 @@ else {
 		}
 		
 		if ($slide->getType() == 'PLACEHOLDER') {
-			echo '<h1><center>' . $slide->getHeaderText() . '</center></h1>';
-			echo '<h3><center>' . $slide->getText() . '</center></h3>';
+		echo json_encode($slide);
+			//echo '<h1><center>' . $slide->getHeaderText() . '</center></h1>';
+			//echo '<h3><center>' . $slide->getText() . '</center></h3>';
 		}
 		else if ($slide->getType() == 'EVENTSCORE') {
 			echo '<h1><center>' . $slide->getHeaderText() . '</center></h1>';	
@@ -2191,6 +2193,7 @@ else {
 		
 		$slideshow[$_SESSION["resultSlideshowIndex"]] = serialize($slide);
 		$_SESSION["resultSlideshow"] = $slideshow;
+		**/
 	}
 	
 	
