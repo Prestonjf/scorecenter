@@ -15,13 +15,8 @@
 
   <script type="text/javascript">
   $(document).ready(function(){
-  
-    //	$("#addTournament").click(function(){
-     //   	alert("add");
-    //	});
-
-    	
-    	
+		// Load link tournament selects
+    	loadLinkedTournaments();
 	});
 	
 	function limitNumber(element) {
@@ -35,7 +30,7 @@
 		clearSuccess();
 		var error = false;
 		var error2 = false;
-		var fields = ["tournamentName", "tournamentDivision", "tournamentLocation","tournamentDate","numberEvents","numberTeams","highestScore"];
+		var fields = ["tournamentName", "tournamentDivision", "tournamentLocation","tournamentDate","numberEvents","numberTeams","highestScore","eventsAwarded","overallAwarded"];
 		var str;
 		for (str in fields) {
 			if (document.getElementById(fields[str]).value.length === 0 || !document.getElementById(fields[str]).value.trim()) {
@@ -268,6 +263,22 @@
 		
 	}
 	
+	function loadLinkedTournaments() {
+		var division = document.getElementById('tournamentDivision').value;
+		var tournDate = document.getElementById('tournamentDate').value;
+		xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				var html = xmlhttp.responseText;
+				var lists = html.split('*****');
+				document.getElementById('tourn1LinkedDiv').innerHTML = lists[0];
+				document.getElementById('tourn2LinkedDiv').innerHTML = lists[1];
+			}
+		}	
+        xmlhttp.open("GET","controller.php?command=loadLinkedTournaments&division="+division+"&date="+tournDate,true);
+        xmlhttp.send();
+	}
+	
   
   </script>
   <style>
@@ -318,7 +329,7 @@
 		<td width="15%"><label for="tournamentName">Tournament Name:<span class="red">*</span></label></td>
 		<td width="35%"><input type="text" class="form-control" name="tournamentName" id="tournamentName" size="50" value=<?php echo '"'.$_SESSION["tournamentName"].'"' ?>></td>
 		<td width="15%"><label for="tournamentDivision">Division:<span class="red">*</span></label></td>
-		<td width="35%"><select class="form-control" name="tournamentDivision" id="tournamentDivision" onchange="loadDivisonTeams(this)">
+		<td width="35%"><select class="form-control" name="tournamentDivision" id="tournamentDivision" onchange="javascript: loadDivisonTeams(this); loadLinkedTournaments();">
 			<option value=""></option>
 			<option value="A" <?php if($_SESSION["tournamentDivision"] == 'A'){echo("selected");}?>>A</option>
 			<option value="B" <?php if($_SESSION["tournamentDivision"] == 'B'){echo("selected");}?>>B</option>
@@ -335,7 +346,7 @@
 		<td>
 		<div class="controls">
 		<div class="input-group">
-			<input type="text" class="date-picker form-control" size="20" name="tournamentDate" id="tournamentDate" readonly="true" value=<?php echo '"'.$_SESSION["tournamentDate"].'"' ?>>
+			<input type="text" class="date-picker form-control" size="20" name="tournamentDate" id="tournamentDate" onchange="javascript: loadLinkedTournaments();" readonly="true" value=<?php echo '"'.$_SESSION["tournamentDate"].'"' ?>>
 			<label for="tournamentDate" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
 		</div>
 		</div>
@@ -366,14 +377,60 @@
 			<label for="totalPointsWins1">High Score Wins</label></td>
 	</tr>
 	<tr>
-		<td><label for="tournamentDescription">Description: </label></td>
-		<td></td>
-		<td></td>
-		<td></td>
+		<td colspan="4"><label for="tournamentDescription">Description: </label></td>
 	</tr>
 	<tr>
 		<td colspan="4">
 			<textarea class="form-control"  name="tournamentDescription" id="tournamentDescription" spellcheck="true" rows="5" cols="100"><?php echo $_SESSION["tournamentDescription"];?></textarea>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="4"><label for="tournamentDescription">Slideshow Settings: </label></td>
+	</tr>
+	<tr>
+		<td><label for="eventsAwarded">Event Positions Awarded: <span class="red">*</span></label></td>
+		<td><input type="text" class="form-control" name="eventsAwarded" id="eventsAwarded" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
+			value=<?php echo '"'.$_SESSION["eventsAwarded"].'"' ?>></td>
+		<td><label for="overallAwarded">Overall Positions Awarded: <span class="red">*</span></label></td>
+		<td><input type="text" class="form-control" name="overallAwarded" id="overallAwarded" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
+			value=<?php echo '"'.$_SESSION["overallAwarded"].'"' ?>></td>
+	</tr>
+	<tr>
+		<td colspan="2"><input type="checkbox" id="bestNewTeam" name="bestNewTeam" <?php if ($_SESSION["bestNewTeam"] == '1') echo 'checked'; ?> value="1"> &nbsp;&nbsp;<label for="bestNewTeam">Display Best New Team</label></td>
+		
+		<td><label for="tourn1Linked">Link Tournament: </label></td>
+		<td>
+			<div id="tourn1LinkedDiv" style="width: 100%;">
+			<select class="form-control" name="tourn1Linked" id="tourn1Linked">
+			<option value=""></option>
+			<?php
+			    if ($linkedTournaments1) {
+             		while($linkedTourn1Row = mysql_fetch_array($linkedTournaments1)) {
+             			echo '<option value="'.$linkedTourn1Row['0'].'" '; if($_SESSION["tourn1Linked"] == $linkedTourn1Row['0']){echo("selected");} echo '>'.$linkedTourn1Row['1'].'</option>';
+             			
+             		}
+             	}
+        	?>
+			</select>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2"><input type="checkbox" id="improvedTeam" name="improvedTeam" <?php if ($_SESSION["improvedTeam"] == '1') echo 'checked'; ?> value="1">  &nbsp;&nbsp;<label for="improvedTeam">Display Most Improved Team</label></td>
+		<td><label for="tourn2Linked">Link Tournament: </label></td>
+			<td><div id="tourn2LinkedDiv" style="width: 100%;">
+			<select class="form-control" name="tourn2Linked" id="tourn2Linked">
+			<option value=""></option>
+			<?php
+			    if ($linkedTournaments2) {
+             		while($linkedTourn2Row = mysql_fetch_array($linkedTournaments1)) {
+             			echo '<option value="'.$linkedTourn2Row['0'].'" '; if($_SESSION["tourn2Linked"] == $linkedTourn2Row['0']){echo("selected");} echo '>'.$linkedTourn2Row['1'].'</option>';
+             			
+             		}
+             	}
+        	?>
+			</select>
+			</div>
 		</td>
 	</tr>
 	</table>
