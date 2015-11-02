@@ -77,6 +77,10 @@ else if ($_GET['command'] != null and $_GET['command'] == 'updateExistingAccount
 	header("Location: account.php");	
 	exit();
 }
+else if ($_GET['command'] != null and $_GET['command'] == 'updateResultPage') {
+	$_SESSION["resultsPage"] = $_GET['page'];
+	exit();
+}
 
 // All Commands Below Require An Active Session
 // Session Timeout 30 Minutes
@@ -512,8 +516,9 @@ else {
 		if ($_GET['overallAwarded'] != null) $_SESSION["overallAwarded"] = $_GET['overallAwarded'];
 		if ($_GET['bestNewTeam'] != null) $_SESSION["bestNewTeam"] = $_GET['bestNewTeam']; else $_SESSION["bestNewTeam"] = null;
 		if ($_GET['improvedTeam'] != null) $_SESSION["improvedTeam"] = $_GET['improvedTeam']; else $_SESSION["improvedTeam"] = null;
-		if ($_GET['tourn1Linked'] != null) $_SESSION["tourn1Linked"] = $_GET['tourn1Linked'];
-		if ($_GET['tourn2Linked'] != null) $_SESSION["tourn2Linked"] = $_GET['tourn2Linked'];
+		
+		$_SESSION["tourn1Linked"] = $_GET['tourn1Linked'];
+		$_SESSION["tourn2Linked"] = $_GET['tourn2Linked'];
 		
 		
 		
@@ -1034,10 +1039,9 @@ else {
 			$overallAwarded = $_SESSION["overallAwarded"];
 			$bestNewTeam = $_SESSION["bestNewTeam"];
 			$improvedTeam = $_SESSION["improvedTeam"];
-			$tourn1Linked = $_SESSION["tourn1Linked"]; if (strcmp($tourn1Linked, '') == 0) $tourn1Linked = -1;
-			$tourn2Linked = $_SESSION["tourn2Linked"]; if (strcmp($tourn2Linked, '') == 0) $tourn2Linked = -1;
+			$tourn1Linked = $_SESSION["tourn1Linked"]; if ($tourn1Linked == null or $tourn1Linked == '') $tourn1Linked = 'NULL';
+			$tourn2Linked = $_SESSION["tourn2Linked"]; if ($tourn2Linked == null or $tourn2Linked == '') $tourn2Linked = 'NULL';
 			
-	
 		// if Tournament id is null create new
 		if ($_SESSION["tournamentId"] == null) { 
 			$result = $mysqli->query("select max(TOURNAMENT_ID) + 1 from TOURNAMENT");
@@ -1047,9 +1051,9 @@ else {
 			$_SESSION["tournamentId"] = $id;
 			
 			$query = $mysqli->prepare("INSERT INTO TOURNAMENT (TOURNAMENT_ID, NAME, LOCATION, DIVISION, DATE, NUMBER_EVENTS, NUMBER_TEAMS, 
-			HIGHEST_SCORE_POSSIBLE, DESCRIPTION, HIGH_LOW_WIN_FLAG, EVENTS_AWARDED, OVERALL_AWARDED,BEST_NEW_TEAM_FLAG,MOST_IMPROVED_FLAG,LINKED_TOURN_1,LINKED_TOURN_2) VALUES (".$id.",?,?,?,?,?,?,?,?,?,?,?,?,?,?) ");
+			HIGHEST_SCORE_POSSIBLE, DESCRIPTION, HIGH_LOW_WIN_FLAG, EVENTS_AWARDED, OVERALL_AWARDED,BEST_NEW_TEAM_FLAG,MOST_IMPROVED_FLAG,LINKED_TOURN_1,LINKED_TOURN_2) VALUES (".$id.",?,?,?,?,?,?,?,?,?,?,?,?,".$tourn1Linked.",".$tourn2Linked.") ");
 			
-			$query->bind_param('ssssiiisiiiiiii',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins, $eventsAwarded, $overallAwarded, $bestNewTeam, $improvedTeam,$tourn1Linked,$tourn2Linked);
+			$query->bind_param('ssssiiisiiiii',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins, $eventsAwarded, $overallAwarded, $bestNewTeam, $improvedTeam);
 			
 			$query->execute();
 			$query->free_result();
@@ -1058,9 +1062,9 @@ else {
 		}
 		else {
 			$query = $mysqli->prepare("UPDATE TOURNAMENT SET NAME=?, LOCATION=?, DIVISION=?, DATE=?, NUMBER_EVENTS=?,NUMBER_TEAMS=?,
-			HIGHEST_SCORE_POSSIBLE=?, DESCRIPTION=?, HIGH_LOW_WIN_FLAG=?,EVENTS_AWARDED=?,OVERALL_AWARDED=?,BEST_NEW_TEAM_FLAG=?,MOST_IMPROVED_FLAG=?,LINKED_TOURN_1=?,LINKED_TOURN_2=? WHERE TOURNAMENT_ID=".$_SESSION["tournamentId"]);
+			HIGHEST_SCORE_POSSIBLE=?, DESCRIPTION=?, HIGH_LOW_WIN_FLAG=?,EVENTS_AWARDED=?,OVERALL_AWARDED=?,BEST_NEW_TEAM_FLAG=?,MOST_IMPROVED_FLAG=?,LINKED_TOURN_1=".$tourn1Linked.",LINKED_TOURN_2=".$tourn2Linked." WHERE TOURNAMENT_ID=".$_SESSION["tournamentId"]);
 			
-			$query->bind_param('ssssiiisiiiiiii',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins,$eventsAwarded, $overallAwarded, $bestNewTeam, $improvedTeam,$tourn1Linked,$tourn2Linked);
+			$query->bind_param('ssssiiisiiiii',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins,$eventsAwarded, $overallAwarded, $bestNewTeam, $improvedTeam);
 			$query->execute();
 			$query->free_result();
 			//$result = mysql_query($query);		
@@ -2160,30 +2164,172 @@ else {
 	// SLIDESHOW RESULTS ----------------------------------------------------
 	function loadSlideShow($id, $mysqli) { 
 		$resultSlideshow = array();
+		// Load Tournament info. 
+			// Upload tournament logo?
+			// 
+		$tournamentDetails = $mysqli->query("SELECT T.NAME, T.LOCATION, T.EVENTS_AWARDED, T.OVERALL_AWARDED, T.BEST_NEW_TEAM_FLAG, T.MOST_IMPROVED_FLAG FROM TOURNAMENT T WHERE T.TOURNAMENT_ID=".$_SESSION["tournamentId"]);
+		$tournamentRow = $tournamentDetails->fetch_row();
+		
+		// Placeholder Slide
 		$slide = new slideshowSlide();
 		$slide->setType('PLACEHOLDER');
-		$slide->setHeaderText('2016 Michigan State Tournament');
-		$slide->setText('At Michigan State University');
+		$slide->setHeaderText($tournamentRow[0]); // Tournament Name
+		$slide->setText('at '.$tournamentRow[1]); // Tournament Location
 		$slide->setLogoPath('img/misologo.png');
 		array_push($resultSlideshow, $slide);
 		
+		// Build interface to add these general slides.
 		$slide = new slideshowSlide();
-		$slide->setType('GENERAL');
-		$slide->setHeaderText('2016 Michigan State Tournament');
-		$slide->setText('Random Text that identifies this as the 2nd slide!!!');
-		array_push($resultSlideshow, $slide);
+		//$slide->setType('GENERAL');
+		//$slide->setHeaderText('2016 Michigan State Tournament');
+		//$slide->setText('Random Text that identifies this as the 2nd slide!!!');
+		//array_push($resultSlideshow, $slide);
 		
+		$aId = null; $aEvents = array();
+		$bId = null; $bEvents = array();
+		$cId = null; $cEvents = array();
+		
+		$query = "select T1.TOURNAMENT_ID, T1.DIVISION, T1.LINKED_TOURN_1, T2.DIVISION, T1.LINKED_TOURN_2, T3.DIVISION FROM TOURNAMENT T1 
+				LEFT JOIN TOURNAMENT T2 on T2.TOURNAMENT_ID=T1.LINKED_TOURN_1
+				LEFT JOIN TOURNAMENT T3 on T3.TOURNAMENT_ID=T1.LINKED_TOURN_2
+				WHERE T1.TOURNAMENT_ID=".$_SESSION["tournamentId"];
+		$tournaments = $mysqli->query($query);
+		$row = $tournaments->fetch_row();
+		if ($row[1] != null AND $row[1] == 'A') $aId = $row[0]; else if ($row[1] != null AND $row[1] == 'B') $bId = $row[0]; else if ($row[1] != null AND $row[1] == 'C') $cId = $row[0];
+		if ($row[3] != null AND $row[3] == 'A') $aId = $row[2]; else if ($row[3] != null AND $row[3] == 'B') $bId = $row[2]; else if ($row[3] != null AND $row[3] == 'C') $cId = $row[2];
+		if ($row[5] != null AND $row[5] == 'A') $aId = $row[4]; else if ($row[5] != null AND $row[5] == 'B') $bId = $row[4]; else if ($row[5] != null AND $row[5] == 'C') $cId = $row[4];
+		
+		
+		if ($cId != null) {
+			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE  from TOURNAMENT_EVENT TE
+					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
+					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
+					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND SCORE <= ".$tournamentRow[2]." AND SCORE > 0
+					INNER JOIN TOURNAMENT_TEAM TT1 on TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID
+					INNER JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
+					WHERE TE.TOURNAMENT_ID=".$cId." GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE ASC ";
+			$results = $mysqli->query($query);
+			$event = null;
+			$eventArray = array();
+			$count = 0;
+			while ($row = $results->fetch_array()) {			
+				if ($event != $row[0] and sizeof($eventArray) > 0) {
+					array_unshift($eventArray, $event);
+					array_push($cEvents, $eventArray);
+					$eventArray = array();
+					$count = 0;
+				}
+				$event = $row[0];
+				array_push($eventArray, $row[1]);			
+				$count++;
+			}
+			if (sizeof($eventArray) > 0) {array_unshift($eventArray, $event); array_push($cEvents, $eventArray); }
+		}
+		
+		if ($bId != null) {
+			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE  from TOURNAMENT_EVENT TE
+					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
+					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
+					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND SCORE <= ".$tournamentRow[2]." AND SCORE > 0
+					INNER JOIN TOURNAMENT_TEAM TT1 on TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID
+					INNER JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
+					WHERE TE.TOURNAMENT_ID=".$bId." GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE ASC ";
+			$results = $mysqli->query($query);
+			$event = null;
+			$eventArray = array();
+			$count = 0;
+			while ($row = $results->fetch_array()) {			
+				if ($event != $row[0] and sizeof($eventArray) > 0) {
+					array_unshift($eventArray, $event);
+					array_push($bEvents, $eventArray);
+					$eventArray = array();
+					$count = 0;
+				}
+				$event = $row[0];
+				array_push($eventArray, $row[1]);			
+				$count++;
+			}
+			if (sizeof($eventArray) > 0) {array_unshift($eventArray, $event); array_push($bEvents, $eventArray); }
+		}
+		
+		if ($aId != null) {
+			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE  from TOURNAMENT_EVENT TE
+					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
+					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
+					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND SCORE <= ".$tournamentRow[2]." AND SCORE > 0
+					INNER JOIN TOURNAMENT_TEAM TT1 on TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID
+					INNER JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
+					WHERE TE.TOURNAMENT_ID=".$aId." GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE ASC ";
+			$results = $mysqli->query($query);
+			$event = null;
+			$eventArray = array();
+			$count = 0;
+			while ($row = $results->fetch_array()) {			
+				if ($event != $row[0] and sizeof($eventArray) > 0) {
+					array_unshift($eventArray, $event);
+					array_push($aEvents, $eventArray);
+					$eventArray = array();
+					$count = 0;
+				}
+				$event = $row[0];
+				array_push($eventArray, $row[1]);			
+				$count++;
+			}
+			if (sizeof($eventArray) > 0) {array_unshift($eventArray, $event); array_push($aEvents, $eventArray); }
+		}
+		
+		for ($i=0; $i < 100; $i++) {
+			if ($i >= sizeof($cEvents) AND $i >= sizeof($bEvents) AND $i >= sizeof($aEvents)) break;
+				if ($i < sizeof($aEvents)) {
+					$event = $aEvents[$i];
+					$slide = new slideshowSlide();
+					$slide->setType('EVENTSCORE');		
+					$slide->setHeaderText($event[0]);
+					$teamList = array();
+					$count2 = 1;
+					while ($count2 <  sizeof($event)) {
+						array_push($teamList, $count2.'. '.$event[$count2]);
+					$count2++;
+					}
+					$slide->setTeamNames($teamList);
+					array_push($resultSlideshow, $slide);
+				}
+				if ($i < sizeof($bEvents)) {
+					$event = $bEvents[$i];
+					$slide = new slideshowSlide();
+					$slide->setType('EVENTSCORE');		
+					$slide->setHeaderText($event[0]);
+					$teamList = array();
+					$count2 = 1;
+					while ($count2 <  sizeof($event)) {
+						array_push($teamList, $count2.'. '.$event[$count2]);
+					$count2++;
+					}
+					$slide->setTeamNames($teamList);
+					array_push($resultSlideshow, $slide);
+				}
+				if ($i < sizeof($cEvents)) {
+					$event = $cEvents[$i];
+					$slide = new slideshowSlide();
+					$slide->setType('EVENTSCORE');		
+					$slide->setHeaderText($event[0]);
+					$teamList = array();
+					$count2 = 1;
+					while ($count2 <  sizeof($event)) {
+						array_push($teamList, $count2.'. '.$event[$count2]);
+					$count2++;
+					}
+					$slide->setTeamNames($teamList);
+					array_push($resultSlideshow, $slide);
+				}
+		}
+		
+		// Placeholder Slide
 		$slide = new slideshowSlide();
-		$slide->setType('EVENTSCORE');
-		$slide->setHeaderText('Air Trajectory - C');
-		$teamList = array();
-			array_push($teamList, "1. Jacksonville High School");
-			array_push($teamList, "2. Crazyland Communit School");
-			array_push($teamList, "3. Grand Rapids High School");
-			array_push($teamList, "4. Kent High School");
-			array_push($teamList, "5. Bath High School");
-			array_push($teamList, "6. Laingsburg High School");	
-		$slide->setTeamNames($teamList);
+		$slide->setType('PLACEHOLDER');
+		$slide->setHeaderText($tournamentRow[0]); // Tournament Name
+		$slide->setText('at '.$tournamentRow[1]); // Tournament Location
+		$slide->setLogoPath('img/misologo.png');
 		array_push($resultSlideshow, $slide);
 		
 		$slide = new slideshowSlide();

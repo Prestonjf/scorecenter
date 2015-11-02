@@ -7,6 +7,7 @@
 	$resultEnd = 0;
 	$pageCount = 1;
 
+	// Load Header
 	function paginationHeader($results) {
 		$totalResults = sizeof($results);
 		$totalPages = ceil(($totalResults+1) / PAGEROWS);
@@ -38,6 +39,7 @@
 		echo '';
 	}
 
+	// Load Footer
 	function paginationFooter($results) {	
 		$totalResults = sizeof($results);
 		$totalPages = ceil(($totalResults+1) / PAGEROWS);
@@ -66,6 +68,7 @@
 		echo '</div></div><br /><br />';
 	}
 	
+	// Load Page Row
 	function paginationRow($index) {
 		$currentPage = ceil(($index+1) / PAGEROWS);
 			echo '<tr id="resultPageRow'.$index.'" style="display: '; if ($_SESSION["resultsPage"]==$currentPage) echo ''; else echo 'none'; echo '">';
