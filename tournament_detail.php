@@ -241,6 +241,12 @@
 			if (document.getElementById('teamNumber'+count) != null) {
 				str += "&teamNumber"+count+"="+document.getElementById('teamNumber'+count).value;
 			}
+			if (document.getElementById('bestNewTeam'+count) != null && document.getElementById('bestNewTeam'+count).checked) {
+				str += "&bestNewTeam="+document.getElementById('bestNewTeam'+count).value;
+			}
+			if (document.getElementById('mostImprovedTeam'+count) != null && document.getElementById('mostImprovedTeam'+count).checked) {
+				str += "&mostImprovedTeam="+document.getElementById('mostImprovedTeam'+count).value;
+			}
 			count++;
 		}
 		return str;
@@ -385,7 +391,7 @@
 		</td>
 	</tr>
 	<tr>
-		<td colspan="4"><label for="tournamentDescription">Slideshow Settings: </label></td>
+		<td colspan="4"><label for="tournamentDescription">Slideshow / Awards Settings: </label></td>
 	</tr>
 	<tr>
 		<td><label for="eventsAwarded">Event Positions Awarded: <span class="red">*</span></label></td>
@@ -507,7 +513,9 @@
                 <th width="30%" data-field="name" data-align="right" data-sortable="true">Team Name</th>
                 <th width="30%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
                 <th width="30%" data-field="alternate" data-align="center" data-sortable="true">Alternate Team?</th>
-				<th width="10%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
+				<th width="2.5%" data-field="alternate" data-align="center" data-sortable="true">Best New Team</th>
+				<th width="2.5%" data-field="alternate" data-align="center" data-sortable="true">Most Improved Team</th>
+				<th width="5%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
         <tbody id="teamTableBody">
@@ -529,6 +537,8 @@
 					echo '<option value="1"'; if($team['3'] == 1){echo("selected");} echo '>Yes</option>';
 					echo '</select>';
 					echo '</div></td>';
+					echo '<td><input type="radio" name="bestNewTeam" id="bestNewTeam'.$teamCount.'" value="'.$team['1'].'" '; if($team['5'] == $team['1']){echo("checked");} echo '></td>';
+					echo '<td><input type="radio" name="mostImprovedTeam" id="mostImprovedTeam'.$teamCount.'" value="'.$team['1'].'" '; if($team['6'] == $team['1']){echo("checked");} echo '></td>';
 					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteTeam" onclick="validateDeleteTeam(this)" value='.$team['4'].'>Delete</button></td>';
 					echo '</tr>';
 					

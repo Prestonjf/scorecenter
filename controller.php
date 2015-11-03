@@ -522,7 +522,7 @@ else {
 		
 		
 		
-		// Team Cache - teamNumber, alternateTeam
+		// Team Cache - teamNumber, alternateTeam, bestNewTeam,mostImprovedTeam
 		$count = 0;
 		$teamList = $_SESSION["teamList"];
 		while ($count < 100) {
@@ -534,6 +534,9 @@ else {
 				if ($_GET['alternateTeam'.$count] != null) {			
 					$team[3] = $_GET['alternateTeam'.$count];	
 				}
+				if ($_GET['bestNewTeam'] != null AND $_GET['bestNewTeam'] == $team[1]) $team[5] = $team[1]; else $team[5] = '';
+				if ($_GET['mostImprovedTeam'] != null AND $_GET['mostImprovedTeam'] == $team[1]) $team[6] = $team[1]; else $team[6] = '';
+
 				$teamList[$count] = $team;
 				$_SESSION["teamList"] = $teamList;	
 				$count++;		
@@ -621,7 +624,7 @@ else {
 				$result = $mysqli->query("SELECT NAME FROM TEAM WHERE TEAM_ID = ".$selectedTeam); 
 				$row1 = $result->fetch_row();
 	
-				$team = array($selectedTeam, $row1['0'], "", "","", "1"); // 0: TEAM_ID 1: NAME 2:TEAM_NUMBER 3: ALTERNATE 4: TOURN_TEAM_ID 5: NEW TEAM 0/1
+				$team = array($selectedTeam, $row1['0'], "", "","", "","","1"); // 0: TEAM_ID 1: NAME 2:TEAM_NUMBER 3: ALTERNATE 4: TOURN_TEAM_ID 5: NEW TEAM 0/1
 				array_push($teamList, $team);
 				$_SESSION["teamList"] = $teamList;
 				reloadTournamentTeam();
@@ -860,6 +863,8 @@ else {
 					echo '<option value="1"'; if($team['3'] == 1){echo("selected");} echo '>Yes</option>';
 					echo '</select>';
 					echo '</div></td>';
+					echo '<td><input type="radio" name="bestNewTeam" id="bestNewTeam'.$teamCount.'" value="'.$team['1'].'" '; if($team['5'] == $team['1']){echo("checked");} echo '></td>';
+					echo '<td><input type="radio" name="mostImprovedTeam" id="mostImprovedTeam'.$teamCount.'" value="'.$team['1'].'" '; if($team['6'] == $team['1']){echo("checked");} echo '></td>';
 					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteTeam" onclick="validateDeleteTeam(this)" value='.$team['4'].'>Delete</button></td>';
 					echo '</tr>';
 					
@@ -977,7 +982,7 @@ else {
 			
 			// Load Teams
 			$teamList = array();
-			$result = $mysqli->query("SELECT TT.TEAM_ID, T.NAME, TT.TEAM_NUMBER, TT.ALTERNATE_FLAG, TT.TOURN_TEAM_ID FROM TOURNAMENT_TEAM TT INNER JOIN TOURNAMENT TR on 		
+			$result = $mysqli->query("SELECT TT.TEAM_ID, T.NAME, TT.TEAM_NUMBER, TT.ALTERNATE_FLAG, TT.TOURN_TEAM_ID, TT.BEST_NEW_TEAM_FLAG, TT.MOST_IMPROVED_TEAM_FLAG FROM TOURNAMENT_TEAM TT INNER JOIN TOURNAMENT TR on 		
 									TR.TOURNAMENT_ID=TT.TOURNAMENT_ID 
 									INNER JOIN TEAM T on T.TEAM_ID=TT.TEAM_ID WHERE TT.TOURNAMENT_ID= " .$id. " ORDER BY TT.TEAM_NUMBER ASC "); 
  			if ($result) {
@@ -988,6 +993,8 @@ else {
  					array_push($team, $teamRow['2']);
  					array_push($team, $teamRow['3']);
  					array_push($team, $teamRow['4']);
+					if ($teamRow['5'] == 1) array_push($team, $teamRow['1']); else array_push($team, '');
+					if ($teamRow['6'] == 1) array_push($team, $teamRow['1']); else array_push($team, '');
  					array_push($team, "0");
 				
  					array_push($teamList, $team);
@@ -1109,6 +1116,8 @@ else {
 		$teamList = $_SESSION["teamList"];
 		if ($teamList) {
 			foreach ($teamList as $team) {
+				$bestNew = null; if ($team[5] == $team[1]) $bestNew = 1; else $bestNew = 0;
+				$mostImproved = null; if ($team[6] == $team[1]) $mostImproved = 1; else $mostImproved = 0;
 			
 			if ($team['4'] == null or $team['4'] == '') {
 				// Generate Next TOURN_TEAM_ID
@@ -1117,13 +1126,13 @@ else {
 				$id = 0;
 				if ($row['0'] != null) $id = $row['0'];
 				 
-				$query = $mysqli->prepare("INSERT INTO TOURNAMENT_TEAM (TOURN_TEAM_ID, TOURNAMENT_ID, TEAM_ID, TEAM_NUMBER, ALTERNATE_FLAG) VALUES (".$id.", ?, ?, ?,?) ");
-				$query->bind_param('iiii',$_SESSION["tournamentId"],$team['0'], $team['2'], $team['3']); 
+				$query = $mysqli->prepare("INSERT INTO TOURNAMENT_TEAM (TOURN_TEAM_ID, TOURNAMENT_ID, TEAM_ID, TEAM_NUMBER, ALTERNATE_FLAG,BEST_NEW_TEAM_FLAG,MOST_IMPROVED_TEAM_FLAG) VALUES (".$id.", ?, ?, ?,?,?,?) ");
+				$query->bind_param('iiiiii',$_SESSION["tournamentId"],$team['0'], $team['2'], $team['3'],$bestNew,$mostImproved); 
 				$query->execute();
 			}
 			else {
-				$query = $mysqli->prepare("UPDATE TOURNAMENT_TEAM SET TEAM_NUMBER=?, ALTERNATE_FLAG=? WHERE TOURN_TEAM_ID=".$team['4']);			
-				$query->bind_param('ii',$team['2'], $team['3']);
+				$query = $mysqli->prepare("UPDATE TOURNAMENT_TEAM SET TEAM_NUMBER=?, ALTERNATE_FLAG=?,BEST_NEW_TEAM_FLAG=?,MOST_IMPROVED_TEAM_FLAG=? WHERE TOURN_TEAM_ID=".$team['4']);			
+				$query->bind_param('iiii',$team['2'], $team['3'],$bestNew,$mostImproved);
 				$query->execute();
 			}
 			
