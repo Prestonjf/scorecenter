@@ -383,6 +383,11 @@
 			<label for="totalPointsWins1">High Score Wins</label></td>
 	</tr>
 	<tr>
+	<td><label for="lockScoresFlag">Lock Scores: </label></td><td><input type="checkbox" id="lockScoresFlag" name="lockScoresFlag" <?php if ($_SESSION["lockScoresFlag"] == '1') echo 'checked'; ?> value="1"></td>
+	<td></td>
+	<td></td>
+	</tr>
+	<tr>
 		<td colspan="4"><label for="tournamentDescription">Description: </label></td>
 	</tr>
 	<tr>
@@ -402,7 +407,7 @@
 			value=<?php echo '"'.$_SESSION["overallAwarded"].'"' ?>></td>
 	</tr>
 	<tr>
-		<td colspan="2"><input type="checkbox" id="bestNewTeam" name="bestNewTeam" <?php if ($_SESSION["bestNewTeam"] == '1') echo 'checked'; ?> value="1"> &nbsp;&nbsp;<label for="bestNewTeam">Display Best New Team</label></td>
+		<td colspan="2"><input type="checkbox" id="bestNewTeamFlag" name="bestNewTeamFlag" <?php if ($_SESSION["bestNewTeam"] == '1') echo 'checked'; ?> value="1"> &nbsp;&nbsp;<label for="bestNewTeamFlag">Display Best New Team</label></td>
 		
 		<td><label for="tourn1Linked">Link Tournament: </label></td>
 		<td>

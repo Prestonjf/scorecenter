@@ -28,6 +28,9 @@ include_once('logon_check.php');
         if ($userRole == 'SUPERVISOR') $disableVerfiy = 'disabled';
         if ($_SESSION["submittedFlag"] == '1') $submitted = 'checked';
 	 	if ($_SESSION["verifiedFlag"] == '1') $verified = 'checked';
+		
+		// Global Score Lock
+		if ($_SESSION["lockScoresFlag"] == 1) {$disable = 'disabled'; $disableVerfiy = 'disabled'; }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -305,6 +308,7 @@ include_once('logon_check.php');
 	 <table width="75%"><tr>
 	 <td><label for="submittedFlag">Submitted</label> &nbsp;&nbsp;<input type="checkbox" id="submittedFlag" name="submittedFlag" <?php echo $disable.' '.$submitted; ?>  value="1"></td>
 	 <td><label for="verifiedFlag">Verified</label> &nbsp;&nbsp;<input type="checkbox" id="verifiedFlag" name="verifiedFlag" <?php echo $disableVerfiy.' '.$verified; ?> value="1"></td>
+	 <?php if ($_SESSION["lockScoresFlag"] == '1')  echo '<td>(LOCKED)</td>'; ?>
 	 <td align="right">Status Key: P = Participated, N = No Participation, D = Disqualified</td>
 	 </tr></table>
 	 <hr>
@@ -425,16 +429,17 @@ include_once('logon_check.php');
 		  </fieldset>
 		<?php } ?>
           <label for="eventComments">Supervisor's Comments</label><br />
-          <textarea class="form-control"  name="eventComments" id="eventComments" spellcheck="true" rows="5" cols="100"><?php echo $_SESSION["eventComments"];?></textarea>
+          <textarea class="form-control"  name="eventComments" id="eventComments" spellcheck="true" rows="5" cols="100" <?php echo $disable; ?>><?php echo $_SESSION["eventComments"];?></textarea>
           <br /> <br />
 
         <?php if ($disable != 'disabled')   { ?>
-		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"' ?>>Save</button>
+		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"'; ?>>Save</button>
 		<button type="button" class="btn btn-xs btn-danger" name="calculateEventScores" onclick="calculateScorez('<?php echo addslashes($_SESSION["eventName"]); ?>','<?php echo $_SESSION["tournamentDivision"]; ?>','<?php echo $_SESSION["scoreSystemCode"]; ?>');" >Calculate Ranks</button>
 		<button type="button" class="btn btn-xs btn-danger" name="clearScores" onclick="resetScores();" >Clear Scores</button>
+		<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores" onclick="return confirmCancel()">Cancel</button>
+		<?php } else { ?>
+ 	 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores">Cancel</button>
 		<?php } ?>
- 	 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores" onclick="return confirmCancel()">Cancel</button>
-
       <hr>
 	<?php include_once 'footer.php'; ?>
 
