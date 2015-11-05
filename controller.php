@@ -1613,6 +1613,7 @@ else {
 	function generateTournamentResults($id, $mysqli) {
 		$tournamentResultsHeader = array();
 		$tournamentResults = array();
+		$tournamentAlternateResults = array();
 		$highLowWin = '0';
 		
 		// Load Event Headers
@@ -1634,8 +1635,25 @@ else {
 		}	
 		$_SESSION['tournamentResultsHeader'] = $tournamentResultsHeader;	
 		
-		// Load Primary Teams
-		$query2 = "  SELECT TT.TEAM_NUMBER,T.NAME, TT.TOURN_TEAM_ID, TT.ALTERNATE_FLAG 
+		// Load Primary Teams	
+		$tournamentResults = getPrimaryTournamentResults($id,$mysqli,$highLowWin,$tournamentResults);
+		// Additional Ordering OPTIONS
+		usort($tournamentResults, "sortTeamNumberAsc");
+		$_SESSION['tournamentResults'] = $tournamentResults;
+		
+		
+		// Load Alternate Teams
+		$tournamentAlternateResults = getAlternateTournamentResults($id,$mysqli,$highLowWin,$tournamentResults);
+		// Additional Ordering OPTIONS
+		usort($tournamentAlternateResults, "sortTeamNumberAsc");
+		$_SESSION['tournamentAlternateResults'] = $tournamentAlternateResults;
+	}
+	
+	// Results Structure:
+	// TOURN_TEAM_ID : TEAM_NAME : TEAM_NUMBER : EV1_SCR : EV2_SCR : EV3_SCR ... ... : TOTAL_SCORE : RANK : POSITIONCOUNTS
+	
+	function getPrimaryTournamentResults($id,$mysqli,$highLowWin,$tournamentResults) {
+				$query2 = "  SELECT TT.TEAM_NUMBER,T.NAME, TT.TOURN_TEAM_ID, TT.ALTERNATE_FLAG 
 					FROM TOURNAMENT TM
 					INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID
 					INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
@@ -1677,18 +1695,11 @@ else {
 					}
 					array_push($resultRow, $total); // Total
 					array_push($resultRow, 0); // Rank
-					array_push($resultRow, $positionCounts);
-					
+					array_push($resultRow, $positionCounts);					
 					array_push($tournamentResults, $resultRow);
-					
-					//echo print_r($positionCounts);
-					//echo '<br /><br /><br />';
-					
 			}
 		}	
 		// Determine Final Rank With Tie Breakers
-		//echo $highLowWin . '<br />';
-		//echo print_r($tournamentResults);
 		$tournamentResults = quicksort($tournamentResults, $highLowWin); 
 		
 		// Set Final Rank VALUE
@@ -1698,14 +1709,10 @@ else {
 			$tournamentResults[$k] = $row;
 			$count++;
 		}	
-		// Additional Ordering OPTIONS
-		usort($tournamentResults, "sortTeamNumberAsc");
-		
-		
-		$_SESSION['tournamentResults'] = $tournamentResults;
-		
-		
-		// Load Alternate Teams
+		return $tournamentResults;
+	}
+	
+	function getAlternateTournamentResults($id,$mysqli,$highLowWin,$tournamentResults) {
 		$query2 = "  SELECT TT.TEAM_NUMBER,T.NAME, TT.TOURN_TEAM_ID, TT.ALTERNATE_FLAG 
 					FROM TOURNAMENT TM
 					INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID
@@ -1754,17 +1761,9 @@ else {
 					array_push($tournamentAlternateResults, $resultRow);
 					
 			}
-			// Additional Ordering OPTIONS
-			usort($tournamentAlternateResults, "sortTeamNumberAsc");
-			
-			
-			$_SESSION['tournamentAlternateResults'] = $tournamentAlternateResults;
-		}
+			return $tournamentAlternateResults;
+		}		
 	}
-	
-	// Results Structure:
-	// TOURN_TEAM_ID : TEAM_NAME : TEAM_NUMBER : EV1_SCR : EV2_SCR : EV3_SCR ... ... : TOTAL_SCORE : RANK : POSITIONCOUNTS
-	
 	
 	// QuickSort Results on Total Score + Tie Breakers
 	function quicksort($array, $highLowWin) {
@@ -1825,8 +1824,8 @@ else {
 	}
 	
 	function sortTeamNumberAsc($a, $b) {
-		if ($a[0] < $b[0]) return -1;
-		if ($a[0] > $b[0]) return 1;
+		if ($a[1] < $b[1]) return -1;
+		if ($a[1] > $b[1]) return 1;
 		return 0;
 	}
 	
@@ -2198,9 +2197,9 @@ else {
 		//$slide->setText('Random Text that identifies this as the 2nd slide!!!');
 		//array_push($resultSlideshow, $slide);
 		
-		$aId = null; $aEvents = array();
-		$bId = null; $bEvents = array();
-		$cId = null; $cEvents = array();
+		$aId = null; $aEvents = array(); $aHighLowFlag = 0; $aOverallAwarded = 0;
+		$bId = null; $bEvents = array(); $bHighLowFlag = 0; $bOverallAwarded = 0;
+		$cId = null; $cEvents = array(); $cHighLowFlag = 0; $cOverallAwarded = 0;
 		
 		$query = "select T1.TOURNAMENT_ID, T1.DIVISION, T1.LINKED_TOURN_1, T2.DIVISION, T1.LINKED_TOURN_2, T3.DIVISION FROM TOURNAMENT T1 
 				LEFT JOIN TOURNAMENT T2 on T2.TOURNAMENT_ID=T1.LINKED_TOURN_1
@@ -2214,7 +2213,7 @@ else {
 		
 		
 		if ($cId != null) {
-			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE  from TOURNAMENT_EVENT TE
+			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND SCORE <= T.EVENTS_AWARDED AND SCORE > 0
@@ -2225,7 +2224,9 @@ else {
 			$event = null;
 			$eventArray = array();
 			$count = 0;
-			while ($row = $results->fetch_array()) {			
+			while ($row = $results->fetch_array()) {
+				$cHighLowFlag = $row[3];
+				$cOverallAwarded = $row[4];
 				if ($event != $row[0] and sizeof($eventArray) > 0) {
 					array_unshift($eventArray, $event);
 					array_push($cEvents, $eventArray);
@@ -2240,7 +2241,7 @@ else {
 		}
 		
 		if ($bId != null) {
-			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE  from TOURNAMENT_EVENT TE
+			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED  from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND SCORE <= T.EVENTS_AWARDED AND SCORE > 0
@@ -2251,7 +2252,9 @@ else {
 			$event = null;
 			$eventArray = array();
 			$count = 0;
-			while ($row = $results->fetch_array()) {			
+			while ($row = $results->fetch_array()) {	
+				$bHighLowFlag = $row[3];
+				$bOverallAwarded = $row[4];
 				if ($event != $row[0] and sizeof($eventArray) > 0) {
 					array_unshift($eventArray, $event);
 					array_push($bEvents, $eventArray);
@@ -2266,7 +2269,7 @@ else {
 		}
 		
 		if ($aId != null) {
-			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE  from TOURNAMENT_EVENT TE
+			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED  from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND SCORE <= T.EVENTS_AWARDED  AND SCORE > 0
@@ -2277,7 +2280,9 @@ else {
 			$event = null;
 			$eventArray = array();
 			$count = 0;
-			while ($row = $results->fetch_array()) {			
+			while ($row = $results->fetch_array()) {
+				$aHighLowFlag = $row[3];				
+				$aOverallAwarded = $row[4];
 				if ($event != $row[0] and sizeof($eventArray) > 0) {
 					array_unshift($eventArray, $event);
 					array_push($aEvents, $eventArray);
@@ -2392,16 +2397,41 @@ else {
 			$slide->setLogoPath('img/misologo.png');
 			array_push($resultSlideshow, $slide);
 		}
+		$tournamentResultsA = array(); $tournamentResultsB = array(); $tournamentResultsC = array();
+		$tournamentResultsA = getPrimaryTournamentResults($aId,$mysqli,$aHighLowFlag,$tournamentResultsA);
+		$tournamentResultsB = getPrimaryTournamentResults($bId,$mysqli,$bHighLowFlag,$tournamentResultsB);
+		$tournamentResultsC = getPrimaryTournamentResults($cId,$mysqli,$cHighLowFlag,$tournamentResultsC);
 		
-		$slide = new slideshowSlide();
-		$slide->setType('OVERALLRESULTS');
-		$slide->setHeaderText('Final Results - 6th Place');
-		$labelValues = array();
-		array_push($labelValues, array("Division A", "Kent Elementary School"));
-		array_push($labelValues, array("Division B", "Kent High School"));
-		array_push($labelValues, array("Division C", "Harrison Middle School"));
-		$slide->setLabelValues($labelValues);
-		array_push($resultSlideshow, $slide);
+		// Overall Results
+		$maxRank = $cOverallAwarded;
+		if ($aOverallAwarded > $maxRank) $maxRank = $aOverallAwarded;
+		if ($bOverallAwarded > $maxRank) $maxRank = $bOverallAwarded;
+		
+		for ($i = $maxRank; $i > 0; $i--) {	
+			$slide = new slideshowSlide();
+			$slide->setType('OVERALLRESULTS');
+			$ordinalSuffix = array('th','st','nd','rd','th','th','th','th','th','th');
+			$suffix = 'th';
+			if (($i % 100) >= 11 && ($i % 100) <= 13) $suffix = 'th';
+			else $suffix = $ordinalSuffix[$i % 10];
+			$slide->setHeaderText('Final Results - '.$i.$suffix.' Place');
+			$labelValues = array();
+		
+			if (sizeof($tournamentResultsA) >= $i AND $aOverallAwarded >= $i) {
+				$row = $tournamentResultsA[$i-1];
+				array_push($labelValues, array("Division A", $row[2]));
+			}
+			if (sizeof($tournamentResultsB) >= $i AND $bOverallAwarded >= $i) {
+				$row = $tournamentResultsB[$i-1];
+				array_push($labelValues, array("Division B", $row[2]));
+			}
+			if (sizeof($tournamentResultsC) >= $i AND $cOverallAwarded >= $i) {
+				$row = $tournamentResultsC[$i-1];
+				array_push($labelValues, array("Division C", $row[2]));
+			}
+			$slide->setLabelValues($labelValues);
+			array_push($resultSlideshow, $slide);
+		}
 		
 		$_SESSION["resultSlideshowIndex"] = 0;
 		$_SESSION["resultSlideshow"] = json_encode($resultSlideshow);
@@ -2815,13 +2845,13 @@ else {
 	++ Make Any Place where 'Science Olympiad' Text Referenced Dynamic
 	++ Make Quick Links Dynamic
 	++ Work on About Page
-	++
+	++ Make General Slide Builder for Slideshow
 	++ Print Broke Again
 	
 
 	
 	-- APP LIMITATIONS / LOW PRIORITY ISSUES --
-	**AJAX on TIMEOUT
+	** AJAX on TIMEOUT
 	** Handles 100 Teams / Events Per TOURNAMENT
 	** Calculations based on specific Event Name (not a code)
 	** Results: Ties Broken to 20 positions

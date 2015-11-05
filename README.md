@@ -1,2 +1,2 @@
 # scorecenter
-Tournament  Scoring Web Application (Designed for Science Olympiad)
+Tournament Scoring Web Application (Designed for Science Olympiad)

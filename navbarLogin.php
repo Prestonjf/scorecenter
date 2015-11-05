@@ -1,6 +1,6 @@
 <script type="text/javascript">
 	function about() { 
-		alert('Score Center \n \n Developed by Michigan Science Olympiad \n An open source scoring application for Science Olympiad Tournaments. \n \n Version: 1.0 (Alpha) - August 2015'); 
+		alert('Score Center \n \nDeveloped by Michigan Science Olympiad \nAn open source scoring application for Science Olympiad Tournaments. \n \nVersion: 1.0 (Beta) - November 2015'); 
 	}
 
 </script>
@@ -15,7 +15,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.php">Score Center &nbsp;&nbsp;
+      <a class="navbar-brand" href="controller.php?command=loadIndex&">Score Center &nbsp;&nbsp;
       	<img alt="MISO Logo" src="img/misologo.png"  width="25" height="25" style="float: right;"></a>
     </div>
 
