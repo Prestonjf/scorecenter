@@ -134,7 +134,7 @@
 	 <hr>
 	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsCSV" value='.$row['0'].'>Export to .csv</button>
 	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsEXCEL" value='.$row['0'].'>Export to .xlsx</button>
-		<?php if (getCurrentRole() == 'ADMIN') echo '<button type="submit" class="btn btn-xs btn-success" name="viewSlideShow" value="'.$row['0'].'" >View Slideshow</button>'; ?>
+		<?php echo '<button type="submit" class="btn btn-xs btn-success" name="viewSlideShow" value="'.$row['0'].'" >View Slideshow</button>'; ?>
 		<input type="button" class="btn btn-xs btn-success" name="printResults" onclick="print();" value='Print'/>
 	 <hr>
 
