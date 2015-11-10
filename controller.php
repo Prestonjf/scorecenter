@@ -2365,7 +2365,8 @@ else {
 				array_push($labelValues, array("Division ".$row[1], $row[0]));
 			}
 			$slide->setLabelValues($labelValues);
-			if (sizeof($labelValues > 0)) {
+			
+			if (sizeof($labelValues) > 0) {
 				array_push($resultSlideshow, $slide);
 			}
 			
@@ -2384,7 +2385,7 @@ else {
 				array_push($labelValues, array("Division ".$row[1], $row[0]));
 			}
 			$slide->setLabelValues($labelValues);
-			if (sizeof($labelValues > 0)) {
+			if (sizeof($labelValues) > 0) {
 				array_push($resultSlideshow, $slide);
 			}
 		
@@ -2432,6 +2433,14 @@ else {
 			$slide->setLabelValues($labelValues);
 			array_push($resultSlideshow, $slide);
 		}
+		
+		// Placeholder Slide
+		$slide = new slideshowSlide();
+		$slide->setType('PLACEHOLDER');
+		$slide->setHeaderText($tournamentRow[0]); // Tournament Name
+		$slide->setText('at '.$tournamentRow[1]); // Tournament Location
+		$slide->setLogoPath('img/misologo.png');
+		array_push($resultSlideshow, $slide);
 		
 		$_SESSION["resultSlideshowIndex"] = 0;
 		$_SESSION["resultSlideshow"] = json_encode($resultSlideshow);
