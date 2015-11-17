@@ -114,7 +114,7 @@
 							placeholder="john@doe.com"	value="<?php echo $_SESSION["userName"]; ?>"></td>
 			<?php if ($_SESSION["accountMode"] == 'create') { ?>
 				<td width="25%"><label for="regCode">Registration Code:<span class="red">*</span></label></td>
-				<td width="25%"><input type="text" size="40" class="form-control" name="regCode" id="regCode"></td>
+				<td width="25%"><input type="text" autocomplete="off" size="40" class="form-control" name="regCode" id="regCode"></td>
 			<?php } else { ?>
 				<td width="25%"></td>
 				<td width="25%"></td>

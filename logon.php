@@ -59,7 +59,7 @@
 		<tr>
 		<td><label for="userName">User Name: </label></td>
 		<td>
-		<input type="text" size="40" autocomplete="off" class="form-control" name="userName" id="userName">
+		<input type="text" size="40" class="form-control" name="userName" id="userName">
 		</td>
 		<td style="padding-left: 2em;"><a href="controller.php?command=createAccount&"><h6>Create Account</h6></a></td>
 		</tr>

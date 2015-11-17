@@ -50,13 +50,14 @@ include_once('role_check.php');
 		
           <div class="jumbotron" style="overflow: auto;">
 		  	<div style="float: left; width: 80%;">
-            <h2 style="margin-top:0px;">Welcome to Score Center!</h2>
-            <p style="padding-right: 10px;">This is a new electronic scoring system designed for Michigan Science Olympiad.
+            <h2 style="margin-top:0px;">Welcome!</h2>
+            <p style="padding-right: 10px;">Tournament Score Center is a new electronic scoring system designed for Michigan Science Olympiad.
             This application allows tournament organizers the ability to manage tournaments, teams, and events
 			in an secure, efficient, and flexible process.</p>
 			</div>
 			<div style="float: left; width: 20%;">
-				<img src="img/misologo.png" alt="misciologo" >
+			<h2 style="margin-top:0px;">&nbsp;</h2>
+				<img src="img/misologo.png" alt="misciologo" width="150" height="150">
 			</div>
           </div>
           

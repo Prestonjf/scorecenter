@@ -453,7 +453,7 @@ else {
 
 // TOURNAMENT DISPLAY SCREEN ---------------------------------------
 	function loadAllTournaments($mysqli) {
-		$query = "SELECT T.TOURNAMENT_ID, T.NAME, T.LOCATION,T.DIVISION, DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE1' FROM TOURNAMENT T ";
+		$query = "SELECT T.TOURNAMENT_ID, T.NAME, T.LOCATION,T.DIVISION, DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE1', T.SCORES_LOCKED_FLAG FROM TOURNAMENT T ";
 		// Verifier Can only see assigned TOURNAMENTS
 		if (getCurrentRole() == 'VERIFIER') {
 			$query .= " INNER JOIN TOURNAMENT_VERIFIER TV ON TV.TOURNAMENT_ID=T.TOURNAMENT_ID AND TV.USER_ID =" .getCurrentUserId();
@@ -1062,7 +1062,7 @@ else {
 			$_SESSION["tournamentId"] = $id;
 			
 			$query = $mysqli->prepare("INSERT INTO TOURNAMENT (TOURNAMENT_ID, NAME, LOCATION, DIVISION, DATE, NUMBER_EVENTS, NUMBER_TEAMS, 
-			HIGHEST_SCORE_POSSIBLE, DESCRIPTION, HIGH_LOW_WIN_FLAG, EVENTS_AWARDED, OVERALL_AWARDED,BEST_NEW_TEAM_FLAG,MOST_IMPROVED_FLAG,LINKED_TOURN_1,LINKED_TOURN_2,SCORES_LOCKED_FLAG) VALUES (".$id.",?,?,?,?,?,?,?,?,?,?,?,?,".$tourn1Linked.",".$tourn2Linked.",?) ");
+			HIGHEST_SCORE_POSSIBLE, DESCRIPTION, HIGH_LOW_WIN_FLAG, EVENTS_AWARDED, OVERALL_AWARDED,BEST_NEW_TEAM_FLAG,MOST_IMPROVED_FLAG,LINKED_TOURN_1,LINKED_TOURN_2,SCORES_LOCKED_FLAG) VALUES (".$id.",?,?,?,?,?,?,?,?,?,?,?,?,?,".$tourn1Linked.",".$tourn2Linked.",?) ");
 			
 			$query->bind_param('ssssiiisiiiiii',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins, $eventsAwarded, $overallAwarded, $bestNewTeam, $improvedTeam,$lockScoresFlag);
 			
@@ -2637,6 +2637,12 @@ else {
 			$_SESSION["userSessionInfo"] = serialize($userSessionInfo);
 			$_SESSION["userEventDate"] = date("m/d/y");
 			$_SESSION['sessionTimeout'] = time(); // Session Timeout
+			
+			// Log Login Success
+			$query = $mysqli->prepare("INSERT INTO USER_LOGIN_LOG (USER_ID, LOGIN_TIME) VALUES (".$account['0'].",NOW())");			
+			$query->execute();$query->free_result();
+			
+			
 			return true;
 		}
 				
@@ -2847,6 +2853,8 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX --
+
+	++ ++ Log Users
 
 	++ Make Logo Dynamic
 	++ Make Footer Text Dynamic

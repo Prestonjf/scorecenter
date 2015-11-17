@@ -5,7 +5,11 @@
 	// Security Level Check
 	include_once('role_check.php');
 	checkUserRole(2);
+	
+	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+	$userRole = $userSessionInfo->getRole();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -78,6 +82,7 @@
 		}
 		else {
 			clearError();
+			document.getElementById("lockScoresFlag").disabled = false;
 			return true;
 		}
 	}
@@ -256,11 +261,11 @@
 		return "&numberEvents="+document.getElementById('numberEvents').value+"&numberTeams="+document.getElementById('numberTeams').value;
 	}
 	
-	function loadDivisonTeams(ele) {
-		var division = ele.value;
+	function loadDivisonTeams() {
+		var division = document.getElementById('tournamentDivision').value;
 		xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && xmlhttp.responseText.indexOf("teamAdded") > -1) {
 				document.getElementById('teamsSelectDiv').innerHTML = xmlhttp.responseText;
 			}
 		}	
@@ -274,12 +279,16 @@
 		var tournDate = document.getElementById('tournamentDate').value;
 		xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && xmlhttp.responseText.indexOf("teamAdded") == -1) {
 				var html = xmlhttp.responseText;
 				var lists = html.split('*****');
 				document.getElementById('tourn1LinkedDiv').innerHTML = lists[0];
 				document.getElementById('tourn2LinkedDiv').innerHTML = lists[1];
 			}
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				loadDivisonTeams();
+			}
+			
 		}	
         xmlhttp.open("GET","controller.php?command=loadLinkedTournaments&division="+division+"&date="+tournDate,true);
         xmlhttp.send();
@@ -335,7 +344,7 @@
 		<td width="15%"><label for="tournamentName">Tournament Name:<span class="red">*</span></label></td>
 		<td width="35%"><input type="text" class="form-control" name="tournamentName" id="tournamentName" size="50" value=<?php echo '"'.$_SESSION["tournamentName"].'"' ?>></td>
 		<td width="15%"><label for="tournamentDivision">Division:<span class="red">*</span></label></td>
-		<td width="35%"><select class="form-control" name="tournamentDivision" id="tournamentDivision" onchange="javascript: loadDivisonTeams(this); loadLinkedTournaments();">
+		<td width="35%"><select class="form-control" name="tournamentDivision" id="tournamentDivision" onchange="javascript: loadLinkedTournaments();">
 			<option value=""></option>
 			<option value="A" <?php if($_SESSION["tournamentDivision"] == 'A'){echo("selected");}?>>A</option>
 			<option value="B" <?php if($_SESSION["tournamentDivision"] == 'B'){echo("selected");}?>>B</option>
@@ -383,7 +392,9 @@
 			<label for="totalPointsWins1">High Score Wins</label></td>
 	</tr>
 	<tr>
-	<td><label for="lockScoresFlag">Lock Scores: </label></td><td><input type="checkbox" id="lockScoresFlag" name="lockScoresFlag" <?php if ($_SESSION["lockScoresFlag"] == '1') echo 'checked'; ?> value="1"></td>
+	<td>
+	<label for="lockScoresFlag">Lock Scores: </label></td><td><input type="checkbox" id="lockScoresFlag" name="lockScoresFlag" <?php if ($_SESSION["lockScoresFlag"] == '1') echo 'checked'; ?> value="1" <?php if ($userRole != 'ADMIN') echo 'disabled'; ?>>
+	</td>
 	<td></td>
 	<td></td>
 	</tr>

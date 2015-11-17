@@ -15,7 +15,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="controller.php?command=loadIndex&">Score Center &nbsp;&nbsp;
+      <a class="navbar-brand" href="controller.php?command=loadIndex&">Tournament Score Center &nbsp;&nbsp;
       	<img alt="MISO Logo" src="img/misologo.png"  width="25" height="25" style="float: right;"></a>
     </div>
 
