@@ -87,7 +87,8 @@ else if ($_GET['command'] != null and $_GET['command'] == 'updateResultPage') {
 if ($_SESSION['sessionTimeout'] + 30 * 60 < time()) {
 	session_destroy();
 	session_start();
-	$_SESSION['errorSessionTimeout'] = '1';
+	if ($_GET['command'] != 'loadIndexLogin')
+		$_SESSION['errorSessionTimeout'] = '1';
 	header("Location: logon.php");	
 	exit();
 }
@@ -95,7 +96,7 @@ else {
 	$_SESSION['sessionTimeout'] = time();
 }
 
-if ($_GET['command'] != null and $_GET['command'] == 'loadIndex') {
+if ($_GET['command'] != null and ($_GET['command'] == 'loadIndex' or $_GET['command'] =='loadIndexLogin')) {
 	header("Location: index.php");	
 	exit();
 }
@@ -2853,31 +2854,30 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX --
-
-	++ ++ Log Users
-
-	++ Make Logo Dynamic
-	++ Make Footer Text Dynamic
-	++ Make Home Page News Text Dynamic
-	++ Make Any Place where 'Science Olympiad' Text Referenced Dynamic
-	++ Make Quick Links Dynamic
-	++ Work on About Page
-	++ Make General Slide Builder for Slideshow
-	++ Print Broke Again
+	** Slideshow, Display no data if no animations / results for event
+	** Log More User data on login
+	** Make Logo Dynamic
+	** Make Footer Text Dynamic
+	** Make Home Page News Text Dynamic
+	** Make Any Place where 'Science Olympiad' Text Referenced Dynamic
+	** Make Quick Links Dynamic
+	** Work on About Page
+	** Make General Slide Builder for Slideshow
+	** Print Broke Again
 	
-
 	
-	-- APP LIMITATIONS / LOW PRIORITY ISSUES --
-	** AJAX on TIMEOUT
-	** Handles 100 Teams / Events Per TOURNAMENT
-	** Calculations based on specific Event Name (not a code)
-	** Results: Ties Broken to 20 positions
-	** Results Order By OPTION / Keep Color PAttern per Row
-	** controller class security
+	-- LOW PRIORITY ISSUES --
 	** Manual Reminder email to supervisor
+	** Results Order By OPTION / Keep Color PAttern per Row
 	** Generate Results as XML
-
+	** AJAX on TIMEOUT	
+	** controller class security
 	
+	
+	-- APP LIMITATIONS --
+	** Handles 100 Teams / Events Per TOURNAMENT
+	** Results: Ties Broken to 20 positions
+
 	
 	-- ACKNOWLEDGEMENTS --
 	^^ PHPMAILER

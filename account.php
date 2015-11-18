@@ -92,7 +92,7 @@
   </head>
   
   <body>
-   <?php include_once 'navbarLogin.php'; ?>
+   <?php include_once 'navbarMin.php'; ?>
   	<form action="controller.php" method="POST">
      <div class="container">
      

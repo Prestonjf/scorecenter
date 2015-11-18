@@ -126,7 +126,7 @@
   </head>
   
   <body>
-  <?php include_once 'navbarLogin.php'; ?>
+  <?php include_once 'navbarMin.php'; ?>
   
   	<form action="controller.php" method="GET" id="controllerForm">
      <div class="container">

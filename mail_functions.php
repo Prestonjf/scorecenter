@@ -23,7 +23,7 @@
 		$msgHtml = $msgHtml . "Password: " .$password." <br />";
 
 		// send email
-		sendMail($mysqli, $userName,"Score Center Account Creation",$msg, $msgHtml);
+		sendMail($mysqli, $userName,"Tournament Score Center Account Creation",$msg, $msgHtml);
 	}
 
 	function emailPasswordReset($mysqli, $address, $name, $userId, $encryptedPassword, $salt) {
@@ -43,7 +43,7 @@
 		$msgHtml = str_replace('<account name>',$address,$msgHtml);
 		$msgHtml .= "Reset Password Link: <br /> http://".$host."/scorecenter/controller.php?command=passwordResetProcess&id=".$userId."&ep=".$encryptedPassword."&sa=".$salt."&nn=".uniqid();
 	
-		sendMail($mysqli, $address,"Score Center Password Reset",$msg, $msgHtml);
+		sendMail($mysqli, $address,"Tournament Score Center Password Reset",$msg, $msgHtml);
 	}
 	
 	function sendTestEmail($mysqli) {
@@ -84,7 +84,7 @@
 			$mail->Port = $port;  
 			
 			$mail->From = $username;
-			$mail->FromName = 'Score Center';
+			$mail->FromName = 'Tournament Score Center';
 			//$mail->addAddress('joe@example.net', 'Joe User');     // Add a recipient
 			$mail->addAddress($address);               				// Name is optional
 			$mail->addReplyTo($username, 'No Reply');
