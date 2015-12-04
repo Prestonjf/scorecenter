@@ -2854,6 +2854,7 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX --
+	** Page Iterator Fix on Tournaments, Add to Home Page
 	** Slideshow, Display no data if no animations / results for event
 	** Log More User data on login
 	** Make Logo Dynamic
