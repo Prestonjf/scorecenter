@@ -209,7 +209,17 @@ include_once('logon_check.php');
             document.getElementById(shID).style.height = '0px';
         }
     }
-	}	
+	}
+
+	function pasteRanks() {
+		var str = "";
+		var clipText = window.clipboardData.getData('Text');
+		clipRows = clipText.split(String.fromCharCode(13));
+		for (i=0; i< clipRows.length; i++) {
+			str  += clipRows[i].split(String.fromCharCode(9)) + '  ';		
+		}
+		alert(str);
+	}
 
   
   </script>
@@ -324,7 +334,7 @@ include_once('logon_check.php');
 				<th width="10%"data-field="score" data-align="center" data-sortable="true">Raw Score&nbsp;&nbsp;</th>
 				<th width="5%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group</th>
 				<th width="30%"data-field="score" data-align="center" data-sortable="true">Tie Break</th>			
-                <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank<span class="red">*</span></th>
+                <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank<span class="red">*</span> <a href="javascript: pasteRanks();">(+)</a></th>
 				<th width="10%" data-field="score" data-align="center" data-sortable="true">Points Earned</th>
             </tr>
         </thead>
