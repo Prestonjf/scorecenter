@@ -34,9 +34,11 @@ include_once('logon_check.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+  <head> 
+  
 	<?php include_once('libs/head_tags.php'); ?>
-	
+	 <script src="js/popBox1.3.0.js" type="text/javascript"></script>
+	<link href="css/popBox1.3.0.css" rel="stylesheet" type="text/css" />
 	
   <script type="text/javascript">
   
@@ -211,16 +213,24 @@ include_once('logon_check.php');
     }
 	}
 
-	function pasteRanks() {
-		var str = "";
-		var clipText = window.clipboardData.getData('Text');
-		clipRows = clipText.split(String.fromCharCode(13));
-		for (i=0; i< clipRows.length; i++) {
-			str  += clipRows[i].split(String.fromCharCode(9)) + '  ';		
-		}
-		alert(str);
-	}
 
+    jQuery(document).ready(function($){
+    	$('#popBox').popBox({width:200,height:500});
+   		$('#popBox1').popBox({width:200,height:500});
+   		$('#popBox2').popBox({width:200,height:500});
+   		
+   		$('#pasteRanks').click(function(){
+   		 	$('#popBox').triggerHandler('focus');
+		});
+		$('#pasteRaw').click(function(){
+   		 	$('#popBox1').triggerHandler('focus');
+		});
+		$('#pasteTier').click(function(){
+   		 	$('#popBox2').triggerHandler('focus');
+		});
+   		
+    });
+ 
   
   </script>
     <style>
@@ -264,6 +274,16 @@ include_once('logon_check.php');
     	-webkit-transition: height 2s; /* Safari and Chrome */
     	-o-transition: height 2s; /* Opera */
 	}
+	
+	.blankButton {
+	    background:none;
+   		border:none;
+   	 	margin:0;
+    	padding:0;
+    	font-size:15px;
+    	color: #23527c;
+
+	}
   
   </style>
   </head>
@@ -276,7 +296,8 @@ include_once('logon_check.php');
      
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
-     
+      
+        
      <h1>Enter Event Scores</h1>
 	 <table>
 	 <tr>
@@ -331,10 +352,10 @@ include_once('logon_check.php');
                 <th width="6%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
                 <th width="20%" data-field="teamNumber" data-align="center" data-sortable="true">Team Name</th>
                 <th width="9%" data-field="status" data-align="center" data-sortable="true">Status&nbsp;&nbsp;&nbsp;&nbsp;</th>
-				<th width="10%"data-field="score" data-align="center" data-sortable="true">Raw Score&nbsp;&nbsp;</th>
-				<th width="5%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group</th>
+				<th width="10%"data-field="score" data-align="center" data-sortable="true">Raw Score <input class="blankButton" type="button" id="pasteRaw" value='+' /></th>
+				<th width="5%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group <input class="blankButton"type="button" id="pasteTier"value='+' /></th>
 				<th width="30%"data-field="score" data-align="center" data-sortable="true">Tie Break</th>			
-                <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank<span class="red">*</span> <a href="javascript: pasteRanks();">(+)</a></th>
+                <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank<span class="red">*</span> <input class="blankButton" type="button" id="pasteRanks"value='+' /></th>
 				<th width="10%" data-field="score" data-align="center" data-sortable="true">Points Earned</th>
             </tr>
         </thead>
@@ -451,6 +472,9 @@ include_once('logon_check.php');
  	 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores">Cancel</button>
 		<?php } ?>
       <hr>
+      <textarea id="popBox" style="display:none;"></textarea>
+      <textarea id="popBox1" style="display: none;"></textarea>
+      <textarea id="popBox2" style="display: none;"></textarea>
 	<?php include_once 'footer.php'; ?>
 
     </div><!--/.container-->
