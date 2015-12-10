@@ -130,6 +130,11 @@ function resetScores() {
 	}
 }
 
+// Set Rank Scores from Pop Up Box
+function pasteRanks(text) {
+	alert(text);
+}
+
 // calculate event score logic (specific per event)
 function calculateScorez(name, division, algorithm) {
 	if (confirm('Score Center will attempt to calculate team ranks based on the inputed data. Current ranks will be overwritten. Ranks can still be set manually. Scores are not saved until the save button is clicked. Do you wish to continue?')) {
