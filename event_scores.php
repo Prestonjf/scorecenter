@@ -346,7 +346,7 @@ include_once('logon_check.php');
 		<?php if ($_SESSION["teamAlternateEventScoreList"] != null) {?>		
 		<fieldset class="utility-border"><legend class="utility-border">Primary Teams</legend>
 		<?php } ?>
-        <table class="table table-hover">
+        <table class="table table-hover" id="primaryTeamTable">
         <thead>
             <tr>
                 <th width="6%" data-field="name" data-align="right" data-sortable="true">Team Number</th>

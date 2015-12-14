@@ -132,7 +132,28 @@ function resetScores() {
 
 // Set Rank Scores from Pop Up Box
 function pasteRanks(text) {
-	alert(text);
+	var ranks = [0];
+	var tokens = text.split('\n');
+	for (i = 0; i < tokens.length; i++) {
+		if (tokens[i].trim() != '') {
+			ranks.push(tokens[i]);
+		}
+	}
+	var teamCount = $('#primaryTeamTable tr').length;	
+	if (teamCount != ranks.length) alert("Number of inputed ranks ("+(ranks.length-1)+") does not match the number of teams ("+(teamCount-1)+") on this screen.")
+	else {
+		$('#primaryTeamTable tr').each(function (i, row) {
+			var count = 0;
+			$(this).find('td').each (function() {
+				if (count == 5) {
+					$(this).next().find('input').val(ranks[i]);
+					updatePointsEarned('teamScore', i-1,'teamPointsEarned');
+				}
+				count++;
+			});
+		});
+
+	}
 }
 
 // calculate event score logic (specific per event)
