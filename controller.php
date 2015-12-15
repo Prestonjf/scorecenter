@@ -2854,11 +2854,9 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX --
-	** Copy / Paste Feature into Raw Score, Tier, and Rank fields from Excel.
 	** Tied Raw Score w/ Tier should set Rank as same number when auto calculate clicked. (So user can't save duplicate ranks)
 	** Slideshow should be downloadable to PDF.
 	** Slideshow, Display no data if no animations / results for event
-	** Event Scores - Input = Accept only numbers ranks and raw score
 	
 	** Page Iterator Fix on Tournaments, Add to Home Page
 	** Log More User data on login
@@ -2869,7 +2867,8 @@ else {
 	** Make Quick Links Dynamic
 	** Work on About Page
 	** Make General Slide Builder for Slideshow
-	** Print Broke Again
+	** Tie Scores display tied position in Raw Score Field
+
 	
 	
 	-- LOW PRIORITY ISSUES --
@@ -2878,6 +2877,7 @@ else {
 	** Generate Results as XML
 	** AJAX on TIMEOUT	
 	** controller class security
+	** Print Broke Again?
 	
 	
 	-- APP LIMITATIONS --

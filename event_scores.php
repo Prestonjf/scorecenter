@@ -54,6 +54,15 @@ include_once('logon_check.php');
 		if (element.value > max || element.value < 1) element.value = '';
 	}
 	
+	function parseNumber(element) {
+		if (isNaN(element.value)) element.value = '';
+	}
+	function parseRawNumber(element) {
+		var str = element.value.trim();
+		if (str.length == 1 && str.charAt(0) == '-') return;
+		if (isNaN(element.value)) element.value = '';
+	}
+	
 	function updatePointsEarned(section, id, type) {
 		var element = document.getElementById(section+id);
 		var max = <?php echo $_SESSION["tournamentHighestScore"];?>;
@@ -299,22 +308,18 @@ include_once('logon_check.php');
       
         
      <h1>Enter Event Scores</h1>
-	 <table>
+	 <table width="100%">
 	 <tr>
-     <td><h4>Tournament: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentName"]. ' - ' . $_SESSION["tournamentDate"]; ?></span></h4></td>
-	<td></td>
+     <td width="50%"><h4>Tournament: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentName"]. ' - ' . $_SESSION["tournamentDate"]; ?></span></h4></td>
+	 <td width="50%"><h4>Event: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventName"]; ?></span></h4></td>
 	 </tr>
 	 <tr>
      <td><h4>Division: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentDivision"]; ?></span></h4></td>
-	 <td></td>
-	 </tr>
-	 <tr>
-	 <td><h4>Event: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventName"]; ?></span></h4></td>
-	 <td></td>
-	 </tr>
-	 <tr>
 	 <td><h4>Supervisor: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventSupervisor"]; ?></span></h4></td>
-	 <td></td>
+	 </tr>
+	 <tr>
+	 <td><h4>Event Scoring Algorithm: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["scoreSystemText"]; ?> Wins</span></h4></td>
+	 <td><h4>Max Points Per Event: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["highestScore"]; ?></span></h4></td>
 	 </tr>
 	 </table>
 	 <div class="instructions">
@@ -374,8 +379,8 @@ include_once('logon_check.php');
 			<option value="D" '; if($scoreRecord['9'] == "D"){echo("selected");} echo '>D</option>
 			</select></td>';
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
-      						name="teamRawScore'.$teamCount.'" id="teamRawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" onkeyup="highlightRawScoreDuplication()" ></td>';
-					echo '<td><select class="form-control" name="teamScoreTier'.$teamCount.'" id="teamScoreTier'.$teamCount.'" '.$disable.' onchange="highlightRawScoreDuplication()">
+      						name="teamRawScore'.$teamCount.'" id="teamRawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" onkeyup="javascript: parseRawNumber(this); highlightRawScoreDuplication();" ></td>';
+					echo '<td><select class="form-control" name="teamScoreTier'.$teamCount.'" id="teamScoreTier'.$teamCount.'" '.$disable.' onchange="javascript: parseRawNumber(this); highlightRawScoreDuplication();">
 			<option value="0"></option>
 			<option value="1" ';  if($scoreRecord['7'] == "1"){echo("selected");} echo '>I</option>
 			<option value="2" '; if($scoreRecord['7'] == "2"){echo("selected");} echo '>II</option>
@@ -385,7 +390,7 @@ include_once('logon_check.php');
 			</select></td>';
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
       						name="teamTieBreak'.$teamCount.'" id="teamTieBreak'.$teamCount.'" value="'.$scoreRecord['8'].'"></td>';
-      				echo '<td style="background-color: #FFCCCC;"><input type="text"  class="form-control" size="4" autocomplete="off" onkeydown="updatePointsEarned(\'teamScore\',\''.$teamCount.'\',\'teamPointsEarned\');" onkeyup="updatePointsEarned(\'teamScore\',\''.$teamCount.'\',\'teamPointsEarned\');" '.$disable.'    
+      				echo '<td style="background-color: #FFCCCC;"><input type="text"  class="form-control" size="4" autocomplete="off" onkeydown="javascript: parseNumber(this); updatePointsEarned(\'teamScore\',\''.$teamCount.'\',\'teamPointsEarned\');" onkeyup="javascript: parseNumber(this); updatePointsEarned(\'teamScore\',\''.$teamCount.'\',\'teamPointsEarned\');" '.$disable.'    
       						name="teamScore'.$teamCount.'" id="teamScore'.$teamCount.'" value="'.$scoreRecord['2'].'">'; // set background color
       				echo '</td>';
       				echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" readonly   
@@ -431,7 +436,7 @@ include_once('logon_check.php');
 			<option value="N" ';  if($scoreRecord['9'] == "N"){echo("selected");} echo '>N</option>
 			<option value="D" '; if($scoreRecord['9'] == "D"){echo("selected");} echo '>D</option>
 			</select></td>';
-					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
+					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.' onkeyup="javascript: parseRawNumber(this);"    
       						name="teamARawScore'.$teamCount.'" id="teamARawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" ></td>';
 					echo '<td><select class="form-control" name="teamAScoreTier'.$teamCount.'" id="teamAScoreTier'.$teamCount.'" '.$disable.'>
 			<option value="0"></option>
@@ -444,7 +449,7 @@ include_once('logon_check.php');
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
       						name="teamATieBreak'.$teamCount.'" id="teamATieBreak'.$teamCount.'" value="'.$scoreRecord['8'].'"></td>';
       				echo '<td style="background-color: #FFCCCC;"><input type="text"  class="form-control" size="4" autocomplete="off"  '.$disable.'    
-      						name="teamAScore'.$teamCount.'" id="teamAScore'.$teamCount.'" value="'.$scoreRecord['2'].'" onkeydown="updatePointsEarned(\'teamAScore\',\''.$teamCount.'\',\'teamAPointsEarned\');" onkeyup="updatePointsEarned(\'teamAScore\',\''.$teamCount.'\',\'teamAPointsEarned\');" >'; // set background color
+      						name="teamAScore'.$teamCount.'" id="teamAScore'.$teamCount.'" value="'.$scoreRecord['2'].'" onkeydown="javascript: parseNumber(this); updatePointsEarned(\'teamAScore\',\''.$teamCount.'\',\'teamAPointsEarned\');" onkeyup="javascript: parseNumber(this);  updatePointsEarned(\'teamAScore\',\''.$teamCount.'\',\'teamAPointsEarned\');" >'; // set background color
       				echo '</td>'; // 
       				echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" readonly   
       						name="teamAPointsEarned'.$teamCount.'" id="teamAPointsEarned'.$teamCount.'" value="'.$scoreRecord['5'].'"></td>';					
