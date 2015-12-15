@@ -90,7 +90,7 @@
                         $(this).parent().hide();
                         $(this).parent().prev().hide();
                         $(this).parent().prev().prev().val($(this).val().replace(/\n/g, options.newlineString));
-						if (--count == 0) pasteRanks($(this).val());
+						if (--count == 0) pasteText($(this).val(), $(this).parent().prev().prev().attr('id'));
 						count--;
                     }
                 });

@@ -2857,9 +2857,10 @@ else {
 	** Copy / Paste Feature into Raw Score, Tier, and Rank fields from Excel.
 	** Tied Raw Score w/ Tier should set Rank as same number when auto calculate clicked. (So user can't save duplicate ranks)
 	** Slideshow should be downloadable to PDF.
+	** Slideshow, Display no data if no animations / results for event
+	** Event Scores - Input = Accept only numbers ranks and raw score
 	
 	** Page Iterator Fix on Tournaments, Add to Home Page
-	** Slideshow, Display no data if no animations / results for event
 	** Log More User data on login
 	** Make Logo Dynamic
 	** Make Footer Text Dynamic

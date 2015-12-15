@@ -131,29 +131,73 @@ function resetScores() {
 }
 
 // Set Rank Scores from Pop Up Box
-function pasteRanks(text) {
+function pasteText(text, type) {
 	var ranks = [0];
 	var tokens = text.split('\n');
 	for (i = 0; i < tokens.length; i++) {
 		if (tokens[i].trim() != '') {
-			ranks.push(tokens[i]);
+			if ((type=='rankBox' || type=='rawBox') && isNaN(tokens[i].trim())) {
+				alert('All values must be numerical.');		
+				return;
+			}
+			else
+				ranks.push(tokens[i].trim());
 		}
 	}
-	var teamCount = $('#primaryTeamTable tr').length;	
-	if (teamCount != ranks.length) alert("Number of inputed ranks ("+(ranks.length-1)+") does not match the number of teams ("+(teamCount-1)+") on this screen.")
-	else {
-		$('#primaryTeamTable tr').each(function (i, row) {
-			var count = 0;
-			$(this).find('td').each (function() {
-				if (count == 5) {
-					$(this).next().find('input').val(ranks[i]);
-					updatePointsEarned('teamScore', i-1,'teamPointsEarned');
-				}
-				count++;
-			});
-		});
 
+	if (type == 'rankBox') {
+		var teamCount = $('#primaryTeamTable tr').length;	
+		if (teamCount != ranks.length) alert("Number of inputed ranks ("+(ranks.length-1)+") does not match the number of teams ("+(teamCount-1)+") on this screen.")
+		else {
+			$('#primaryTeamTable tr').each(function (i, row) {
+				var count = 0;
+				$(this).find('td').each (function() {
+					if (count == 5) {
+						$(this).next().find('input').val(ranks[i]);
+						updatePointsEarned('teamScore', i-1,'teamPointsEarned');
+					}
+					count++;
+				});
+			});
+		}
 	}
+	
+	else if (type == 'rawBox') {
+		var teamCount = $('#primaryTeamTable tr').length;	
+		if (teamCount != ranks.length) alert("Number of inputed raw scores ("+(ranks.length-1)+") does not match the number of teams ("+(teamCount-1)+") on this screen.")
+		else {
+			$('#primaryTeamTable tr').each(function (i, row) {
+				var count = 0;
+				$(this).find('td').each (function() {
+					if (count == 2) {
+						$(this).next().find('input').val(ranks[i]);
+						highlightRawScoreDuplication();
+					}
+					count++;
+				});
+			});
+		}
+	}
+	else if (type == 'tierBox') {
+		var teamCount = $('#primaryTeamTable tr').length;	
+		if (teamCount != ranks.length) alert("Number of inputed tiers ("+(ranks.length-1)+") does not match the number of teams ("+(teamCount-1)+") on this screen.")
+		else {
+			$('#primaryTeamTable tr').each(function (i, row) {
+				var count = 0;
+				$(this).find('td').each (function() {
+					if (count == 3) {
+						var tier = ranks[i];
+						if (tier == 'I') tier = 1; else if (tier == 'II') tier = 2; else if (tier == 'III') tier = 3; else if (tier == 'IV') tier = 4; else if (tier == 'V') tier = 5;
+						$(this).next().find('select').val(tier);
+						highlightRawScoreDuplication();
+					}
+					count++;
+				});
+			});
+		}
+	}
+	
+	
 }
 
 // calculate event score logic (specific per event)

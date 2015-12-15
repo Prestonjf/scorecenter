@@ -215,18 +215,18 @@ include_once('logon_check.php');
 
 
     jQuery(document).ready(function($){
-    	$('#popBox').popBox({width:200,height:500});
-   		$('#popBox1').popBox({width:200,height:500});
-   		$('#popBox2').popBox({width:200,height:500});
+    	$('#rankBox').popBox({width:200,height:500});
+   		$('#rawBox').popBox({width:200,height:500});
+   		$('#tierBox').popBox({width:200,height:500});
    		
    		$('#pasteRanks').click(function(){
-   		 	$('#popBox').triggerHandler('focus');
+   		 	$('#rankBox').triggerHandler('focus');
 		});
 		$('#pasteRaw').click(function(){
-   		 	$('#popBox1').triggerHandler('focus');
+   		 	$('#rawBox').triggerHandler('focus');
 		});
 		$('#pasteTier').click(function(){
-   		 	$('#popBox2').triggerHandler('focus');
+   		 	$('#tierBox').triggerHandler('focus');
 		});
    		
     });
@@ -472,9 +472,9 @@ include_once('logon_check.php');
  	 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores">Cancel</button>
 		<?php } ?>
       <hr>
-      <textarea id="popBox" style="display:none;"></textarea>
-      <textarea id="popBox1" style="display: none;"></textarea>
-      <textarea id="popBox2" style="display: none;"></textarea>
+      <textarea id="rankBox" style="display:none;"></textarea>
+      <textarea id="rawBox" style="display: none;"></textarea>
+      <textarea id="tierBox" style="display: none;"></textarea>
 	<?php include_once 'footer.php'; ?>
 
     </div><!--/.container-->
