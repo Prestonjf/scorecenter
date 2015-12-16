@@ -2877,6 +2877,7 @@ else {
 	** Generate Results as XML
 	** AJAX on TIMEOUT	
 	** controller class security
+	** declare constants on login (to avoid notices if server has them turned on)
 	** Print Broke Again?
 	
 	
