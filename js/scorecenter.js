@@ -269,6 +269,10 @@ function calculateScorez(name, division, algorithm) {
 function calc(type) {
 		var count = 0;
 		var rank = 1;
+		var previousRawScore = -100;
+		var previousTier = -100;
+		var previousStatus = '';
+		var tiesCount = 0;
 		var scoreArr = [];
 		while (count < 1000) {
 			if  ($('#teamRawScore'+count) != null && $('#teamRawScore'+count).val() != null) {
@@ -301,13 +305,31 @@ function calc(type) {
 		
 		// Set Ranks, ReOrder, Set Points Earned (Status of P gets ranked. N and D get 0 Rank)
 		scoreArr.forEach(function(entry) {
+			// if (entry[0] ==15 )
+			//	alert(entry[0]+': Rank Count:' +rank+ ' Tie Count: '+tiesCount);
+		
+			if (previousRawScore != entry[2] || previousTier != entry[3] || (previousRawScore != '' && entry[2] == '')) tiesCount = 0;
 			if (entry[4] == 'P') {
-				entry[1] = rank;
+				if ((type == 'HIGHRAW' || type == 'LOWRAW') && previousRawScore == entry[2]) {
+					tiesCount++;
+					entry[1] = rank - tiesCount;
+				}
+				else if ((type == 'HIGHRAWTIER' || type == 'LOWRAWTIER' || type == 'HIGHRAWTIER4LOW') && previousRawScore == entry[2] && previousTier == entry[3]) {
+					tiesCount++;
+					entry[1] = rank - tiesCount;
+				}
+				else {
+					entry[1] = rank;
+				}
 				rank++;
 			}
 			else {
 				entry[1] = 0;
 			}
+			
+			previousRawScore = entry[2];
+			previousTier = entry[3];
+			previousStatus = entry[4];
 		});
 		scoreArr.sort(compare);
 		//alert(scoreArr.toString());
@@ -327,8 +349,11 @@ function compare(a,b) {
   return 0;	
 }
 
+// ALL Score Calculations. 'N' And 'D' Status is Last
+
 // 1. HIGHRAW
 function compare1(a,b) {
+  if (a[4] == 'N' || a['4'] == 'D') return 1;
   if (a[2] > b[2])
     return -1;
   if (a[2] < b[2])
@@ -338,6 +363,7 @@ function compare1(a,b) {
 
 // 2. HIGHRAWTIER
 function compare2(a,b) {
+  if (a[4] == 'N' || a['4'] == 'D') return 1;
   if (a[3] < b[3])
     return -1;
   if (a[3] > b[3])
@@ -351,6 +377,7 @@ function compare2(a,b) {
 
 // 3. LOWRAW
 function compare3(a,b) {
+  if (a[4] == 'N' || a['4'] == 'D') return 1;
   var x = a[2]; if (a[2] == '') x = 100000;
   var y = b[2]; if (b[2] == '') y = 100000;
   if (x < y)
@@ -362,6 +389,7 @@ function compare3(a,b) {
 
 // 4. LOWRAWTIER
 function compare4(a,b) {
+  if (a[4] == 'N' || a['4'] == 'D') return 1;
   if (a[3] < b[3])
     return -1;
   if (a[3] > b[3])
@@ -377,6 +405,7 @@ function compare4(a,b) {
 
 // 5. HIGHRAWTIER4LOW - 4th Tier Low Score
 function compare5(a,b) {
+  if (a[4] == 'N' || a['4'] == 'D') return 1;
   if (a[3] < b[3])
     return -1;
   if (a[3] > b[3])

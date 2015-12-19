@@ -22,6 +22,7 @@ include_once('logon_check.php');
 		$userRole = $userSessionInfo->getRole();
 		$disable = '';
 		$disableVerfiy = '';
+		$disableTier = '';
 		$submitted = '';
 		$verified = '';
         if ($userRole == 'SUPERVISOR' and $_SESSION["submittedFlag"] == '1') $disable = 'disabled';
@@ -31,6 +32,11 @@ include_once('logon_check.php');
 		
 		// Global Score Lock
 		if ($_SESSION["lockScoresFlag"] == 1) {$disable = 'disabled'; $disableVerfiy = 'disabled'; }
+		// Disable Tier Depending on Algorithm		
+		if ($_SESSION["scoreSystemText"] == 'High Raw Score' or $_SESSION["scoreSystemText"] == 'Low Raw Score' or $disable == 'disabled') {
+			$disableTier = 'disabled';		
+		}
+		
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -93,7 +99,6 @@ include_once('logon_check.php');
 				var tier = $('#teamScoreTier'+count).val();
 				document.getElementById('teamRawScore'+count).style.backgroundColor = "#FFFFFF";
 				scoreArr.forEach(function(entry) {
-					//alert(entry);
 					if (score == entry[0] && tier == entry[1]) {
 						if (entry[0] in duplicates);
 						else {
@@ -212,7 +217,7 @@ include_once('logon_check.php');
         if (document.getElementById('showInstructions').style.display != 'none') {
             document.getElementById('showInstructions').style.display = 'none';
             document.getElementById('hideInstructions').style.display = 'inline';
-            document.getElementById(shID).style.height = '225px';
+            document.getElementById(shID).style.height = '275px';
         }
         else {
             document.getElementById('showInstructions').style.display = 'inline';
@@ -332,8 +337,9 @@ include_once('logon_check.php');
      2. Enter the Raw Score (Exam Score, Calculated Score, Points Earned etc) for each team. Not Required.<br /><br />
      3. Enter the Tier or Rank Group if applicable for each team. Not Required<br /><br />
 	 4. If the team has a tie, enter a short description of the tie breaker for the tied teams. Not Required<br /><br />
-	 5. Enter the finishing rank each team earned. If the team did not participate or was disqualified, enter 0.
-	 -OR- Click the Calculate Ranks button below to allow the system to automatically calculate event ranks. (Calculation algorithm for this event is: <?php echo $_SESSION["scoreSystemText"]; ?> wins.) Tied teams will require manually modification of their rank. All ranks can be modified manually after clicking the Calculate Ranks button. REQUIRED<br /><br />
+	 5A. Enter the finishing rank each team earned. If the team did not participate or was disqualified, enter 0. REQUIRED<br />
+	 -OR- <br />
+	 5B. Click the Calculate Ranks button below to allow the system to automatically calculate event ranks. (Calculation algorithm for this event is: <?php echo $_SESSION["scoreSystemText"]; ?> wins.) Tied teams will require manually modification of their ranks as the system will give the same ranks to each team. Highest rank for the tie is displayed. All ranks can be modified manually after clicking the Calculate Ranks button. REQUIRED<br /><br />
 	 6. Points earned will be calculated automatically. (Max points per event: <?php echo $_SESSION["highestScore"]; ?>. Tournament Winner: <?php echo $_SESSION["pointsSystem"]; ?>.)<br /><br />
      7. Click save to save the event's scores. Event scores can be modified after the initial save if they have not yet been submitted. Once submitted, only a score verifier can modify the scores.
      </div>
@@ -357,10 +363,13 @@ include_once('logon_check.php');
                 <th width="6%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
                 <th width="20%" data-field="teamNumber" data-align="center" data-sortable="true">Team Name</th>
                 <th width="9%" data-field="status" data-align="center" data-sortable="true">Status&nbsp;&nbsp;&nbsp;&nbsp;</th>
-				<th width="10%"data-field="score" data-align="center" data-sortable="true">Raw Score <input class="blankButton" type="button" id="pasteRaw" value='+' /></th>
-				<th width="5%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group <input class="blankButton"type="button" id="pasteTier"value='+' /></th>
+				<th width="10%"data-field="score" data-align="center" data-sortable="true">Raw Score 
+					<?php if ($disable != 'disabled') { ?><input class="blankButton" type="button" id="pasteRaw" value='+' /><?php } ?></th>
+				<th width="5%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group 
+					<?php if ($disableTier != 'disabled') { ?><input class="blankButton"type="button" id="pasteTier"value='+' /><?php } ?></th>
 				<th width="30%"data-field="score" data-align="center" data-sortable="true">Tie Break</th>			
-                <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank<span class="red">*</span> <input class="blankButton" type="button" id="pasteRanks"value='+' /></th>
+                <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank<span class="red">*</span> 
+                	<?php if ($disable != 'disabled') { ?><input class="blankButton" type="button" id="pasteRanks"value='+' /><?php } ?></th>
 				<th width="10%" data-field="score" data-align="center" data-sortable="true">Points Earned</th>
             </tr>
         </thead>
@@ -380,7 +389,7 @@ include_once('logon_check.php');
 			</select></td>';
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
       						name="teamRawScore'.$teamCount.'" id="teamRawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" onkeyup="javascript: parseRawNumber(this); highlightRawScoreDuplication();" ></td>';
-					echo '<td><select class="form-control" name="teamScoreTier'.$teamCount.'" id="teamScoreTier'.$teamCount.'" '.$disable.' onchange="javascript: parseRawNumber(this); highlightRawScoreDuplication();">
+					echo '<td><select class="form-control" name="teamScoreTier'.$teamCount.'" id="teamScoreTier'.$teamCount.'" '.$disableTier.' onchange="javascript: parseRawNumber(this); highlightRawScoreDuplication();">
 			<option value="0"></option>
 			<option value="1" ';  if($scoreRecord['7'] == "1"){echo("selected");} echo '>I</option>
 			<option value="2" '; if($scoreRecord['7'] == "2"){echo("selected");} echo '>II</option>
@@ -438,7 +447,7 @@ include_once('logon_check.php');
 			</select></td>';
 					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.' onkeyup="javascript: parseRawNumber(this);"    
       						name="teamARawScore'.$teamCount.'" id="teamARawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" ></td>';
-					echo '<td><select class="form-control" name="teamAScoreTier'.$teamCount.'" id="teamAScoreTier'.$teamCount.'" '.$disable.'>
+					echo '<td><select class="form-control" name="teamAScoreTier'.$teamCount.'" id="teamAScoreTier'.$teamCount.'" '.$disableTier.'>
 			<option value="0"></option>
 			<option value="1" ';  if($scoreRecord['7'] == "1"){echo("selected");} echo '>I</option>
 			<option value="2" '; if($scoreRecord['7'] == "2"){echo("selected");} echo '>II</option>

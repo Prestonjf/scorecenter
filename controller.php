@@ -2854,11 +2854,15 @@ else {
 	/**** TODO / GENERAL ISSUES ********
 	
 	-- ISSUES TO IMPLEMENT / FIX --
-	** Tied Raw Score w/ Tier should set Rank as same number when auto calculate clicked. (So user can't save duplicate ranks)
-	** Slideshow should be downloadable to PDF.
-	** Slideshow, Display no data if no animations / results for event
 	
+	-- CRITICAL
+	
+	-- HIGH
+	** Slideshow should be downloadable to PDF/?.
+	** Slideshow, Display no data if no animations / results for event
 	** Page Iterator Fix on Tournaments, Add to Home Page
+	
+	-- MEDIUM
 	** Log More User data on login
 	** Make Logo Dynamic
 	** Make Footer Text Dynamic
@@ -2869,9 +2873,7 @@ else {
 	** Make General Slide Builder for Slideshow
 	** Tie Scores display tied position in Raw Score Field
 
-	
-	
-	-- LOW PRIORITY ISSUES --
+	-- LOW
 	** Manual Reminder email to supervisor
 	** Results Order By OPTION / Keep Color PAttern per Row
 	** Generate Results as XML
@@ -2879,6 +2881,7 @@ else {
 	** controller class security
 	** declare constants on login (to avoid notices if server has them turned on)
 	** Print Broke Again?
+	** Implement offline Event Score Version. Exportable to file, and importable in online version
 	
 	
 	-- APP LIMITATIONS --
