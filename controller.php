@@ -344,6 +344,13 @@ else if (isset($_GET['viewSlideShow'])) {
 	header("Location: slideshow.php");
 	exit();
 }
+else if (isset($_GET['exportSlideShowPDF'])) {
+	$id = $_GET['exportSlideShowPDF'];
+	loadSlideShow($id, $mysqli);
+	exportSlideShowPDF($mysqli);
+	//header("Location: tournament_results.php");
+	exit();
+}
 else if ($_GET['command'] != null and $_GET['command'] == 'exitSlideShow') {
 	clearSlideshow();
 	header("Location: tournament_results.php");
@@ -2445,11 +2452,29 @@ else {
 		
 		$_SESSION["resultSlideshowIndex"] = 0;
 		$_SESSION["resultSlideshow"] = json_encode($resultSlideshow);
+		$_SESSION["resultSlideshowPDF"] = $resultSlideshow;
 	}
 	
 	function clearSlideshow() {
 		$_SESSION["resultSlideshow"] = null;
 	}	
+	
+	function exportSlideShowPDF($mysqli) {
+		$resultSlideshow = $_SESSION["resultSlideshowPDF"]; //json_decode($_SESSION["resultSlideshow"], FALSE);
+		
+		require('libs/fpdf/fpdf.php');
+		$pdf = new FPDF();
+		
+		foreach ($resultSlideshow as $slide) {
+			$pdf->AddPage();
+			$pdf->SetFont('Arial','B',16);
+			$pdf->Cell(40,10,$slide->getHeaderText());
+		}
+		
+		$pdf->Output('D', 'slideshow.pdf',true);
+	
+	
+	}
 	
 	// USER MANAGEMENT ------------------------------------------------
 	function loadAllUsers($mysqli) {
@@ -2894,6 +2919,7 @@ else {
 	^^ PHPEXCEL
 	^^ JQUERY Table Sorter
 	^^ Spectrum Color Picker
+	^^ FPDF
 		
 	
 	**** TODO / GENERAL ISSUES *********/
