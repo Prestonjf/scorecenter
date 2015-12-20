@@ -2225,8 +2225,8 @@ else {
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND SCORE <= T.EVENTS_AWARDED AND SCORE > 0
-					INNER JOIN TOURNAMENT_TEAM TT1 on TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID
-					INNER JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
+					LEFT JOIN TOURNAMENT_TEAM TT1 on TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1
+					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
 					WHERE TE.TOURNAMENT_ID=".$cId." GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE ASC ";
 			$results = $mysqli->query($query);
 			$event = null;
@@ -2253,8 +2253,8 @@ else {
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND SCORE <= T.EVENTS_AWARDED AND SCORE > 0
-					INNER JOIN TOURNAMENT_TEAM TT1 on TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID
-					INNER JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
+					LEFT JOIN TOURNAMENT_TEAM TT1 on TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1
+					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
 					WHERE TE.TOURNAMENT_ID=".$bId." GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE ASC ";
 			$results = $mysqli->query($query);
 			$event = null;
@@ -2281,8 +2281,8 @@ else {
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND SCORE <= T.EVENTS_AWARDED  AND SCORE > 0
-					INNER JOIN TOURNAMENT_TEAM TT1 on TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID
-					INNER JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
+					LEFT JOIN TOURNAMENT_TEAM TT1 on TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1
+					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
 					WHERE TE.TOURNAMENT_ID=".$aId." GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE ASC ";
 			$results = $mysqli->query($query);
 			$event = null;
@@ -2314,7 +2314,7 @@ else {
 					$teamList = array();
 					$count2 = 1;
 					while ($count2 <  sizeof($event)) {
-						array_push($teamList, $count2.'. '.$event[$count2]);
+						if ($event[$count2] != null) array_push($teamList, $count2.'. '.$event[$count2]);
 					$count2++;
 					}
 					$slide->setTeamNames($teamList);
@@ -2328,7 +2328,7 @@ else {
 					$teamList = array();
 					$count2 = 1;
 					while ($count2 <  sizeof($event)) {
-						array_push($teamList, $count2.'. '.$event[$count2]);
+						if ($event[$count2] != null) array_push($teamList, $count2.'. '.$event[$count2]);
 					$count2++;
 					}
 					$slide->setTeamNames($teamList);
@@ -2342,7 +2342,7 @@ else {
 					$teamList = array();
 					$count2 = 1;
 					while ($count2 <  sizeof($event)) {
-						array_push($teamList, $count2.'. '.$event[$count2]);
+						if ($event[$count2] != null) array_push($teamList, $count2.'. '.$event[$count2]);
 					$count2++;
 					}
 					$slide->setTeamNames($teamList);
@@ -2464,11 +2464,49 @@ else {
 		
 		require('libs/fpdf/fpdf.php');
 		$pdf = new FPDF();
+		$pdf->SetTitle('Tournament Results Slideshow', true);
 		
 		foreach ($resultSlideshow as $slide) {
-			$pdf->AddPage();
-			$pdf->SetFont('Arial','B',16);
-			$pdf->Cell(40,10,$slide->getHeaderText());
+			// General Slide Setup
+			$pdf->AddPage('L','Letter', 0);
+			$pdf->SetAutoPageBreak(True, 2);
+			// Logic For Each Type of Slide
+			if ($slide->getType() == 'PLACEHOLDER') {
+				$pdf->SetFont('Arial','I',16);
+				$pdf->Cell(0,10,'Science Olympiad',0,0,'C');
+				$pdf->Ln(16);
+				$pdf->SetFont('Arial','B',48);
+				$pdf->MultiCell(0,16,$slide->getHeaderText(),0,'C',false);
+				$pdf->Ln(16);
+				$len = $pdf->GetPageWidth();
+				$len = ($len / 2) - 50;
+				$pdf->SetX($len);
+				$pdf->Image($slide->getLogoPath(),null,null,100,100);
+				$pdf->Ln(16);
+				$pdf->SetFont('Arial','BI',20);
+				$pdf->Cell(0,10,$slide->getText(),0,0,'C');
+				
+			}
+			else if ($slide->getType() == 'GENERAL') {
+			$pdf->Cell(0,10,$slide->getHeaderText(),0,0,'C');
+			
+			
+			
+			}
+			else if ($slide->getType() == 'EVENTSCORE') {
+			
+			$pdf->Cell(0,10,$slide->getHeaderText(),0,0,'C');
+			
+			
+			}
+			else if ($slide->getType() == 'OVERALLRESULTS') {
+			$pdf->Cell(0,10,$slide->getHeaderText(),0,0,'C');
+			
+			
+			
+			}
+			
+			
 		}
 		
 		$pdf->Output('D', 'slideshow.pdf',true);
@@ -2884,7 +2922,6 @@ else {
 	
 	-- HIGH
 	** Slideshow should be downloadable to PDF/?.
-	** Slideshow, Display no data if no animations / results for event
 	** Page Iterator Fix on Tournaments, Add to Home Page
 	
 	-- MEDIUM

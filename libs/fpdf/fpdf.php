@@ -169,6 +169,13 @@ function __construct($orientation='P', $unit='mm', $size='A4')
 	$this->PDFVersion = '1.3';
 }
 
+function GetPageWidth() {
+	return $this->w;
+}
+function GetPageHeight() {
+	return $this->h;
+}
+
 function SetMargins($left, $top, $right=null)
 {
 	// Set left, top and right margins

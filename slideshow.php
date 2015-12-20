@@ -86,6 +86,7 @@
 			var count  = 0; 
 			var animationPosition = slide.animationPosition;
 			var animationCount = Object.keys(slideshow[slideshowIndex].teamNames).length;
+			if (animationCount == 0) slideHtml += '<div style="width: 100%; font-size: 350%; white-space:nowrap; text-align: left;">' + 'No Results Available' + '</div>';
 			
 			while (count < animationCount) {
 				if (((animationCount-1) - animationPosition) >= count) slideHtml += '<div style="width: 100%; font-size: 300%; white-space:nowrap; text-align: center;">&nbsp;</div>';
