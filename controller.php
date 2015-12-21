@@ -2488,22 +2488,45 @@ else {
 				
 			}
 			else if ($slide->getType() == 'GENERAL') {
-			$pdf->Cell(0,10,$slide->getHeaderText(),0,0,'C');
+				$pdf->SetFont('Arial','I',16);
+				$pdf->Cell(0,10,'Science Olympiad',0,0,'C');
+				$pdf->Ln(16);
+				$pdf->SetFont('Arial','B',48);
+				$pdf->MultiCell(0,16,$slide->getHeaderText(),0,'C',false);
+				$pdf->Ln(16);
 			
-			
-			
+				$pdf->SetFont('Arial','B',36);
+				$pdf->MultiCell(0,16,$slide->getText(),0,'L',false);
 			}
-			else if ($slide->getType() == 'EVENTSCORE') {
-			
-			$pdf->Cell(0,10,$slide->getHeaderText(),0,0,'C');
-			
-			
+			else if ($slide->getType() == 'EVENTSCORE') {		
+				$pdf->SetFont('Arial','B',48);
+				$pdf->MultiCell(0,16,$slide->getHeaderText(),0,'C',false);
+				$pdf->Ln(16);
+				foreach ($slide->getTeamNames() as $team) {
+					$pdf->SetFont('Arial','',36);
+					$pdf->Cell(0,10, $team,0,0,'L');
+					$pdf->Ln(18);
+				}
+				if (sizeof($slide->getTeamNames()) == 0) {
+					$pdf->SetFont('Arial','',36);
+					$pdf->Cell(0,10, 'No Results Available',0,0,'L');
+					$pdf->Ln(18);
+				}
 			}
 			else if ($slide->getType() == 'OVERALLRESULTS') {
-			$pdf->Cell(0,10,$slide->getHeaderText(),0,0,'C');
-			
-			
-			
+				$pdf->SetFont('Arial','B',48);
+				$pdf->MultiCell(0,16,$slide->getHeaderText(),0,'C',false);
+				$pdf->Ln(16);
+				foreach ($slide->getLabelValues() as $labels) {
+					$pdf->SetFont('Arial','',26);	
+					$pdf->Cell(0,10, $labels[0],0,0,'L');
+					$pdf->Ln(18);
+					
+					$pdf->SetFont('Arial','',36);	
+					$pdf->Cell(0,10, $labels[1],0,0,'L');
+					$pdf->Ln(18);
+					$pdf->Ln(10);
+				}
 			}
 			
 			
@@ -2921,7 +2944,6 @@ else {
 	-- CRITICAL
 	
 	-- HIGH
-	** Slideshow should be downloadable to PDF/?.
 	** Page Iterator Fix on Tournaments, Add to Home Page
 	
 	-- MEDIUM
