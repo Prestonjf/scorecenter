@@ -94,7 +94,7 @@
 				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 					clearError();
 					clearSuccess();
-					if (xmlhttp.responseText == 'error') {
+					if (xmlhttp.responseText.trim() == 'error') {
 						//error message
 						displayError("<strong>Cannot Delete Event:</strong> Scores have already been entered for this event.")					
 					}
@@ -117,7 +117,7 @@
 				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 					clearError();
 					clearSuccess();
-					if (xmlhttp.responseText == 'error') {
+					if (xmlhttp.responseText.trim() == 'error') {
 						//error message
 						displayError("<strong>Cannot Delete Team:</strong> Scores have already been entered for this team.")	
 					}
@@ -140,7 +140,7 @@
 				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 					clearError();
 					clearSuccess();
-					if (xmlhttp.responseText == 'error') {
+					if (xmlhttp.responseText.trim() == 'error') {
 						//error message	
 					}
 					else {
@@ -162,10 +162,10 @@
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			clearError();
 			clearSuccess();
-			if (xmlhttp.responseText == 'error1' || xmlhttp.responseText == 'error2') {
+			if (xmlhttp.responseText.trim() == 'error1' || xmlhttp.responseText.trim() == 'error2') {
 				//error message
-				if (xmlhttp.responseText == 'error1') displayError("<strong>Cannot Add Event:</strong> Event already added or no event selected.");
-				else if (xmlhttp.responseText == 'error2') displayError("<strong>Cannot Add Event:</strong> Cannot add more than "+document.getElementById('numberEvents').value+" events.");				
+				if (xmlhttp.responseText.trim() == 'error1') displayError("<strong>Cannot Add Event:</strong> Event already added or no event selected.");
+				else if (xmlhttp.responseText.trim() == 'error2') displayError("<strong>Cannot Add Event:</strong> Cannot add more than "+document.getElementById('numberEvents').value+" events.");				
 			}
 			else {
 				// success message
@@ -185,10 +185,10 @@
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			clearError();
 			clearSuccess();
-			if (xmlhttp.responseText == 'error1' || xmlhttp.responseText == 'error2') {
+			if (xmlhttp.responseText.trim() == 'error1' || xmlhttp.responseText.trim() == 'error2') {
 				//error message 
-				if (xmlhttp.responseText == 'error1') displayError("<strong>Cannot Add Team:</strong> Team already added or no team selected.");
-				else if (xmlhttp.responseText == 'error2') displayError("<strong>Cannot Add Team:</strong> Cannot add more than "+document.getElementById('numberTeams').value+" teams.");
+				if (xmlhttp.responseText.trim() == 'error1') displayError("<strong>Cannot Add Team:</strong> Team already added or no team selected.");
+				else if (xmlhttp.responseText.trim() == 'error2') displayError("<strong>Cannot Add Team:</strong> Cannot add more than "+document.getElementById('numberTeams').value+" teams.");
 			}
 			else {
 				// success message
@@ -208,9 +208,9 @@
 		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 			clearError();
 			clearSuccess();
-			if (xmlhttp.responseText == 'error1' || xmlhttp.responseText == 'error2') {
+			if (xmlhttp.responseText.trim() == 'error1' || xmlhttp.responseText.trim() == 'error2') {
 				//error message 
-				if (xmlhttp.responseText == 'error1') displayError("<strong>Cannot Add Verifier:</strong> Verifier already added or no verifier selected.");
+				if (xmlhttp.responseText.trim() == 'error1') displayError("<strong>Cannot Add Verifier:</strong> Verifier already added or no verifier selected.");
 			}
 			else {
 				// success message
