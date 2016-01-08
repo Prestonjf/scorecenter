@@ -2725,7 +2725,7 @@ else {
 			$userSessionInfo->setPhoneNumber($account['8']);
 			
 			$_SESSION["userSessionInfo"] = serialize($userSessionInfo);
-			$_SESSION["userEventDate"] = date("m/d/y");
+			//$_SESSION["userEventDate"] = date("m/d/y");
 			$_SESSION['sessionTimeout'] = time(); // Session Timeout
 			
 			// Log Login Success
@@ -2947,6 +2947,7 @@ else {
 	-- CRITICAL
 	
 	-- HIGH
+	** load highest points per event when supervisor logs in
 	** Page Iterator Fix on Tournaments, Add to Home Page
 	
 	-- MEDIUM
@@ -2959,6 +2960,13 @@ else {
 	** Work on About Page
 	** Make General Slide Builder for Slideshow
 	** Tie Scores display tied position in Raw Score Field
+	
+	** Filter supervisor drop down in edit tournament
+	** Filter Verifier drop down in edit tournament
+	** Make Offline Event Score screen. Export/Import Function for offline users
+	** Delete user function
+	** 
+	
 
 	-- LOW
 	** Manual Reminder email to supervisor

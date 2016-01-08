@@ -77,7 +77,7 @@
  			return;
  		}
  		else {
- 			ele.value = '';
+ 		//	ele.value = '';
  		}
 	}
   
