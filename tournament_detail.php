@@ -26,7 +26,13 @@
 	function limitNumber(element) {
 		var max = 1000;
 		if (isNaN(element.value)) element.value = '';
-		if (element.value > max || element.value < 1) element.value = '';
+		if (element.value > max || element.value < 0) element.value = '';
+	}
+	function limitNumberNegatives(element) {
+		var max = 1000;
+		if (element.value.indexOf('-') == 0 && element.value.length == 1) return;
+		if (isNaN(element.value)) element.value = '';
+		if (element.value > max) element.value = '';
 	}
 	
 	function validate() {
@@ -34,7 +40,7 @@
 		clearSuccess();
 		var error = false;
 		var error2 = false;
-		var fields = ["tournamentName", "tournamentDivision", "tournamentLocation","tournamentDate","numberEvents","numberTeams","highestScore","eventsAwarded","overallAwarded"];
+		var fields = ["tournamentName", "tournamentDivision", "tournamentLocation","tournamentDate","numberEvents","numberTeams","highestScore","eventsAwarded","overallAwarded", "highestScoreAlt", "pointsForNP","pointsForDQ"];
 		var str;
 		for (str in fields) {
 			if (document.getElementById(fields[str]).value.length === 0 || !document.getElementById(fields[str]).value.trim()) {
@@ -382,7 +388,7 @@
 			value=<?php echo '"'.$_SESSION["numberTeams"].'"' ?>></td>
 	</tr>
 	<tr>
-		<td><label for="highestScore">Max Points per Event:<span class="red">*</span></label></td>
+		<td><label for="highestScore">Highest Rank (Primary Teams):<span class="red">*</span></label></td>
 		<td><input type="text" class="form-control" name="highestScore" id="highestScore" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
 			value=<?php echo '"'.$_SESSION["highestScore"].'"' ?>></td>
 		<td><label for="highestScore">Total Points:<span class="red">*</span></label></td>
@@ -392,11 +398,21 @@
 			<label for="totalPointsWins1">High Score Wins</label></td>
 	</tr>
 	<tr>
+	<td><label for="highestScoreAlt">Highest Rank (Alternate Teams):<span class="red">*</span></label></td>
+	<td><input type="text" class="form-control" name="highestScoreAlt" id="highestScoreAlt" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
+		value=<?php echo '"'.$_SESSION["highestScoreAlt"].'"' ?>></td>
 	<td>
 	<label for="lockScoresFlag">Lock Scores: </label></td><td><input type="checkbox" id="lockScoresFlag" name="lockScoresFlag" <?php if ($_SESSION["lockScoresFlag"] == '1') echo 'checked'; ?> value="1" <?php if ($userRole != 'ADMIN') echo 'disabled'; ?>>
 	</td>
-	<td></td>
-	<td></td>
+	</tr>
+	<tr>
+	<td><label for="pointsForNP">Points For NP:<span class="red">*</span></label></td>
+	<td><input type="text" class="form-control" name="pointsForNP" id="pointsForNP" onkeydown="limitNumberNegatives(this);" onkeyup="limitNumberNegatives(this);"
+		value=<?php echo '"'.$_SESSION["pointsForNP"].'"' ?>></td>
+	<td><label for="pointsForDQ">Points For DQ:<span class="red">*</span></label></td>
+	<td><input type="text" class="form-control" name="pointsForDQ" id="pointsForDQ" onkeydown="limitNumberNegatives(this);" onkeyup="limitNumberNegatives(this);"
+		value=<?php echo '"'.$_SESSION["pointsForDQ"].'"' ?>></td>
+	<td>
 	</tr>
 	<tr>
 		<td colspan="4"><label for="tournamentDescription">Description: </label></td>

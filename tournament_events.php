@@ -78,7 +78,7 @@
 	</tr>
 	 <tr>
 	 <td><h4>Division: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentDivision"]; ?></span></h4></td>
-     <td><h4>Max Points Earned Per Event: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["highestScore"]; ?></span></h4></td>	
+     <td><!--<h4>Max Points Earned Per Event: <span style="font-weight:normal;font-size:14px;"><?php //echo $_SESSION["highestScore"]; ?></span></h4>--></td>	
 	</tr>
 	</table>
 	<br />
