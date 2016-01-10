@@ -388,7 +388,7 @@
 			value=<?php echo '"'.$_SESSION["numberTeams"].'"' ?>></td>
 	</tr>
 	<tr>
-		<td><label for="highestScore">Highest Rank (Primary Teams):<span class="red">*</span></label></td>
+		<td><label for="highestScore">Last/First Place Point (Primary):<span class="red">*</span></label></td>
 		<td><input type="text" class="form-control" name="highestScore" id="highestScore" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
 			value=<?php echo '"'.$_SESSION["highestScore"].'"' ?>></td>
 		<td><label for="highestScore">Total Points:<span class="red">*</span></label></td>
@@ -398,7 +398,7 @@
 			<label for="totalPointsWins1">High Score Wins</label></td>
 	</tr>
 	<tr>
-	<td><label for="highestScoreAlt">Highest Rank (Alternate Teams):<span class="red">*</span></label></td>
+	<td><label for="highestScoreAlt">Last/First Place Point (Alternate):<span class="red">*</span></label></td>
 	<td><input type="text" class="form-control" name="highestScoreAlt" id="highestScoreAlt" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
 		value=<?php echo '"'.$_SESSION["highestScoreAlt"].'"' ?>></td>
 	<td>

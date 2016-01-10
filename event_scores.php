@@ -319,6 +319,9 @@ include_once('logon_check.php');
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
       
+       <?php 
+       $pointsLabel = 'Last Place Points';
+       if ($_SESSION["pointsSystem"]=='High Score Wins' )  $pointsLabel = 'First Place Points'; ?>
         
      <h1>Enter Event Scores</h1>
 	 <table width="100%">
@@ -331,12 +334,12 @@ include_once('logon_check.php');
 	 <td><h4>Supervisor: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventSupervisor"]; ?></span></h4></td>
 	 </tr>
 	 <tr>
-	 <td><h4>Highest Rank (Primary Teams): <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["highestScore"]; ?></span></h4></td>
 	 <td><h4>Event Scoring Algorithm: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["scoreSystemText"]; ?> Wins</span></h4></td>
-	 <tr>
-	 <td><h4>Highest Rank (Alternate Teams): <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["highestScoreAlt"]; ?></span></h4></td>
 	 <td></td>
-	 </tr>
+<!--	 <tr>
+	 <td><h4><?php //echo $pointsLabel;?> (Alternate Teams): <span style="font-weight:normal;font-size:14px;"><?//php echo $_SESSION["highestScoreAlt"]; ?></span></h4></td>
+	 <td><h4><?php //echo $pointsLabel;?> (Primary Teams): <span style="font-weight:normal;font-size:14px;"><?php //echo $_SESSION["highestScore"]; ?></span></h4></td>
+	 </tr> -->
 	 </tr>
 	 </table>
 	 <div class="instructions">
