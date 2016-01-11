@@ -225,7 +225,7 @@ include_once('logon_check.php');
         if (document.getElementById('showInstructions').style.display != 'none') {
             document.getElementById('showInstructions').style.display = 'none';
             document.getElementById('hideInstructions').style.display = 'inline';
-            document.getElementById(shID).style.height = '275px';
+            document.getElementById(shID).style.height = '375px';
         }
         else {
             document.getElementById('showInstructions').style.display = 'inline';
@@ -348,15 +348,41 @@ include_once('logon_check.php');
      <a href="#" id="hideInstructions" class="hideLink" onclick="showInstructions('instructionsText');return false;">Click to Hide</a>
      
      <div id="instructionsText" class="instructionsText"><br /><br />
-     1. Enter the team's status. Use the status key below to determine the correct code. Non Participating and Disqualified teams should be ranked with 0 and will receive last place points.<br /><br />
-     2. Enter the Raw Score (Exam Score, Calculated Score, Points Earned etc) for each team. Not Required.<br /><br />
-     3. Enter the Tier or Rank Group if applicable for each team. Not Required<br /><br />
-	 4. If the team has a tie, enter a short description of the tie breaker for the tied teams. Not Required<br /><br />
-	 5A. Enter the finishing rank each team earned. If the team did not participate or was disqualified, enter 0. REQUIRED<br />
-	 -OR- <br />
-	 5B. Click the Calculate Ranks button below to allow the system to automatically calculate event ranks. (Calculation algorithm for this event is: <?php echo $_SESSION["scoreSystemText"]; ?> wins.) Tied teams will require manually modification of their ranks as the system will give the same ranks to each team. Highest rank for the tie is displayed. All ranks can be modified manually after clicking the Calculate Ranks button. REQUIRED<br /><br />
-	 6. Points earned will be calculated automatically. (Max points per event: <?php echo $_SESSION["highestScore"]; ?>. Tournament Winner: <?php echo $_SESSION["pointsSystem"]; ?>.)<br /><br />
-     7. Click save to save the event's scores. Event scores can be modified after the initial save if they have not yet been submitted. Once submitted, only a score verifier can modify the scores.
+     <table width="100%">
+     <tr><td width="1%" valign="top">0.</td>
+     <td width="99%">For each Primary and Alternate Team, do the following: <br /><br /></td>
+     </tr>
+          <tr><td valign="top">1.</td>
+     <td><b><u>Status</u></b> Enter the team's status. Use the key below to determine the correct code. <br /><br /></td>
+     </tr>
+          <tr><td valign="top">2.</td>
+     <td><b><u>Raw Score</u></b> Enter the Raw Score (Exam Score, Calculated Score, Points Earned etc).<br /><br /></td>
+     </tr>
+          <tr><td valign="top">3.</td>
+     <td><b><u>Tier</u></b> Enter the Tier or Rank Group if applicable for each team. Drop down may be disabled if this does not apply to your event.<br /><br /></td>
+     </tr>
+          <tr><td valign="top">4.</td>
+     <td><b><u>Calculate</u></b> Click the Calculate Ranks button at the bottom of the screen to allow the system to automatically calculate event ranks. (Calculation algorithm for this event is: <?php echo $_SESSION["scoreSystemText"]; ?> wins.) <br /><br /></td>
+     </tr>
+          <tr><td valign="top">5.</td>
+     <td><b><u>Ties</u></b> Once the raw score and tier (if applicable) have been entered, the raw score text field may change color. This means the team is tied. (Has the same raw score and tier). All ties must be broken. You will manually break the tie by changing the team's 'Rank' (After the calculate ranks button has been clicked) By default, the tied teams will be given the same rank. For example, if two teams tie for fourth place, they will each be assigned 4 as there rank. The loser of the tie breaker should have their rank set to 5. You may write a description in the Tie Break field as to how the tie was broken.<br /><br /></td>
+     </tr>
+               <tr><td valign="top">6.</td>
+     <td><b><u>Primary vs. Alternates</u></b> Primary teams and Alternate teams will be ranked independent of each other. These teams do not compete against one another. The Primary teams will be ranked starting at 1 and the Alternate teams will be ranked starting at 1. <br /><br /></td>
+     </tr>
+          <tr><td valign="top">7.</td>
+     <td><b><u>Rank Errors</u></b> If the ranks are not calculated correctly, you can manually set all the team's ranks. Enter 0 if the team's status is PX, NP, or DQ. Two team's cannot have the same rank unless the rank is 0. All ranks must be sequential starting at 1. (Clicking the Calculate rank button will overwrite the rank values)<br /><br /></td>
+     </tr>
+          <tr><td valign="top">8.</td>
+     <td><b><u>Points Earned</u></b> Points earned will be calculated automatically and used for the overall tournament rankings. Tournament Winner: <?php echo $_SESSION["pointsSystem"]; ?>.) Participating teams will earn points corresponding to their rank value. Teams with a status of PX will earn last place points. Teams with a status of NP will earn last place points + <?php echo $_SESSION["pointsForNP"]; ?>. Teams with a status of DQ will earn last place points + <?php echo $_SESSION["pointsForDQ"]; ?>.<br /><br /></td>
+     </tr>
+               <tr><td valign="top">9.</td>
+     <td><b><u>Save</u></b> Click the save button to save the event scores. Event scores can be modified after the initial save if they have not yet been submitted. Once submitted, only a score verifier can modify the scores.<br /><br /></td>
+     </tr>
+	 </table>
+
+
+
      </div>
      </h6>  
      </div>  
