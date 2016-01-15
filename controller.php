@@ -2962,7 +2962,6 @@ else {
 	
 	-- HIGH
 	** Alternate scores - Save blank when cleared
-	** Ties w/ tiers highlighting issue
 	** highlight alternate ties
 	
 	** load highest points per event when supervisor logs in

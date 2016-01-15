@@ -98,6 +98,7 @@ include_once('logon_check.php');
 		var count = 0;
 		var scoreArr = [];
 		var duplicates = {};
+		var key = '';
 		var pCount = 0;
 		var colorPalette = ["#FFD5D5","#FFFFCC","#E1F7D5","#C9C9FF","#F1CBFF","#FFE7CC","#CCFFFD","#EBE8E0","#939393","#CFE4F1"];
 		
@@ -106,11 +107,12 @@ include_once('logon_check.php');
 				var score = $('#teamRawScore'+count).val();
 				var tier = $('#teamScoreTier'+count).val();
 				document.getElementById('teamRawScore'+count).style.backgroundColor = "#FFFFFF";
-				scoreArr.forEach(function(entry) {
+				scoreArr.forEach(function(entry) {				
 					if (score == entry[0] && tier == entry[1]) {
-						if (entry[0] in duplicates);
+						key = entry[0] + '-' + entry[1];
+						if (key in duplicates);
 						else {
-							duplicates[entry[0]] = colorPalette[pCount];
+							duplicates[key] = colorPalette[pCount];
 							if (pCount == 9 )pCount = 0;
 							else pCount++;
 						}
@@ -129,8 +131,10 @@ include_once('logon_check.php');
 		while (count < 1000) {
 			if  ($('#teamRawScore'+count) != null && $('#teamRawScore'+count).val() != null) {
 				var score = $('#teamRawScore'+count).val();
-				if (score in duplicates) {
-					document.getElementById('teamRawScore'+count).style.backgroundColor = duplicates[score];			
+				var tier = $('#teamScoreTier'+count).val();
+				key = score + '-' + tier;
+				if (key in duplicates) {
+					document.getElementById('teamRawScore'+count).style.backgroundColor = duplicates[key];			
 				}
 			}
 			else break;
