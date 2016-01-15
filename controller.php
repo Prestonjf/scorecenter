@@ -2961,10 +2961,17 @@ else {
 	-- CRITICAL
 	
 	-- HIGH
+	** Alternate scores - Save blank when cleared
+	** Ties w/ tiers highlighting issue
+	** highlight alternate ties
+	
 	** load highest points per event when supervisor logs in
 	** Page Iterator Fix on Tournaments, Add to Home Page
 	
 	-- MEDIUM
+	** View Results Grid - Line Break for Long Text/Names?
+	** Add number of teams / last place points to instructions.
+	
 	** Log More User data on login
 	** Make Logo Dynamic
 	** Make Footer Text Dynamic
