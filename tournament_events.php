@@ -94,12 +94,12 @@
             <tr> 
                 <th data-field="name" data-align="right" data-sortable="true">Event Name</th>
                 <th data-field="division" data-align="center" data-sortable="true">Division</th>
-                <th data-field="trialEvent" data-align="center" data-sortable="true">Trial Event?</th>
+                <th data-field="trialEvent" data-align="center" data-sortable="true">Trial Event <img src="img/question_blue.png" alt="check_green" height="10" width="10" data-toggle="tooltip" title="Trial events are excluded from the overall rankings calculation."></th>
                 <th data-field="scoresComplete" data-align="center" data-sortable="true">Teams Scored</th>
-                <th data-field="completed" data-align="center" data-sortable="true">Submitted?</th>
-                <th data-field="completed" data-align="center" data-sortable="true">Verified?</th>
+                <th data-field="completed" data-align="center" data-sortable="true">Submitted <img src="img/question_blue.png" alt="check_green" height="10" width="10" data-toggle="tooltip" title="Supervisor has submitted the completed scores for verification."></th>
+                <th data-field="completed" data-align="center" data-sortable="true">Verified <img src="img/question_blue.png" alt="check_green" height="10" width="10" data-toggle="tooltip" title="Verifier has validated the event scores were entered correctly."></th>
                 <th data-field="actions" data-sortable="true">Actions</th>
-                <th data-field="completed" data-align="center" data-sortable="true">Completed?</th>
+                <th data-field="completed" data-align="center" data-sortable="true">Completed <img src="img/question_blue.png" alt="check_green" height="10" width="10" data-toggle="tooltip" title="All team's scores have been submitted and verified for the event."></th>
             </tr>
         </thead>
         <tbody>
@@ -148,6 +148,11 @@
     <script src="js/jquery-1.11.3.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
+    <script>
+		$(document).ready(function(){
+    		$('[data-toggle="tooltip"]').tooltip(); 
+		});
+	</script>
     
     <?php 
     	if ($_SESSION['savesuccessScore'] != null and $_SESSION['savesuccessScore'] == '1') { ?>
