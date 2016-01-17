@@ -1,7 +1,11 @@
 <script type="text/javascript">
-	function about() { 
-		alert('Score Center \n \nDeveloped by Michigan Science Olympiad \nAn open source scoring application for Science Olympiad Tournaments. \n \nVersion: 1.0 (Beta) - November 2015'); 
-	}
+	    jQuery(document).ready(function($){
+   			$('#aboutLinkBox').popBox({width:200,height:350},'about');
+
+			$('#aboutLink').click(function(){
+   		 		$('#aboutLinkBox').triggerHandler('focus');
+			});
+	    });
 
 </script>
 
@@ -29,10 +33,11 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Configuration<span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a href="#" onclick="about();return false;" >About</a></li>
+            <li><a href="#" id="aboutLink">About</a></li>
           </ul>
         </li>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
+<textarea id="aboutLinkBox" style="display: none;"></textarea>

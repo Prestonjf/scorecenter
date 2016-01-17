@@ -43,8 +43,6 @@ include_once('logon_check.php');
   <head> 
   
 	<?php include_once('libs/head_tags.php'); ?>
-	 <script src="js/popBox1.3.0.js" type="text/javascript"></script>
-	<link href="css/popBox1.3.0.css" rel="stylesheet" type="text/css" />
 	
   <script type="text/javascript">
   
@@ -241,9 +239,9 @@ include_once('logon_check.php');
 
 
     jQuery(document).ready(function($){
-    	$('#rankBox').popBox({width:200,height:500});
-   		$('#rawBox').popBox({width:200,height:500});
-   		$('#tierBox').popBox({width:200,height:500});
+    	$('#rankBox').popBox({width:200,height:350}, 'copyPaste');
+   		$('#rawBox').popBox({width:200,height:350},'copyPaste');
+   		$('#tierBox').popBox({width:200,height:350},'copyPaste');
    		
    		$('#pasteRanks').click(function(){
    		 	$('#rankBox').triggerHandler('focus');

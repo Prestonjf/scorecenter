@@ -10,6 +10,7 @@
     echo '<link href="js/jquery-ui-1.11.4/jquery-ui.css" rel="stylesheet">';
     echo '<link rel="icon" type="image/png" href="img/favicon.png" />';
     echo '<link href="css/tablesorter.css" rel="stylesheet">';
+    echo '<link href="css/popBox1.3.0.css" rel="stylesheet" type="text/css" />';
 
 
     echo '<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->';
@@ -24,4 +25,6 @@
   	echo '<script src="js/jquery-ui-1.11.4/jquery-ui.js"></script>';
  	echo '<script type="text/javascript" src="js/jquery.tablesorter.js"></script>';
   	echo '<script type="text/javascript" src="js/scorecenter.js"></script>';
+  	echo '<script src="js/popBox1.3.0.js" type="text/javascript"></script>';
+	
 ?>

@@ -32,7 +32,7 @@
 */
 
 (function ($) {
-    $.fn.popBox = function (options) {
+    $.fn.popBox = function (options, type) {
 
         var defaults = {
             height: 100,
@@ -48,8 +48,15 @@
 
             var inputName = 'popBoxInput' + obj.attr("Id");
             var labelValue = $("label[for=" + obj.attr('id') + "]").text();
-
-            obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label>Copy values from a spreadsheet (in corresponding team order as this screen) <br />and paste them in the text field below. Do not include alternate teams. <br />Once finished, select done.</label><br /><label style="display: none;" for="' + inputName + '">' + labelValue + '</label><textarea id="' + inputName + '" name="' + inputName + '" class="popBox-input" /><div class="done-button"><input type="button" value="Done" class="button blue small"/></div></div>');
+			
+			if (type == 'copyPaste') {
+            	obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label><span style="font-weight:normal;font-size:14px;"><h4>Bulk Copy</h4>Copy values from a spreadsheet (in corresponding team order as this screen) <br />and paste them in the text field below. Do not include alternate teams. <br />Once finished, select done.</label><br /><label style="display: none;" for="' + inputName + '">' + labelValue + '</span></label><textarea id="' + inputName + '" name="' + inputName + '" class="popBox-input" /><div class="done-button"><input type="button" value="Done" class="btn btn-xs btn-primary"/></div></div>');
+			}
+			else if (type == 'about') {
+			
+				obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label><span style="font-weight:normal;font-size:14px;"><h4>Tournament Score Center</h4><br />Developed by Preston Frazier <br />A web based scoring application for Science Olympiad Tournaments. <br /><br />v1.0 (Beta) - 01.17.2016</span></label><div class="done-button"><input type="button" value="Close" id="closeAbout" class="btn btn-xs btn-primary"/></div></div>');
+	
+			}
 
             obj.focus(function () {
                 $(this).next(".popBox-holder").show();
@@ -63,12 +70,14 @@
                 var objH = popBoxContainer.height();
                 var objW = popBoxContainer.width();
                 var left = (winW / 2) - (objW / 2);
-                var top = (winH / 2) - (objH / 2);
+                var top = (winH / 4) - (objH / 4);
 
                 popBoxContainer.css({ position: 'fixed', margin: 0, top: (top > 0 ? top : 0) + 'px', left: (left > 0 ? left : 0) + 'px' });
 
-                popBoxContainer.children('.popBox-input').val($(this).val().replace(RegExp(options.newlineString, "g"), "\n"));
-                popBoxContainer.children('.popBox-input').focus();
+				if (type == 'copyPaste') {
+                	popBoxContainer.children('.popBox-input').val($(this).val().replace(RegExp(options.newlineString, "g"), "\n"));
+                	popBoxContainer.children('.popBox-input').focus();
+                }
 
                 popBoxContainer.children().keydown(function (e) {
                     if (e == null) { // ie
@@ -84,16 +93,27 @@
                     }
                 });
 
+				// Close Popup Box for bulk copying values
 				var count =  1;
                 popBoxContainer.children().blur(function () {
                     if (change) {
                         $(this).parent().hide();
                         $(this).parent().prev().hide();
-                        $(this).parent().prev().prev().val($(this).val().replace(/\n/g, options.newlineString));
-						if (--count == 0) pasteText($(this).val(), $(this).parent().prev().prev().attr('id'));
+                        if (type == 'copyPaste') {
+                        	$(this).parent().prev().prev().val($(this).val().replace(/\n/g, options.newlineString));
+							if (--count == 0) pasteText($(this).val(), $(this).parent().prev().prev().attr('id'));
+						}
 						count--;
                     }
                 });
+                
+                // Close Popup Box for About Inf
+                popBoxContainer.children().click(function() {
+                if (change) {
+    				 $(this).parent().hide();
+                     $(this).parent().prev().hide();
+    				}           
+				});
 
             });
 

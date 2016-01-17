@@ -1,7 +1,15 @@
 <script type="text/javascript">
 	function about() { 
-		alert('Score Center \n \nDeveloped by Michigan Science Olympiad \nAn open source scoring application for Science Olympiad Tournaments. \n \nVersion: 1.0 (Beta) - November 2015'); 
+		alert('Score Center \n \nDeveloped by Michigan Science Olympiad \nAn open source scoring application for Science Olympiad Tournaments. \n \nVersion: 1.0 (Beta) - November 2015');
 	}
+	
+	    jQuery(document).ready(function($){
+   			$('#aboutLinkBox').popBox({width:200,height:350},'about');
+
+			$('#aboutLink').click(function(){
+   		 		$('#aboutLinkBox').triggerHandler('focus');
+			});
+	    });
 
 </script>
 
@@ -56,7 +64,7 @@
             <li role="separator" class="divider"></li>
             <?php if ($role == 'ADMIN') { ?> <li><a href="controller.php?command=loadUtilities&">Utilities</a></li><?php } ?>
             <?php } ?>
-            <li><a href="#" onclick="about();return false;" >About</a></li>
+            <li><a href="#" id="aboutLink" >About</a></li>
 			<li role="separator" class="divider"></li>
 			 <li><a href="controller.php?command=logout&">Logout</a></li>
           </ul>
@@ -65,3 +73,4 @@
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
+<textarea id="aboutLinkBox" style="display: none;"></textarea>
