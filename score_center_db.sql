@@ -1,0 +1,253 @@
+# ************************************************************
+# Sequel Pro SQL dump
+# Version 4499
+#
+# http://www.sequelpro.com/
+# https://github.com/sequelpro/sequelpro
+#
+# Host: mysql.prestonsproductions.com (MySQL 5.6.25-log)
+# Database: score_center_db
+# Generation Time: 2016-01-18 16:33:48 +0000
+# ************************************************************
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+
+# Dump of table EVENT
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `EVENT`;
+
+CREATE TABLE `EVENT` (
+  `EVENT_ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `NAME` varchar(100) DEFAULT NULL,
+  `COMMENTS` longtext,
+  `SCORE_SYSTEM_CODE` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`EVENT_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8;
+
+
+
+# Dump of table REF_DATA
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `REF_DATA`;
+
+CREATE TABLE `REF_DATA` (
+  `REF_DATA_ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `DOMAIN_CODE` varchar(30) DEFAULT NULL,
+  `REF_DATA_CODE` varchar(30) DEFAULT NULL,
+  `PARENT_REF_DATA_CODE` varchar(30) DEFAULT NULL,
+  `SORT_ORDER` int(11) DEFAULT NULL,
+  `DISPLAY_TEXT` longtext,
+  PRIMARY KEY (`REF_DATA_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+
+LOCK TABLES `REF_DATA` WRITE;
+/*!40000 ALTER TABLE `REF_DATA` DISABLE KEYS */;
+
+INSERT INTO `REF_DATA` (`REF_DATA_ID`, `DOMAIN_CODE`, `REF_DATA_CODE`, `PARENT_REF_DATA_CODE`, `SORT_ORDER`, `DISPLAY_TEXT`)
+VALUES
+	(1,'ROLE','ADMIN',NULL,0,'Admin'),
+	(2,'ROLE','VERIFIER',NULL,1,'Verifier'),
+	(3,'ROLE','SUPERVISOR',NULL,2,'Event Supervisor'),
+	(4,'PASSWORDRESET','SALT',NULL,0,'w6dMqnoztG591yiuLO8V'),
+	(5,'REGISTRATIONCODE','SUPERVISOR',NULL,0,'Science101'),
+	(6,'REGISTRATIONCODE','VERIFIER',NULL,1,'Science1358219'),
+	(7,'REGISTRATIONCODE','ADMIN',NULL,2,'Science$$1357986420'),
+	(8,'MAILSERVER','HOST',NULL,0,''),
+	(9,'MAILSERVER','PORT',NULL,1,''),
+	(10,'MAILSERVER','USERNAME',NULL,2,''),
+	(11,'MAILSERVER','PASSWORD',NULL,3,''),
+	(12,'MAILSERVER','SMTPSECURE',NULL,4,''),
+	(13,'EMAILMESSAGE','ACCOUNTCREATE',NULL,0,'Thank you for creating an account on Michigan Science Olympiad\'s Score Center. You will now be able to enter scores for events assigned to you. If you are a score verifier, you will be able to enter scores for entire tournaments. You may access Score Center at the following address with the user name and password below.'),
+	(14,'EMAILMESSAGE','PASSWORDRESET',NULL,1,'A password reset for account <account name> has been requested from the Science Olympiad Score Center application. To reset your password, select the hyperlink below and update your password on the account screen. If this message was sent in error, please disregard this email.'),
+	(15,'SCOREALGORITHM','HIGHRAW',NULL,0,'High Raw Score'),
+	(16,'SCOREALGORITHM','HIGHRAWTIER',NULL,1,'High Raw Score / Tier Ranked'),
+	(17,'SCOREALGORITHM','LOWRAW',NULL,2,'Low Raw Score'),
+	(18,'SCOREALGORITHM','LOWRAWTIER',NULL,3,'Low Raw Score / Tier Ranked'),
+	(19,'SCOREALGORITHM','HIGHRAWTIER4LOW',NULL,4,'High Raw Score / Tier Ranked / 4th Tier Low');
+
+/*!40000 ALTER TABLE `REF_DATA` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+# Dump of table TEAM
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `TEAM`;
+
+CREATE TABLE `TEAM` (
+  `TEAM_ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `NAME` varchar(100) DEFAULT NULL,
+  `CITY` varchar(100) DEFAULT NULL,
+  `EMAIL_ADDRESS` varchar(100) DEFAULT NULL,
+  `PHONE_NUMBER` varchar(100) DEFAULT NULL,
+  `DESCRIPTION` longtext,
+  `DIVISION` varchar(5) DEFAULT NULL,
+  PRIMARY KEY (`TEAM_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8;
+
+
+
+# Dump of table TEAM_EVENT_SCORE
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `TEAM_EVENT_SCORE`;
+
+CREATE TABLE `TEAM_EVENT_SCORE` (
+  `TEAM_EVENT_SCORE_ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `TOURN_TEAM_ID` int(11) DEFAULT NULL,
+  `TOURN_EVENT_ID` int(11) DEFAULT NULL,
+  `SCORE` int(11) DEFAULT NULL,
+  `POINTS_EARNED` int(11) DEFAULT NULL,
+  `RAW_SCORE` text,
+  `TIER_TEXT` text,
+  `TIE_BREAK_TEXT` text,
+  `TEAM_STATUS` varchar(2) DEFAULT NULL,
+  PRIMARY KEY (`TEAM_EVENT_SCORE_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=1613 DEFAULT CHARSET=utf8;
+
+
+
+# Dump of table TOURNAMENT
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `TOURNAMENT`;
+
+CREATE TABLE `TOURNAMENT` (
+  `TOURNAMENT_ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `NAME` varchar(100) DEFAULT NULL,
+  `LOCATION` varchar(100) DEFAULT NULL,
+  `DIVISION` varchar(10) DEFAULT NULL,
+  `DATE` date DEFAULT NULL,
+  `NUMBER_EVENTS` int(11) DEFAULT NULL,
+  `NUMBER_TEAMS` int(11) DEFAULT NULL,
+  `HIGHEST_SCORE_POSSIBLE` int(11) DEFAULT NULL,
+  `DESCRIPTION` longtext,
+  `HIGH_LOW_WIN_FLAG` int(11) DEFAULT NULL,
+  `EVENTS_AWARDED` int(11) DEFAULT NULL,
+  `OVERALL_AWARDED` int(11) DEFAULT NULL,
+  `BEST_NEW_TEAM_FLAG` int(11) DEFAULT NULL,
+  `MOST_IMPROVED_FLAG` int(11) DEFAULT NULL,
+  `LINKED_TOURN_1` int(11) DEFAULT NULL,
+  `LINKED_TOURN_2` int(11) DEFAULT NULL,
+  `SCORES_LOCKED_FLAG` int(11) DEFAULT NULL,
+  `HIGHEST_SCORE_POSSIBLE_ALT` int(11) DEFAULT NULL,
+  `ADDITIONAL_POINTS_NP` int(11) DEFAULT NULL,
+  `ADDITIONAL_POINTS_DQ` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TOURNAMENT_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+
+
+
+# Dump of table TOURNAMENT_EVENT
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `TOURNAMENT_EVENT`;
+
+CREATE TABLE `TOURNAMENT_EVENT` (
+  `TOURN_EVENT_ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `TOURNAMENT_ID` int(11) DEFAULT NULL,
+  `EVENT_ID` int(11) DEFAULT NULL,
+  `TRIAL_EVENT_FLAG` int(11) DEFAULT NULL,
+  `USER_ID` int(11) DEFAULT NULL,
+  `SUBMITTED_FLAG` int(11) DEFAULT NULL,
+  `VERIFIED_FLAG` int(11) DEFAULT NULL,
+  `COMMENTS` longtext,
+  PRIMARY KEY (`TOURN_EVENT_ID`),
+  KEY `USER_ID_FK` (`USER_ID`),
+  CONSTRAINT `USER_ID_FK` FOREIGN KEY (`USER_ID`) REFERENCES `USER` (`USER_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=134 DEFAULT CHARSET=utf8;
+
+
+
+# Dump of table TOURNAMENT_TEAM
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `TOURNAMENT_TEAM`;
+
+CREATE TABLE `TOURNAMENT_TEAM` (
+  `TOURN_TEAM_ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `TOURNAMENT_ID` int(11) DEFAULT NULL,
+  `TEAM_ID` int(11) DEFAULT NULL,
+  `TEAM_NUMBER` int(11) DEFAULT NULL,
+  `ALTERNATE_FLAG` int(11) DEFAULT NULL,
+  `BEST_NEW_TEAM_FLAG` int(11) DEFAULT NULL,
+  `MOST_IMPROVED_TEAM_FLAG` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TOURN_TEAM_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=144 DEFAULT CHARSET=utf8;
+
+
+
+# Dump of table TOURNAMENT_VERIFIER
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `TOURNAMENT_VERIFIER`;
+
+CREATE TABLE `TOURNAMENT_VERIFIER` (
+  `TOURN_VERIFIER_ID` int(11) DEFAULT NULL,
+  `TOURNAMENT_ID` int(11) DEFAULT NULL,
+  `USER_ID` int(11) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+
+# Dump of table USER
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `USER`;
+
+CREATE TABLE `USER` (
+  `USER_ID` int(4) NOT NULL AUTO_INCREMENT,
+  `USERNAME` varchar(65) NOT NULL DEFAULT '',
+  `PASSWORD` varchar(1000) NOT NULL DEFAULT '',
+  `ROLE_CODE` varchar(30) DEFAULT NULL,
+  `FIRST_NAME` varchar(65) DEFAULT NULL,
+  `LAST_NAME` varchar(65) DEFAULT NULL,
+  `PASSWORD_RESET_SALT` varchar(1000) DEFAULT NULL,
+  `ACCOUNT_ACTIVE_FLAG` int(11) DEFAULT NULL,
+  `PHONE_NUMBER` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`USER_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8;
+
+LOCK TABLES `USER` WRITE;
+/*!40000 ALTER TABLE `USER` DISABLE KEYS */;
+
+INSERT INTO `USER` (`USER_ID`, `USERNAME`, `PASSWORD`, `ROLE_CODE`, `FIRST_NAME`, `LAST_NAME`, `PASSWORD_RESET_SALT`, `ACCOUNT_ACTIVE_FLAG`, `PHONE_NUMBER`)
+VALUES
+	(1,'admin@tscorecenter.com','$1$lZ8nqapR$5QUil0/.lnmKMrlw69mrV/','ADMIN','Admin','Scorecenter',NULL,1,''),
+
+
+/*!40000 ALTER TABLE `USER` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+# Dump of table USER_LOGIN_LOG
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `USER_LOGIN_LOG`;
+
+CREATE TABLE `USER_LOGIN_LOG` (
+  `USER_LOGIN_LOG_ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `USER_ID` int(11) DEFAULT NULL,
+  `LOGIN_TIME` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`USER_LOGIN_LOG_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=233 DEFAULT CHARSET=utf8;
+
+
+
+
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
