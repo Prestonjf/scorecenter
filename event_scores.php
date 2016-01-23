@@ -140,6 +140,54 @@ include_once('logon_check.php');
 		}
 	}
 	
+		function highlightARawScoreDuplication() {
+		var count = 0;
+		var scoreArr = [];
+		var duplicates = {};
+		var key = '';
+		var pCount = 0;
+		var colorPalette = ["#FFD5D5","#FFFFCC","#E1F7D5","#C9C9FF","#F1CBFF","#FFE7CC","#CCFFFD","#EBE8E0","#939393","#CFE4F1"];
+		
+		while (count < 1000) {
+			if  ($('#teamARawScore'+count) != null && $('#teamARawScore'+count).val() != null) {
+				var score = $('#teamARawScore'+count).val();
+				var tier = $('#teamAScoreTier'+count).val();
+				document.getElementById('teamARawScore'+count).style.backgroundColor = "#FFFFFF";
+				scoreArr.forEach(function(entry) {				
+					if (score == entry[0] && tier == entry[1]) {
+						key = entry[0] + '-' + entry[1];
+						if (key in duplicates);
+						else {
+							duplicates[key] = colorPalette[pCount];
+							if (pCount == 9 )pCount = 0;
+							else pCount++;
+						}
+					}
+				});
+				if (score != '') {
+					var obj = [score,tier];
+					scoreArr.push(obj);
+				}
+			}
+			else break;		
+			count++;
+		}
+		
+		count = 0;
+		while (count < 1000) {
+			if  ($('#teamARawScore'+count) != null && $('#teamARawScore'+count).val() != null) {
+				var score = $('#teamARawScore'+count).val();
+				var tier = $('#teamAScoreTier'+count).val();
+				key = score + '-' + tier;
+				if (key in duplicates) {
+					document.getElementById('teamARawScore'+count).style.backgroundColor = duplicates[key];			
+				}
+			}
+			else break;
+			count++;
+		}
+	}
+	
 	function validate() {
 		var error = false;
 		var error2 = false;
@@ -492,9 +540,9 @@ include_once('logon_check.php');
 			<option value="N" ';  if($scoreRecord['9'] == "N"){echo("selected");} echo '>NP</option>
 			<option value="D" '; if($scoreRecord['9'] == "D"){echo("selected");} echo '>DQ</option>
 			</select></td>';
-					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.' onkeyup="javascript: parseRawNumber(this);"    
+					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.' onkeyup="javascript: parseRawNumber(this); highlightARawScoreDuplication();"    
       						name="teamARawScore'.$teamCount.'" id="teamARawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" ></td>';
-					echo '<td><select class="form-control" name="teamAScoreTier'.$teamCount.'" id="teamAScoreTier'.$teamCount.'" '.$disableTier.'>
+					echo '<td><select class="form-control" name="teamAScoreTier'.$teamCount.'" id="teamAScoreTier'.$teamCount.'" '.$disableTier.' onchange="javascript: parseRawNumber(this); highlightARawScoreDuplication();">
 			<option value="0"></option>
 			<option value="1" ';  if($scoreRecord['7'] == "1"){echo("selected");} echo '>I</option>
 			<option value="2" '; if($scoreRecord['7'] == "2"){echo("selected");} echo '>II</option>
@@ -548,6 +596,7 @@ include_once('logon_check.php');
     <script src="js/bootstrap.min.js"></script>	
     <script type="text/javascript">
     	highlightRawScoreDuplication();
+    	highlightARawScoreDuplication();
     </script>
     
   </body>

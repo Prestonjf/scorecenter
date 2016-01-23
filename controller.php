@@ -2962,7 +2962,7 @@ else {
 	
 	-- HIGH
 	** Alternate scores - Save blank when cleared
-	** highlight alternate ties
+	** Alternate last place points calculation
 	
 	** load highest points per event when supervisor logs in
 	** Page Iterator Fix on Tournaments, Add to Home Page
