@@ -70,6 +70,8 @@ include_once('logon_check.php');
 	function updatePointsEarned(section, id, type, status) {
 		var element = document.getElementById(section+id);
 		var max = <?php echo $_SESSION["tournamentHighestScore"];?>;
+		if (section == 'teamAScore') max = <?php echo $_SESSION["highestScoreAlt"];?>;
+		var maxA = <?php echo $_SESSION["highestScoreAlt"];?>;
 		var lowHighFlag = <?php echo $_SESSION["highLowWinFlag"];?>;
 		
 		var npPoints = <?php echo $_SESSION["pointsForNP"];?>;

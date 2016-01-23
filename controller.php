@@ -1385,6 +1385,7 @@ else {
 				
 				
 				if ($value == '') $value = null;
+				if ($pointsEarned == '') $pointsEarned = null;
 					
 				if ($score['3'] == null or $score['3'] == '') {
 					$result = $mysqli->query("select max(TEAM_EVENT_SCORE_ID) + 1 from TEAM_EVENT_SCORE");
@@ -2960,16 +2961,15 @@ else {
 	
 	-- CRITICAL
 	
-	-- HIGH
-	** Alternate scores - Save blank when cleared
-	** Alternate last place points calculation
 	
-	** load highest points per event when supervisor logs in
-	** Page Iterator Fix on Tournaments, Add to Home Page
+	-- HIGH
+	
 	
 	-- MEDIUM
 	** View Results Grid - Line Break for Long Text/Names?
 	** Add number of teams / last place points to instructions.
+	** Page Iterator Fix on Tournaments, Add to Home Page
+	** Add feature to give awards for alternate teams
 	
 	** Log More User data on login
 	** Make Logo Dynamic
@@ -2985,7 +2985,6 @@ else {
 	** Filter Verifier drop down in edit tournament
 	** Make Offline Event Score screen. Export/Import Function for offline users
 	** Delete user function
-	** 
 	
 
 	-- LOW
@@ -2995,8 +2994,7 @@ else {
 	** AJAX on TIMEOUT	
 	** controller class security
 	** declare constants on login (to avoid notices if server has them turned on)
-	** Print Broke Again?
-	** Implement offline Event Score Version. Exportable to file, and importable in online version
+	** Update Print Functionality
 	
 	
 	-- APP LIMITATIONS --
