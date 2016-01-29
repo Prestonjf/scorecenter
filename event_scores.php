@@ -76,9 +76,11 @@ include_once('logon_check.php');
 		
 		var npPoints = <?php echo $_SESSION["pointsForNP"];?>;
 		var dqPoints = <?php echo $_SESSION["pointsForDQ"];?>;
+		var pxPoints = 0;
 		var extraPoints = 0;
 		if (document.getElementById(status+id) != null && document.getElementById(status+id).value == 'N') extraPoints += npPoints;
 		else if (document.getElementById(status+id) != null && document.getElementById(status+id).value == 'D') extraPoints += dqPoints;
+		else if (document.getElementById(status+id) != null && document.getElementById(status+id).value == 'X') extraPoints += pxPoints;
 		
 		
 		if (lowHighFlag == 0) {
@@ -477,7 +479,7 @@ include_once('logon_check.php');
 					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
 					echo '<td><select class="form-control" name="teamStatus'.$teamCount.'" id="teamStatus'.$teamCount.'" '.$disable.'>
 			<option value="P" ';  if($scoreRecord['9'] == "P"){echo("selected");} echo '>P</option>
-			<option value="X" ';  if($scoreRecord['9'] == "O"){echo("selected");} echo '>PX</option>
+			<option value="X" ';  if($scoreRecord['9'] == "X"){echo("selected");} echo '>PX</option>
 			<option value="N" ';  if($scoreRecord['9'] == "N"){echo("selected");} echo '>NP</option>
 			<option value="D" '; if($scoreRecord['9'] == "D"){echo("selected");} echo '>DQ</option>
 			</select></td>';
@@ -538,7 +540,7 @@ include_once('logon_check.php');
 					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
 			echo '<td><select class="form-control" name="teamAStatus'.$teamCount.'" id="teamAStatus'.$teamCount.'" '.$disable.'>
 			<option value="P" ';  if($scoreRecord['9'] == "P"){echo("selected");} echo '>P</option>
-			<option value="X" ';  if($scoreRecord['9'] == "O"){echo("selected");} echo '>PX</option>
+			<option value="X" ';  if($scoreRecord['9'] == "X"){echo("selected");} echo '>PX</option>
 			<option value="N" ';  if($scoreRecord['9'] == "N"){echo("selected");} echo '>NP</option>
 			<option value="D" '; if($scoreRecord['9'] == "D"){echo("selected");} echo '>DQ</option>
 			</select></td>';

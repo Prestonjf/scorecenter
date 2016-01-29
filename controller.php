@@ -2966,6 +2966,7 @@ else {
 	
 	
 	-- MEDIUM
+	** Add extra points value for PX status
 	** View Results Grid - Line Break for Long Text/Names?
 	** Add number of teams / last place points to instructions.
 	** Page Iterator Fix on Tournaments, Add to Home Page
