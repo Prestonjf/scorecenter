@@ -83,8 +83,8 @@ else if ($_GET['command'] != null and $_GET['command'] == 'updateResultPage') {
 }
 
 // All Commands Below Require An Active Session
-// Session Timeout 30 Minutes
-if ($_SESSION['sessionTimeout'] + 30 * 60 < time()) {
+// Session Timeout 60 Minutes
+if ($_SESSION['sessionTimeout'] + 60 * 60 < time()) {
 	session_destroy();
 	session_start();
 	if ($_GET['command'] != 'loadIndexLogin')
