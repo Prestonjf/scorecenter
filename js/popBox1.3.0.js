@@ -46,15 +46,15 @@
 
             obj = $(this);
 
-            var inputName = 'popBoxInput' + obj.attr("Id");
+            var inputName = 'popBoxInput' + obj.attr('id');
             var labelValue = $("label[for=" + obj.attr('id') + "]").text();
 			
 			if (type == 'copyPaste') {
-            	obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label><span style="font-weight:normal;font-size:14px;"><h4>Bulk Copy</h4>Copy values from a spreadsheet (in corresponding team order as this screen) <br />and paste them in the text field below. Do not include alternate teams. <br />Once finished, select done.</label><br /><label style="display: none;" for="' + inputName + '">' + labelValue + '</span></label><textarea id="' + inputName + '" name="' + inputName + '" class="popBox-input" /><div class="done-button"><input type="button" value="Done" class="btn btn-xs btn-primary"/></div></div>');
+            	obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label><span style="font-weight:normal;font-size:14px;"><h4>Bulk Copy</h4>Copy values from a spreadsheet (in corresponding team order as this screen) <br />and paste them in the text field below. Do not include alternate teams. <br />Once finished, select done.</label><br /><label style="display: none;" for="' + inputName + '">' + labelValue + '</span></label><textarea id="' + inputName + '" name="' + inputName + '" class="popBox-input" /><div class="done-button"><input type="button" value="Done" class="btn btn-xs btn-primary" id="bulkCopyButton" /></div></div>');
 			}
 			else if (type == 'about') {
 			
-				obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label><span style="font-weight:normal;font-size:14px;"><h4>Tournament Score Center</h4><br />Developed by Preston Frazier <br />A web based scoring application for Science Olympiad Tournaments. <br /><br />v1.0 (Beta) - 01.17.2016</span></label><div class="done-button"><input type="button" value="Close" id="closeAbout" class="btn btn-xs btn-primary"/></div></div>');
+				obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label><span style="font-weight:normal;font-size:14px;"><h4>Tournament Score Center</h4><br />Developed by Preston Frazier <br />A web based scoring application for Science Olympiad Tournaments. <br /><br />v1.2 (Beta) - 01.31.2016</span></label><div class="done-button"><input type="button" value="Close" id="closeAbout" class="btn btn-xs btn-primary"/></div></div>');
 	
 			}
 
@@ -95,13 +95,13 @@
 
 				// Close Popup Box for bulk copying values
 				var count =  1;
-                popBoxContainer.children().blur(function () {
-                    if (change) {
-                        $(this).parent().hide();
-                        $(this).parent().prev().hide();
+                popBoxContainer.children().click(function () {
+                    if (change && $('input',this).attr('id') == 'bulkCopyButton') {
+                       popBoxContainer.children('.popBox-input').parent().hide();
+                        popBoxContainer.children('.popBox-input').parent().prev().hide();
                         if (type == 'copyPaste') {
-                        	$(this).parent().prev().prev().val($(this).val().replace(/\n/g, options.newlineString));
-							if (--count == 0) pasteText($(this).val(), $(this).parent().prev().prev().attr('id'));
+                        	popBoxContainer.children('.popBox-input').parent().prev().prev().val(popBoxContainer.children('.popBox-input').val().replace(/\n/g, options.newlineString));
+							if (--count == 0) pasteText(popBoxContainer.children('.popBox-input').val(), popBoxContainer.children('.popBox-input').parent().prev().prev().attr('id'));
 						}
 						count--;
                     }
@@ -109,7 +109,7 @@
                 
                 // Close Popup Box for About Inf
                 popBoxContainer.children().click(function() {
-                if (change) {
+                if (change && $('input',this).attr('id') == 'closeAbout') {
     				 $(this).parent().hide();
                      $(this).parent().prev().hide();
     				}           

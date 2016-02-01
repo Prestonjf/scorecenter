@@ -83,7 +83,8 @@ include_once('logon_check.php');
 		else if (document.getElementById(status+id) != null && document.getElementById(status+id).value == 'X') extraPoints += pxPoints;
 		
 		
-		if (lowHighFlag == 0) {
+		if (element.value.length == 0) document.getElementById(type+id).value = '';
+		else if (lowHighFlag == 0) {
 			if (element.value == 0) document.getElementById(type+id).value = (max + extraPoints);
 			else if (element.value > max) document.getElementById(type+id).value = max;
 			else document.getElementById(type+id).value = element.value;			
@@ -193,10 +194,12 @@ include_once('logon_check.php');
 	}
 	
 	function validate() {
-		var error = false;
-		var error2 = false;
-		var error3 = false;
-		var error4 = false;
+		var error = false; // Team cannot have the same rank as another. Unless it is 0
+		var error2 = false; // Ranks must sequential from 1+
+		var error3 = false; // A team's rank was left blank
+		var error4 = false; // Submitted Check box must be checked before verified check box
+		var error5 = false; // Cannot save rank of 0 with 'P' Status 
+		
 		var max = <?php echo $_SESSION["tournamentHighestScore"];?>;
 		var count = 0;
 		var maxScore = <?php echo $_SESSION["tournamentHighestScore"];?>;
@@ -218,6 +221,10 @@ include_once('logon_check.php');
 						error3 = true;
 					break;
 				}
+				if (score != null && score != '' && score == '0' && 'P' == $('#teamStatus'+count).val()) {
+					error5 = true;
+				}
+				
 				scoreArr.forEach(function(entry) {
 					if (score == entry && max != score) exists = true;
 				});
@@ -260,6 +267,10 @@ include_once('logon_check.php');
 		}
 		if (error4) {
 			displayError("<strong>Cannot Save Scores:</strong> Submitted checkbox must be checked to verify scores.");
+			return false;
+		}
+		if (error5) {
+			displayError("<strong>Cannot Save Scores:</strong> Team cannot have a status of P (Participated) and earn a rank of 0.");
 			return false;
 		}
 		 if (document.getElementById('submittedFlag').checked) {
@@ -478,26 +489,26 @@ include_once('logon_check.php');
       				echo '<tr>';
       				echo '<td>'; echo $scoreRecord['1']; echo '</td>';
 					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
-					echo '<td><select class="form-control" name="teamStatus'.$teamCount.'" id="teamStatus'.$teamCount.'" '.$disable.'>
+					echo '<td><select class="form-control" name="teamStatus'.$teamCount.'" id="teamStatus'.$teamCount.'" '.$disable.' tabindex="1">
 			<option value="P" ';  if($scoreRecord['9'] == "P"){echo("selected");} echo '>P</option>
 			<option value="X" ';  if($scoreRecord['9'] == "X"){echo("selected");} echo '>PX</option>
 			<option value="N" ';  if($scoreRecord['9'] == "N"){echo("selected");} echo '>NP</option>
 			<option value="D" '; if($scoreRecord['9'] == "D"){echo("selected");} echo '>DQ</option>
 			</select></td>';
-					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
+					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.' tabindex="2"    
       						name="teamRawScore'.$teamCount.'" id="teamRawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" onkeyup="javascript: parseRawNumber(this); highlightRawScoreDuplication();" ></td>';
-					echo '<td><select class="form-control" name="teamScoreTier'.$teamCount.'" id="teamScoreTier'.$teamCount.'" '.$disableTier.' onchange="javascript: parseRawNumber(this); highlightRawScoreDuplication();">
-			<option value="0"></option>
+					echo '<td><select class="form-control" name="teamScoreTier'.$teamCount.'" id="teamScoreTier'.$teamCount.'" '.$disableTier.' onchange="javascript: parseRawNumber(this); highlightRawScoreDuplication();" tabindex="3">
+			
 			<option value="1" ';  if($scoreRecord['7'] == "1"){echo("selected");} echo '>I</option>
 			<option value="2" '; if($scoreRecord['7'] == "2"){echo("selected");} echo '>II</option>
 			<option value="3" ';if($scoreRecord['7'] == "3"){echo("selected");} echo '>III</option>
 			<option value="4" '; if($scoreRecord['7'] == "4"){echo("selected");} echo '>IV</option>
 			<option value="5" ';  if($scoreRecord['7'] == "5"){echo("selected");} echo '>V</option>
 			</select></td>';
-					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
+					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.' tabindex="4"    
       						name="teamTieBreak'.$teamCount.'" id="teamTieBreak'.$teamCount.'" value="'.$scoreRecord['8'].'"></td>';
       				echo '<td style="background-color: #FFCCCC;"><input type="text"  class="form-control" size="4" autocomplete="off" onkeydown="javascript: parseNumber(this); updatePointsEarned(\'teamScore\',\''.$teamCount.'\',\'teamPointsEarned\',\'teamStatus\');" onkeyup="javascript: parseNumber(this); updatePointsEarned(\'teamScore\',\''.$teamCount.'\',\'teamPointsEarned\',\'teamStatus\');" '.$disable.'    
-      						name="teamScore'.$teamCount.'" id="teamScore'.$teamCount.'" value="'.$scoreRecord['2'].'">'; // set background color
+      						tabindex="5" name="teamScore'.$teamCount.'" id="teamScore'.$teamCount.'" value="'.$scoreRecord['2'].'">'; // set background color
       				echo '</td>';
       				echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" readonly   
       						name="teamPointsEarned'.$teamCount.'" id="teamPointsEarned'.$teamCount.'" value="'.$scoreRecord['5'].'"></td>';					
@@ -539,26 +550,26 @@ include_once('logon_check.php');
       				echo '<tr>';
       				echo '<td>'; echo $scoreRecord['1']; echo '</td>';
 					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
-			echo '<td><select class="form-control" name="teamAStatus'.$teamCount.'" id="teamAStatus'.$teamCount.'" '.$disable.'>
+			echo '<td><select class="form-control" name="teamAStatus'.$teamCount.'" id="teamAStatus'.$teamCount.'" '.$disable.' tabindex="6">
 			<option value="P" ';  if($scoreRecord['9'] == "P"){echo("selected");} echo '>P</option>
 			<option value="X" ';  if($scoreRecord['9'] == "X"){echo("selected");} echo '>PX</option>
 			<option value="N" ';  if($scoreRecord['9'] == "N"){echo("selected");} echo '>NP</option>
 			<option value="D" '; if($scoreRecord['9'] == "D"){echo("selected");} echo '>DQ</option>
 			</select></td>';
-					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.' onkeyup="javascript: parseRawNumber(this); highlightARawScoreDuplication();"    
+					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.' tabindex="7" onkeyup="javascript: parseRawNumber(this); highlightARawScoreDuplication();"    
       						name="teamARawScore'.$teamCount.'" id="teamARawScore'.$teamCount.'" value="'.$scoreRecord['6'].'" ></td>';
-					echo '<td><select class="form-control" name="teamAScoreTier'.$teamCount.'" id="teamAScoreTier'.$teamCount.'" '.$disableTier.' onchange="javascript: parseRawNumber(this); highlightARawScoreDuplication();">
-			<option value="0"></option>
+					echo '<td><select class="form-control" name="teamAScoreTier'.$teamCount.'" id="teamAScoreTier'.$teamCount.'" '.$disableTier.' tabindex="8" onchange="javascript: parseRawNumber(this); highlightARawScoreDuplication();">
+			
 			<option value="1" ';  if($scoreRecord['7'] == "1"){echo("selected");} echo '>I</option>
 			<option value="2" '; if($scoreRecord['7'] == "2"){echo("selected");} echo '>II</option>
 			<option value="3" ';if($scoreRecord['7'] == "3"){echo("selected");} echo '>III</option>
 			<option value="4" '; if($scoreRecord['7'] == "4"){echo("selected");} echo '>IV</option>
 			<option value="5" ';  if($scoreRecord['7'] == "5"){echo("selected");} echo '>V</option>
 			</select></td>';
-					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.'    
+					echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" '.$disable.' tabindex="9"    
       						name="teamATieBreak'.$teamCount.'" id="teamATieBreak'.$teamCount.'" value="'.$scoreRecord['8'].'"></td>';
       				echo '<td style="background-color: #FFCCCC;"><input type="text"  class="form-control" size="4" autocomplete="off"  '.$disable.'    
-      						name="teamAScore'.$teamCount.'" id="teamAScore'.$teamCount.'" value="'.$scoreRecord['2'].'" onkeydown="javascript: parseNumber(this); updatePointsEarned(\'teamAScore\',\''.$teamCount.'\',\'teamAPointsEarned\',\'teamAStatus\');" onkeyup="javascript: parseNumber(this);  updatePointsEarned(\'teamAScore\',\''.$teamCount.'\',\'teamAPointsEarned\',\'teamAStatus\');" >'; // set background color
+      						tabindex="10" name="teamAScore'.$teamCount.'" id="teamAScore'.$teamCount.'" value="'.$scoreRecord['2'].'" onkeydown="javascript: parseNumber(this); updatePointsEarned(\'teamAScore\',\''.$teamCount.'\',\'teamAPointsEarned\',\'teamAStatus\');" onkeyup="javascript: parseNumber(this);  updatePointsEarned(\'teamAScore\',\''.$teamCount.'\',\'teamAPointsEarned\',\'teamAStatus\');" >'; // set background color
       				echo '</td>'; // 
       				echo '<td><input type="text"  class="form-control" size="4" autocomplete="off" readonly   
       						name="teamAPointsEarned'.$teamCount.'" id="teamAPointsEarned'.$teamCount.'" value="'.$scoreRecord['5'].'"></td>';					
@@ -579,8 +590,8 @@ include_once('logon_check.php');
 
         <?php if ($disable != 'disabled')   { ?>
 		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"'; ?>>Save</button>
-		<button type="button" class="btn btn-xs btn-danger" name="calculateEventScores" onclick="calculateScorez('<?php echo addslashes($_SESSION["eventName"]); ?>','<?php echo $_SESSION["tournamentDivision"]; ?>','<?php echo $_SESSION["scoreSystemCode"]; ?>');" >Calculate Ranks</button>
-		<button type="button" class="btn btn-xs btn-danger" name="clearScores" onclick="resetScores();" >Clear Scores</button>
+		<button type="button" class="btn btn-xs btn-warning" name="calculateEventScores" onclick="calculateScorez('<?php echo addslashes($_SESSION["eventName"]); ?>','<?php echo $_SESSION["tournamentDivision"]; ?>','<?php echo $_SESSION["scoreSystemCode"]; ?>');" >Calculate Ranks</button>
+		<button type="button" class="btn btn-xs btn-warning" name="clearScores" onclick="resetScores();" >Clear Scores</button>
 		<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores" onclick="return confirmCancel()">Cancel</button>
 		<?php } else { ?>
  	 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores">Cancel</button>

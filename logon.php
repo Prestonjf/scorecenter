@@ -61,14 +61,14 @@
 		<td>
 		<input type="text" size="40" class="form-control" name="userName" id="userName">
 		</td>
-		<td style="padding-left: 2em;"><a href="controller.php?command=createAccount&"><h6>Create Account</h6></a></td>
+		<td style="padding-left: 2em;"><a href="controller.php?command=createAccount&" tabindex="-1"><h6>Create Account</h6></a></td>
 		</tr>
 		<tr>
 		<td><label for="password">Password: </label></td>
 		<td>
 		<input type="password" size="40" class="form-control" name="password" id="password">
 		</td>
-		<td style="padding-left: 2em;"><a href="#" onclick="forgotPassword()"><h6>Forgot Password?</h6></a></td>
+		<td style="padding-left: 2em;"><a href="#" onclick="forgotPassword()" tabindex="-1"><h6>Forgot Password?</h6></a></td>
 		</tr>
 		<tr><td>&nbsp;</td><td></td><td></td></tr>
 		</table>

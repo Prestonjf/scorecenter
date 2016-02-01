@@ -2963,14 +2963,26 @@ else {
 	
 	
 	-- HIGH
+	** Convert Tie Column to selectable number, add to calculation if Rank and Tier tied.
+	** Sort Enter scores Grid By Rank
 	
 	
 	-- MEDIUM
+	** More colors for ties
 	** Add extra points value for PX status
+	
+	** Print Each event score individually
+	** Try alternate row color for enter scores
+	** Fix Max points earned per event on overall points screen
+	** Overall points. what if all scores are the same? Same rank?
+	** overall points display if scores are compeleted. 
+	**	Larger Time Out / Time Out Ajax
+	
 	** View Results Grid - Line Break for Long Text/Names?
 	** Add number of teams / last place points to instructions.
 	** Page Iterator Fix on Tournaments, Add to Home Page
 	** Add feature to give awards for alternate teams
+	** Awards for Alternate teams
 	
 	** Log More User data on login
 	** Make Logo Dynamic
