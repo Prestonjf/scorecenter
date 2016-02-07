@@ -16,10 +16,14 @@
 <?php
 		$userName = "";
 		$role = "";
+		$firstName = "";
+		$lastName = "";
 		if($_SESSION["userSessionInfo"] != null) {
 			$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
 			if ($userSessionInfo->getUserName() != null) {
 				$userName = $userSessionInfo->getUserName();
+				$firstName = $userSessionInfo->getFirstName();
+				$lastName = $userSessionInfo->getLastName();
 			}
 			if ($userSessionInfo->getRole() != null) {
 				$role = $userSessionInfo->getRole();
@@ -52,9 +56,9 @@
         <?php } ?>      
       </ul>
       <ul class="nav navbar-nav navbar-right">
-      	<li><a href="controller.php?command=updateAccount&"><?php echo 'Logged in: '.$userName;?></a></li>
+      	<li><a href="controller.php?command=updateAccount&"><?php echo 'Hello, '.$firstName.' '.$lastName;?></a></li><li><a href="controller.php?command=logout&">Logout</a></li>
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Configuration<span class="caret"></span></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Settings<span class="caret"></span></a>
           <ul class="dropdown-menu">
            <?php if ($role == 'ADMIN' or $role == 'VERIFIER') { ?>
             <li><a href="controller.php?command=loadAllTournaments&">Manage Tournaments</a></li>

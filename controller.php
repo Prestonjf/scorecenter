@@ -2960,7 +2960,6 @@ else {
 	-- ISSUES TO IMPLEMENT / FIX --
 	
 	-- CRITICAL
-	** IE Calculate Ranks Issue
 	
 	
 	-- HIGH
@@ -2970,7 +2969,6 @@ else {
 	** error: Navigation - login -> view results - > cancel. Query Not loaded. reload.
 	** Fix ‘Teams Scored column’ should check if raw score is entered. Not Rank
 	** Fix highlight raw scores. compare value as a string and not a number. should parse as number. uses GLI invasive species.
-	** logout hyperlink
 	
 	
 	-- MEDIUM
