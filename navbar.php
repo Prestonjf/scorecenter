@@ -56,7 +56,7 @@
         <?php } ?>      
       </ul>
       <ul class="nav navbar-nav navbar-right">
-      	<li><a href="controller.php?command=updateAccount&"><?php echo 'Hello, '.$firstName.' '.$lastName;?></a></li><li><a href="controller.php?command=logout&">Logout</a></li>
+      	<li><a href="controller.php?command=updateAccount&"><?php echo 'Hello, '.$firstName.' '.$lastName;?></a></li><li><a href="controller.php?command=logout&"><u>Logout</u></a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Settings<span class="caret"></span></a>
           <ul class="dropdown-menu">

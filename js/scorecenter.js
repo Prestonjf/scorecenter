@@ -135,14 +135,14 @@ function pasteText(text, type) {
 	var ranks = [0];
 	var tokens = text.split('\n');
 	for (i = 0; i < tokens.length; i++) {
-		if (tokens[i].trim() != '') {
+	//	if (tokens[i].trim() != '') {
 			if ((type=='rankBox' || type=='rawBox') && isNaN(tokens[i].trim())) {
 				alert('All values must be numerical.');		
 				return;
 			}
 			else
 				ranks.push(tokens[i].trim());
-		}
+	//	}
 	}
 
 	if (type == 'rankBox') {

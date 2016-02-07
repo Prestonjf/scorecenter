@@ -107,12 +107,13 @@ include_once('logon_check.php');
 		
 		while (count < 1000) {
 			if  ($('#teamRawScore'+count) != null && $('#teamRawScore'+count).val() != null) {
+				var status = $('#teamStatus'+count).val();
 				var score = $('#teamRawScore'+count).val();
 				var tier = $('#teamScoreTier'+count).val();
 				document.getElementById('teamRawScore'+count).style.backgroundColor = "#FFFFFF";
 				scoreArr.forEach(function(entry) {				
-					if (score == entry[0] && tier == entry[1]) {
-						key = entry[0] + '-' + entry[1];
+					if (score.trim() && entry[0].trim() && Number(score) == Number(entry[0]) && tier == entry[1] && status != 'X' && status != 'N' && status != 'D') {
+						key = Number(entry[0]) + '-' + entry[1];
 						if (key in duplicates);
 						else {
 							duplicates[key] = colorPalette[pCount];
@@ -121,7 +122,7 @@ include_once('logon_check.php');
 						}
 					}
 				});
-				if (score != '') {
+				if (score.trim() && status != 'X' && status != 'N' && status != 'D') {
 					var obj = [score,tier];
 					scoreArr.push(obj);
 				}
@@ -133,10 +134,11 @@ include_once('logon_check.php');
 		count = 0;
 		while (count < 1000) {
 			if  ($('#teamRawScore'+count) != null && $('#teamRawScore'+count).val() != null) {
+				var status = $('#teamStatus'+count).val();
 				var score = $('#teamRawScore'+count).val();
 				var tier = $('#teamScoreTier'+count).val();
-				key = score + '-' + tier;
-				if (key in duplicates) {
+				key = Number(score) + '-' + tier;
+				if (key in duplicates && status != 'X' && status != 'N' && status != 'D') {
 					document.getElementById('teamRawScore'+count).style.backgroundColor = duplicates[key];			
 				}
 			}
@@ -155,12 +157,13 @@ include_once('logon_check.php');
 		
 		while (count < 1000) {
 			if  ($('#teamARawScore'+count) != null && $('#teamARawScore'+count).val() != null) {
+				var status = $('#teamAStatus'+count).val();
 				var score = $('#teamARawScore'+count).val();
 				var tier = $('#teamAScoreTier'+count).val();
 				document.getElementById('teamARawScore'+count).style.backgroundColor = "#FFFFFF";
 				scoreArr.forEach(function(entry) {				
-					if (score == entry[0] && tier == entry[1]) {
-						key = entry[0] + '-' + entry[1];
+					if (score.trim() && entry[0].trim() && Number(score) == Number(entry[0]) && tier == entry[1] && status != 'X' && status != 'N' && status != 'D') {
+						key = Number(entry[0]) + '-' + entry[1];
 						if (key in duplicates);
 						else {
 							duplicates[key] = colorPalette[pCount];
@@ -169,7 +172,7 @@ include_once('logon_check.php');
 						}
 					}
 				});
-				if (score != '') {
+				if (score.trim() && status != 'X' && status != 'N' && status != 'D') {
 					var obj = [score,tier];
 					scoreArr.push(obj);
 				}
@@ -181,10 +184,11 @@ include_once('logon_check.php');
 		count = 0;
 		while (count < 1000) {
 			if  ($('#teamARawScore'+count) != null && $('#teamARawScore'+count).val() != null) {
+				var status = $('#teamAStatus'+count).val();
 				var score = $('#teamARawScore'+count).val();
 				var tier = $('#teamAScoreTier'+count).val();
-				key = score + '-' + tier;
-				if (key in duplicates) {
+				key = Number(score) + '-' + tier;
+				if (key in duplicates && status != 'X' && status != 'N' && status != 'D') {
 					document.getElementById('teamARawScore'+count).style.backgroundColor = duplicates[key];			
 				}
 			}
@@ -489,7 +493,7 @@ include_once('logon_check.php');
       				echo '<tr>';
       				echo '<td>'; echo $scoreRecord['1']; echo '</td>';
 					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
-					echo '<td><select class="form-control" name="teamStatus'.$teamCount.'" id="teamStatus'.$teamCount.'" '.$disable.' tabindex="1">
+					echo '<td><select class="form-control" name="teamStatus'.$teamCount.'" id="teamStatus'.$teamCount.'" '.$disable.' tabindex="1" onchange="javascript: highlightRawScoreDuplication();">
 			<option value="P" ';  if($scoreRecord['9'] == "P"){echo("selected");} echo '>P</option>
 			<option value="X" ';  if($scoreRecord['9'] == "X"){echo("selected");} echo '>PX</option>
 			<option value="N" ';  if($scoreRecord['9'] == "N"){echo("selected");} echo '>NP</option>
@@ -550,7 +554,7 @@ include_once('logon_check.php');
       				echo '<tr>';
       				echo '<td>'; echo $scoreRecord['1']; echo '</td>';
 					echo '<td>'; echo $scoreRecord['0'];; echo '</td>';
-			echo '<td><select class="form-control" name="teamAStatus'.$teamCount.'" id="teamAStatus'.$teamCount.'" '.$disable.' tabindex="6">
+			echo '<td><select class="form-control" name="teamAStatus'.$teamCount.'" id="teamAStatus'.$teamCount.'" '.$disable.' tabindex="6" onchange="javascript: highlightARawScoreDuplication();">
 			<option value="P" ';  if($scoreRecord['9'] == "P"){echo("selected");} echo '>P</option>
 			<option value="X" ';  if($scoreRecord['9'] == "X"){echo("selected");} echo '>PX</option>
 			<option value="N" ';  if($scoreRecord['9'] == "N"){echo("selected");} echo '>NP</option>

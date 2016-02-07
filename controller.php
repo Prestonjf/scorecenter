@@ -409,6 +409,7 @@ else if (isset($_GET['saveTournament'])) {
 
 else if (isset($_GET['cancelTournament'])) {
 	clearTournament();
+	loadAllTournaments($mysqli);
 	if ($_SESSION["tournamentScoresIndexReturn"] != null && $_SESSION["tournamentScoresIndexReturn"] == '1') {
 		$_SESSION["tournamentScoresIndexReturn"] = null;
 		header("Location: index.php");
@@ -2965,10 +2966,7 @@ else {
 	-- HIGH
 	** Convert Tie Column to selectable number, add to calculation if Rank and Tier tied.
 	** Sort Enter scores Grid By Rank
-	
-	** error: Navigation - login -> view results - > cancel. Query Not loaded. reload.
 	** Fix ‘Teams Scored column’ should check if raw score is entered. Not Rank
-	** Fix highlight raw scores. compare value as a string and not a number. should parse as number. uses GLI invasive species.
 	
 	
 	-- MEDIUM
@@ -3028,4 +3026,20 @@ else {
 		
 	
 	**** TODO / GENERAL ISSUES *********/
+	
+	/**** VERSION CHANGELOG ********
+		
+	** Nav Bar 'Logout' link added
+	** Nav Bar  Text Updated
+	** Ties are not highlighted for status of PX, NP, DQ
+	** Ties are now highlighted correctly based on Number value comparison. (not string)
+	** Bulk Copy will now allow blank lines. Number of lines must match the number of teams.
+	** fixed navigation error: login > results > cancel
+		
+		
+		
+	**** VERSION CHANGELOG *********/
+		
+		
+		
 ?>
