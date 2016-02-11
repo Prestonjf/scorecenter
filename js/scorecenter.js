@@ -104,8 +104,8 @@ function resetScores() {
 		if  ($('#teamRawScore'+count) != null && $('#teamRawScore'+count).val() != null) {
 				$('#teamRawScore'+count).val('');
 				$('#teamStatus'+count).val('P');
-				$('#teamScoreTier'+count).val(0);
-				$('#teamTieBreak'+count).val('');
+				$('#teamScoreTier'+count).val(1);
+				$('#teamTieBreak'+count).val(0);
 				$('#teamScore'+count).val('');
 				$('#teamPointsEarned'+count).val('');
 				document.getElementById('teamRawScore'+count).style.backgroundColor = "#FFFFFF";
@@ -118,8 +118,8 @@ function resetScores() {
 		if  ($('#teamARawScore'+count) != null && $('#teamARawScore'+count).val() != null) {
 				$('#teamARawScore'+count).val('');
 				$('#teamAStatus'+count).val('P');
-				$('#teamAScoreTier'+count).val(0);
-				$('#teamATieBreak'+count).val('');
+				$('#teamAScoreTier'+count).val(1);
+				$('#teamATieBreak'+count).val(0);
 				$('#teamAScore'+count).val('');
 				$('#teamAPointsEarned'+count).val('');
 				document.getElementById('teamARawScore'+count).style.backgroundColor = "#FFFFFF";
@@ -271,6 +271,7 @@ function calcPrimary(type) {
 		var previousRawScore = -100;
 		var previousTier = -100;
 		var previousStatus = '';
+		var previousTieBreak = -100;
 		var tiesCount = 0;
 		var scoreArr = [];
 		while (count < 1000) {
@@ -287,7 +288,7 @@ function calcPrimary(type) {
 				record.push(Number(score)); // Raw Score
 				record.push(tier); // Tier
 				record.push(status); // Status
-				record.push(tieBreak); // Tie Break		
+				record.push(Number(tieBreak)); // Tie Break		
 				record.push("####");			
 				scoreArr.push(record);
 			}
@@ -307,13 +308,13 @@ function calcPrimary(type) {
 			// if (entry[0] ==15 )
 			//	alert(entry[0]+': Rank Count:' +rank+ ' Tie Count: '+tiesCount);
 		
-			if (previousRawScore != entry[2] || previousTier != entry[3] || (previousRawScore != '' && entry[2] == '')) tiesCount = 0;
+			if (previousRawScore != entry[2] || previousTier != entry[3] || previousTieBreak != entry[5] || (previousRawScore != '' && entry[2] == '')) tiesCount = 0;
 			if (entry[4] == 'P') {
-				if ((type == 'HIGHRAW' || type == 'LOWRAW') && previousRawScore == entry[2]) {
+				if ((type == 'HIGHRAW' || type == 'LOWRAW') && previousRawScore == entry[2] && previousTieBreak == entry[5]) {
 					tiesCount++;
 					entry[1] = rank - tiesCount;
 				}
-				else if ((type == 'HIGHRAWTIER' || type == 'LOWRAWTIER' || type == 'HIGHRAWTIER4LOW') && previousRawScore == entry[2] && previousTier == entry[3]) {
+				else if ((type == 'HIGHRAWTIER' || type == 'LOWRAWTIER' || type == 'HIGHRAWTIER4LOW') && previousRawScore == entry[2] && previousTier == entry[3] && previousTieBreak == entry[5]) {
 					tiesCount++;
 					entry[1] = rank - tiesCount;
 				}
@@ -329,6 +330,7 @@ function calcPrimary(type) {
 			previousRawScore = entry[2];
 			previousTier = entry[3];
 			previousStatus = entry[4];
+			previousTieBreak = entry[5];
 		});
 		scoreArr.sort(compare);
 		//alert(scoreArr.toString());
@@ -346,6 +348,7 @@ function calcAlternate(type) {
 		var previousRawScore = -100;
 		var previousTier = -100;
 		var previousStatus = '';
+		var previousTieBreak = -100;
 		var tiesCount = 0;
 		var scoreArr = [];
 		while (count < 1000) {
@@ -362,7 +365,7 @@ function calcAlternate(type) {
 				record.push(Number(score)); // Raw Score
 				record.push(tier); // Tier
 				record.push(status); // Status
-				record.push(tieBreak); // Tie Break		
+				record.push(Number(tieBreak)); // Tie Break		
 				record.push("####");			
 				scoreArr.push(record);
 			}
@@ -382,13 +385,13 @@ function calcAlternate(type) {
 			// if (entry[0] ==15 )
 			//	alert(entry[0]+': Rank Count:' +rank+ ' Tie Count: '+tiesCount);
 		
-			if (previousRawScore != entry[2] || previousTier != entry[3] || (previousRawScore != '' && entry[2] == '')) tiesCount = 0;
+			if (previousRawScore != entry[2] || previousTier != entry[3] || previousTieBreak != entry[5] || (previousRawScore != '' && entry[2] == '')) tiesCount = 0;
 			if (entry[4] == 'P') {
-				if ((type == 'HIGHRAW' || type == 'LOWRAW') && previousRawScore == entry[2]) {
+				if ((type == 'HIGHRAW' || type == 'LOWRAW') && previousRawScore == entry[2] && previousTieBreak == entry[5]) {
 					tiesCount++;
 					entry[1] = rank - tiesCount;
 				}
-				else if ((type == 'HIGHRAWTIER' || type == 'LOWRAWTIER' || type == 'HIGHRAWTIER4LOW') && previousRawScore == entry[2] && previousTier == entry[3]) {
+				else if ((type == 'HIGHRAWTIER' || type == 'LOWRAWTIER' || type == 'HIGHRAWTIER4LOW') && previousRawScore == entry[2] && previousTier == entry[3] && previousTieBreak == entry[5]) {
 					tiesCount++;
 					entry[1] = rank - tiesCount;
 				}
@@ -404,6 +407,7 @@ function calcAlternate(type) {
 			previousRawScore = entry[2];
 			previousTier = entry[3];
 			previousStatus = entry[4];
+			previousTieBreak = entry[5];
 		});
 		scoreArr.sort(compare);
 		//alert(scoreArr.toString());
@@ -432,6 +436,12 @@ function compare1(a,b) {
     return -1;
   if (a[2] < b[2])
     return 1;
+  if (a[2] == b[2]) {
+	  if (a[5] < b[5])
+	  	return -1;
+	  if (a[5] > b[5])
+	  	return 1;
+  }
   return 0;	
 }
 
@@ -445,6 +455,12 @@ function compare2(a,b) {
   if (a[3] == b[3]) {
   	if (a[2] > b[2]) return -1;
   	if (a[2] < b[2]) return 1;
+  	if (a[2] == b[2]) {
+	  if (a[5] < b[5])
+	  	return -1;
+	  if (a[5] > b[5])
+	  	return 1;
+  	}
   }
   return 0;	
 }
@@ -458,6 +474,12 @@ function compare3(a,b) {
     return -1;
   if (x > y)
     return 1;
+  if (x == y) {
+	  if (a[5] < b[5])
+	  	return -1;
+	  if (a[5] > b[5])
+	  	return 1;
+  }
   return 0;	
 }
 
@@ -473,6 +495,12 @@ function compare4(a,b) {
   	var y = b[2]; if (b[2] == '') y = 100000;
   	if (x < y) return -1;
   	if (x > y) return 1;
+  	if (x == y) {
+	  if (a[5] < b[5])
+	  	return -1;
+	  if (a[5] > b[5])
+	  	return 1;
+  	}
   }
   return 0;	
 }
@@ -488,10 +516,22 @@ function compare5(a,b) {
 	if (a[3] == 4) {
 		if (a[2] < b[2]) return -1;
 		if (a[2] > b[2]) return 1;
+		if (a[2] == b[2]) {
+			if (a[5] < b[5])
+				return -1;
+			if (a[5] > b[5])
+				return 1;
+  		}
 	}
 	else {
 		if (a[2] > b[2]) return -1;
 		if (a[2] < b[2]) return 1;
+		if (a[2] == b[2]) {
+			if (a[5] < b[5])
+				return -1;
+			if (a[5] > b[5])
+				return 1;
+  		}
 	}
   }
   return 0;	

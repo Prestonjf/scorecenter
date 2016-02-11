@@ -714,6 +714,7 @@
                     $headers.click(
 
                     function (e) {
+	                    if (e.target !== this && e.target.className !== 'sortableTH') return false;
                         var totalRows = ($this[0].tBodies[0] && $this[0].tBodies[0].rows.length) || 0;
                         if (!this.sortDisabled && totalRows > 0) {
                             // Only call sortStart if sorting is

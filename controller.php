@@ -2964,14 +2964,14 @@ else {
 	
 	
 	-- HIGH
-	** Convert Tie Column to selectable number, add to calculation if Rank and Tier tied.
-	** Sort Enter scores Grid By Rank
 	** Fix ‘Teams Scored column’ should check if raw score is entered. Not Rank
+	** Sort and Bulk copy for alternate Teams
 	
 	
 	-- MEDIUM
 	** More colors for ties
 	** Add extra points value for PX status
+	** location of submitted / Verified checkboxes?
 	
 	** Print Each event score individually
 	** Try alternate row color for enter scores
