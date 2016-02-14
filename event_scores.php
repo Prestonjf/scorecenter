@@ -336,7 +336,7 @@ include_once('logon_check.php');
     });
 
 
-    jQuery(document).ready(function($){
+    jQuery(document).ready(function($) {
     	$('#rankBox').popBox({width:200,height:350}, 'copyPaste');
    		$('#rawBox').popBox({width:200,height:350},'copyPaste');
    		$('#tierBox').popBox({width:200,height:350},'copyPaste');
@@ -351,6 +351,22 @@ include_once('logon_check.php');
    		 	$('#tierBox').triggerHandler('focus');
 		});
 		
+		if (document.getElementById('alternateTeamTable') != null) {
+			$('#rankABox').popBox({width:200,height:350}, 'copyPaste');
+	   		$('#rawABox').popBox({width:200,height:350},'copyPaste');
+	   		$('#tierABox').popBox({width:200,height:350},'copyPaste');
+	   		
+	   		$('#pasteARanks').click(function(){
+	   		 	$('#rankABox').triggerHandler('focus');
+			});
+			$('#pasteARaw').click(function(){
+	   		 	$('#rawABox').triggerHandler('focus');
+			});
+			$('#pasteATier').click(function(){
+	   		 	$('#tierABox').triggerHandler('focus');
+			});	
+		}
+		
 		
 		
 		$("#primaryTeamTable").tablesorter({
@@ -364,26 +380,58 @@ include_once('logon_check.php');
             }  
     	}); 
     	
+    	if (document.getElementById('alternateTeamTable') != null) {
+	    	$("#alternateTeamTable").tablesorter({
+	            headers: { 
+		            2: { sorter: 'dropdownText' },
+		            3: { sorter: 'points' },
+		            4: { sorter: 'dropdown' },
+		            5: { sorter: 'dropdown' },
+		            6: { sorter: 'points' },
+	                7: { sorter: 'points' } 
+	            }  
+	    	}); 
+    	}
+    	
     	$("input").change(function() {
 			$('#primaryTeamTable').trigger("update"); 
+			if (document.getElementById('alternateTeamTable') != null) 
+				$('#alternateTeamTable').trigger("update"); 
 		});
 		$("select").change(function() {
 			$('#primaryTeamTable').trigger("update"); 
+			if (document.getElementById('alternateTeamTable') != null) 
+				$('#alternateTeamTable').trigger("update"); 
 		});
 		
 		$("#calculateEventScores").click(function() {
 			$('#primaryTeamTable').trigger("update");
+			if (document.getElementById('alternateTeamTable') != null) 
+				$('#alternateTeamTable').trigger("update"); 
 		});
 		
 		$("#clearScores").click(function() {
 			$('#primaryTeamTable').trigger("update");
 			var sorting = [[0,0]];
 			$("#primaryTeamTable").trigger("sorton",[sorting]); 
+			if (document.getElementById('alternateTeamTable') != null) {
+				$('#alternateTeamTable').trigger("update"); 
+				$("#alternateTeamTable").trigger("sorton",[sorting]); 
+			}
 		});
+		
+		$(document).on("click", "#bulkCopyButton", function () { 
+			$('#primaryTeamTable').trigger("update"); 
+			if (document.getElementById('alternateTeamTable') != null) 
+				$('#alternateTeamTable').trigger("update"); 
+	    
+		}); 
 		
 		
    		
     });
+    
+
  
   
   </script>
@@ -497,13 +545,13 @@ include_once('logon_check.php');
      <td><b><u>Calculate</u></b> Click the Calculate Ranks button at the bottom of the screen to allow the system to automatically calculate event ranks. (Calculation algorithm for this event is: <?php echo $_SESSION["scoreSystemText"]; ?> wins.) <br /><br /></td>
      </tr>
           <tr><td valign="top">5.</td>
-     <td><b><u>Ties</u></b> Once the raw score and tier (if applicable) have been entered, the raw score text field may change color. This means the team is tied. (Has the same raw score and tier). All ties must be broken. You will manually break the tie by changing the team's 'Rank' (After the calculate ranks button has been clicked) By default, the tied teams will be given the same rank. For example, if two teams tie for fourth place, they will each be assigned 4 as there rank. The loser of the tie breaker should have their rank set to 5. You may write a description in the Tie Break field as to how the tie was broken.<br /><br /></td>
+     <td><b><u>Ties</u></b> Once the Status, Raw Score, and Tier (if applicable) have been entered, the Raw Score field may change color. This means the team is tied with another team. Each tie will have a unique color. All ties must be broken. You may click the table headers to sort each column. This will assist in grouping and identifying ties. Use the tie break rank column to set the order in which the tie was won. Once all ties have been broken, click the Calculate Ranks button to update the ranks.<br /><br /></td>
      </tr>
                <tr><td valign="top">6.</td>
      <td><b><u>Primary vs. Alternates</u></b> Primary teams and Alternate teams will be ranked independent of each other. These teams do not compete against one another. The Primary teams will be ranked starting at 1 and the Alternate teams will be ranked starting at 1. <br /><br /></td>
      </tr>
           <tr><td valign="top">7.</td>
-     <td><b><u>Rank Errors</u></b> If the ranks are not calculated correctly, you can manually set all the team's ranks. Enter 0 if the team's status is PX, NP, or DQ. Two team's cannot have the same rank unless the rank is 0. All ranks must be sequential starting at 1. (Clicking the Calculate rank button will overwrite the rank values)<br /><br /></td>
+     <td><b><u>Rank Errors</u></b> If the ranks are not calculated correctly, you can manually set all the team's ranks. Enter 0 if the team's status is PX, NP, or DQ. Two team's cannot have the same rank unless the rank is 0. All ranks must be sequential starting at 1. (Clicking the Calculate Ranks button will overwrite the rank values)<br /><br /></td>
      </tr>
           <tr><td valign="top">8.</td>
      <td><b><u>Points Earned</u></b> Points earned will be calculated automatically and used for the overall tournament rankings. Tournament Winner: <?php echo $_SESSION["pointsSystem"]; ?>.) Participating teams will earn points corresponding to their rank value. Teams with a status of PX will earn last place points. Teams with a status of NP will earn last place points + <?php echo $_SESSION["pointsForNP"]; ?>. Teams with a status of DQ will earn last place points + <?php echo $_SESSION["pointsForDQ"]; ?>.<br /><br /></td>
@@ -542,7 +590,7 @@ include_once('logon_check.php');
 					<?php if ($disable != 'disabled') { ?><input class="blankButton" type="button" id="pasteRaw" value='+' /><?php } ?></th>
 				<th width="10%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group 
 					<?php if ($disableTier != 'disabled') { ?><input class="blankButton"type="button" id="pasteTier"value='+' /><?php } ?></th>
-				<th width="10%"data-field="score" data-align="center" data-sortable="true">Tie Break Position</th>			
+				<th width="10%"data-field="score" data-align="center" data-sortable="true">Tie Break Rank</th>			
                 <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank<span class="red">*</span>
                 	<?php if ($disable != 'disabled') { ?><input class="blankButton" type="button" id="pasteRanks"value='+' /><?php } ?></th>
 				<th width="10%" data-field="score" data-align="center" data-sortable="true">Points Earned</th>
@@ -604,16 +652,19 @@ include_once('logon_check.php');
 		<?php } ?>
 		<?php if ($_SESSION["teamAlternateEventScoreList"] != null) {?>
 		<fieldset class="utility-border"><legend class="utility-border">Alternate Teams</legend>
-		<table class="table table-hover">
+		<table class="table table-hover tablesorter" id="alternateTeamTable">
         <thead>
             <tr>
                 <th width="6%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
                 <th width="29%" data-field="teamNumber" data-align="center" data-sortable="true">Team Name</th>
                 <th width="10%" data-field="status" data-align="center" data-sortable="true">Status&nbsp;&nbsp;&nbsp;&nbsp;</th>
-				<th width="15%"data-field="score" data-align="center" data-sortable="true">Raw Score&nbsp;&nbsp;</th>
-				<th width="10%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group</th>
-				<th width="10%"data-field="score" data-align="center" data-sortable="true">Tie Break Position</th>	
-                <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank</th>
+				<th width="15%"data-field="score" data-align="center" data-sortable="true">Raw Score&nbsp;&nbsp;
+					<?php if ($disable != 'disabled') { ?><input class="blankButton" type="button" id="pasteARaw" value='+' /><?php } ?></th>
+				<th width="10%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group
+					<?php if ($disableTier != 'disabled') { ?><input class="blankButton"type="button" id="pasteATier"value='+' /><?php } ?></th>
+				<th width="10%"data-field="score" data-align="center" data-sortable="true">Tie Break Rank</th>	
+                <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank
+	                <?php if ($disable != 'disabled') { ?><input class="blankButton" type="button" id="pasteARanks"value='+' /><?php } ?></th>
 				<th width="10%" data-field="score" data-align="center" data-sortable="true">Points Earned</th>
             </tr>
         </thead>
@@ -684,6 +735,9 @@ include_once('logon_check.php');
       <textarea id="rankBox" style="display:none;"></textarea>
       <textarea id="rawBox" style="display: none;"></textarea>
       <textarea id="tierBox" style="display: none;"></textarea>
+      <textarea id="rankABox" style="display:none;"></textarea>
+      <textarea id="rawABox" style="display: none;"></textarea>
+      <textarea id="tierABox" style="display: none;"></textarea>
 	<?php include_once 'footer.php'; ?>
 
     </div><!--/.container-->

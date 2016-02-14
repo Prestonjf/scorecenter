@@ -2965,7 +2965,6 @@ else {
 	
 	-- HIGH
 	** Fix ‘Teams Scored column’ should check if raw score is entered. Not Rank
-	** Sort and Bulk copy for alternate Teams
 	
 	
 	-- MEDIUM

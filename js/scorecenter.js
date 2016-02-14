@@ -105,7 +105,7 @@ function resetScores() {
 				$('#teamRawScore'+count).val('');
 				$('#teamStatus'+count).val('P');
 				$('#teamScoreTier'+count).val(1);
-				$('#teamTieBreak'+count).val(0);
+				$('#teamTieBreak'+count).val(1);
 				$('#teamScore'+count).val('');
 				$('#teamPointsEarned'+count).val('');
 				document.getElementById('teamRawScore'+count).style.backgroundColor = "#FFFFFF";
@@ -119,7 +119,7 @@ function resetScores() {
 				$('#teamARawScore'+count).val('');
 				$('#teamAStatus'+count).val('P');
 				$('#teamAScoreTier'+count).val(1);
-				$('#teamATieBreak'+count).val(0);
+				$('#teamATieBreak'+count).val(1);
 				$('#teamAScore'+count).val('');
 				$('#teamAPointsEarned'+count).val('');
 				document.getElementById('teamARawScore'+count).style.backgroundColor = "#FFFFFF";
@@ -136,7 +136,7 @@ function pasteText(text, type) {
 	var tokens = text.split('\n');
 	for (i = 0; i < tokens.length; i++) {
 	//	if (tokens[i].trim() != '') {
-			if ((type=='rankBox' || type=='rawBox') && isNaN(tokens[i].trim())) {
+			if ((type=='rankBox' || type=='rawBox' || type=='rankABox' || type=='rawABox') && isNaN(tokens[i].trim())) {
 				alert('All values must be numerical.');		
 				return;
 			}
@@ -190,6 +190,58 @@ function pasteText(text, type) {
 						if (tier == 'I') tier = 1; else if (tier == 'II') tier = 2; else if (tier == 'III') tier = 3; else if (tier == 'IV') tier = 4; else if (tier == 'V') tier = 5;
 						$(this).next().find('select').val(tier);
 						highlightRawScoreDuplication();
+					}
+					count++;
+				});
+			});
+		}
+	}
+	
+	else if (type == 'rankABox') {
+		var teamCount = $('#alternateTeamTable tr').length;	
+		if (teamCount != ranks.length) alert("Number of inputed ranks ("+(ranks.length-1)+") does not match the number of teams ("+(teamCount-1)+") on this screen.")
+		else {
+			$('#alternateTeamTable tr').each(function (i, row) {
+				var count = 0;
+				$(this).find('td').each (function() {
+					if (count == 5) {
+						$(this).next().find('input').val(ranks[i]);
+						updatePointsEarned('teamAScore', i-1,'teamAPointsEarned','teamAStatus');
+					}
+					count++;
+				});
+			});
+		}
+	}
+	
+	else if (type == 'rawABox') {
+		var teamCount = $('#alternateTeamTable tr').length;	
+		if (teamCount != ranks.length) alert("Number of inputed raw scores ("+(ranks.length-1)+") does not match the number of teams ("+(teamCount-1)+") on this screen.")
+		else {
+			$('#alternateTeamTable tr').each(function (i, row) {
+				var count = 0;
+				$(this).find('td').each (function() {
+					if (count == 2) {
+						$(this).next().find('input').val(ranks[i]);
+						highlightARawScoreDuplication();
+					}
+					count++;
+				});
+			});
+		}
+	}
+	else if (type == 'tierABox') {
+		var teamCount = $('#alternateTeamTable tr').length;	
+		if (teamCount != ranks.length) alert("Number of inputed tiers ("+(ranks.length-1)+") does not match the number of teams ("+(teamCount-1)+") on this screen.")
+		else {
+			$('#alternateTeamTable tr').each(function (i, row) {
+				var count = 0;
+				$(this).find('td').each (function() {
+					if (count == 3) {
+						var tier = ranks[i];
+						if (tier == 'I') tier = 1; else if (tier == 'II') tier = 2; else if (tier == 'III') tier = 3; else if (tier == 'IV') tier = 4; else if (tier == 'V') tier = 5;
+						$(this).next().find('select').val(tier);
+						highlightARawScoreDuplication();
 					}
 					count++;
 				});

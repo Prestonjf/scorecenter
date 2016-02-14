@@ -50,7 +50,7 @@
             var labelValue = $("label[for=" + obj.attr('id') + "]").text();
 			
 			if (type == 'copyPaste') {
-            	obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label><span style="font-weight:normal;font-size:14px;"><h4>Bulk Copy</h4>Copy values from a spreadsheet (in corresponding team order as this screen) <br />and paste them in the text field below. Do not include alternate teams. <br />Once finished, select done.</label><br /><label style="display: none;" for="' + inputName + '">' + labelValue + '</span></label><textarea id="' + inputName + '" name="' + inputName + '" class="popBox-input" /><div class="done-button"><input type="button" value="Done" class="btn btn-xs btn-primary" id="bulkCopyButton" /></div></div>');
+            	obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label style="text-align:left;"><span style="font-weight:normal;font-size:14px;"><h4>Bulk Copy</h4>1. Primary and Alternate Teams must be copied and pasted separately. <br />2. Copy values from a spreadsheet (in corresponding team order as this screen) <br />3. Paste them in the text field below. Each row must be a number or blank. <br />4. Once finished, select done.</label><br /><label style="display: none;" for="' + inputName + '">' + labelValue + '</span></label><textarea id="' + inputName + '" name="' + inputName + '" class="popBox-input" /><div class="done-button"><input type="button" value="Done" class="btn btn-xs btn-primary" id="bulkCopyButton" /></div></div>');
 			}
 			else if (type == 'about') {
 			
