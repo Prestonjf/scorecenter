@@ -84,7 +84,7 @@ else if ($_GET['command'] != null and $_GET['command'] == 'updateResultPage') {
 
 // All Commands Below Require An Active Session
 // Session Timeout 60 Minutes
-if ($_SESSION['sessionTimeout'] + 60 * 60 < time()) {
+if ($_SESSION['sessionTimeout'] + ((60 * 12) * 60) < time()) {
 	session_destroy();
 	session_start();
 	if ($_GET['command'] != 'loadIndexLogin')
@@ -1205,7 +1205,8 @@ else {
 					T.NUMBER_TEAMS, TE.SUBMITTED_FLAG, TE.VERIFIED_FLAG, T.HIGH_LOW_WIN_FLAG FROM TOURNAMENT_EVENT TE 
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
 					INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID 
-					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TES.SCORE IS NOT NULL									
+					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_EVENT_ID=TE.TOURN_EVENT_ID
+					AND (TES.SCORE IS NOT NULL OR (TES.RAW_SCORE IS NOT NULL AND TES.RAW_SCORE != '')) 									
 					WHERE TE.TOURNAMENT_ID=".$_SESSION["tournamentId"]. 
 					" GROUP BY EVENT_ID,NAME, TRIAL_EVENT_FLAG,TOURN_EVENT_ID, NUMBER_TEAMS
 					ORDER BY UPPER(E.NAME) ASC"; 
@@ -2964,7 +2965,6 @@ else {
 	
 	
 	-- HIGH
-	** Fix ‘Teams Scored column’ should check if raw score is entered. Not Rank
 	
 	
 	-- MEDIUM
@@ -2977,7 +2977,6 @@ else {
 	** Fix Max points earned per event on overall points screen
 	** Overall points. what if all scores are the same? Same rank?
 	** overall points display if scores are compeleted. 
-	**	Larger Time Out / Time Out Ajax
 	
 	** View Results Grid - Line Break for Long Text/Names?
 	** Add number of teams / last place points to instructions.
@@ -3009,6 +3008,7 @@ else {
 	** controller class security
 	** declare constants on login (to avoid notices if server has them turned on)
 	** Update Print Functionality
+	** Timeout at 12 hours / Time Out Ajax
 	
 	
 	-- APP LIMITATIONS --

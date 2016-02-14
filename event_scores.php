@@ -566,7 +566,7 @@ include_once('logon_check.php');
      </div>
      </h6>  
      </div> 
-     <h6>* This page will time out after 60 minutes if save or cancel has not been selected. Please make sure this page has not been open for more than 60 minutes before entering your scores. Click cancel or save to exit, then click enter scores to refresh the time out.</h6>
+     <h6>* Remember to SAVE your data frequently. </h6>
 	 <hr>
 
 	 <table width="100%"><tr>
