@@ -1006,7 +1006,7 @@ else {
 			$teamList = array();
 			$result = $mysqli->query("SELECT TT.TEAM_ID, T.NAME, TT.TEAM_NUMBER, TT.ALTERNATE_FLAG, TT.TOURN_TEAM_ID, TT.BEST_NEW_TEAM_FLAG, TT.MOST_IMPROVED_TEAM_FLAG FROM TOURNAMENT_TEAM TT INNER JOIN TOURNAMENT TR on 		
 									TR.TOURNAMENT_ID=TT.TOURNAMENT_ID 
-									INNER JOIN TEAM T on T.TEAM_ID=TT.TEAM_ID WHERE TT.TOURNAMENT_ID= " .$id. " ORDER BY if(CAST(TT.TEAM_NUMBER AS INT)=0,1,0), CAST(TT.TEAM_NUMBER AS INT) ASC, TEAM_NUMBER "); 
+									INNER JOIN TEAM T on T.TEAM_ID=TT.TEAM_ID WHERE TT.TOURNAMENT_ID= " .$id. " ORDER BY if(CAST(TT.TEAM_NUMBER AS UNSIGNED)=0,1,0), CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC, TEAM_NUMBER "); 
  			if ($result) {
  				while($teamRow = $result->fetch_array()) {
  					$team = array();
@@ -1286,7 +1286,7 @@ else {
     	 $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT, TES.TEAM_STATUS 
     	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID AND TT.ALTERNATE_FLAG = 0 
     	 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID AND TES.TOURN_EVENT_ID = " .$_SESSION["tournEventId"].
-    	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY if(CAST(TT.TEAM_NUMBER AS INT)=0,1,0), CAST(TT.TEAM_NUMBER AS INT) ASC, TEAM_NUMBER "); 
+    	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY if(CAST(TT.TEAM_NUMBER AS UNSIGNED)=0,1,0), CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC, TEAM_NUMBER "); 
  			$teamEventScoreList = array();
  			if ($result) {
  				while($scoreRow = $result->fetch_array()) {
@@ -1313,7 +1313,7 @@ else {
 		    $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT, TES.TEAM_STATUS 
     	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID AND TT.ALTERNATE_FLAG = 1
     	 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID AND TES.TOURN_EVENT_ID = " .$_SESSION["tournEventId"].
-    	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY if(CAST(TT.TEAM_NUMBER AS INT)=0,1,0), CAST(TT.TEAM_NUMBER AS INT) ASC, TEAM_NUMBER "); 
+    	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY if(CAST(TT.TEAM_NUMBER AS UNSIGNED)=0,1,0), CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC, TEAM_NUMBER "); 
  			$teamAlternateEventScoreList = array();
  			if ($result) {
  				while($scoreRow = $result->fetch_array()) {
@@ -1686,7 +1686,7 @@ else {
 					INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID
 					INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
 					WHERE TT.ALTERNATE_FLAG=0 AND TM.TOURNAMENT_ID=".$id."
-					 ORDER BY if(CAST(TT.TEAM_NUMBER AS INT)=0,1,0), CAST(TT.TEAM_NUMBER AS INT) ASC, TEAM_NUMBER ";
+					 ORDER BY if(CAST(TT.TEAM_NUMBER AS UNSIGNED)=0,1,0), CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC, TEAM_NUMBER ";
 		$result = $mysqli->query($query2); 
  		if ($result) {
 			while($teams = $result->fetch_array()) {
@@ -1746,7 +1746,7 @@ else {
 					INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID
 					INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
 					WHERE TT.ALTERNATE_FLAG=1 AND TM.TOURNAMENT_ID=".$id."
-					 ORDER BY if(CAST(TT.TEAM_NUMBER AS INT)=0,1,0), CAST(TT.TEAM_NUMBER AS INT) ASC, TEAM_NUMBER ";
+					 ORDER BY if(CAST(TT.TEAM_NUMBER AS UNSIGNED)=0,1,0), CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC, TEAM_NUMBER ";
 		$result = $mysqli->query($query2); 
 		$_SESSION['tournamentAlternateResults'] = null;
  		if ($result) {
@@ -2962,7 +2962,8 @@ else {
 	-- ISSUES TO IMPLEMENT / FIX --
 	
 	-- CRITICAL
-	
+		** Add feature to give awards for alternate teams
+		** Awards for Alternate teams
 	
 	-- HIGH
 	
@@ -2981,8 +2982,6 @@ else {
 	** View Results Grid - Line Break for Long Text/Names?
 	** Add number of teams / last place points to instructions.
 	** Page Iterator Fix on Tournaments, Add to Home Page
-	** Add feature to give awards for alternate teams
-	** Awards for Alternate teams
 	
 	** Log More User data on login
 	** Make Logo Dynamic

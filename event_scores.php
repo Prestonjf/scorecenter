@@ -197,6 +197,13 @@ include_once('logon_check.php');
 	}
 	
 	function validate() {
+		if (validatePrimary() && validateAlternate())
+			return true;
+		else 
+			return false;
+	}
+	
+	function validatePrimary() {
 		var error = false; // Team cannot have the same rank as another. Unless it is 0
 		var error2 = false; // Ranks must sequential from 1+
 		var error3 = false; // A team's rank was left blank
@@ -219,7 +226,7 @@ include_once('logon_check.php');
 			if  ($('#teamScore'+count) != null && $('#teamScore'+count).val() != null) {
 				var score = $('#teamScore'+count).val();
 				if (score == null || score == '') {
-					if(!confirm("A team's score / rank has been left blank. Do you still wish to save?")) return false;
+					if(!confirm("A team's rank has been left blank. Do you still wish to save?")) return false;
 					if (document.getElementById('submittedFlag').checked || document.getElementById('verifiedFlag').checked)
 						error3 = true;
 					break;
@@ -229,7 +236,7 @@ include_once('logon_check.php');
 				}
 				
 				scoreArr.forEach(function(entry) {
-					if (score == entry && max != score) exists = true;
+					if (score == entry) exists = true; // && max != score
 				});
 				
 				if (exists) {
@@ -282,6 +289,89 @@ include_once('logon_check.php');
 			 }
 		 }
 		 return true;		
+	}
+	
+	function validateAlternate() {
+		var error = false; // Team cannot have the same rank as another. Unless it is 0
+		var error2 = false; // Ranks must sequential from 1+
+		var error3 = false; // A team's rank was left blank
+		var error4 = false; // Submitted Check box must be checked before verified check box
+		var error5 = false; // Cannot save rank of 0 with 'P' Status 
+		
+		var max = <?php echo $_SESSION["highestScoreAlt"];?>;
+		var count = 0;
+		var maxScore = <?php echo $_SESSION["highestScoreAlt"];?>;
+		var scoreArr = [];
+		var exists = false;
+		var userRole = '<?php echo $userRole; ?>';
+		
+		if (document.getElementById('verifiedFlag').checked && !document.getElementById('submittedFlag').checked) {
+			error4 = true;
+		}
+		
+		while (count < 1000) {
+			exists = false;
+			if  ($('#teamAScore'+count) != null && $('#teamAScore'+count).val() != null) {
+				var score = $('#teamAScore'+count).val();
+				if (score == null || score == '') {
+					if(!confirm("An alternate team's rank has been left blank. Do you still wish to save?")) return false;
+					if (document.getElementById('submittedFlag').checked || document.getElementById('verifiedFlag').checked)
+						error3 = true;
+					break;
+				}
+				if (score != null && score != '' && score == '0' && 'P' == $('#teamAStatus'+count).val()) {
+					error5 = true;
+				}
+				
+				scoreArr.forEach(function(entry) {
+					if (score == entry) exists = true; // && max != score
+				});
+				
+				if (exists) {
+					error = true;
+					break;
+				}
+				else if (score != '' && score != '0') {
+					scoreArr.push(score);
+				}
+			} 
+			else { break;}
+			count++;
+		}
+		// Validate Numbers are sequential and no 0 - error2
+		scoreArr.sort(sortNumber);
+		var sequence = 1;
+
+		scoreArr.forEach(function(entry) {
+			if (entry != 0) { // 0 Means Team did not Participate or DQ
+				//if (entry == 0) { error2 = true;}
+				if (sequence != entry && sequence < max) { error2 = true;}
+				if (sequence != entry && max != entry) { error2 = true;}
+				sequence++;
+			}
+		});
+
+		if (error) {
+			displayError("<strong>Cannot Save Scores:</strong> Alternate team cannot have the same rank as another.");
+			return false;
+		}
+		if (error2) {
+			displayError("<strong>Cannot Save Scores:</strong> Alternate ranks must be sequential (no rank skipped)."); // and cannot be 0
+			return false;
+		}
+		if (error3) {
+			displayError("<strong>Cannot Save Scores:</strong> All alternate teams must be ranked to submit or verify scores.");
+			return false;
+		}
+		if (error4) {
+			displayError("<strong>Cannot Save Scores:</strong> Submitted checkbox must be checked to verify scores.");
+			return false;
+		}
+		if (error5) {
+			displayError("<strong>Cannot Save Scores:</strong> Alternate team cannot have a status of P (Participated) and earn a rank of 0.");
+			return false;
+		}	
+		return true;
 	}
 	
 	function sortNumber(a,b) {
@@ -663,7 +753,7 @@ include_once('logon_check.php');
 				<th width="10%" data-field="score" data-align="center" data-sortable="true">Tier/Rank Group
 					<?php if ($disableTier != 'disabled') { ?><input class="blankButton"type="button" id="pasteATier"value='+' /><?php } ?></th>
 				<th width="10%"data-field="score" data-align="center" data-sortable="true">Tie Break Rank</th>	
-                <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank
+                <th width="10%"data-field="score" data-align="center" data-sortable="true">Rank<span class="red">*</span>
 	                <?php if ($disable != 'disabled') { ?><input class="blankButton" type="button" id="pasteARanks"value='+' /><?php } ?></th>
 				<th width="10%" data-field="score" data-align="center" data-sortable="true">Points Earned</th>
             </tr>
