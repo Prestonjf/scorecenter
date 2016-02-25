@@ -1006,7 +1006,7 @@ else {
 			$teamList = array();
 			$result = $mysqli->query("SELECT TT.TEAM_ID, T.NAME, TT.TEAM_NUMBER, TT.ALTERNATE_FLAG, TT.TOURN_TEAM_ID, TT.BEST_NEW_TEAM_FLAG, TT.MOST_IMPROVED_TEAM_FLAG FROM TOURNAMENT_TEAM TT INNER JOIN TOURNAMENT TR on 		
 									TR.TOURNAMENT_ID=TT.TOURNAMENT_ID 
-									INNER JOIN TEAM T on T.TEAM_ID=TT.TEAM_ID WHERE TT.TOURNAMENT_ID= " .$id. " ORDER BY TT.TEAM_NUMBER ASC "); 
+									INNER JOIN TEAM T on T.TEAM_ID=TT.TEAM_ID WHERE TT.TOURNAMENT_ID= " .$id. " ORDER BY if(CAST(TT.TEAM_NUMBER AS INT)=0,1,0), CAST(TT.TEAM_NUMBER AS INT) ASC, TEAM_NUMBER "); 
  			if ($result) {
  				while($teamRow = $result->fetch_array()) {
  					$team = array();
@@ -1153,12 +1153,12 @@ else {
 				if ($row['0'] != null) $id = $row['0'];
 				 
 				$query = $mysqli->prepare("INSERT INTO TOURNAMENT_TEAM (TOURN_TEAM_ID, TOURNAMENT_ID, TEAM_ID, TEAM_NUMBER, ALTERNATE_FLAG,BEST_NEW_TEAM_FLAG,MOST_IMPROVED_TEAM_FLAG) VALUES (".$id.", ?, ?, ?,?,?,?) ");
-				$query->bind_param('iiiiii',$_SESSION["tournamentId"],$team['0'], $team['2'], $team['3'],$bestNew,$mostImproved); 
+				$query->bind_param('iisiii',$_SESSION["tournamentId"],$team['0'], $team['2'], $team['3'],$bestNew,$mostImproved); 
 				$query->execute();
 			}
 			else {
 				$query = $mysqli->prepare("UPDATE TOURNAMENT_TEAM SET TEAM_NUMBER=?, ALTERNATE_FLAG=?,BEST_NEW_TEAM_FLAG=?,MOST_IMPROVED_TEAM_FLAG=? WHERE TOURN_TEAM_ID=".$team['4']);			
-				$query->bind_param('iiii',$team['2'], $team['3'],$bestNew,$mostImproved);
+				$query->bind_param('siii',$team['2'], $team['3'],$bestNew,$mostImproved);
 				$query->execute();
 			}
 			
@@ -1286,7 +1286,7 @@ else {
     	 $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT, TES.TEAM_STATUS 
     	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID AND TT.ALTERNATE_FLAG = 0 
     	 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID AND TES.TOURN_EVENT_ID = " .$_SESSION["tournEventId"].
-    	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY TEAM_NUMBER ASC "); 
+    	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY if(CAST(TT.TEAM_NUMBER AS INT)=0,1,0), CAST(TT.TEAM_NUMBER AS INT) ASC, TEAM_NUMBER "); 
  			$teamEventScoreList = array();
  			if ($result) {
  				while($scoreRow = $result->fetch_array()) {
@@ -1313,7 +1313,7 @@ else {
 		    $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT, TES.TEAM_STATUS 
     	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID AND TT.ALTERNATE_FLAG = 1
     	 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID AND TES.TOURN_EVENT_ID = " .$_SESSION["tournEventId"].
-    	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY TEAM_NUMBER ASC "); 
+    	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY if(CAST(TT.TEAM_NUMBER AS INT)=0,1,0), CAST(TT.TEAM_NUMBER AS INT) ASC, TEAM_NUMBER "); 
  			$teamAlternateEventScoreList = array();
  			if ($result) {
  				while($scoreRow = $result->fetch_array()) {
@@ -1686,7 +1686,7 @@ else {
 					INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID
 					INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
 					WHERE TT.ALTERNATE_FLAG=0 AND TM.TOURNAMENT_ID=".$id."
-					 ORDER BY TEAM_NUMBER ASC ";
+					 ORDER BY if(CAST(TT.TEAM_NUMBER AS INT)=0,1,0), CAST(TT.TEAM_NUMBER AS INT) ASC, TEAM_NUMBER ";
 		$result = $mysqli->query($query2); 
  		if ($result) {
 			while($teams = $result->fetch_array()) {
@@ -1746,7 +1746,7 @@ else {
 					INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TM.TOURNAMENT_ID
 					INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
 					WHERE TT.ALTERNATE_FLAG=1 AND TM.TOURNAMENT_ID=".$id."
-					 ORDER BY TEAM_NUMBER ASC ";
+					 ORDER BY if(CAST(TT.TEAM_NUMBER AS INT)=0,1,0), CAST(TT.TEAM_NUMBER AS INT) ASC, TEAM_NUMBER ";
 		$result = $mysqli->query($query2); 
 		$_SESSION['tournamentAlternateResults'] = null;
  		if ($result) {
