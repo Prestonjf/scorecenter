@@ -2117,13 +2117,13 @@ else {
 	}
 	
 	function reloadResults() {
-			$rowCount = 2;
-			$colWidth = 1;
+		$rowCount = 2; // Color Counts
+		$colWidth = 1;
 		echo '<table id="primaryResultsGrid" class="table table-bordered table-hover tablesorter" style="table-layout:fixed;">';
         echo '<thead> ';
         echo '<tr> ';
-		echo '<th '; echo 'width="5%" style="background-color: #'.$_SESSION["primaryColumnColor"].';border-bottom: 1px solid #000000;"'; echo 'class="rotate" ><div><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#</span></div></th>';
-		echo '<th '; echo 'style="background-color: #'.$_SESSION["secondaryRowColor"].';border-bottom: 1px solid #000000;"'; echo ' width="20%"><div><span>'; 
+		echo '<th '; echo 'width="5%" style="background-color: #'.$_SESSION["primaryColumnColor"].';border-bottom: 1px solid #000000;"'; echo ' class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#</span></div></th>';
+		echo '<th '; echo 'style="background-color: #'.$_SESSION["secondaryRowColor"].';border-bottom: 1px solid #000000;"'; echo ' width="20%"><div><span class="sortableTH">'; 
 		echo $_SESSION["tournamentName"] .'<br />'; echo 'Division: '.$_SESSION["tournamentDivision"] . '<br />'; echo 'Date: '.$_SESSION["tournamentDate"] .' </span></div></th>';
 				$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
 				if ($tournamentResultsHeader != null) {
@@ -2134,14 +2134,14 @@ else {
 						echo '<th width="'.$colWidth.'%" style="border-bottom: 1px solid #000000;'; 
 						if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].';';
 						else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';
-						echo '" class="rotate"><div><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$resultHeader.'</span></div></th>';						
+						echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$resultHeader.'</span></div></th>';						
 						$rowCount++;
 					}
 				}
 
-                echo '<th width="'.$colWidth.'%" style="border-bottom: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';'; echo '" class="rotate"><div><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Score</span></div></th>';
+                echo '<th width="'.$colWidth.'%" style="border-bottom: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';'; echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Score</span></div></th>';
 				$rowCount++;
-			   echo '<th width="'.$colWidth.'%" style="border-bottom: 1px solid #000000; '; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';'; echo '" class="rotate"><div><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Final Rank</span></div></th>';
+			   echo '<th width="'.$colWidth.'%" style="border-bottom: 1px solid #000000; '; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';'; echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Final Rank</span></div></th>';
         echo '</tr>';
         echo '</thead>';
         echo '<tbody>';
@@ -2183,10 +2183,35 @@ else {
          echo '</tbody>';
          echo '</table>';
 		  if ($_SESSION['tournamentAlternateResults'] != null) {
-			  echo '';
+			$rowCount = 2; // Color Counts
+			$colWidth = 1;
 		  $tournamentAlternateResults = $_SESSION['tournamentAlternateResults'];
           if ($tournamentAlternateResults != null) {
-			 echo '<table class="table table-bordered table-hover" data-sortable data-sort-name="rank" data-sort-order="desc" style="table-layout:fixed;">';
+			 echo '<table id="alternateResultsGrid" class="table table-bordered table-hover tablesorter" style="table-layout:fixed;">';
+			 echo '<thead><tr>';
+			 echo '<th width="5%" style="background-color: #'.$_SESSION["primaryColumnColor"].';border-bottom: 1px solid #000000;" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#</span></div></th>';
+			 echo '<th style="background-color: #'.$_SESSION["secondaryRowColor"].';border-bottom: 1px solid #000000;" width="20%"><div><span class="sortableTH">'. $_SESSION["tournamentName"] . '<br />Division: '.$_SESSION["tournamentDivision"].' (Alternate)<br /> Date: '.$_SESSION["tournamentDate"] .'</span></div></th> ';
+
+				$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
+				if ($tournamentResultsHeader != null) {
+					foreach ($tournamentResultsHeader as $resultHeader) {
+						$colWidth = sizeof($tournamentResultsHeader) + 2;
+						$colWidth = 75 / $colWidth;
+						
+						echo '<th width="'.$colWidth.'%" style="padding-left: none; border-bottom: 1px solid #000000;'; 
+						if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].';';
+						else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';
+						echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$resultHeader.'</span></div></th>';						
+						$rowCount++;
+					}
+				}
+				echo '<th width="'. $colWidth.'%" style="border-bottom: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';'; echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Score</span></div></th>';
+				$rowCount++;
+				echo '<th width="'. $colWidth.'%" style="border-bottom: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';'; echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Final Rank</span></div></th> ';
+
+			echo '</tr></thead>';
+			echo '<tbody>';
+			$rowCount = 0;
 			 foreach ($tournamentAlternateResults as $resultRow) {
 				$colCount = 0;
       			echo '<tr>'; //style="border-right: 1px solid #000000;
@@ -2197,7 +2222,7 @@ else {
 					else echo 'style="background-color: #'.$_SESSION["secondaryRowColor"].';"';
 				echo '><b>'.$resultRow['1'].'</b></td>';
 				$colCount++;
-				echo '<td width="20%" style="white-space: nowrap; overflow: hidden; border-right: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryRowColor"]; else echo ' background-color: #'.$_SESSION["secondaryRowColor"]; echo '"><b>'.$resultRow['2'].'</b></td>';
+				echo '<td width="20%" style="white-space: nowrap; overflow: hidden;  border-right: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryRowColor"]; else echo ' background-color: #'.$_SESSION["secondaryRowColor"]; echo '"><b>'.$resultRow['2'].'</b></td>';
 				$i = 3;
 				$colCount++;
 				while ($i < sizeof($resultRow)-1) {
@@ -2215,6 +2240,7 @@ else {
 				echo '</tr>';
 			$rowCount++;
 			}
+			echo '</tbody>';
 			echo '</table>';
 			}
 		  }	

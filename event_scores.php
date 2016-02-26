@@ -226,7 +226,7 @@ include_once('logon_check.php');
 			if  ($('#teamScore'+count) != null && $('#teamScore'+count).val() != null) {
 				var score = $('#teamScore'+count).val();
 				if (score == null || score == '') {
-					if(!confirm("A team's rank has been left blank. Do you still wish to save?")) return false;
+					//if(!confirm("A team's rank has been left blank. Do you still wish to save?")) return false;
 					if (document.getElementById('submittedFlag').checked || document.getElementById('verifiedFlag').checked)
 						error3 = true;
 					break;
@@ -314,7 +314,7 @@ include_once('logon_check.php');
 			if  ($('#teamAScore'+count) != null && $('#teamAScore'+count).val() != null) {
 				var score = $('#teamAScore'+count).val();
 				if (score == null || score == '') {
-					if(!confirm("An alternate team's rank has been left blank. Do you still wish to save?")) return false;
+					//if(!confirm("An alternate team's rank has been left blank. Do you still wish to save?")) return false;
 					if (document.getElementById('submittedFlag').checked || document.getElementById('verifiedFlag').checked)
 						error3 = true;
 					break;

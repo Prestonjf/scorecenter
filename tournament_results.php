@@ -71,7 +71,9 @@
 					else {
 						// success message
 						document.getElementById('resultsGrid').innerHTML = xmlhttp.responseText;
-						$("#primaryResultsGrid").tablesorter(); 
+						$("#primaryResultsGrid").tablesorter();
+						if (document.getElementById('alternateResultsGrid') != null)
+							$("#alternateResultsGrid").tablesorter();						
 						if (color == '-1') { 
 							$("#primaryRowColor").spectrum("set", "#FFFFFF"); // D1ECD1
 							$("#primaryColumnColor").spectrum("set", "#FFFFFF"); // D1D1D1
@@ -124,7 +126,7 @@
 	 </tr>
 	 <tr>
      <td><h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4></td>
-	 <td><h4>Max Points Earned Per Event: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["highestScore"]; ?></span></h4></td>
+	 <td><h4></h4></td> <!-- Max Points Earned Per Event: <span style="font-weight:normal;font-size:14px;"><?php //echo $_SESSION["highestScore"]; ?></span> -->
 	 </tr>
 	 <tr>
 	 <td><h4>Events Completed: <?php echo $_SESSION["tournamentEventsCompleted"]; ?></h4></td>
@@ -142,7 +144,7 @@
 
 	<div id="resultsGrid">
 		<?php
-			$rowCount = 2;
+			$rowCount = 2;	// Color Counts
 			$colWidth = 1;
 		?>
         <table id="primaryResultsGrid" class="table table-bordered table-hover tablesorter" style="table-layout:fixed;">
@@ -209,11 +211,37 @@
           </tbody>
           </table>
 		  <?php
+
 		  if ($_SESSION['tournamentAlternateResults'] != null) {
-			  echo '';
+				$rowCount = 2; // Color Counts
+				$colWidth = 1;
 		  $tournamentAlternateResults = $_SESSION['tournamentAlternateResults'];
           if ($tournamentAlternateResults != null) {
-			 echo '<table class="table table-bordered table-hover" data-sortable data-sort-name="rank" data-sort-order="desc" style="table-layout:fixed;">';
+			 echo '<table id="alternateResultsGrid" class="table table-bordered table-hover tablesorter" style="table-layout:fixed;">';
+			 echo '<thead><tr>';
+			 echo '<th width="5%" style="background-color: #'.$_SESSION["primaryColumnColor"].';border-bottom: 1px solid #000000;" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#</span></div></th>';
+			 echo '<th style="background-color: #'.$_SESSION["secondaryRowColor"].';border-bottom: 1px solid #000000;" width="20%"><div><span class="sortableTH">'. $_SESSION["tournamentName"] . ' (Alternate)<br />Division: '.$_SESSION["tournamentDivision"].'<br /> Date: '.$_SESSION["tournamentDate"] .'</span></div></th> ';
+
+				$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
+				if ($tournamentResultsHeader != null) {
+					foreach ($tournamentResultsHeader as $resultHeader) {
+						$colWidth = sizeof($tournamentResultsHeader) + 2;
+						$colWidth = 75 / $colWidth;
+						
+						echo '<th width="'.$colWidth.'%" style="padding-left: none; border-bottom: 1px solid #000000;'; 
+						if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].';';
+						else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';
+						echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$resultHeader.'</span></div></th>';						
+						$rowCount++;
+					}
+				}
+				echo '<th width="'. $colWidth.'%" style="border-bottom: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';'; echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Score</span></div></th>';
+				$rowCount++;
+				echo '<th width="'. $colWidth.'%" style="border-bottom: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';'; echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Final Rank</span></div></th> ';
+
+			echo '</tr></thead>';
+			echo '<tbody>';
+			 $rowCount = 0;
 			 foreach ($tournamentAlternateResults as $resultRow) {
 				$colCount = 0;
       			echo '<tr>'; //style="border-right: 1px solid #000000;
@@ -242,6 +270,7 @@
 				echo '</tr>';
 			$rowCount++;
 			}
+			echo '</tbody>';
 			echo '</table>';
 			}
 		  }	
@@ -318,6 +347,8 @@
     <script>
       $(document).ready(function(){
 		$("#primaryResultsGrid").tablesorter(); 
+		if (document.getElementById('alternateResultsGrid') != null)
+			$("#alternateResultsGrid").tablesorter();
 	});
     </script>
     
