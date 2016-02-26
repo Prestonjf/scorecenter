@@ -40,7 +40,7 @@
 		clearSuccess();
 		var error = false;
 		var error2 = false;
-		var fields = ["tournamentName", "tournamentDivision", "tournamentLocation","tournamentDate","numberEvents","numberTeams","highestScore","eventsAwarded","overallAwarded", "highestScoreAlt", "pointsForNP","pointsForDQ"];
+		var fields = ["tournamentName", "tournamentDivision", "tournamentLocation","tournamentDate","numberEvents","numberTeams","highestScore","eventsAwarded","overallAwarded", "highestScoreAlt", "pointsForNP","pointsForDQ","eventsAAwarded","overallAAwarded"];
 		var str;
 		for (str in fields) {
 			if (document.getElementById(fields[str]).value.length === 0 || !document.getElementById(fields[str]).value.trim()) {
@@ -426,12 +426,20 @@
 		<td colspan="4"><label for="tournamentDescription">Slideshow / Awards Settings: </label></td>
 	</tr>
 	<tr>
-		<td><label for="eventsAwarded">Event Positions Awarded: <span class="red">*</span></label></td>
+		<td><label for="eventsAwarded">Event Positions Awarded:<span class="red">*</span></label></td>
 		<td><input type="text" class="form-control" name="eventsAwarded" id="eventsAwarded" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
 			value=<?php echo '"'.$_SESSION["eventsAwarded"].'"' ?>></td>
-		<td><label for="overallAwarded">Overall Positions Awarded: <span class="red">*</span></label></td>
+		<td><label for="overallAwarded">Overall Positions Awarded:<span class="red">*</span></label></td>
 		<td><input type="text" class="form-control" name="overallAwarded" id="overallAwarded" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
 			value=<?php echo '"'.$_SESSION["overallAwarded"].'"' ?>></td>
+	</tr>
+	<tr>
+		<td><label for="eventsAwarded">Event Positions Awarded (Alternate):<span class="red">*</span></label></td>
+		<td><input type="text" class="form-control" name="eventsAAwarded" id="eventsAAwarded" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
+			value=<?php echo '"'.$_SESSION["eventsAAwarded"].'"' ?>></td>
+		<td><label for="overallAwarded">Overall Positions Awarded (Alternate):<span class="red">*</span></label></td>
+		<td><input type="text" class="form-control" name="overallAAwarded" id="overallAAwarded" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
+			value=<?php echo '"'.$_SESSION["overallAAwarded"].'"' ?>></td>
 	</tr>
 	<tr>
 		<td colspan="2"><input type="checkbox" id="bestNewTeamFlag" name="bestNewTeamFlag" <?php if ($_SESSION["bestNewTeam"] == '1') echo 'checked'; ?> value="1"> &nbsp;&nbsp;<label for="bestNewTeamFlag">Display Best New Team</label></td>

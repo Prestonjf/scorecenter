@@ -245,6 +245,7 @@
 			echo '</table>';
 			}
 		  }	
+		  
 		  ?>
 		</div>
 		  * = Trial Event <br />
