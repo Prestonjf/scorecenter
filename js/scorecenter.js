@@ -354,16 +354,14 @@ function calcPrimary(type) {
 		else if (type == 'LOWRAWTIER') scoreArr.sort(compare4);
 		else if (type == 'HIGHRAWTIER4LOW') scoreArr.sort(compare5);
 		
-		
 		// Set Ranks, ReOrder, Set Points Earned (Status of P gets ranked. N and D get 0 Rank)
 		scoreArr.forEach(function(entry) {
 			// if (entry[0] ==15 )
-			//	alert(entry[0]+': Rank Count:' +rank+ ' Tie Count: '+tiesCount);
 		
 			if (previousRawScore != entry[2] || previousTier != entry[3] || previousTieBreak != entry[5] || (previousRawScore != '' && entry[2] == '')) tiesCount = 0;
 			if (entry[4] == 'P') {
 				if ((type == 'HIGHRAW' || type == 'LOWRAW') && previousRawScore == entry[2] && previousTieBreak == entry[5]) {
-					tiesCount++;
+					tiesCount++; //if (previousStatus != 'N' && previousStatus != 'D' && previousStatus != 'X') 
 					entry[1] = rank - tiesCount;
 				}
 				else if ((type == 'HIGHRAWTIER' || type == 'LOWRAWTIER' || type == 'HIGHRAWTIER4LOW') && previousRawScore == entry[2] && previousTier == entry[3] && previousTieBreak == entry[5]) {
@@ -383,6 +381,7 @@ function calcPrimary(type) {
 			previousTier = entry[3];
 			previousStatus = entry[4];
 			previousTieBreak = entry[5];
+			//console.log(entry[0]+': \t status: '+entry[4]+'\t raw:' +entry[2] + '\t rank: '+entry[1]+ '\t tier: '+entry[3]+ ' \t Tie Count: '+tiesCount);
 		});
 		scoreArr.sort(compare);
 		//alert(scoreArr.toString());
@@ -483,7 +482,9 @@ function compare(a,b) {
 
 // 1. HIGHRAW
 function compare1(a,b) {
- // if (a[4] == 'N' || a['4'] == 'D' || a['4'] == 'X') return 1;
+  if ((a[4] == 'N' || a[4] == 'D' || a[4] == 'X') && b[4] == 'P') return 1;
+  if ((b[4] == 'N' || b[4] == 'D' || b[4] == 'X') && a[4] == 'P') return -1; 
+  
   if (a[2] > b[2])
     return -1;
   if (a[2] < b[2])
@@ -499,7 +500,9 @@ function compare1(a,b) {
 
 // 2. HIGHRAWTIER
 function compare2(a,b) {
-//  if (a[4] == 'N' || a['4'] == 'D' || a['4'] == 'X') return 1;
+  if ((a[4] == 'N' || a[4] == 'D' || a[4] == 'X') && b[4] == 'P') return 1;
+  if ((b[4] == 'N' || b[4] == 'D' || b[4] == 'X') && a[4] == 'P') return -1; 
+  
   if (a[3] < b[3])
     return -1;
   if (a[3] > b[3])
@@ -519,7 +522,9 @@ function compare2(a,b) {
 
 // 3. LOWRAW
 function compare3(a,b) {
-  //if (a[4] == 'N' || a['4'] == 'D' || a['4'] == 'X') return 1;
+  if ((a[4] == 'N' || a[4] == 'D' || a[4] == 'X') && b[4] == 'P') return 1;
+  if ((b[4] == 'N' || b[4] == 'D' || b[4] == 'X') && a[4] == 'P') return -1; 
+  
   var x = a[2]; if (a[2] == '') x = 100000;
   var y = b[2]; if (b[2] == '') y = 100000;
   if (x < y)
@@ -537,7 +542,9 @@ function compare3(a,b) {
 
 // 4. LOWRAWTIER
 function compare4(a,b) {
-//  if (a[4] == 'N' || a['4'] == 'D' || a['4'] == 'X') return 1;
+  if ((a[4] == 'N' || a[4] == 'D' || a[4] == 'X') && b[4] == 'P') return 1;
+  if ((b[4] == 'N' || b[4] == 'D' || b[4] == 'X') && a[4] == 'P') return -1; 
+  
   if (a[3] < b[3])
     return -1;
   if (a[3] > b[3])
@@ -559,7 +566,9 @@ function compare4(a,b) {
 
 // 5. HIGHRAWTIER4LOW - 4th Tier Low Score
 function compare5(a,b) {
-//  if (a[4] == 'N' || a['4'] == 'D' || a['4'] == 'X') return 1;
+  if ((a[4] == 'N' || a[4] == 'D' || a[4] == 'X') && b[4] == 'P') return 1;
+  if ((b[4] == 'N' || b[4] == 'D' || b[4] == 'X') && a[4] == 'P') return -1; 
+  
   if (a[3] < b[3])
     return -1;
   if (a[3] > b[3])

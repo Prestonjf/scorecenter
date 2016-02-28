@@ -3200,9 +3200,10 @@ else {
 	
 	
 	-- HIGH
-	** Auto Generate Users for a Tournaments Events
+	** Auto Generate Users for a Tournaments Events 
 	** Make Super User Security Level
 	** Admin can only modify tournaments they created. (No Access to Utilities or Users)
+	** Add Additional Point(s) for PX teams 
 	
 	
 	-- MEDIUM
