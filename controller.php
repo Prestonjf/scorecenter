@@ -2270,9 +2270,9 @@ else {
 		//$slide->setText('Random Text that identifies this as the 2nd slide!!!');
 		//array_push($resultSlideshow, $slide);
 		
-		$aId = null; $aEvents = array(); $aAltEvents = array(); $aHighLowFlag = 0; $aOverallAwarded = 0; $aOverallAwardedAlt = 0;
-		$bId = null; $bEvents = array(); $bAltEvents = array(); $bHighLowFlag = 0; $bOverallAwarded = 0; $bOverallAwardedAlt = 0;
-		$cId = null; $cEvents = array(); $cAltEvents = array(); $cHighLowFlag = 0; $cOverallAwarded = 0; $cOverallAwardedAlt = 0;
+		$aId = null; $aEvents = array(); $aAltEvents = array(); $aHighLowFlag = 0; $aOverallAwarded = 0; $aOverallAwardedAlt = 0; $cEventAwardedAlt = 0;
+		$bId = null; $bEvents = array(); $bAltEvents = array(); $bHighLowFlag = 0; $bOverallAwarded = 0; $bOverallAwardedAlt = 0; $bEventAwardedAlt = 0;
+		$cId = null; $cEvents = array(); $cAltEvents = array(); $cHighLowFlag = 0; $cOverallAwarded = 0; $cOverallAwardedAlt = 0; $aEventAwardedAlt = 0;
 		
 		$query = "select T1.TOURNAMENT_ID, T1.DIVISION, T1.LINKED_TOURN_1, T2.DIVISION, T1.LINKED_TOURN_2, T3.DIVISION FROM TOURNAMENT T1 
 				LEFT JOIN TOURNAMENT T2 on T2.TOURNAMENT_ID=T1.LINKED_TOURN_1
@@ -2317,7 +2317,7 @@ else {
 		
 		// Alternate C
 		if ($cId != null) {
-			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED_ALT from TOURNAMENT_EVENT TE
+			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED_ALT, T.EVENTS_AWARDED_ALT from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
 					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 1
@@ -2333,6 +2333,7 @@ else {
 			while ($row = $results->fetch_array()) {
 				//$cHighLowFlag = $row[3];
 				$cOverallAwardedAlt = $row[4];
+				$cEventAwardedAlt = $row[5];
 				if ($event != $row[0] and sizeof($eventArray) > 0) {
 					array_unshift($eventArray, $event);
 					array_push($cAltEvents, $eventArray);
@@ -2379,7 +2380,7 @@ else {
 		
 		// Alternate B
 		if ($bId != null) {
-			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED_ALT from TOURNAMENT_EVENT TE
+			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED_ALT, T.EVENTS_AWARDED_ALT from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
 					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 1
@@ -2395,6 +2396,7 @@ else {
 			while ($row = $results->fetch_array()) {	
 				//$bHighLowFlag = $row[3];
 				$bOverallAwardedAlt = $row[4];
+				$bEventAwardedAlt = $row[5];
 				if ($event != $row[0] and sizeof($eventArray) > 0) {
 					array_unshift($eventArray, $event);
 					array_push($bAltEvents, $eventArray);
@@ -2441,7 +2443,7 @@ else {
 		
 		// Alternate A
 		if ($aId != null) {
-			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED_ALT from TOURNAMENT_EVENT TE
+			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED_ALT, T.EVENTS_AWARDED_ALT from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
 					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 1
@@ -2457,6 +2459,7 @@ else {
 			while ($row = $results->fetch_array()) {
 				//$aHighLowFlag = $row[3];				
 				$aOverallAwardedAlt = $row[4];
+				$aEventAwardedAlt = $row[5];
 				if ($event != $row[0] and sizeof($eventArray) > 0) {
 					array_unshift($eventArray, $event);
 					array_push($aAltEvents, $eventArray);
@@ -2472,7 +2475,7 @@ else {
 		
 		for ($i=0; $i < 100; $i++) {
 			if ($i >= sizeof($cEvents) AND $i >= sizeof($bEvents) AND $i >= sizeof($aEvents)) break;
-				if ($i < sizeof($aAltEvents) AND $aOverallAwardedAlt != null AND $aOverallAwardedAlt > 0) {
+				if ($i < sizeof($aAltEvents) AND $aEventAwardedAlt != null AND $aEventAwardedAlt > 0) {
 					$event = $aAltEvents[$i];
 					$slide = new slideshowSlide();
 					$slide->setType('EVENTSCORE');		
@@ -2500,7 +2503,7 @@ else {
 					$slide->setTeamNames($teamList);
 					array_push($resultSlideshow, $slide);
 				}
-				if ($i < sizeof($bAltEvents) AND $bOverallAwardedAlt != null AND $bOverallAwardedAlt > 0) {
+				if ($i < sizeof($bAltEvents) AND $bEventAwardedAlt != null AND $bEventAwardedAlt > 0) {
 					$event = $bAltEvents[$i];
 					$slide = new slideshowSlide();
 					$slide->setType('EVENTSCORE');		
@@ -2528,7 +2531,7 @@ else {
 					$slide->setTeamNames($teamList);
 					array_push($resultSlideshow, $slide);
 				}
-				if ($i < sizeof($cAltEvents) AND $cOverallAwardedAlt != null AND $cOverallAwardedAlt > 0) {
+				if ($i < sizeof($cAltEvents) AND $cEventAwardedAlt != null AND $cEventAwardedAlt > 0) {
 					$event = $cAltEvents[$i];
 					$slide = new slideshowSlide();
 					$slide->setType('EVENTSCORE');		
