@@ -13,7 +13,7 @@ include_once('logon_check.php');
 
 	// Security Level Check
 	include_once('role_check.php');
-	checkUserRole(2);
+	checkUserRole(1);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,13 +21,37 @@ include_once('logon_check.php');
 	<?php include_once('libs/head_tags.php'); ?>
 	
   <script type="text/javascript">
-  $(document).ready(function(){
-  
-    //	$("#addTournament").click(function(){
-     //   	alert("add");
-    //	});
+  function resetPassword() {
+	 	clearError();
+	 	clearSuccess();
+	 	if (confirm('Are you sure you want to reset this users password?')) {
+		  if ($('#resetPasswordText') == null || $('#resetPasswordText').val().trim() === '') {
+		  	displayError("<strong>Cannot Reset Password:</strong> No password has been entered.");
+			return;  
+		  }
+		  	xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+					if (xmlhttp.responseText.trim() == 'error') {
+						//error message	
+					}
+					else {
+						// success message
+						$('#resetPasswordText').val('');
+						displaySuccess("<strong>Password Reset:</strong> User Password has been reset successfully!");
+					}					
+				}
+			}
+		var str = $('#resetPasswordText').val();
+		var encStr = window.btoa(str);	
+        xmlhttp.open("GET","controller.php?command=resetUserPassword&id="+encStr,true);
+        xmlhttp.send();	 
+	  }
+  }
 
-    	
+
+
+  $(document).ready(function(){
     	
 	});
 
@@ -88,12 +112,22 @@ include_once('logon_check.php');
 			</select>
 	</td>
 	</tr>
+	<tr>
+	<td><label for="resetPasswordText">Reset Password: </label></td>
+	<td>
+		<input type="text" class="form-control" name="resetPasswordText" id="resetPasswordText" size="50" />
+	</td>
+	<td><label for=""></label></td>
+	<td>
+	</td>
+	</tr>
 
 	</table>
 	
 	<hr>
 
      <button type="submit" class="btn btn-xs btn-danger" name="saveUser" value="<?php echo $_SESSION["userId"];?>">Save</button>
+     <input type="button" class="btn btn-xs btn-danger" name="resetUserPassword" onclick="resetPassword()" value="Reset Password"></button>
  	 <button type="submit" class="btn btn-xs btn-primary" name="cancelUser" value="0">Cancel</button>
 
 

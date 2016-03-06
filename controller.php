@@ -282,6 +282,9 @@ else if (isset($_GET['editUser'])) {
 	header("Location: user_detail.php");
 	exit();
 }
+else if ($_GET['command'] != null and $_GET['command'] == 'resetUserPassword') {
+	resetUserPassword($mysqli,$_GET['id']);
+}
 
 else if (isset($_GET['loadTournament'])) {
 	clearTournament();
@@ -2865,6 +2868,17 @@ else {
 		
 		// save Confirmation
 		$_SESSION['savesuccessUser'] = "1";	
+	}
+	
+	function resetUserPassword($mysqli, $id) {
+		$decId = base64_decode($id);
+		$encryptPassword = crypt($decId);
+		
+		$query = $mysqli->prepare("UPDATE USER SET PASSWORD=? WHERE USER_ID=".$_SESSION["userId"]);
+			
+		$query->bind_param('s',$encryptPassword);
+		$query->execute();
+		$query->free_result();
 	}
 	
 	// UTILITIES MANAGEMENT --------------------------------------------------
