@@ -409,6 +409,15 @@ else if (isset($_GET['saveTournament'])) {
 	header("Location: tournament.php");
 	exit();
 }
+else if (isset($_GET['generateSupervisorLogins'])) {
+	cacheTournamnent();
+	generateUsersForEvents($mysqli, $_SESSION["tournamentId"]);
+
+	saveTournament($mysqli);
+	header("Location: tournament_detail.php");
+	exit();
+}
+
 
 else if (isset($_GET['cancelTournament'])) {
 	clearTournament();
@@ -588,6 +597,19 @@ else {
 		// Event Cache - Supervisor
 		
 
+	}
+	
+	function generateUsersForEvents($mysqli, $id) {
+		// Delete linked users if auto_created flag = 1
+		$result = $mysqli->query("DELETE FROM USER_LOGIN_LOG WHERE USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE INNER JOIN USER U on u.USER_ID=TE.USER_ID WHERE TE.TOURNAMENT_ID=".$id." AND U.AUTO_CREATED = 1)");
+		$result = $mysqli->query("DELETE U1.* FROM USER U1 WHERE U1.AUTO_CREATED = 1 AND U1.USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE WHERE TE.TOURNAMENT_ID=".$id.")");
+		
+		
+		// loop through events
+		// create user for each event
+		// link user Id in event list (Save will happen after this method)
+		
+		
 	}
 	
 	function clearTournament() {

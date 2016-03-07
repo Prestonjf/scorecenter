@@ -300,6 +300,12 @@
         xmlhttp.send();
 	}
 	
+	function generateUserLogins() {
+		if (confirm('Are you sure you want to create new users for all tournament events? This will save the tournament and overwrite current users.'))
+			return true;
+		return false;	
+	}
+	
   
   </script>
   <style>
@@ -544,6 +550,10 @@
 		</select>
 		</div>
 		</div>
+	<?php if ($_SESSION["tournamentId"] != null AND $_SESSION["tournamentId"] != '') { ?>
+	<br />
+	<button type="submit" class="btn btn-xs btn-primary" onclick="return generateUserLogins();" name="generateSupervisorLogins">Generate Supervisor Logins</button>
+	<?php } ?>
 	<hr>
 	
 	    <h2>Teams</h2>
