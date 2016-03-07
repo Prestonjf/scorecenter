@@ -411,9 +411,11 @@ else if (isset($_GET['saveTournament'])) {
 }
 else if (isset($_GET['generateSupervisorLogins'])) {
 	cacheTournamnent();
-	generateUsersForEvents($mysqli, $_SESSION["tournamentId"]);
-
+	$id = $_SESSION["tournamentId"];
+	generateUsersForEvents($mysqli, $id);
 	saveTournament($mysqli);
+	clearTournament();
+	loadTournament($id, $mysqli);
 	header("Location: tournament_detail.php");
 	exit();
 }
@@ -604,12 +606,54 @@ else {
 		$result = $mysqli->query("DELETE FROM USER_LOGIN_LOG WHERE USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE INNER JOIN USER U on u.USER_ID=TE.USER_ID WHERE TE.TOURNAMENT_ID=".$id." AND U.AUTO_CREATED = 1)");
 		$result = $mysqli->query("DELETE U1.* FROM USER U1 WHERE U1.AUTO_CREATED = 1 AND U1.USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE WHERE TE.TOURNAMENT_ID=".$id.")");
 		
+		// Build spreadsheet to export
+		// filename for download
+  		$filename = $_SESSION["tournamentName"]." Supervisors " . $_SESSION["tournamentDivision"] . ".csv";
+  		header("Content-Disposition: attachment; filename=\"$filename\"");
+  		header("Content-Type: text/csv; charset=utf-8");
+  		
+  		$output = fopen('php://output', 'w');
+
+		$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
+		$headings = array();
+		array_push($headings,"Event Name");
+		array_push($headings,"Username");
+		array_push($headings,"Password");
+		fputcsv($output, $headings);
 		
 		// loop through events
-		// create user for each event
-		// link user Id in event list (Save will happen after this method)
+		$eventList = $_SESSION["eventList"];
+		$sql = "";
+		$count = 0;
+		foreach ($eventList as $event) { 		
+			// create user for each event
+			// link user Id in event list (Save will happen after this method)
+			$result = $mysqli->query("select max(USER_ID) + 1 from USER");
+			$row = $result->fetch_row(); 
+			$id = 0;
+			if ($row != null) $id = $row['0'];
+			$n = rand(0, 9999); $e = explode($event['1']); $d = $_SESSION["tournamentDivision"]; $y = date("Y");
+			$username = $e.$y.$d.$n;
+			$passowrd = $username . rand(0, 9);
+			$encryptPwd = crypt($passowrd);
+			$sql .= " INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER, AUTO_CREATED_FLAG) 
+				VALUES (".$id.",".$username.",".$encryptPwd.",'SUPERVISOR',".$event['1'].",'Supervisor',1,'',1); ";
+					
+			$event['5'] = $id;
+			$eventList[count] = $event;
+			count++;
+			
+			$row = array();
+			array_push($row,$event['1']); array_push($row,$username);  array_push($row,$passowrd);
+			fputcsv($output, $row);
+		}
+		$result = $mysqli->query($sql);
+
+		fclose($output);
+		//exit;
+		$_SESSION["eventList"] = $eventList;
 		
-		
+// 0: EVENT_ID 1: NAME 2:TRIAL_EVENT 3: TOURN_EVENT_ID 4: New Event 0/1 5: USER_ID 6: USER NAME	
 	}
 	
 	function clearTournament() {
