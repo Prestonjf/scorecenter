@@ -550,7 +550,9 @@
 		</select>
 		</div>
 		</div>
-	<?php if ($_SESSION["tournamentId"] != null AND $_SESSION["tournamentId"] != '') { ?>
+	<?php if ($_SESSION["tournamentId"] != null AND $_SESSION["tournamentId"] != '') { 
+		//echo $_SESSION["insertuser"];
+	?>
 	<br />
 	<button type="submit" class="btn btn-xs btn-primary" onclick="return generateUserLogins();" name="generateSupervisorLogins">Generate Supervisor Logins</button>
 	<?php } ?>
