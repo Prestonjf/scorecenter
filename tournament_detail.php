@@ -684,7 +684,14 @@
      <button type="submit" class="btn btn-xs btn-danger" name="saveTournament" onclick="return validate();" value=<?php echo '"'.$tournamentRow['0'].'"' ?>>Save</button>
  	 <button type="submit" class="btn btn-xs btn-primary" name="cancelTournament">Cancel</button>
       <hr>
-	<?php include_once 'footer.php'; ?>
+	<?php 
+		include_once 'footer.php'; 
+		
+		if ($_SESSION["EXPORT_GENERATED_USERS"] != null) {
+			include_once 'export_auto_usr_pwds.php';
+		}
+	
+	?>
 
     </div><!--/.container-->
     
@@ -703,6 +710,11 @@
 	//});
     
     </script>
+	
+	<?php 
+		if ($_SESSION['savesuccessTournament'] != null and $_SESSION['savesuccessTournament'] == '1') { ?>
+		<script type="text/javascript">saveMessage('Tournament');</script>
+   	<?php $_SESSION['savesuccessTournament'] = null; } ?> 	
 	
   </body>
 </html>

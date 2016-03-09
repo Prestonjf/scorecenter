@@ -663,30 +663,11 @@ else {
 		 }
 		} while ($mysqli->more_results() && $mysqli->next_result());
 		
-		$_SESSION["insertuser"] = $sql;
+		//$_SESSION["insertuser"] = $sql;
 		
-	/*	// Build spreadsheet to export
-		// filename for download
-  		$filename = $_SESSION["tournamentName"]." Supervisors " . $_SESSION["tournamentDivision"] . ".csv";
-  		header("Content-Disposition: attachment; filename=\"$filename\"");
-  		header("Content-Type: text/csv; charset=utf-8");
-  		
-  		$output = fopen('php://output', 'w');
-
-		$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
-		$headings = array();
-		array_push($headings,"Event Name");
-		array_push($headings,"Username");
-		array_push($headings,"Password");
-		fputcsv($output, $headings);
-		foreach ($eventRows as $row) {
-			fputcsv($output, $row);
-		}
-		//echo $sql;
-		fclose($output); */
+		$_SESSION["EXPORT_GENERATED_USERS"] = $eventRows;
 		$_SESSION["eventList"] = $eventList;
-		//exit;
-// 0: EVENT_ID 1: NAME 2:TRIAL_EVENT 3: TOURN_EVENT_ID 4: New Event 0/1 5: USER_ID 6: USER NAME	
+
 	}
 	
 	function clearTournament() {
