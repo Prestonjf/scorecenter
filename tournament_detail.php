@@ -338,8 +338,16 @@
     		$events = mysql_query("SELECT DISTINCT * FROM EVENT ORDER BY NAME ASC");
     		if ($_SESSION["tournamentDivision"] == null or $_SESSION["tournamentDivision"] == '') $teams = mysql_query("SELECT DISTINCT * FROM TEAM ORDER BY NAME ASC");
     		else $teams = mysql_query("SELECT DISTINCT * FROM TEAM WHERE DIVISION = '".$_SESSION["tournamentDivision"]."' ORDER BY NAME ASC"); 
-    		$supervisors = mysql_query("SELECT DISTINCT USER_ID, CONCAT(LAST_NAME,', ',FIRST_NAME,' (', USERNAME,')') AS USER
-    									 FROM USER WHERE ROLE_CODE='SUPERVISOR' ORDER BY UPPER(LAST_NAME) ASC");
+    		$supervisors = mysql_query("SELECT DISTINCT X.* FROM (
+										SELECT DISTINCT U.USER_ID, CONCAT(U.LAST_NAME,', ',U.FIRST_NAME,' (', U.USERNAME,')') AS USER
+										FROM USER U WHERE U.ROLE_CODE='SUPERVISOR' AND COALESCE(U.AUTO_CREATED_FLAG,0) <> 1 AND ACCOUNT_ACTIVE_FLAG=1
+										UNION
+										SELECT DISTINCT U1.USER_ID, CONCAT(U1.LAST_NAME,', ',U1.FIRST_NAME,' (', U1.USERNAME,')') AS USER
+										FROM USER U1
+										INNER JOIN TOURNAMENT_EVENT TE on TE.USER_ID=U1.USER_ID and TE. TOURNAMENT_ID=".$_SESSION["tournamentId"]."
+										WHERE U1.ROLE_CODE='SUPERVISOR'
+										) X
+										ORDER BY UPPER(X.USER) ASC");
         ?>
   
   	<form action="controller.php" method="GET">

@@ -604,8 +604,9 @@ else {
 	
 	function generateUsersForEvents($mysqli, $id) {
 		// Delete linked users if auto_created flag = 1
-		$result = $mysqli->query("DELETE FROM USER_LOGIN_LOG WHERE USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE INNER JOIN USER U on u.USER_ID=TE.USER_ID WHERE TE.TOURNAMENT_ID=".$id." AND U.AUTO_CREATED = 1)");
-		$result = $mysqli->query("DELETE U1.* FROM USER U1 WHERE U1.AUTO_CREATED = 1 AND U1.USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE WHERE TE.TOURNAMENT_ID=".$id.")");
+		$result = $mysqli->query("DELETE FROM USER_LOGIN_LOG WHERE USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE INNER JOIN USER U on u.USER_ID=TE.USER_ID WHERE TE.TOURNAMENT_ID=".$id." AND U.AUTO_CREATED_FLAG = 1)");
+		//$result = $mysqli->query("UPDATE TOURNAMENT_EVENT TE SET TE.USER_ID = NULL WHERE TE.TOURNAMENT_ID=".$id.")");
+		$result = $mysqli->query("DELETE U1.* FROM USER U1 WHERE U1.AUTO_CREATED_FLAG = 1 AND U1.USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE WHERE TE.TOURNAMENT_ID=".$id.")");
 		
 
 		$eventRows = array();
@@ -613,15 +614,30 @@ else {
 		$eventList = $_SESSION["eventList"];
 		$sql = "";
 		$count = 0;
+		
+		$result = $mysqli->query("select max(USER_ID) + 1 from USER");
+		$row = $result->fetch_row(); 
+		$id = 0;
+		if ($row != null) $id = $row['0'];
+			
 		foreach ($eventList as $event) { 		
 			// create user for each event
 			// link user Id in event list (Save will happen after this method)
-			$result = $mysqli->query("select max(USER_ID) + 1 from USER");
-			$row = $result->fetch_row(); 
-			$id = 0;
-			if ($row != null) $id = $row['0'];
-			$n = rand(0, 9999); $e = explode(" ", $event['1']); $d = $_SESSION["tournamentDivision"]; $y = date("Y");
-			$username = $e[0].$y.$d.$n;
+			$flag = True;
+			$username = '';
+			while ($flag) {
+				$n = rand(0, 9999); $e = explode(" ", $event['1']); $d = $_SESSION["tournamentDivision"]; $y = date("Y");
+				$username = strtolower($e[0].$y.$d.$n);
+				
+				$exists = $mysqli->query("SELECT 1 FROM TEAM WHERE TEAM_ID = ".$selectedTeam); 
+				if ($exists) {
+					$userNameRow = $exists->fetch_row();
+					if ($userNameRow == null OR $userNameRow['0'] == null) $flag = False;
+				} else {
+					$flag = False;
+				}
+			}
+			
 			$passowrd = $username . rand(0, 9);
 			$encryptPwd = crypt($passowrd);
 			$sql .= " INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER, AUTO_CREATED_FLAG) 
@@ -634,6 +650,7 @@ else {
 			$row = array();
 			array_push($row,$event['1']); array_push($row,$username);  array_push($row,$passowrd);
 			array_push($eventRows, $row);
+			$id++;
 		}
 		if (!$mysqli->multi_query($sql)) {
 			
@@ -995,8 +1012,16 @@ else {
 	}
 	
 	function reloadTournamentEvent($mysqli) {
-	    	$supervisors = $mysqli->query("SELECT DISTINCT USER_ID, CONCAT(LAST_NAME,', ',FIRST_NAME,' (', USERNAME,')') AS USER
-    									 FROM USER WHERE ROLE_CODE='SUPERVISOR' ORDER BY UPPER(LAST_NAME) ASC");
+	    	$supervisors = $mysqli->query("SELECT DISTINCT X.* FROM (
+										SELECT DISTINCT U.USER_ID, CONCAT(U.LAST_NAME,', ',U.FIRST_NAME,' (', U.USERNAME,')') AS USER
+										FROM USER U WHERE U.ROLE_CODE='SUPERVISOR' AND COALESCE(U.AUTO_CREATED_FLAG,0) <> 1 AND ACCOUNT_ACTIVE_FLAG=1
+										UNION
+										SELECT DISTINCT U1.USER_ID, CONCAT(U1.LAST_NAME,', ',U1.FIRST_NAME,' (', U1.USERNAME,')') AS USER
+										FROM USER U1
+										INNER JOIN TOURNAMENT_EVENT TE on TE.USER_ID=U1.USER_ID and TE. TOURNAMENT_ID=".$_SESSION["tournamentId"]."
+										WHERE U1.ROLE_CODE='SUPERVISOR'
+										) X
+										ORDER BY UPPER(X.USER) ASC");
     									 
 			$eventList = $_SESSION["eventList"];
 			$eventCount = 0;
