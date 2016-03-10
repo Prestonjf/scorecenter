@@ -420,7 +420,11 @@ else if (isset($_GET['generateSupervisorLogins'])) {
 	header("Location: tournament_detail.php");
 	exit();
 }
-
+else if ($_GET['command'] != null and $_GET['command'] == 'exportUserPasswords') {
+	exportUserPasswords();	
+	//header("Location: tournament_detail.php");
+	exit();
+}
 
 else if (isset($_GET['cancelTournament'])) {
 	clearTournament();
@@ -666,8 +670,33 @@ else {
 		//$_SESSION["insertuser"] = $sql;
 		
 		$_SESSION["EXPORT_GENERATED_USERS"] = $eventRows;
+		$_SESSION["EXPORT_GENERATED_USERS_FLAG"] = 1;
 		$_SESSION["eventList"] = $eventList;
 
+	}
+	
+	function exportUserPasswords() {
+		// Build spreadsheet to export
+		// filename for download
+	  	$filename = $_SESSION["tournamentName"]." Supervisors " . $_SESSION["tournamentDivision"] . ".csv";
+	  	header("Content-Disposition: attachment; filename=\"$filename\"");
+	  	header("Content-Type: text/csv; charset=utf-8");
+	  		
+	  	$output = fopen('php://output', 'w');
+	
+		$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
+		$users = $_SESSION["EXPORT_GENERATED_USERS"];
+		$headings = array();
+		array_push($headings,"Event Name");
+		array_push($headings,"Username");
+		array_push($headings,"Password");
+		fputcsv($output, $headings);
+		foreach ($users as $row) {
+			fputcsv($output, $row);
+		}
+		fclose($output);
+		$_SESSION["EXPORT_GENERATED_USERS_FLAG"] = null;
+		$_SESSION["EXPORT_GENERATED_USERS"] = null;	
 	}
 	
 	function clearTournament() {
@@ -3303,8 +3332,7 @@ else {
 	-- CRITICAL
 	
 	
-	-- HIGH
-	** Auto Generate Users for a Tournaments Events 
+	-- HIGH 
 	** Make Super User Security Level
 	** Admin can only modify tournaments they created. (No Access to Utilities or Users)
 	** Add Additional Point(s) for PX teams 

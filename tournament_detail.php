@@ -1,4 +1,5 @@
-<?php session_start(); 
+<?php 
+	session_start(); 
 	include_once('score_center_objects.php');
 	include_once('logon_check.php');
 
@@ -21,7 +22,21 @@
   $(document).ready(function(){
 		// Load link tournament selects
     	loadLinkedTournaments();
+    <?php 
+		$x = 0;
+		if ($_SESSION["EXPORT_GENERATED_USERS_FLAG"] != null) $x = 1; 		
+	?>
+	var x = <?php echo $x; ?>;
+	if (x != null && x == 1) {
+		location.href = "controller.php?command=exportUserPasswords";
+	}
 	});
+	
+	  function saveMessage(message) {
+		document.getElementById('messages').style.display = "block";
+		document.getElementById('messages').innerHTML = "<strong>Saved: </strong>"+message+" has been saved successfully!";
+		document.body.scrollTop = document.documentElement.scrollTop = 0;						
+	}
 	
 	function limitNumber(element) {
 		var max = 1000;
@@ -350,7 +365,7 @@
 										ORDER BY UPPER(X.USER) ASC");
         ?>
   
-  	<form action="controller.php" method="GET">
+  	<form action="controller.php" id="form1" method="GET">
      <div class="container">
 	 
 	 <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
@@ -685,29 +700,19 @@
  	 <button type="submit" class="btn btn-xs btn-primary" name="cancelTournament">Cancel</button>
       <hr>
 	<?php 
-		include_once 'footer.php'; 
-		
-		if ($_SESSION["EXPORT_GENERATED_USERS"] != null) {
-			include_once 'export_auto_usr_pwds.php';
-		}
-	
+		include_once 'footer.php';	
 	?>
 
     </div><!--/.container-->
     
     </form>
       
-      
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
    <script src="js/jquery-1.11.3.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
     <script>
-    //	$('table tr').click(function() {
 
- 	//   alert( this.rowIndex );  // alert the index number of the clicked row.
-
-	//});
     
     </script>
 	
@@ -715,6 +720,6 @@
 		if ($_SESSION['savesuccessTournament'] != null and $_SESSION['savesuccessTournament'] == '1') { ?>
 		<script type="text/javascript">saveMessage('Tournament');</script>
    	<?php $_SESSION['savesuccessTournament'] = null; } ?> 	
-	
+	<div id="exportDiv"></div>
   </body>
 </html>
