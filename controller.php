@@ -2442,10 +2442,10 @@ else {
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
 					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 1
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID 
-						AND TES1.SCORE <= T.EVENTS_AWARDED_ALT AND TES1.SCORE > 0
+						AND TES1.SCORE <= T.EVENTS_AWARDED_ALT #AND TES1.SCORE > 0
 					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
 					WHERE TE.TOURNAMENT_ID=".$cId." AND (T1.NAME is null OR (T1.NAME is not null AND TES1.SCORE is not null))
-					GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE ASC ";
+					GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE = 0, SCORE ASC ";
 			$results = $mysqli->query($query);
 			$event = null;
 			$eventArray = array();
@@ -2461,7 +2461,8 @@ else {
 					$count = 0;
 				}
 				$event = $row[0];
-				array_push($eventArray, $row[1]);			
+				if ($row[2] != 0) array_push($eventArray, $row[1]);
+				if ($row[2] == 0 AND sizeof($eventArray) == 0) array_push($eventArray, '');
 				$count++;
 			}
 			if (sizeof($eventArray) > 0) {array_unshift($eventArray, $event); array_push($cAltEvents, $eventArray); }
@@ -2505,10 +2506,10 @@ else {
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
 					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 1
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID 
-						AND TES1.SCORE <= T.EVENTS_AWARDED_ALT AND TES1.SCORE > 0
+						AND TES1.SCORE <= T.EVENTS_AWARDED_ALT #AND TES1.SCORE > 0
 					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
 					WHERE TE.TOURNAMENT_ID=".$bId." AND (T1.NAME is null OR (T1.NAME is not null AND TES1.SCORE is not null))
-					GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE ASC ";
+					GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE = 0, SCORE ASC ";
 			$results = $mysqli->query($query);
 			$event = null;
 			$eventArray = array();
@@ -2524,7 +2525,8 @@ else {
 					$count = 0;
 				}
 				$event = $row[0];
-				array_push($eventArray, $row[1]);			
+				if ($row[2] != 0) array_push($eventArray, $row[1]);
+				if ($row[2] == 0 AND sizeof($eventArray) == 0) array_push($eventArray, '');			
 				$count++;
 			}
 			if (sizeof($eventArray) > 0) {array_unshift($eventArray, $event); array_push($bAltEvents, $eventArray); }
@@ -2568,10 +2570,10 @@ else {
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
 					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 1
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID 
-						AND TES1.SCORE <= T.EVENTS_AWARDED_ALT AND TES1.SCORE > 0
+						AND TES1.SCORE <= T.EVENTS_AWARDED_ALT #AND TES1.SCORE > 0
 					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
 					WHERE TE.TOURNAMENT_ID=".$aId." AND (T1.NAME is null OR (T1.NAME is not null AND TES1.SCORE is not null))
-					GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE ASC ";
+					GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE = 0, SCORE ASC ";
 			$results = $mysqli->query($query);
 			$event = null;
 			$eventArray = array();
@@ -2587,7 +2589,8 @@ else {
 					$count = 0;
 				}
 				$event = $row[0];
-				array_push($eventArray, $row[1]);			
+				if ($row[2] != 0) array_push($eventArray, $row[1]);
+				if ($row[2] == 0 AND sizeof($eventArray) == 0) array_push($eventArray, '');			
 				$count++;
 			}
 			if (sizeof($eventArray) > 0) {array_unshift($eventArray, $event); array_push($aAltEvents, $eventArray); }
