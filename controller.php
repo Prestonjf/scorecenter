@@ -3341,10 +3341,10 @@ else {
 	
 	
 	-- HIGH 
-	** Add Additional Point(s) for PX teams 
 	
 	
 	-- MEDIUM
+	** Add Additional Point(s) for PX teams 
 	** More colors for ties
 	** Add extra points value for PX status
 	** location of submitted / Verified checkboxes?

@@ -152,7 +152,7 @@
           </tbody>
           </table>
           <?php paginationFooter($result); ?> 
-		<?php if (getCurrentRole() == 'ADMIN') echo '<button type="submit" class="btn btn-xs btn-primary" name="addTournament">Add Tournament</button>'; ?>
+		<?php if (isUserAccess(1)) echo '<button type="submit" class="btn btn-xs btn-primary" name="addTournament">Add Tournament</button>'; ?>
 
       <hr>
 	<?php include_once 'footer.php'; ?>
