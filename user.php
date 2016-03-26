@@ -13,7 +13,7 @@
 	
 	// Security Level Check
 	include_once('role_check.php');
-	checkUserRole(1);
+	checkUserRole(0);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -79,6 +79,7 @@
 	<td width="35">
 			<select class="form-control" name="userRole" id="userRole">
 			<option value="" <?php if ($_SESSION["userRole"] == null or $_SESSION["userRole"] == '') echo 'selected'; ?> ></option>
+			<option value="SUPERUSER" <?php if ($_SESSION["userRole"] == 'SUPERUSER') echo 'selected'; ?>>Super User</option>
 			<option value="ADMIN" <?php if ($_SESSION["userRole"] == 'ADMIN') echo 'selected'; ?> >Admin</option>
 			<option value="VERIFIER" <?php if ($_SESSION["userRole"] == 'VERIFIER') echo 'selected'; ?>>Verifier</option>
 			<option value="SUPERVISOR" <?php if ($_SESSION["userRole"] == 'SUPERVISOR') echo 'selected'; ?>>Supervisor</option>

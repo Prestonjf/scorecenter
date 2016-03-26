@@ -13,7 +13,7 @@
 	
 	// Security Level Check
 	include_once('role_check.php');
-	checkUserRole(1);
+	checkUserRole(0);
 ?>
 <!DOCTYPE html>
 <html lang="en">

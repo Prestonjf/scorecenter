@@ -34,6 +34,7 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Settings<span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="#" id="aboutLink">About</a></li>
+            <li><a href="#" id="" >Help</a></li>
           </ul>
         </li>
       </ul>

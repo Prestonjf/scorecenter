@@ -65,8 +65,7 @@ include_once('role_check.php');
         
         <?php
           	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
-			$userRole = $userSessionInfo->getRole();
-          	if ($userRole == 'VERIFIER' or $userRole == 'ADMIN') {
+          	if (isUserAccess(2)) {
           ?>
         <h2>Today's Tournaments</h2>
         <table class="table table-hover">
@@ -86,6 +85,9 @@ include_once('role_check.php');
 			$query .= " INNER JOIN TOURNAMENT_VERIFIER TV ON TV.TOURNAMENT_ID=T.TOURNAMENT_ID AND TV.USER_ID =" .getCurrentUserId();
 		}
 		$query .= " WHERE DATE_FORMAT(T.DATE, '%Y-%m-%d') = DATE_FORMAT(CURDATE(), '%Y-%m-%d') ";
+		if (getCurrentRole() == 'ADMIN') {
+			$query .= " AND T.ADMIN_USER_ID =" .getCurrentUserId();
+		}
  		$result = mysql_query($query); 
 			
 
@@ -115,7 +117,7 @@ include_once('role_check.php');
     	</table>
     	
     	<?php } else {   	 
-    	 //if ($_SESSION["userEventDate"] == null or $_SESSION["userEventDate"] == '') $_SESSION["userEventDate"] = date("m/d/y"); 	
+ 	
     	?>
 		<h2>My Events</h2>
 		

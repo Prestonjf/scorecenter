@@ -14,6 +14,8 @@
 </script>
 
 <?php
+		include_once('role_check.php');
+		
 		$userName = "";
 		$role = "";
 		$firstName = "";
@@ -50,7 +52,7 @@
       <ul class="nav navbar-nav">
         <li class="<?php if ($_SERVER['REQUEST_URI'] == '/scorecenter/index.php' or $_SERVER['REQUEST_URI'] == '/scorecenter/') echo 'active';  ?>">
         <a href="controller.php?command=loadIndex&">Home<span class="sr-only">(current)</span></a></li>
-        <?php if ($role == 'ADMIN' or $role == 'VERIFIER') { ?>
+        <?php if (isUserAccess(2)) { ?>
         <li class="<?php if ($_SERVER['REQUEST_URI'] != '/scorecenter/index.php' and $_SERVER['REQUEST_URI'] != '/scorecenter/') echo 'active';  ?>">
         <a href="controller.php?command=loadAllTournaments&">Tournaments</a></li>
         <?php } ?>      
@@ -60,15 +62,16 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Settings<span class="caret"></span></a>
           <ul class="dropdown-menu">
-           <?php if ($role == 'ADMIN' or $role == 'VERIFIER') { ?>
+           <?php if (isUserAccess(2)) { ?>
             <li><a href="controller.php?command=loadAllTournaments&">Manage Tournaments</a></li>
             <li><a href="controller.php?command=loadAllTeams&">Manage Teams</a></li>
             <li><a href="controller.php?command=loadAllEvents&">Manage Events</a></li>
-            <?php if ($role == 'ADMIN') { ?><li><a href="controller.php?command=loadAllUsers&">Manage Users</a></li> <?php } ?>
+            <?php if (isUserAccess(0)) { ?><li><a href="controller.php?command=loadAllUsers&">Manage Users</a></li> <?php } ?>
             <li role="separator" class="divider"></li>
-            <?php if ($role == 'ADMIN') { ?> <li><a href="controller.php?command=loadUtilities&">Utilities</a></li><?php } ?>
+            <?php if (isUserAccess(0)) { ?> <li><a href="controller.php?command=loadUtilities&">Utilities</a></li><?php } ?>
             <?php } ?>
             <li><a href="#" id="aboutLink" >About</a></li>
+            <li><a href="#" id="" >Help</a></li>
 			<li role="separator" class="divider"></li>
 			 <li><a href="controller.php?command=logout&">Logout</a></li>
           </ul>

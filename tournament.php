@@ -140,7 +140,7 @@
 					echo '<button type="submit" class="btn btn-xs btn-primary" name="enterScores" value="'.$row['0'].'">Enter Scores</button> &nbsp;'; 				
 					echo '<button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$row['0'].'>View Results</button>&nbsp;';
 					echo '<button type="submit" class="btn btn-xs btn-primary" name="loadTournament" value='.$row['0'].'>Edit Tournament</button>&nbsp;';
-					if (getCurrentRole() == 'ADMIN' and ($row['5'] == null or $row['5'] == 0)) echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTournament" onclick="return confirm2Delete(\''.$row['0'].'\')" value='.$row['0'].'>Delete</button>&nbsp;';
+					if (isUserAccess(1) and ($row['5'] == null or $row['5'] == 0)) echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTournament" onclick="return confirm2Delete(\''.$row['0'].'\')" value='.$row['0'].'>Delete</button>&nbsp;';
 					echo '</td>';				
 					echo '</tr>';
 					echo '<input type="hidden" value="'.$row['1'].'" id="tournamentName'.$row['0'].'" />';

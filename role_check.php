@@ -20,7 +20,8 @@ function checkUserRole($level) {
 	if ($userSessionInfo->getRole() != null and $userSessionInfo->getRole() != '') {
 		$userLevel = 10;
 		$role = $userSessionInfo->getRole();
-		if ('ADMIN' == $role) $userLevel = 1;
+		if ('SUPERUSER' == $role) $userLevel = 0;
+		else if ('ADMIN' == $role) $userLevel = 1;
 		else if ('VERIFIER' == $role) $userLevel = 2;
 		else if ('SUPERVISOR' == $role) $userLevel = 3;
 	
@@ -32,6 +33,36 @@ function checkUserRole($level) {
 	else {
 		header("location: index.php");
 		exit(); 
+	}
+}
+
+function isUserAccess($level) {
+
+	$userSessionInfo = null;
+	if($_SESSION["userSessionInfo"] == null) {
+		header("location: logon.php");
+		exit();
+	}
+
+	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+
+	if ($userSessionInfo->getRole() != null and $userSessionInfo->getRole() != '') {
+		$userLevel = 10;
+		$role = $userSessionInfo->getRole();
+		if ('SUPERUSER' == $role) $userLevel = 0;
+		else if ('ADMIN' == $role) $userLevel = 1;
+		else if ('VERIFIER' == $role) $userLevel = 2;
+		else if ('SUPERVISOR' == $role) $userLevel = 3;
+	
+		if ($userLevel > $level) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+	else {
+		return false;
 	}
 }
 

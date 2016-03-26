@@ -496,6 +496,10 @@ else {
 			$date1 = strtotime($_SESSION["toTournamentDate"]); $date = date('Y-m-d', $date1 );
 			$query = $query . " and T.DATE <= '".$date."' ";
 		}
+		
+		if (getCurrentRole() == 'ADMIN') {
+			$query .= " AND T.ADMIN_USER_ID =" .getCurrentUserId();
+		}
 		 
 		$query = $query . " ORDER BY T.DATE DESC, T.NAME ASC, T.DIVISION ASC ";
 		
@@ -1209,11 +1213,12 @@ else {
 			$id = 0;
 			if ($row != null) $id = $row['0'];  
 			$_SESSION["tournamentId"] = $id;
+			$userId = getCurrentUserId();
 			
 			$query = $mysqli->prepare("INSERT INTO TOURNAMENT (TOURNAMENT_ID, NAME, LOCATION, DIVISION, DATE, NUMBER_EVENTS, NUMBER_TEAMS, 
-			HIGHEST_SCORE_POSSIBLE, DESCRIPTION, HIGH_LOW_WIN_FLAG, EVENTS_AWARDED, OVERALL_AWARDED,BEST_NEW_TEAM_FLAG,MOST_IMPROVED_FLAG,LINKED_TOURN_1,LINKED_TOURN_2,SCORES_LOCKED_FLAG,HIGHEST_SCORE_POSSIBLE_ALT,ADDITIONAL_POINTS_NP,ADDITIONAL_POINTS_DQ,EVENTS_AWARDED_ALT,OVERALL_AWARDED_ALT) VALUES (".$id.",?,?,?,?,?,?,?,?,?,?,?,?,?,".$tourn1Linked.",".$tourn2Linked.",?,?,?,?,?,?) ");
+			HIGHEST_SCORE_POSSIBLE, DESCRIPTION, HIGH_LOW_WIN_FLAG, EVENTS_AWARDED, OVERALL_AWARDED,BEST_NEW_TEAM_FLAG,MOST_IMPROVED_FLAG,LINKED_TOURN_1,LINKED_TOURN_2,SCORES_LOCKED_FLAG,HIGHEST_SCORE_POSSIBLE_ALT,ADDITIONAL_POINTS_NP,ADDITIONAL_POINTS_DQ,EVENTS_AWARDED_ALT,OVERALL_AWARDED_ALT, ADMIN_USER_ID) VALUES (".$id.",?,?,?,?,?,?,?,?,?,?,?,?,?,".$tourn1Linked.",".$tourn2Linked.",?,?,?,?,?,?,?) ");
 			
-			$query->bind_param('ssssiiisiiiiiiiiiii',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins, $eventsAwarded, $overallAwarded, $bestNewTeam, $improvedTeam,$lockScoresFlag,$highestScoreAlt,$pointsForNP,$pointsForDQ,$eventsAAwarded,$overallAAwarded);
+			$query->bind_param('ssssiiisiiiiiiiiiiii',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins, $eventsAwarded, $overallAwarded, $bestNewTeam, $improvedTeam,$lockScoresFlag,$highestScoreAlt,$pointsForNP,$pointsForDQ,$eventsAAwarded,$overallAAwarded,$userId);
 			
 			$query->execute();
 			$query->free_result();
@@ -3336,8 +3341,6 @@ else {
 	
 	
 	-- HIGH 
-	** Make Super User Security Level
-	** Admin can only modify tournaments they created. (No Access to Utilities or Users)
 	** Add Additional Point(s) for PX teams 
 	
 	
