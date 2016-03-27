@@ -431,7 +431,7 @@
 	<td><input type="text" class="form-control" name="highestScoreAlt" id="highestScoreAlt" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
 		value=<?php echo '"'.$_SESSION["highestScoreAlt"].'"' ?>></td>
 	<td>
-	<label for="lockScoresFlag">Lock Scores: </label></td><td><input type="checkbox" id="lockScoresFlag" name="lockScoresFlag" <?php if ($_SESSION["lockScoresFlag"] == '1') echo 'checked'; ?> value="1" <?php if ($userRole != 'ADMIN') echo 'disabled'; ?>>
+	<label for="lockScoresFlag">Lock Scores: </label></td><td><input type="checkbox" id="lockScoresFlag" name="lockScoresFlag" <?php if ($_SESSION["lockScoresFlag"] == '1') echo 'checked'; ?> value="1" <?php if ($userRole != 'ADMIN' and $userRole != 'ADMIN') echo 'disabled'; ?>>
 	</td>
 	</tr>
 	<tr>

@@ -3341,7 +3341,10 @@ else {
 	
 	
 	-- HIGH 
-	
+	fix navbar highlighted menu
+	fix tournament page iterator
+	fix favicon - on miscioly
+	Add Role to Account Page
 	
 	-- MEDIUM
 	** Add Additional Point(s) for PX teams 
@@ -3349,6 +3352,7 @@ else {
 	** Add extra points value for PX status
 	** location of submitted / Verified checkboxes?
 	
+	** Email link expects web root folder
 	** Improve Navigation From Result Screen
 	
 	** Print Each event score individually
