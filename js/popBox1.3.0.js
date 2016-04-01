@@ -54,7 +54,7 @@
 			}
 			else if (type == 'about') {
 			
-				obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label><span style="font-weight:normal;font-size:14px;"><h4>Tournament Score Center</h4><br />Developed by Preston Frazier <br />A web based scoring application for Science Olympiad Tournaments. <br /><br />v1.0.5 (Beta) - 02.26.2016</span></label><div class="done-button"><input type="button" value="Close" id="closeAbout" class="btn btn-xs btn-primary"/></div></div>');
+				obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label><span style="font-weight:normal;font-size:14px;"><h4>Tournament Score Center</h4><br />Developed by Preston Frazier <br />A web based scoring application for Science Olympiad Tournaments. <br /><br />v1.0.6 (Beta) - 03.31.2016</span></label><div class="done-button"><input type="button" value="Close" id="closeAbout" class="btn btn-xs btn-primary"/></div></div>');
 	
 			}
 

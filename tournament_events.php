@@ -98,8 +98,9 @@
                 <th data-field="scoresComplete" data-align="center" data-sortable="true">Teams Scored</th>
                 <th data-field="completed" data-align="center" data-sortable="true">Submitted <img src="img/question_blue.png" alt="check_green" height="10" width="10" data-toggle="tooltip" title="Supervisor has submitted the completed scores for verification."></th>
                 <th data-field="completed" data-align="center" data-sortable="true">Verified <img src="img/question_blue.png" alt="check_green" height="10" width="10" data-toggle="tooltip" title="Verifier has validated the event scores were entered correctly."></th>
-                <th data-field="actions" data-sortable="true">Actions</th>
                 <th data-field="completed" data-align="center" data-sortable="true">Completed <img src="img/question_blue.png" alt="check_green" height="10" width="10" data-toggle="tooltip" title="All team's scores have been submitted and verified for the event."></th>
+                <th data-field="actions" data-sortable="true">Actions</th>
+
             </tr>
         </thead>
         <tbody>
@@ -120,13 +121,16 @@
 				echo '<td>'; if ($row['7'] == '1') echo '<img src="img/check_green.png" alt="check_green" height="20" width="20">';
 							else echo '<img src="img/check_red.png" alt="check_red" height="20" width="20">';
 				echo '</td>';
-				echo '<td>';
-				echo '<button type="submit" class="btn btn-xs btn-primary" name="enterEventScores" value="'.$row['3'].'">Enter Scores</button> &nbsp;'; 				
-				echo '</td>';
 				echo '<td>'; if ($row['4']==$row['5'] and $row['6'] == '1' and $row['7'] == '1') 
-							echo '<img src="img/check_green.png" alt="check_green" height="20" width="20">';
+				echo '<img src="img/check_green.png" alt="check_green" height="20" width="20">';
 							else echo '<img src="img/check_red.png" alt="check_red" height="20" width="20">'; 				
-				echo '</td>';					
+				echo '</td>';
+				echo '<td>';
+				echo '<button type="submit" class="btn btn-xs btn-primary" name="enterEventScores" value="'.$row['3'].'">Enter Scores</button> &nbsp;
+				<button type="submit" class="btn btn-xs btn-success" name="exportEventScores" value="'.$row['3'].'">Results</button>&nbsp;
+				<button type="submit" class="btn btn-xs btn-success" name="exportEventAwards" value="'.$row['3'].'">Awards</button>  '; 				
+				echo '</td>';
+					
 				echo '</tr>';	
       			}
     		}

@@ -50,10 +50,10 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="<?php if ($_SERVER['REQUEST_URI'] == '/scorecenter/index.php' or $_SERVER['REQUEST_URI'] == '/scorecenter/') echo 'active';  ?>">
+        <li class="<?php if (strpos($_SERVER['REQUEST_URI'],'index') !== false) echo 'active';  ?>">
         <a href="controller.php?command=loadIndex&">Home<span class="sr-only">(current)</span></a></li>
         <?php if (isUserAccess(2)) { ?>
-        <li class="<?php if ($_SERVER['REQUEST_URI'] != '/scorecenter/index.php' and $_SERVER['REQUEST_URI'] != '/scorecenter/') echo 'active';  ?>">
+        <li class="<?php if (strpos($_SERVER['REQUEST_URI'],'index') === false) echo 'active';  ?>">
         <a href="controller.php?command=loadAllTournaments&">Tournaments</a></li>
         <?php } ?>      
       </ul>

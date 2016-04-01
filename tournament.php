@@ -112,8 +112,10 @@
 	</script>
 
 <hr>
-		<?php $result = $mysqli->query($_SESSION["allTournaments"]); ?>
-		<?php paginationHeader($result); ?>
+		<?php $result = $mysqli->query($_SESSION["allTournaments"]);
+			$num_rows = $result->num_rows;
+			$resultArray = array_fill(0, $num_rows, '');
+			paginationHeader($resultArray); ?>
         <table class="table table-hover">
         <thead>
             <tr>
@@ -151,7 +153,7 @@
         ?>
           </tbody>
           </table>
-          <?php paginationFooter($result); ?> 
+          <?php paginationFooter($resultArray); ?> 
 		<?php if (isUserAccess(1)) echo '<button type="submit" class="btn btn-xs btn-primary" name="addTournament">Add Tournament</button>'; ?>
 
       <hr>

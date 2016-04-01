@@ -313,6 +313,16 @@ else if (isset($_GET['enterEventScores'])) {
 	header("Location: event_scores.php");
 	exit();
 }
+else if (isset($_GET['exportEventScores'])) {
+	$_SESSION["tournEventId"] = $_GET['exportEventScores'];
+	//loadEventScores($mysqli);
+	header("Location: tournament_events.php");
+	exit();
+}
+else if (isset($_GET['exportEventAwards'])) {
+	generateEventAwards($mysqli, $_GET['exportEventAwards']);
+	exit();
+}
 else if (isset($_GET['cancelEvent'])) {
 		$_SESSION["tournEventId"] = null;
 		loadTournamentEvents($mysqli);
@@ -595,6 +605,7 @@ else {
 				
 				$event['2'] = $_GET['trialEvent'.$count];	
 				$event['5'] = $_GET['eventSupervisor'.$count];	
+				$event['7'] = $_GET['primAltFlag'.$count];
 				
 				$eventList[$count] = $event;
 				$_SESSION["eventList"] = $eventList;							
@@ -1054,12 +1065,18 @@ else {
              		mysqli_data_seek($supervisors, 0);				
       				echo '</select>'; 
       				echo '</td>';
-					echo '<td><div class="col-xs-5 col-md-5">'; 
+					echo '<td>'; 
 					echo '<select  class="form-control" name="trialEvent'.$eventCount.'" id="trialEvent'.$eventCount.'">';
 					echo '<option value="0"'; if($event['2'] == '' or $event['2'] == 0){echo("selected");} echo '>No</option>';
 					echo '<option value="1"'; if($event['2'] == 1){echo("selected");} echo '>Yes</option>';
 					echo '</select>';
-					echo '</div></td>';
+					echo '</td>';
+					echo '<td>'; 
+					echo '<select  class="form-control" name="primAltFlag'.$eventCount.'" id="primAltFlag'.$eventCount.'">';
+					echo '<option value="0"'; if($event['7'] == '' or $event['2'] == 0){echo("selected");} echo '>No</option>';
+					echo '<option value="1"'; if($event['7'] == 1){echo("selected");} echo '>Yes</option>';
+					echo '</select>';
+					echo '</td>';
 					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteEvent" onclick="validateDeleteEvent(this)" 
 						 value='.$event['3'].'>Delete</button></td>';
 					echo '</tr>';
@@ -1108,7 +1125,7 @@ else {
 			// Load Events
 			$eventList = array();
 			$result = $mysqli->query("SELECT TE.EVENT_ID, E.NAME, TE.TRIAL_EVENT_FLAG, TE.TOURN_EVENT_ID, U.USER_ID, 
-									CONCAT(U.LAST_NAME,', ',U.FIRST_NAME,' (', U.USERNAME,')') AS USER 
+									CONCAT(U.LAST_NAME,', ',U.FIRST_NAME,' (', U.USERNAME,')') AS USER, TE.PRIM_ALT_FLAG 
 									FROM TOURNAMENT_EVENT TE 
 									INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
 									INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID 
@@ -1124,6 +1141,7 @@ else {
  					array_push($event, "0");
  					array_push($event, $eventRow['4']);
  					array_push($event, $eventRow['5']);
+ 					array_push($event, $eventRow['6']);
 				
  					array_push($eventList, $event);
  				}
@@ -1239,7 +1257,7 @@ else {
 	
 	
 		// save events
-		// 0: EVENT_ID 1: NAME 2:TRIAL_EVENT 3: TOURN_EVENT_ID 4: New Event 0/1 5: USER_ID 6: USER NAME
+		// 0: EVENT_ID 1: NAME 2:TRIAL_EVENT 3: TOURN_EVENT_ID 4: New Event 0/1 5: USER_ID 6: USER NAME 7: PRIM_ALT_FLAG
 		$eventList = $_SESSION["eventList"];
 		if ($eventList) {
 			foreach ($eventList as $event) {
@@ -1252,13 +1270,13 @@ else {
 				$id = 0;
 				if ($row['0'] != null) $id = $row['0']; 
 				
-				$query = $mysqli->prepare("INSERT INTO TOURNAMENT_EVENT (TOURN_EVENT_ID, TOURNAMENT_ID, EVENT_ID, TRIAL_EVENT_FLAG, USER_ID) VALUES (".$id.", ?, ?, ?, ?) ");
-				$query->bind_param('iiii',$_SESSION["tournamentId"],$event['0'], $event['2'], $event['5']); 
+				$query = $mysqli->prepare("INSERT INTO TOURNAMENT_EVENT (TOURN_EVENT_ID, TOURNAMENT_ID, EVENT_ID, TRIAL_EVENT_FLAG, USER_ID, PRIM_ALT_FLAG) VALUES (".$id.", ?, ?, ?, ?,?) ");
+				$query->bind_param('iiiii',$_SESSION["tournamentId"],$event['0'], $event['2'], $event['5'],$event['7']); 
 				$query->execute();
 			}
 			else {
-				$query = $mysqli->prepare("UPDATE TOURNAMENT_EVENT SET TRIAL_EVENT_FLAG=?, USER_ID=? WHERE TOURN_EVENT_ID=".$event['3']);			
-				$query->bind_param('ii',$event['2'], $event['5']);
+				$query = $mysqli->prepare("UPDATE TOURNAMENT_EVENT SET TRIAL_EVENT_FLAG=?, USER_ID=?, PRIM_ALT_FLAG=? WHERE TOURN_EVENT_ID=".$event['3']);			
+				$query->bind_param('iii',$event['2'], $event['5'], $event['7']);
 				$query->execute();
 			}
 			
@@ -1382,10 +1400,10 @@ else {
 	
 // MANAGE EVENT SCORES SCREEN ---------------------------------------	
 	function loadEventScores($mysqli) {
-				
+		$primAltFlag = 0; 
 		 $result = $mysqli->query("SELECT E.NAME, T.HIGHEST_SCORE_POSSIBLE, T.TOURNAMENT_ID, T.DIVISION, T.NAME,TE.SUBMITTED_FLAG,TE.VERIFIED_FLAG,
 							CONCAT(U.FIRST_NAME, ' ', U.LAST_NAME, ' - ',U.USERNAME,' - ',coalesce(U.PHONE_NUMBER,'')) as supervisor, T.DATE, T.HIGH_LOW_WIN_FLAG, TE.COMMENTS, 
-							E.SCORE_SYSTEM_CODE, RD.DISPLAY_TEXT, T.HIGHEST_SCORE_POSSIBLE_ALT, T.ADDITIONAL_POINTS_NP, T.ADDITIONAL_POINTS_DQ 
+							E.SCORE_SYSTEM_CODE, RD.DISPLAY_TEXT, T.HIGHEST_SCORE_POSSIBLE_ALT, T.ADDITIONAL_POINTS_NP, T.ADDITIONAL_POINTS_DQ, TE.PRIM_ALT_FLAG 
 		 					FROM EVENT E INNER JOIN TOURNAMENT_EVENT TE ON TE.EVENT_ID=E.EVENT_ID 
 		 					INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
 							LEFT JOIN USER U ON TE.USER_ID=U.USER_ID
@@ -1412,11 +1430,15 @@ else {
  				$_SESSION["highestScoreAlt"] = $tournamentRow['13'];
  				$_SESSION["pointsForNP"] = $tournamentRow['14'];
  				$_SESSION["pointsForDQ"] = $tournamentRow['15'];
-    		}
+ 				$primAltFlag = $tournamentRow['16'];
+    		}    		
+    		// PRIM_ALT_FLAG
+    		$primAltSql = " IN (0) ";
+    		if ($primAltFlag == 1) $primAltSql = " IN (0,1) ";
     	
 		// Primary Teams
     	 $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT, TES.TEAM_STATUS 
-    	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID AND TT.ALTERNATE_FLAG = 0 
+    	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID AND TT.ALTERNATE_FLAG ".$primAltSql." 
     	 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID AND TES.TOURN_EVENT_ID = " .$_SESSION["tournEventId"].
     	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY if(CAST(TT.TEAM_NUMBER AS UNSIGNED)=0,1,0), CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC, TEAM_NUMBER "); 
  			$teamEventScoreList = array();
@@ -1440,10 +1462,14 @@ else {
     									
     		$_SESSION["teamEventScoreList"] = $teamEventScoreList;
 			
+		    // PRIM_ALT_FLAG
+    		$primAltSql = " IN (1) ";
+    		if ($primAltFlag == 1) $primAltSql = " IN (-1) ";
+    		
 		// Alternate Teams
 		$_SESSION["teamAlternateEventScoreList"] = null;
 		    $result = $mysqli->query("SELECT T.NAME, TT.TEAM_NUMBER, TES.SCORE, TES.TEAM_EVENT_SCORE_ID, TT.TOURN_TEAM_ID, TES.POINTS_EARNED, TES.RAW_SCORE, TES.TIER_TEXT, 								TES.TIE_BREAK_TEXT, TES.TEAM_STATUS 
-    	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID AND TT.ALTERNATE_FLAG = 1
+    	 					FROM TEAM T INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=T.TEAM_ID AND TT.ALTERNATE_FLAG ".$primAltSql."
     	 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID AND TES.TOURN_EVENT_ID = " .$_SESSION["tournEventId"].
     	 					" WHERE TT.TOURNAMENT_ID = " .$_SESSION["tournamentId"]. " ORDER BY if(CAST(TT.TEAM_NUMBER AS UNSIGNED)=0,1,0), CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC, TEAM_NUMBER "); 
  			$teamAlternateEventScoreList = array();
@@ -1650,6 +1676,87 @@ else {
 		
 		if ($count > 0) { $_SESSION['saveEventError'] = "1";	return true; }
 		return false;
+	}
+	
+	function generateEventAwards($mysqli, $eventId) {
+		$primQuery = " select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED 
+					from TOURNAMENT_EVENT TE
+					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
+					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
+					INNER JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 
+					AND (TT1.ALTERNATE_FLAG = 0 or COALESCE(TE.PRIM_ALT_FLAG,0) = 1)
+					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID 
+						AND TES1.SCORE <= T.EVENTS_AWARDED AND TES1.SCORE > 0
+					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
+					WHERE TE.TOURN_EVENT_ID=".$eventId." AND (T1.NAME is null OR (T1.NAME is not null AND TES1.SCORE is not null))
+					GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE ASC ";
+		
+		$altQuery = " select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED_ALT
+					from TOURNAMENT_EVENT TE
+					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
+					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
+					INNER JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 
+					AND TT1.ALTERNATE_FLAG = 1 AND COALESCE(TE.PRIM_ALT_FLAG,0) <> 1
+					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID 
+						AND TES1.SCORE <= T.EVENTS_AWARDED_ALT #AND TES1.SCORE > 0
+					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
+					WHERE TE.TOURN_EVENT_ID=".$eventId." AND (T1.NAME is null OR (T1.NAME is not null AND TES1.SCORE is not null))
+					GROUP BY NAME,TEAM,SCORE ORDER BY UPPER(E.NAME) ASC, SCORE = 0, SCORE ASC ";	
+					
+		$tournQuery = "	SELECT T.NAME, T.DIVISION, DATE_FORMAT(T.DATE, '%m-%d-%Y'), E.NAME FROM TOURNAMENT T
+						INNER JOIN TOURNAMENT_EVENT TE on TE.TOURNAMENT_ID=T.TOURNAMENT_ID
+						INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID
+						WHERE TE.TOURN_EVENT_ID=".$eventId;			
+		
+		$result1 = $mysqli->query($primQuery);		
+		$result2 = $mysqli->query($altQuery);	
+		$result3 = $mysqli->query($tournQuery);
+		
+		$row = $result3->fetch_row();
+		
+		require('libs/fpdf/fpdf.php');
+		$pdf = new FPDF();
+		$pdf->SetTitle($row[3], true);
+		$pdf->AddPage('P','Letter', 0);
+		$pdf->SetAutoPageBreak(True, 2);
+		$pdf->SetFont('Arial','B',40);
+		$pdf->MultiCell(0,16,$row[3].' - '. $row[1],0,'C',false);
+		//$pdf->Ln(8);
+		$pdf->SetFont('Arial','',12);
+		$pdf->MultiCell(0,16,$row[0].' - '. $row[2],0,'C',false);
+		//$pdf->Ln(8);
+		$pdf->SetFont('Arial','',16);
+		$pdf->Cell(0,10, 'Primary Teams:',0,0,'L');
+		$pdf->Ln(12);
+		if ($result1->num_rows == 0) {
+			$pdf->SetFont('Arial','',16);
+			$pdf->Cell(0,10, 'No Results Available',0,0,'L');
+			$pdf->Ln(12);
+		}
+		else {
+			while($teamRow = $result1->fetch_array()) {
+				if ($teamRow[2] != 0) {
+					$pdf->SetFont('Arial','',24);
+					$pdf->Cell(0,10, $teamRow[2].'. '.$teamRow[1],0,0,'L');
+					$pdf->Ln(12);
+				}
+			}
+			if ($result2->num_rows != 0) {
+				$pdf->SetFont('Arial','',16);
+				$pdf->Cell(0,10, 'Alternate Teams:',0,0,'L');
+				$pdf->Ln(12);
+			}
+			while($teamRow = $result2->fetch_array()) {
+				if ($teamRow[2] != 0) {
+					$pdf->SetFont('Arial','',24);
+					$pdf->Cell(0,10, $teamRow[2].'. '.$teamRow[1],0,0,'L');
+					$pdf->Ln(12);
+				}
+			}
+		}
+		
+				
+		$pdf->Output('D', str_replace(' ','',$row[3]).'_Awards.pdf',true);		
 	}
 
 
@@ -2414,7 +2521,7 @@ else {
 			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
-					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 0
+					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND (TT1.ALTERNATE_FLAG = 0 or COALESCE(TE.PRIM_ALT_FLAG,0) = 1)
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID 
 						AND TES1.SCORE <= T.EVENTS_AWARDED AND TES1.SCORE > 0
 					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
@@ -2445,7 +2552,7 @@ else {
 			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED_ALT, T.EVENTS_AWARDED_ALT from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
-					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 1
+					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 1 AND COALESCE(TE.PRIM_ALT_FLAG,0) <> 1
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID 
 						AND TES1.SCORE <= T.EVENTS_AWARDED_ALT #AND TES1.SCORE > 0
 					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
@@ -2478,7 +2585,7 @@ else {
 			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
-					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 0
+					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND (TT1.ALTERNATE_FLAG = 0 or COALESCE(TE.PRIM_ALT_FLAG,0) = 1)
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID 
 						AND TES1.SCORE <= T.EVENTS_AWARDED AND TES1.SCORE > 0
 					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
@@ -2509,7 +2616,7 @@ else {
 			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED_ALT, T.EVENTS_AWARDED_ALT from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
-					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 1
+					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 1 AND COALESCE(TE.PRIM_ALT_FLAG,0) <> 1
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID 
 						AND TES1.SCORE <= T.EVENTS_AWARDED_ALT #AND TES1.SCORE > 0
 					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
@@ -2542,7 +2649,7 @@ else {
 			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
-					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 0
+					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND (TT1.ALTERNATE_FLAG = 0 or COALESCE(TE.PRIM_ALT_FLAG,0) = 1)
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID 
 						AND TES1.SCORE <= T.EVENTS_AWARDED AND TES1.SCORE > 0
 					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
@@ -2573,7 +2680,7 @@ else {
 			$query = "select concat(E.NAME,' - ', T.DIVISION) As NAME, T1.NAME as TEAM, TES1.SCORE, T.HIGH_LOW_WIN_FLAG, T.OVERALL_AWARDED_ALT, T.EVENTS_AWARDED_ALT from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID
-					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 1
+					LEFT JOIN TOURNAMENT_TEAM TT1 on T.TOURNAMENT_ID=TT1.TOURNAMENT_ID AND coalesce(TE.VERIFIED_FLAG,0) = 1 AND TT1.ALTERNATE_FLAG = 1 AND COALESCE(TE.PRIM_ALT_FLAG,0) <> 1
 					LEFT JOIN TEAM_EVENT_SCORE TES1 on TES1.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TT1.TOURN_TEAM_ID=TES1.TOURN_TEAM_ID 
 						AND TES1.SCORE <= T.EVENTS_AWARDED_ALT #AND TES1.SCORE > 0
 					LEFT JOIN TEAM T1 ON TT1.TEAM_ID=T1.TEAM_ID
@@ -3341,12 +3448,11 @@ else {
 	
 	
 	-- HIGH 
-	fix navbar highlighted menu
-	fix tournament page iterator
-	fix favicon - on miscioly
-	Add Role to Account Page
+	Export Events Ranks
+	Export Awards for Event
 	
 	-- MEDIUM
+	** System to select which alternates get awards
 	** Add Additional Point(s) for PX teams 
 	** More colors for ties
 	** Add extra points value for PX status
@@ -3363,7 +3469,6 @@ else {
 	
 	** View Results Grid - Line Break for Long Text/Names?
 	** Add number of teams / last place points to instructions.
-	** Page Iterator Fix on Tournaments, Add to Home Page
 	
 	** Log More User data on login
 	** Make Logo Dynamic

@@ -1,5 +1,6 @@
 <?php session_start(); 
 	include_once('score_center_objects.php');
+	include_once('role_check.php');
 	require_once 'login.php';
 	$mysqli = mysqli_init();
 	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
@@ -115,10 +116,12 @@
 			<?php if ($_SESSION["accountMode"] == 'create') { ?>
 				<td width="25%"><label for="regCode">Registration Code:<span class="red">*</span></label></td>
 				<td width="25%"><input type="text" autocomplete="off" size="40" class="form-control" name="regCode" id="regCode"></td>
-			<?php } else { ?>
-				<td width="25%"></td>
-				<td width="25%"></td>
-			<?php } ?>
+			<?php } else { 
+				$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+				$userRole = $userSessionInfo->getRole();
+				echo '<td width="25%"><label for="regCode">Role:</label></td>';
+				echo '<td width="25%">'.$userRole.'</td>';
+				} ?>
 		</tr>
 		<tr>
 			<td width="25%"><label for="userName">Phone Number: </label></td>

@@ -252,6 +252,7 @@
 			if (document.getElementById('trialEvent'+count) != null) {
 				str += "&trialEvent"+count+"="+document.getElementById('trialEvent'+count).value;
 				str += "&eventSupervisor"+count+"="+document.getElementById('eventSupervisor'+count).value;
+				str += "&primAltFlag"+count+"="+document.getElementById('primAltFlag'+count).value;
 			}
 			count++;
 		}
@@ -515,9 +516,10 @@
         <table class="table table-hover" id="eventTable">
         <thead>
             <tr>
-                <th width="30%" data-field="name" data-align="right" data-sortable="true">Event Name</th>
+                <th width="20%" data-field="name" data-align="right" data-sortable="true">Event Name</th>
                 <th width="30%" data-field="name" data-align="right" data-sortable="true">Supervisor</th>
-                <th width="30%" data-field="trial" data-align="center" data-sortable="true">Trial Event?</th>
+                <th width="20%" data-field="trial" data-align="center" data-sortable="true">Trial Event?</th>
+                <th width="20%" data-field="trial" data-align="center" data-sortable="true">No Prim/Alt?</th>
 				<th width="10%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
@@ -540,12 +542,18 @@
              		mysql_data_seek($supervisors, 0);				
       				echo '</select>'; 
       				echo '</td>';
-					echo '<td><div class="col-xs-5 col-md-5">'; 
+					echo '<td>'; 
 					echo '<select  class="form-control" name="trialEvent'.$eventCount.'" id="trialEvent'.$eventCount.'">';
 					echo '<option value="0"'; if($event['2'] == '' or $event['2'] == 0){echo("selected");} echo '>No</option>';
 					echo '<option value="1"'; if($event['2'] == 1){echo("selected");} echo '>Yes</option>';
 					echo '</select>';
-					echo '</div></td>';
+					echo '</td>';
+					echo '<td>'; 
+					echo '<select  class="form-control" name="primAltFlag'.$eventCount.'" id="primAltFlag'.$eventCount.'">';
+					echo '<option value="0"'; if($event['7'] == '' or $event['2'] == 0){echo("selected");} echo '>No</option>';
+					echo '<option value="1"'; if($event['7'] == 1){echo("selected");} echo '>Yes</option>';
+					echo '</select>';
+					echo '</td>';
 					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteEvent" onclick="validateDeleteEvent(this)" value='.$event['3'].'>Delete</button></td>';
 					echo '</tr>';
 					
