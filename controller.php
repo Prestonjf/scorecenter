@@ -314,8 +314,7 @@ else if (isset($_GET['enterEventScores'])) {
 	exit();
 }
 else if (isset($_GET['exportEventScores'])) {
-	$_SESSION["tournEventId"] = $_GET['exportEventScores'];
-	//loadEventScores($mysqli);
+	exportEventScores($mysqli, $_GET['exportEventScores']);
 	header("Location: tournament_events.php");
 	exit();
 }
@@ -1757,6 +1756,103 @@ else {
 		
 				
 		$pdf->Output('D', str_replace(' ','',$row[3]).'_Awards.pdf',true);		
+	}
+	
+	function exportEventScores($mysqli, $id) {
+		$tournQuery = "	SELECT T.NAME, T.DIVISION, DATE_FORMAT(T.DATE, '%m/%d/%y'),
+						CASE WHEN TE.TRIAL_EVENT_FLAG = 1 THEN CONCAT(E.NAME ,'*')
+						ELSE E.NAME
+						END AS ENAME,
+						TE.COMMENTS FROM TOURNAMENT T
+						INNER JOIN TOURNAMENT_EVENT TE on TE.TOURNAMENT_ID=T.TOURNAMENT_ID
+						INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID
+						WHERE TE.TOURN_EVENT_ID=".$id;	
+						
+		$queryPrimary = "SELECT TT.TEAM_NUMBER,
+				T.NAME AS TNAME, TES.TEAM_STATUS, RAW_SCORE, TES.TIER_TEXT,
+				TES.TIE_BREAK_TEXT, TES.SCORE, TES.POINTS_EARNED  
+				FROM TEAM_EVENT_SCORE TES 
+				INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURN_EVENT_ID=TES.TOURN_EVENT_ID
+				INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURN_TEAM_ID=TES.TOURN_TEAM_ID
+				INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
+				INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID
+				INNER JOIN TOURNAMENT TN ON TN.TOURNAMENT_ID=TE.TOURNAMENT_ID
+				WHERE TES.TOURN_EVENT_ID=".$id." AND COALESCE(TT.ALTERNATE_FLAG,0) = 0 ORDER BY CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC ";	
+				
+		$queryAlternate = "SELECT TT.TEAM_NUMBER,
+				CONCAT(T.NAME,' +') AS TNAME, TES.TEAM_STATUS, RAW_SCORE, TES.TIER_TEXT,
+				TES.TIE_BREAK_TEXT, TES.SCORE, TES.POINTS_EARNED  
+				FROM TEAM_EVENT_SCORE TES 
+				INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURN_EVENT_ID=TES.TOURN_EVENT_ID
+				INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURN_TEAM_ID=TES.TOURN_TEAM_ID
+				INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
+				INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID
+				INNER JOIN TOURNAMENT TN ON TN.TOURNAMENT_ID=TE.TOURNAMENT_ID
+				WHERE TES.TOURN_EVENT_ID=".$id." AND COALESCE(TT.ALTERNATE_FLAG,0) = 1 ORDER BY CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC ";	
+		
+		$result = $mysqli->query($tournQuery);
+		$row = $result->fetch_row();
+		$eventName = $row[3];
+		$tournamentName = $row[0];
+		$division = $row[1];
+		$date = $row[2];
+		$comments = $row[4];
+		
+		$filename = $eventName.'_'.$division."_Results". ".csv";
+		$title = $tournamentName.' - '.$date.' - '.$eventName.' '.$division.' Results';
+		
+		$filename = str_replace(" ", "_", $filename);$filename = str_replace("/", "", $filename);
+		$filename = str_replace("\\", "", $filename);$filename = str_replace("'", "", $filename);
+	
+  		header("Content-Disposition: attachment; filename=\"$filename\"");
+  		header("Content-Type: text/csv; charset=utf-8");
+  		
+  		$output = fopen('php://output', 'w');	
+  		
+  		$header = array();
+  		array_push($header, '');
+  		array_push($header, $title);
+  		fputcsv($output, $header);
+  		
+  		$headings = array();
+  		array_push($headings, 'Team Number');
+  		array_push($headings, 'Team Name');
+  		array_push($headings, 'Status');
+  		array_push($headings, 'Raw Score');
+  		array_push($headings, 'Tier/Rank Group');
+  		array_push($headings, 'Tie Break Rank');
+  		array_push($headings, 'Rank');
+  		array_push($headings, 'Points Earned');				 
+		fputcsv($output, $headings);							 
+		
+		$space = array();
+		array_push($space, 'Primary Teams:');
+		fputcsv($output, $space);
+		
+		$result = $mysqli->query($queryPrimary);	
+		while ($row = $result->fetch_assoc()) {
+			fputcsv($output, $row);
+		}
+		
+		$space = array();
+		array_push($space, 'Alternate Teams:');
+		fputcsv($output, $space);
+		
+		$result = $mysqli->query($queryAlternate);	
+		while ($row = $result->fetch_assoc()) {
+			fputcsv($output, $row);	
+		}
+		
+		$row = array();
+		fputcsv($output, $row);
+		array_push($row,'');array_push($row,'* = Trial Event');
+		fputcsv($output, $row);
+		$row = array();
+    	array_push($row,'');array_push($row,'+ = Alternate Team');
+		fputcsv($output, $row);
+		
+		fclose($output);
+		exit;
 	}
 
 
@@ -3448,8 +3544,17 @@ else {
 	
 	
 	-- HIGH 
-	Export Events Ranks
-	Export Awards for Event
+	** Verifier Cannot Manage Teams or Events. Cannot Edit Tournament
+	** Lock edit events feature. SuperUSer access only
+	** Add filter criteria for Teams: State, Region
+	** Filter Criteria for Verifier. Can only link Verifiers Admin created?
+	** Team And Event Admin Created By, Admins can only delete/edit events this created. (SUPER USER FUL ACCESS)
+	
+	** Link Mulitple Admins to a tournament
+	** Admin can generate verifier account for tournament 
+	** Users should be available to Admins, but Only show users auto generated on there tournament.
+	** Scores read only to verifier once verified checked? (only Admin can undo)
+	** Add time out check to is user loged in.
 	
 	-- MEDIUM
 	** System to select which alternates get awards
@@ -3460,8 +3565,8 @@ else {
 	
 	** Email link expects web root folder
 	** Improve Navigation From Result Screen
+	** clear High low wins radio in add tournament
 	
-	** Print Each event score individually
 	** Try alternate row color for enter scores
 	** Fix Max points earned per event on overall points screen
 	** Overall points. what if all scores are the same? Same rank?
