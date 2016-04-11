@@ -1769,7 +1769,10 @@ else {
 						WHERE TE.TOURN_EVENT_ID=".$id;	
 						
 		$queryPrimary = "SELECT TT.TEAM_NUMBER,
-				T.NAME AS TNAME, TES.TEAM_STATUS, RAW_SCORE, TES.TIER_TEXT,
+				T.NAME AS TNAME, TES.TEAM_STATUS, RAW_SCORE,
+				CASE WHEN TES.TIER_TEXT IS NULL THEN 'I' WHEN TES.TIER_TEXT = 1 THEN 'I' WHEN TES.TIER_TEXT = 2 THEN 'II'
+				WHEN TES.TIER_TEXT = 3 THEN 'III' WHEN TES.TIER_TEXT = 4 THEN 'IV' WHEN TES.TIER_TEXT = 5 THEN 'V'
+				END AS TIER_TEXT,
 				TES.TIE_BREAK_TEXT, TES.SCORE, TES.POINTS_EARNED  
 				FROM TEAM_EVENT_SCORE TES 
 				INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURN_EVENT_ID=TES.TOURN_EVENT_ID
@@ -1780,7 +1783,10 @@ else {
 				WHERE TES.TOURN_EVENT_ID=".$id." AND COALESCE(TT.ALTERNATE_FLAG,0) = 0 ORDER BY CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC ";	
 				
 		$queryAlternate = "SELECT TT.TEAM_NUMBER,
-				CONCAT(T.NAME,' +') AS TNAME, TES.TEAM_STATUS, RAW_SCORE, TES.TIER_TEXT,
+				CONCAT(T.NAME,' +') AS TNAME, TES.TEAM_STATUS, RAW_SCORE,
+				CASE WHEN TES.TIER_TEXT IS NULL THEN 'I' WHEN TES.TIER_TEXT = 1 THEN 'I' WHEN TES.TIER_TEXT = 2 THEN 'II'
+				WHEN TES.TIER_TEXT = 3 THEN 'III' WHEN TES.TIER_TEXT = 4 THEN 'IV' WHEN TES.TIER_TEXT = 5 THEN 'V'
+				END AS TIER_TEXT,
 				TES.TIE_BREAK_TEXT, TES.SCORE, TES.POINTS_EARNED  
 				FROM TEAM_EVENT_SCORE TES 
 				INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURN_EVENT_ID=TES.TOURN_EVENT_ID
@@ -1801,7 +1807,7 @@ else {
 		$filename = $eventName.'_'.$division."_Results". ".csv";
 		$title = $tournamentName.' - '.$date.' - '.$eventName.' '.$division.' Results';
 		
-		$filename = str_replace(" ", "_", $filename);$filename = str_replace("/", "", $filename);
+		$filename = str_replace(" ", "_", $filename);$filename = str_replace("/", "", $filename);$filename = str_replace("*", "", $filename);
 		$filename = str_replace("\\", "", $filename);$filename = str_replace("'", "", $filename);
 	
   		header("Content-Disposition: attachment; filename=\"$filename\"");
