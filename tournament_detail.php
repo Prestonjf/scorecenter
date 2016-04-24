@@ -269,10 +269,10 @@
 				str += "&teamNumber"+count+"="+document.getElementById('teamNumber'+count).value;
 			}
 			if (document.getElementById('bestNewTeam'+count) != null && document.getElementById('bestNewTeam'+count).checked) {
-				str += "&bestNewTeam="+document.getElementById('bestNewTeam'+count).value;
+				str += "&bestNewTeam"+count+"="+document.getElementById('bestNewTeam'+count).value;
 			}
 			if (document.getElementById('mostImprovedTeam'+count) != null && document.getElementById('mostImprovedTeam'+count).checked) {
-				str += "&mostImprovedTeam="+document.getElementById('mostImprovedTeam'+count).value;
+				str += "&mostImprovedTeam"+count+"="+document.getElementById('mostImprovedTeam'+count).value;			
 			}
 			count++;
 		}
@@ -472,7 +472,8 @@
 			value=<?php echo '"'.$_SESSION["overallAAwarded"].'"' ?>></td>
 	</tr>
 	<tr>
-		<td colspan="2"><input type="checkbox" id="bestNewTeamFlag" name="bestNewTeamFlag" <?php if ($_SESSION["bestNewTeam"] == '1') echo 'checked'; ?> value="1"> &nbsp;&nbsp;<label for="bestNewTeamFlag">Display Best New Team</label></td>
+		<td style="white-space: nowrap;"><label for="bestNewTeamFlag">Display Team List 1:&nbsp;</label><input type="checkbox" id="bestNewTeamFlag" name="bestNewTeamFlag" <?php if ($_SESSION["bestNewTeam"] == '1') echo 'checked'; ?> value="1"></td>
+		<td><input type="text" class="form-control" name="teamList1Text" id="teamList1Text" size="50" value=<?php echo '"'.$_SESSION["teamList1Text"].'"' ?>></td>
 		
 		<td><label for="tourn1Linked">Link Tournament: </label></td>
 		<td>
@@ -492,7 +493,8 @@
 		</td>
 	</tr>
 	<tr>
-		<td colspan="2"><input type="checkbox" id="improvedTeam" name="improvedTeam" <?php if ($_SESSION["improvedTeam"] == '1') echo 'checked'; ?> value="1">  &nbsp;&nbsp;<label for="improvedTeam">Display Most Improved Team</label></td>
+		<td style="white-space: nowrap;"><label for="improvedTeam">Display Team List 2:</label>&nbsp;<input type="checkbox" id="improvedTeam" name="improvedTeam" <?php if ($_SESSION["improvedTeam"] == '1') echo 'checked'; ?> value="1"></td>
+		<td><input type="text" class="form-control" name="teamList2Text" id="teamList2Text" size="50" value=<?php echo '"'.$_SESSION["teamList2Text"].'"' ?>></td>
 		<td><label for="tourn2Linked">Link Tournament: </label></td>
 			<td><div id="tourn2LinkedDiv" style="width: 100%;">
 			<select class="form-control" name="tourn2Linked" id="tourn2Linked">
@@ -596,8 +598,8 @@
                 <th width="30%" data-field="name" data-align="right" data-sortable="true">Team Name</th>
                 <th width="30%" data-field="name" data-align="right" data-sortable="true">Team Number</th>
                 <th width="30%" data-field="alternate" data-align="center" data-sortable="true">Alternate Team?</th>
-				<th width="2.5%" data-field="alternate" data-align="center" data-sortable="true">Best New Team</th>
-				<th width="2.5%" data-field="alternate" data-align="center" data-sortable="true">Most Improved Team</th>
+				<th width="2.5%" data-field="alternate" data-align="center" data-sortable="true">Team List 1</th>
+				<th width="2.5%" data-field="alternate" data-align="center" data-sortable="true">Team List 2</th>
 				<th width="5%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
@@ -619,8 +621,8 @@
 					echo '<option value="1"'; if($team['3'] == 1){echo("selected");} echo '>Yes</option>';
 					echo '</select>';
 					echo '</div></td>';
-					echo '<td><input type="radio" name="bestNewTeam" id="bestNewTeam'.$teamCount.'" value="'.$team['1'].'" '; if($team['5'] == $team['1']){echo("checked");} echo '></td>';
-					echo '<td><input type="radio" name="mostImprovedTeam" id="mostImprovedTeam'.$teamCount.'" value="'.$team['1'].'" '; if($team['6'] == $team['1']){echo("checked");} echo '></td>';
+					echo '<td><input type="checkbox" name="bestNewTeam'.$teamCount.'" id="bestNewTeam'.$teamCount.'" value="'.$team['1'].'" '; if($team['5'] == $team['1']){echo("checked");} echo '></td>';
+					echo '<td><input type="checkbox" name="mostImprovedTeam'.$teamCount.'" id="mostImprovedTeam'.$teamCount.'" value="'.$team['1'].'" '; if($team['6'] == $team['1']){echo("checked");} echo '></td>';
 					echo '<td><button type="button" class="btn btn-xs btn-danger" name="deleteTeam" onclick="validateDeleteTeam(this)" value='.$team['4'].'>Delete</button></td>';
 					echo '</tr>';
 					

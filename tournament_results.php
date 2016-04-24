@@ -188,7 +188,8 @@
 					else echo 'style="background-color: #'.$_SESSION["secondaryRowColor"].';"';
 				echo '><b>'.$resultRow['1'].'</b></td>';
 				$colCount++;
-				echo '<td style="white-space: nowrap; overflow: hidden;  border-right: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryRowColor"]; else echo ' background-color: #'.$_SESSION["secondaryRowColor"]; echo '"><b>'.$resultRow['2'].'</b></td>';
+				echo '<td style="white-space: nowrap; overflow: hidden;  border-right: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryRowColor"]; else echo ' background-color: #'.$_SESSION["secondaryRowColor"]; echo '"><b>
+				<div data-toggle="tooltip" title="'.$resultRow['2'].'">'.$resultRow['2'].'</div></b></td>';
 				$i = 3;
 				$colCount++;
 				while ($i < sizeof($resultRow)-1) {
@@ -252,7 +253,8 @@
 					else echo 'style="background-color: #'.$_SESSION["secondaryRowColor"].';"';
 				echo '><b>'.$resultRow['1'].'</b></td>';
 				$colCount++;
-				echo '<td width="20%" style="white-space: nowrap; overflow: hidden;  border-right: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryRowColor"]; else echo ' background-color: #'.$_SESSION["secondaryRowColor"]; echo '"><b>'.$resultRow['2'].'</b></td>';
+				echo '<td width="20%" style="white-space: nowrap; overflow: hidden;  border-right: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryRowColor"]; else echo ' background-color: #'.$_SESSION["secondaryRowColor"]; echo '"><b>
+				<div data-toggle="tooltip" title="'.$resultRow['2'].'">'.$resultRow['2'].'</div></b></td>';
 				$i = 3;
 				$colCount++;
 				while ($i < sizeof($resultRow)-1) {

@@ -94,6 +94,19 @@
 				count++;
 			}			
 		}
+		else if (slide.type == 'TEAMLIST') {
+			slideHtml += '<div style="width: 100%; font-size: 500%; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />'
+			var count  = 0;
+			var animationPosition = slide.animationPosition;			
+			//var elementCount = Object.keys(slideshow[slideshowIndex].labelValues).length;	
+			while (count < animationPosition) {
+				var element = slide.labelValues[count];
+				slideHtml += '<div style="width: 100%; font-size: 200%; white-space:nowrap; text-align: left;">' + element[0] + '</div>';
+				if (element.length > 1)
+					slideHtml += '<div style="width: 100%; font-size: 350%; white-space:nowrap; text-align: left;">' + element[1] + '</div><br /><br />';
+				count++;
+			}			
+		}
 		else if (slide.type == 'OVERALLRESULTS') {
 			slideHtml += '<div style="width: 100%; font-size: 500%; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />'
 			var count  = 0;
@@ -102,7 +115,8 @@
 			while (count < animationPosition) {
 				var element = slide.labelValues[count];
 				slideHtml += '<div style="width: 100%; font-size: 200%; white-space:nowrap; text-align: left;">' + element[0] + '</div>';
-				slideHtml += '<div style="width: 100%; font-size: 350%; white-space:nowrap; text-align: left;">' + element[1] + '</div><br /><br />';
+				if (element.length > 1)
+					slideHtml += '<div style="width: 100%; font-size: 350%; white-space:nowrap; text-align: left;">' + element[1] + '</div><br /><br />';
 				count++;
 			}			
 		}
