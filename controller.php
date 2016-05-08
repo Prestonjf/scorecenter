@@ -1,4 +1,28 @@
 <?php
+/**
+ * Tournament Score Center (TSC) - Tournament scoring web application.
+ * Copyright (C) 2016  Preston Frazier
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/.
+ *    
+ * @package: Tournament Score Center (TSC) - Tournament scoring web application.
+ * @version: 1.16.1, 05.08.2016 
+ * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
+ * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
+ */
+    
+	
 session_start();
 include_once('score_center_objects.php');
 include_once('mail_functions.php');
@@ -648,7 +672,7 @@ else {
 		$result = $mysqli->query("select max(USER_ID) + 1 from USER");
 		$row = $result->fetch_row(); 
 		$id = 0;
-		if ($row != null) $id = $row['0'];
+		if ($row != null and $row['0'] != null) $id = $row['0'];
 			
 		foreach ($eventList as $event) { 		
 			// create user for each event
@@ -1246,7 +1270,7 @@ else {
 			$result = $mysqli->query("select max(TOURNAMENT_ID) + 1 from TOURNAMENT");
 			$row = $result->fetch_row(); 
 			$id = 0;
-			if ($row != null) $id = $row['0'];  
+			if ($row != null and $row['0'] != null) $id = $row['0'];  
 			$_SESSION["tournamentId"] = $id;
 			$userId = getCurrentUserId();
 			
@@ -1647,7 +1671,7 @@ else {
 			$result = $mysqli->query("select max(EVENT_ID) + 1 from EVENT");
 			$row = $result->fetch_row(); 
 			$id = 0;
-			if ($row != null) $id = $row['0'];  
+			if ($row != null and $row['0'] != null) $id = $row['0'];  
 			$_SESSION["eventId"] = $id;
 			
 			$query = $mysqli->prepare("INSERT INTO EVENT (EVENT_ID, NAME, COMMENTS, SCORE_SYSTEM_CODE) VALUES (".$id.", ?, ?,?) ");
@@ -1942,7 +1966,7 @@ else {
 			$result = $mysqli->query("select max(TEAM_ID) + 1 from TEAM");
 			$row = $result->fetch_row(); 
 			$id = 0;
-			if ($row != null) $id = $row['0'];  
+			if ($row != null and $row['0'] != null) $id = $row['0'];  
 			$_SESSION["teamId"] = $id;
 			
 			$query = $mysqli->prepare("INSERT INTO TEAM (TEAM_ID, NAME, CITY, PHONE_NUMBER, EMAIL_ADDRESS, DESCRIPTION, DIVISION) VALUES (".$id.",?,?,?,?,?,?) ");
@@ -3354,6 +3378,18 @@ else {
 			$userSessionInfo->setRole($account['3']);
 			$userSessionInfo->setPhoneNumber($account['8']);
 			
+			$url = explode("/", $_SERVER[REQUEST_URI]);
+			$tmp = ''; 
+			$i = 0;
+			if (sizeof($url) > 1) {
+				while ($i < sizeof($url) - 1) {
+					$tmp .= $url[$i] . '/'; 
+				    $i++;
+				}
+			}
+			$url =  $_SERVER[HTTP_HOST] . $tmp;
+			$userSessionInfo->setDomain($url);
+			
 			$_SESSION["userSessionInfo"] = serialize($userSessionInfo);
 			//$_SESSION["userEventDate"] = date("m/d/y");
 			$_SESSION['sessionTimeout'] = time(); // Session Timeout
@@ -3512,7 +3548,7 @@ else {
 			$result = $mysqli->query("select max(USER_ID) + 1 from USER");
 			$row = $result->fetch_row(); 
 			$id = 0;
-			if ($row != null) $id = $row['0'];  
+			if ($row != null and $row['0'] != null) $id = $row['0'];  
 			
 			$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER) 
 				VALUES (".$id.",?,?,?,?,?,?,?) ");
@@ -3568,101 +3604,6 @@ else {
 		$_SESSION["secondaryRowColor"] = "FFFFFF"; // Default White. Secondary Row FFFFFF
 		$_SESSION["secondaryColumnColor"] = "FFFFFF"; // Default Green/Gray. Secondary Column CEDCCE
 	}
-
-
-	/**** TODO / GENERAL ISSUES ********
-	
-	-- ISSUES TO IMPLEMENT / FIX --
-	
-	-- CRITICAL
-	
-	
-	-- HIGH 
-	** Verifier Cannot Manage Teams or Events. Cannot Edit Tournament
-	** Lock edit events feature. SuperUSer access only
-	** Add filter criteria for Teams: State, Region
-	** Filter Criteria for Verifier. Can only link Verifiers Admin created?
-	** Team And Event Admin Created By, Admins can only delete/edit events this created. (SUPER USER FUL ACCESS)
-	
-	** Link Mulitple Admins to a tournament
-	** Admin can generate verifier account for tournament 
-	** Users should be available to Admins, but Only show users auto generated on there tournament.
-	** Scores read only to verifier once verified checked? (only Admin can undo)
-	** Add time out check to is user loged in.
-	
-	-- MEDIUM
-	** System to select which alternates get awards
-	** Add Additional Point(s) for PX teams 
-	** More colors for ties
-	** Add extra points value for PX status
-	** location of submitted / Verified checkboxes?
-	
-	** Email link expects web root folder
-	** Improve Navigation From Result Screen
-	** clear High low wins radio in add tournament
-	
-	** Try alternate row color for enter scores
-	** Fix Max points earned per event on overall points screen
-	** Overall points. what if all scores are the same? Same rank?
-	** overall points display if scores are compeleted. 
-	
-	** Add number of teams / last place points to instructions.
-	
-	** Log More User data on login
-	** Make Logo Dynamic
-	** Make Footer Text Dynamic
-	** Make Home Page News Text Dynamic
-	** Make Any Place where 'Science Olympiad' Text Referenced Dynamic
-	** Make Quick Links Dynamic
-	** Work on About Page
-	** Make General Slide Builder for Slideshow
-	** Tie Scores display tied position in Raw Score Field
-	
-	** Filter supervisor drop down in edit tournament
-	** Filter Verifier drop down in edit tournament
-	** Make Offline Event Score screen. Export/Import Function for offline users
-	** Delete user function
-	
-
-	-- LOW
-	** Manual Reminder email to supervisor
-	** Results Order By OPTION / Keep Color PAttern per Row
-	** Generate Results as XML
-	** AJAX on TIMEOUT	
-	** controller class security
-	** declare constants on login (to avoid notices if server has them turned on)
-	** Update Print Functionality
-	** Timeout at 12 hours / Time Out Ajax
-	
-	
-	-- APP LIMITATIONS --
-	** Handles 100 Teams / Events Per TOURNAMENT
-	** Results: Ties Broken to 20 positions
-
-	
-	-- ACKNOWLEDGEMENTS --
-	^^ PHPMAILER
-	^^ PHPEXCEL
-	^^ JQUERY Table Sorter
-	^^ Spectrum Color Picker
-	^^ FPDF
-		
-	
-	**** TODO / GENERAL ISSUES *********/
-	
-	/**** VERSION CHANGELOG ********
-		
-	** Nav Bar 'Logout' link added
-	** Nav Bar  Text Updated
-	** Ties are not highlighted for status of PX, NP, DQ
-	** Ties are now highlighted correctly based on Number value comparison. (not string)
-	** Bulk Copy will now allow blank lines. Number of lines must match the number of teams.
-	** fixed navigation error: login > results > cancel
-		
-		
-		
-	**** VERSION CHANGELOG *********/
-		
 		
 		
 ?>

@@ -1,13 +1,13 @@
 # ************************************************************
 # Sequel Pro SQL dump
-# Version 4499
+# Version 4541
 #
 # http://www.sequelpro.com/
 # https://github.com/sequelpro/sequelpro
 #
 # Host: mysql.prestonsproductions.com (MySQL 5.6.25-log)
 # Database: score_center_db
-# Generation Time: 2016-01-18 16:33:48 +0000
+# Generation Time: 2016-05-05 00:25:06 +0000
 # ************************************************************
 
 
@@ -31,8 +31,56 @@ CREATE TABLE `EVENT` (
   `COMMENTS` longtext,
   `SCORE_SYSTEM_CODE` varchar(30) DEFAULT NULL,
   PRIMARY KEY (`EVENT_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8;
 
+LOCK TABLES `EVENT` WRITE;
+/*!40000 ALTER TABLE `EVENT` DISABLE KEYS */;
+
+INSERT INTO `EVENT` (`EVENT_ID`, `NAME`, `COMMENTS`, `SCORE_SYSTEM_CODE`)
+VALUES
+	(1,'Air Trajectory','','HIGHRAWTIER'),
+	(2,'Astronomy','','HIGHRAW'),
+	(3,'Cell Biology','','HIGHRAW'),
+	(4,'Mission Possible','','HIGHRAWTIER'),
+	(5,'Write It, Do It','','HIGHRAWTIER'),
+	(6,'Experimental Design','','HIGHRAWTIER'),
+	(7,'Rocks and Minerals','','HIGHRAW'),
+	(8,'Game On','','HIGHRAWTIER'),
+	(9,'Wheeled Vehicle','','HIGHRAWTIER'),
+	(10,'Circuit Lab','','HIGHRAW'),
+	(11,'Bottle Rocket','Bottle Rockets!','HIGHRAWTIER'),
+	(12,'Fossils','Fossil Event','HIGHRAW'),
+	(14,'Wright Stuff','','HIGHRAWTIER'),
+	(15,'Electric Vehicle','','LOWRAW'),
+	(16,'Bridge Building','','HIGHRAWTIER4LOW'),
+	(17,'Chemistry Lab','','HIGHRAW'),
+	(18,'Dynamic Planet','','HIGHRAW'),
+	(19,'Forensics','','HIGHRAW'),
+	(20,'Geologic Mapping','','HIGHRAW'),
+	(21,'Green Generation','','HIGHRAW'),
+	(22,'Protein Modeling','','HIGHRAW'),
+	(23,'Anatomy & Physiology','','HIGHRAW'),
+	(24,'Disease Detectives','','HIGHRAW'),
+	(25,'Hydrogeology','','HIGHRAW'),
+	(26,'Invasive Species','','HIGHRAW'),
+	(27,'It\'s About Time','','HIGHRAW'),
+	(28,'Robot Arm','','HIGHRAWTIER'),
+	(29,'Wind Power','','HIGHRAW'),
+	(30,'Bio-Process Lab','','HIGHRAW'),
+	(31,'Crave The Wave','','HIGHRAW'),
+	(32,'Crime Busters','','HIGHRAW'),
+	(33,'Elastic Launched Glider','','HIGHRAWTIER'),
+	(34,'Food Science','','HIGHRAW'),
+	(35,'Meteorology','','HIGHRAW'),
+	(36,'Picture This','','HIGHRAW'),
+	(37,'Reach For The Stars','','HIGHRAW'),
+	(38,'Road Scholar','','HIGHRAW'),
+	(39,'Scrambler','','LOWRAW'),
+	(40,'Roller Coaster','','LOWRAWTIER'),
+	(41,'Source Code','','HIGHRAW');
+
+/*!40000 ALTER TABLE `EVENT` ENABLE KEYS */;
+UNLOCK TABLES;
 
 
 # Dump of table REF_DATA
@@ -48,7 +96,7 @@ CREATE TABLE `REF_DATA` (
   `SORT_ORDER` int(11) DEFAULT NULL,
   `DISPLAY_TEXT` longtext,
   PRIMARY KEY (`REF_DATA_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `REF_DATA` WRITE;
 /*!40000 ALTER TABLE `REF_DATA` DISABLE KEYS */;
@@ -63,17 +111,18 @@ VALUES
 	(6,'REGISTRATIONCODE','VERIFIER',NULL,1,'Science1358219'),
 	(7,'REGISTRATIONCODE','ADMIN',NULL,2,'Science$$1357986420'),
 	(8,'MAILSERVER','HOST',NULL,0,''),
-	(9,'MAILSERVER','PORT',NULL,1,''),
+	(9,'MAILSERVER','PORT',NULL,1,'587'),
 	(10,'MAILSERVER','USERNAME',NULL,2,''),
 	(11,'MAILSERVER','PASSWORD',NULL,3,''),
-	(12,'MAILSERVER','SMTPSECURE',NULL,4,''),
-	(13,'EMAILMESSAGE','ACCOUNTCREATE',NULL,0,'Thank you for creating an account on Michigan Science Olympiad\'s Score Center. You will now be able to enter scores for events assigned to you. If you are a score verifier, you will be able to enter scores for entire tournaments. You may access Score Center at the following address with the user name and password below.'),
-	(14,'EMAILMESSAGE','PASSWORDRESET',NULL,1,'A password reset for account <account name> has been requested from the Science Olympiad Score Center application. To reset your password, select the hyperlink below and update your password on the account screen. If this message was sent in error, please disregard this email.'),
+	(12,'MAILSERVER','SMTPSECURE',NULL,4,'tls'),
+	(13,'EMAILMESSAGE','ACCOUNTCREATE',NULL,0,''),
+	(14,'EMAILMESSAGE','PASSWORDRESET',NULL,1,''),
 	(15,'SCOREALGORITHM','HIGHRAW',NULL,0,'High Raw Score'),
 	(16,'SCOREALGORITHM','HIGHRAWTIER',NULL,1,'High Raw Score / Tier Ranked'),
 	(17,'SCOREALGORITHM','LOWRAW',NULL,2,'Low Raw Score'),
 	(18,'SCOREALGORITHM','LOWRAWTIER',NULL,3,'Low Raw Score / Tier Ranked'),
-	(19,'SCOREALGORITHM','HIGHRAWTIER4LOW',NULL,4,'High Raw Score / Tier Ranked / 4th Tier Low');
+	(19,'SCOREALGORITHM','HIGHRAWTIER4LOW',NULL,4,'High Raw Score / Tier Ranked / 4th Tier Low'),
+	(20,'ROLE','SUPERUSER',NULL,-1,'Super User');
 
 /*!40000 ALTER TABLE `REF_DATA` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -93,7 +142,7 @@ CREATE TABLE `TEAM` (
   `DESCRIPTION` longtext,
   `DIVISION` varchar(5) DEFAULT NULL,
   PRIMARY KEY (`TEAM_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=243 DEFAULT CHARSET=utf8;
 
 
 
@@ -113,7 +162,7 @@ CREATE TABLE `TEAM_EVENT_SCORE` (
   `TIE_BREAK_TEXT` text,
   `TEAM_STATUS` varchar(2) DEFAULT NULL,
   PRIMARY KEY (`TEAM_EVENT_SCORE_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=1613 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6258 DEFAULT CHARSET=utf8;
 
 
 
@@ -143,8 +192,13 @@ CREATE TABLE `TOURNAMENT` (
   `HIGHEST_SCORE_POSSIBLE_ALT` int(11) DEFAULT NULL,
   `ADDITIONAL_POINTS_NP` int(11) DEFAULT NULL,
   `ADDITIONAL_POINTS_DQ` int(11) DEFAULT NULL,
+  `EVENTS_AWARDED_ALT` int(11) DEFAULT NULL,
+  `OVERALL_AWARDED_ALT` int(11) DEFAULT NULL,
+  `ADMIN_USER_ID` int(11) DEFAULT NULL,
+  `TEAM_LIST_1_TEXT` varchar(100) DEFAULT NULL,
+  `TEAM_LIST_2_TEXT` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`TOURNAMENT_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
 
 
@@ -162,10 +216,9 @@ CREATE TABLE `TOURNAMENT_EVENT` (
   `SUBMITTED_FLAG` int(11) DEFAULT NULL,
   `VERIFIED_FLAG` int(11) DEFAULT NULL,
   `COMMENTS` longtext,
-  PRIMARY KEY (`TOURN_EVENT_ID`),
-  KEY `USER_ID_FK` (`USER_ID`),
-  CONSTRAINT `USER_ID_FK` FOREIGN KEY (`USER_ID`) REFERENCES `USER` (`USER_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=134 DEFAULT CHARSET=utf8;
+  `PRIM_ALT_FLAG` int(11) DEFAULT NULL,
+  PRIMARY KEY (`TOURN_EVENT_ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=277 DEFAULT CHARSET=utf8;
 
 
 
@@ -178,12 +231,12 @@ CREATE TABLE `TOURNAMENT_TEAM` (
   `TOURN_TEAM_ID` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `TOURNAMENT_ID` int(11) DEFAULT NULL,
   `TEAM_ID` int(11) DEFAULT NULL,
-  `TEAM_NUMBER` int(11) DEFAULT NULL,
+  `TEAM_NUMBER` text,
   `ALTERNATE_FLAG` int(11) DEFAULT NULL,
   `BEST_NEW_TEAM_FLAG` int(11) DEFAULT NULL,
   `MOST_IMPROVED_TEAM_FLAG` int(11) DEFAULT NULL,
   PRIMARY KEY (`TOURN_TEAM_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=144 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=327 DEFAULT CHARSET=utf8;
 
 
 
@@ -215,16 +268,17 @@ CREATE TABLE `USER` (
   `PASSWORD_RESET_SALT` varchar(1000) DEFAULT NULL,
   `ACCOUNT_ACTIVE_FLAG` int(11) DEFAULT NULL,
   `PHONE_NUMBER` varchar(30) DEFAULT NULL,
+  `AUTO_CREATED_FLAG` int(11) DEFAULT NULL,
   PRIMARY KEY (`USER_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8;
 
 LOCK TABLES `USER` WRITE;
 /*!40000 ALTER TABLE `USER` DISABLE KEYS */;
 
-INSERT INTO `USER` (`USER_ID`, `USERNAME`, `PASSWORD`, `ROLE_CODE`, `FIRST_NAME`, `LAST_NAME`, `PASSWORD_RESET_SALT`, `ACCOUNT_ACTIVE_FLAG`, `PHONE_NUMBER`)
+INSERT INTO `USER` (`USER_ID`, `USERNAME`, `PASSWORD`, `ROLE_CODE`, `FIRST_NAME`, `LAST_NAME`, `PASSWORD_RESET_SALT`, `ACCOUNT_ACTIVE_FLAG`, `PHONE_NUMBER`, `AUTO_CREATED_FLAG`)
 VALUES
-	(1,'admin@tscorecenter.com','$1$lZ8nqapR$5QUil0/.lnmKMrlw69mrV/','ADMIN','Admin','Scorecenter',NULL,1,''),
-
+	(1,'admin','$1$Jqtt5aLI$0cwc9tJ5WZ2c9vPp/Z0BB0','SUPERUSER','Super','User',NULL,1,'',NULL),
+	(2,'demoadmin','$1$Hb2FrNM0$17Bka7FdIKKx9x2aL9O8./','ADMIN','Demo','Admin',NULL,1,'',1);
 
 /*!40000 ALTER TABLE `USER` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -240,7 +294,7 @@ CREATE TABLE `USER_LOGIN_LOG` (
   `USER_ID` int(11) DEFAULT NULL,
   `LOGIN_TIME` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`USER_LOGIN_LOG_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=233 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=617 DEFAULT CHARSET=utf8;
 
 
 

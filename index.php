@@ -1,13 +1,42 @@
 <?php 
+/**
+ * Tournament Score Center (TSC) - Tournament scoring web application.
+ * Copyright (C) 2016  Preston Frazier
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/.
+ *    
+ * @package: Tournament Score Center (TSC) - Tournament scoring web application.
+ * @version: 1.16.1, 05.08.2016 
+ * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
+ * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
+ */
+    
+	
 session_start(); 
 include_once('score_center_objects.php');
 include_once('logon_check.php');
 include_once('role_check.php');
+require_once('login.php');
 
-            require_once('login.php');
-		 	$db_server = mysql_connect($db_hostname, $db_username, $db_password);
- 			if (!$db_server) die("Unable to connect to MySQL: " . mysql_error());
- 			mysql_select_db($db_database);
+	$mysqli = mysqli_init();
+	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
+	mysqli_real_connect($mysqli, $db_hostname,$db_username,$db_password,$db_database);
+	
+	if (mysqli_connect_errno()) {
+		printf("Connect failed: %s\n", mysqli_connect_error());
+		exit();
+	}
 
 ?>
 
@@ -51,13 +80,13 @@ include_once('role_check.php');
           <div class="jumbotron" style="overflow: auto;">
 		  	<div style="float: left; width: 80%;">
             <h2 style="margin-top:0px;">Welcome!</h2>
-            <p style="padding-right: 10px;">Tournament Score Center is a new electronic scoring system designed for Michigan Science Olympiad.
+            <p style="padding-right: 10px;">Tournament Score Center is a new electronic scoring system designed specifically for Science Olympiad, but useable for most competitions.
             This application allows tournament organizers the ability to manage tournaments, teams, and events
 			in an secure, efficient, and flexible process.</p>
 			</div>
 			<div style="float: left; width: 20%;">
 			<h2 style="margin-top:0px;">&nbsp;</h2>
-				<img src="img/misologo.png" alt="misciologo" width="150" height="150">
+				<img src="img/misologo.png" alt="tsclogo" width="150" height="150">
 			</div>
           </div>
           
@@ -88,13 +117,13 @@ include_once('role_check.php');
 		if (getCurrentRole() == 'ADMIN') {
 			$query .= " AND T.ADMIN_USER_ID =" .getCurrentUserId();
 		}
- 		$result = mysql_query($query); 
+ 		$result = $mysqli->query($query); 
 			
 
  			if ($result) {
- 				if (mysql_num_rows($result) == 0) { echo '<tr><td colspan="5">No Tournaments Today</td></tr>';}
+ 				if ($result->num_rows == 0) { echo '<tr><td colspan="5">No Tournaments Today</td></tr>';}
  				else {
-      				while($row = mysql_fetch_array($result)) {
+      				while($row = $result->fetch_array()) {
       					echo '<tr>';
       					echo '<td>'; echo $row['1']; echo '</td>';
 						echo '<td>'; echo $row['3']; echo '</td>';
@@ -141,9 +170,9 @@ include_once('role_check.php');
 					FROM TOURNAMENT T
 					INNER JOIN TOURNAMENT_EVENT TE on TE.TOURNAMENT_ID=T.TOURNAMENT_ID 									
 					WHERE TE.USER_ID = ".$userSessionInfo->getUserId() . " ORDER BY NAME ASC ";
-					$result1 = mysql_query($query);	
+					$result1 = $mysqli->query($query);	
 			    if ($result1) {				 
-             		while($tournamentRow = mysql_fetch_array($result1)) {
+             		while($tournamentRow = $result->fetch_array()) {
              			echo '<option '; if ($_SESSION["userTournament"] == $tournamentRow['0']) echo ' selected ';
 						echo ' value="'.$tournamentRow['0'].'">'.$tournamentRow['1'].'</option>';		
              		}
@@ -203,10 +232,10 @@ include_once('role_check.php');
 					$query = $query ." GROUP BY EVENT_ID,eNAME, TRIAL_EVENT_FLAG,TOURN_EVENT_ID, NUMBER_TEAMS
 					ORDER BY UPPER(E.NAME) ASC, T.DATE DESC "; 
 	
-         	$result = mysql_query($query);			
+         	$result = $mysqli->query($query);			
  			if ($result) {
- 				if (mysql_num_rows($result) == 0) { echo '<tr><td colspan="9">No Events Found</td></tr>';}
-      			while($row = mysql_fetch_array($result)) {
+ 				if ($result->num_rows == 0) { echo '<tr><td colspan="9">No Events Found</td></tr>';}
+      			while($row = $result->fetch_array()) {
       			echo '<tr>';
       			echo '<td>'; echo $row['1']; echo '</td>';
 				echo '<td>'; echo $row['8']; echo '</td>';
@@ -244,8 +273,8 @@ include_once('role_check.php');
         <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar">
           <div class="list-group">
             <a href="#" class="list-group-item active">Quick Links</a>
-            <a href="http://miscioly.org/" target="_blank" class="list-group-item">Michigan Science Olympiad Website</a>
-            <a href="http://scienceolympiad.msu.edu/" target="_blank" class="list-group-item">Michigan State Tournament Website</a>
+            <a href="#" target="_blank" class="list-group-item">Dynamic Link 1</a>
+            <a href="#" target="_blank" class="list-group-item">Dynamic Link 2</a>
 
           </div>
         </div><!--/.sidebar-offcanvas-->

@@ -29,9 +29,34 @@
 * Release: 26-01-2011
 * Based on jQuery 1.5.0
 * Additional features provided with thanks to Alex Lareau
+* Modified By: Preston Frazier
 */
 
 (function ($) {
+	
+	var about = 'Tournament Score Center (TSC) - Tournament scoring web application.<br />'+
+	'Copyright (C) 2016  Preston Frazier<br /><br />'+
+
+    'This program is free software: you can redistribute it and/or modify<br />'+
+    'it under the terms of the GNU General Public License as published by<br />'+
+    'the Free Software Foundation, either version 3 of the License, or<br />'+
+    '(at your option) any later version.<br /><br />'+
+
+    'This program is distributed in the hope that it will be useful,<br />'+
+    'but WITHOUT ANY WARRANTY; without even the implied warranty of<br />'+
+    'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the<br />'+
+    'GNU General Public License for more details.<br /><br />'+
+
+    'You should have received a copy of the GNU General Public License<br />'+
+    'along with this program.  If not, see <a href="http://www.gnu.org/licenses/" target="_blank">http://www.gnu.org/licenses/</a>.<br /><br />'+
+    
+    '@package: Tournament Score Center (TSC) - Tournament scoring web application.<br />'+
+    '@version: 1.16.1, 05.08.2016<br />'+
+    '@author: Preston Frazier <a href="http://scorecenter.prestonsproductions.com/index.php" target="_blank">http://scorecenter.prestonsproductions.com/index.php</a><br />'+ 
+    '@license: <a href="http://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank">http://www.gnu.org/licenses/gpl-3.0.en.html</a> GPLv3<br />';
+	
+	
+	
     $.fn.popBox = function (options, type) {
 
         var defaults = {
@@ -54,7 +79,7 @@
 			}
 			else if (type == 'about') {
 			
-				obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label><span style="font-weight:normal;font-size:14px;"><h4>Tournament Score Center</h4><br />Developed by Preston Frazier <br />A web based scoring application for Science Olympiad Tournaments. <br /><br />v1.0.6 (Beta) - 03.31.2016</span></label><div class="done-button"><input type="button" value="Close" id="closeAbout" class="btn btn-xs btn-primary"/></div></div>');
+				obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label style="text-align:left;"><span style="font-weight:normal;font-size:14px;">'+about+'</span></label><div class="done-button"><input type="button" value="Close" id="closeAbout" class="btn btn-xs btn-primary"/></div></div>');
 	
 			}
 
