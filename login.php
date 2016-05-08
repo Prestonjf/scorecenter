@@ -28,4 +28,4 @@
 	$db_username = 'scorecenter_user';
 	$db_password = '12345';
 	$db_database = 'score_center_db';
-?> 
+?>
