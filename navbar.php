@@ -96,7 +96,7 @@
             <?php if (isUserAccess(0)) { ?> <li><a href="controller.php?command=loadUtilities&">Utilities</a></li><?php } ?>
             <?php } ?>
             <li><a href="#" id="aboutLink" >About</a></li>
-            <li><a href="#" id="" >Help</a></li>
+            <li><a href="http://scorecenter.prestonsproductions.com" target="_blank" id="" >Help</a></li>
 			<li role="separator" class="divider"></li>
 			 <li><a href="controller.php?command=logout&">Logout</a></li>
           </ul>

@@ -272,7 +272,7 @@
 	function generateEventParamsString() {
 		var str = "";
 		var count = 0;
-		while (count < 100) {
+		while (count < 200) {
 			if (document.getElementById('trialEvent'+count) != null) {
 				str += "&trialEvent"+count+"="+document.getElementById('trialEvent'+count).value;
 				str += "&eventSupervisor"+count+"="+document.getElementById('eventSupervisor'+count).value;
@@ -285,7 +285,7 @@
 	function generateTeamParamsString() {
 		var str = "";
 		var count = 0;
-		while (count < 100) {
+		while (count < 200) {
 			if (document.getElementById('alternateTeam'+count) != null) {
 				str += "&alternateTeam"+count+"="+document.getElementById('alternateTeam'+count).value;
 			}

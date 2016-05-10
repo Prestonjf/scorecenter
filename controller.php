@@ -600,7 +600,7 @@ else {
 		// Team Cache - teamNumber, alternateTeam, bestNewTeam,mostImprovedTeam
 		$count = 0;
 		$teamList = $_SESSION["teamList"];
-		while ($count < 100) {
+		while ($count < 200) {
 			$team = $teamList[$count];
 			if ($_GET['teamNumber'.$count] != null or $_GET['alternateTeam'.$count] != null) {	
 				if ($_GET['teamNumber'.$count] != null) {			
@@ -634,7 +634,7 @@ else {
 		$count = 0;
 		$eventList = $_SESSION["eventList"];
 		
-		while ($count < 100) {
+		while ($count < 200) {
 			$event = $eventList[$count];
 			if ($_GET['trialEvent'.$count] != null) {	
 				
@@ -2852,7 +2852,7 @@ else {
 			if (sizeof($eventArray) > 0) {array_unshift($eventArray, $event); array_push($aAltEvents, $eventArray); }
 		}
 		
-		for ($i=0; $i < 100; $i++) {
+		for ($i=0; $i < 200; $i++) {
 			if ($i >= sizeof($cEvents) AND $i >= sizeof($bEvents) AND $i >= sizeof($aEvents)) break;
 				if ($i < sizeof($aAltEvents) AND $aEventAwardedAlt != null AND $aEventAwardedAlt > 0) {
 					$event = $aAltEvents[$i];

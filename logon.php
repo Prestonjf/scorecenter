@@ -107,8 +107,8 @@ session_start();
         <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar">
           <div class="list-group">
             <a href="#" class="list-group-item active">Quick Links</a>
-            <a href="http://miscioly.org/" target="_blank" class="list-group-item">Michigan Science Olympiad Website</a>
-            <a href="http://scienceolympiad.msu.edu/" target="_blank" class="list-group-item">Michigan State Tournament Website</a>
+            <a href="#" target="_blank" class="list-group-item">Dynamic Link 1</a>
+            <a href="#" target="_blank" class="list-group-item">Dynamic Link 2</a>
           </div>
         </div><!--/.sidebar-offcanvas-->
         
