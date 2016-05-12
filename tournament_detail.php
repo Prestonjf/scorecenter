@@ -368,17 +368,22 @@
        <?php
         // Load Events and Teams
         	require_once 'login.php';
-		 	$db_server = mysql_connect($db_hostname, $db_username, $db_password);
- 			if (!db_server) die("Unable to connect to MySQL: " . mysql_error());			
- 			mysql_select_db($db_database);
+			$mysqli = mysqli_init();
+			mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
+			mysqli_real_connect($mysqli, $db_hostname,$db_username,$db_password,$db_database);
+			
+			if (mysqli_connect_errno()) {
+				printf("Connect failed: %s\n", mysqli_connect_error());
+				exit();
+			}
     		
     		$teams = null;
-			$verifiers = mysql_query("SELECT DISTINCT USER_ID, CONCAT(LAST_NAME,', ',FIRST_NAME,' (', USERNAME,')') AS USER
+			$verifiers = $mysqli->query("SELECT DISTINCT USER_ID, CONCAT(LAST_NAME,', ',FIRST_NAME,' (', USERNAME,')') AS USER
     									 FROM USER WHERE ROLE_CODE='VERIFIER' ORDER BY UPPER(LAST_NAME) ASC");
-    		$events = mysql_query("SELECT DISTINCT * FROM EVENT ORDER BY NAME ASC");
-    		if ($_SESSION["tournamentDivision"] == null or $_SESSION["tournamentDivision"] == '') $teams = mysql_query("SELECT DISTINCT * FROM TEAM ORDER BY NAME ASC");
-    		else $teams = mysql_query("SELECT DISTINCT * FROM TEAM WHERE DIVISION = '".$_SESSION["tournamentDivision"]."' ORDER BY NAME ASC"); 
-    		$supervisors = mysql_query("SELECT DISTINCT X.* FROM (
+    		$events = $mysqli->query("SELECT DISTINCT * FROM EVENT ORDER BY NAME ASC");
+    		if ($_SESSION["tournamentDivision"] == null or $_SESSION["tournamentDivision"] == '') $teams = $mysqli->query("SELECT DISTINCT * FROM TEAM ORDER BY NAME ASC");
+    		else $teams = $mysqli->query("SELECT DISTINCT * FROM TEAM WHERE DIVISION = '".$_SESSION["tournamentDivision"]."' ORDER BY NAME ASC"); 
+    		$supervisors = $mysqli->query("SELECT DISTINCT X.* FROM (
 										SELECT DISTINCT U.USER_ID, CONCAT(U.LAST_NAME,', ',U.FIRST_NAME,' (', U.USERNAME,')') AS USER
 										FROM USER U WHERE U.ROLE_CODE='SUPERVISOR' AND COALESCE(U.AUTO_CREATED_FLAG,0) <> 1 AND ACCOUNT_ACTIVE_FLAG=1
 										UNION
@@ -561,7 +566,7 @@
       				echo '<select  class="form-control" name="eventSupervisor'.$eventCount.'" id="eventSupervisor'.$eventCount.'">';
       				echo '<option value=""></option>';
       				if ($supervisors) {
-             			while($supervisorRow = mysql_fetch_array($supervisors)) {
+             			while($supervisorRow = $supervisors->fetch_array()) {
              				echo '<option value="'.$supervisorRow['0'].'"'; if($supervisorRow['0'] == $event['5']){echo("selected");} echo '>'.$supervisorRow['1'].'</option>';	
              			}
              		}    
@@ -598,7 +603,7 @@
 			<option value=""></option>
 			<?php
 			    if ($events) {
-             		while($eventRow = mysql_fetch_array($events)) {
+             		while($eventRow = $events->fetch_array()) {
              			echo '<option value="'.$eventRow['0'].'">'.$eventRow['1'].'</option>';
              			
              		}
@@ -666,7 +671,7 @@
 			<option value=""></option>
 			<?php
 			    if ($teams) {
-             		while($teamRow = mysql_fetch_array($teams)) {
+             		while($teamRow = $teams->fetch_array()) {
              			echo '<option value="'.$teamRow['0'].'">'.$teamRow['1'].'</option>';
              			
              		}
@@ -718,7 +723,7 @@
 			<option value=""></option>
 			<?php
 			    if ($verifiers) {
-             		while($verifierRow = mysql_fetch_array($verifiers)) {
+             		while($verifierRow = $verifiers->fetch_array()) {
              			echo '<option value="'.$verifierRow['0'].'">'.$verifierRow['1'].'</option>';
              			
              		}

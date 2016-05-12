@@ -82,7 +82,7 @@ require_once('login.php');
             <h2 style="margin-top:0px;">Welcome!</h2>
             <p style="padding-right: 10px;">Tournament Score Center is a new electronic scoring system designed specifically for Science Olympiad, but usable for most competitions.
             This application allows tournament organizers the ability to manage tournaments, teams, and events
-			in an secure, efficient, and flexible process.</p>
+			in a secure, efficient, and flexible process.</p>
 			</div>
 			<div style="float: left; width: 20%;">
 			<h2 style="margin-top:0px;">&nbsp;</h2>
