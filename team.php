@@ -184,7 +184,8 @@
 						echo '<button type="submit" class="btn btn-xs btn-primary" name="editTeam" value="'.$team['0'].'">Edit Team</button> &nbsp;'; 				
 						echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTeam" onclick="return confirmDelete(\'team\')" value='.$team['0'].'>Delete</button>&nbsp;';
 					} else {
-						echo '<button type="submit" class="btn btn-xs btn-success" name="viewTeam" value="'.$team['0'].'">View Team</button> &nbsp;'; 		
+						echo '<button type="submit" class="btn btn-xs btn-primary" name="editTeam" value="'.$team['0'].'">Edit Team</button> &nbsp;'; 
+						//echo '<button type="submit" class="btn btn-xs btn-success" name="viewTeam" value="'.$team['0'].'">View Team</button> &nbsp;'; 		
 					}
 					echo '</td>';	
 					echo '</tr>';		

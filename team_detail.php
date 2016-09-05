@@ -43,7 +43,7 @@ include_once('logon_check.php');
 	// Edit or Readonly
 	$disable = '';
 	if ($_SESSION["disableRecord"] != null and $_SESSION["disableRecord"] == 1) {
-		$disable = 'disabled';	
+		//$disable = 'disabled';	
 	}
 	
 ?>
