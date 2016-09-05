@@ -1976,7 +1976,7 @@ else {
 			}
 			if ($_SESSION["filterMyTeams"] === null) {
 				if (getCurrentRole() == 'SUPERUSER') $_SESSION["filterMyTeams"] = 'NO';
-				else $_SESSION["filterMyTeams"] = 'YES';
+				else $_SESSION["filterMyTeams"] = 'NO';
 			}
 			
 			$teamList = array();
