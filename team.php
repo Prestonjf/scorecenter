@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.1, 05.08.2016 
+ * @version: 1.16.2, 09.05.2016 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -64,9 +64,11 @@
 	}
 	
 	function clearFilterCriteria() {
-		document.getElementById('teamName').value = '';
-		document.getElementById('teamNumber').value = '';
+		document.getElementById('teamFilterName').value = '';
 		document.getElementById('filterDivision').value = '';
+		document.getElementById('filterState').value = '';
+		document.getElementById('filterRegion').value = '';
+		document.getElementById('filterMyTeams').value = 'YES';
 	}
   
   </script>
@@ -97,14 +99,14 @@
 	 <hr>
 	<table width="90%" class="borderless">
 	<tr>
-	<td width="15"><label for="eventName">Team Name: </label></td>
-	<td width="35">
-	<input type="text" size="20" class="form-control" name="teamName" id="teamName" value=<?php echo '"'.$_SESSION["teamFilterName"].'"' ?>>
+	<td width="15%"><label for="teamFilterName">Team Name: </label></td>
+	<td width="35%">
+	<input type="text" size="20" class="form-control" name="teamFilterName" id="teamFilterName" value=<?php echo '"'.$_SESSION["teamFilterName"].'"' ?>>
 	</td>
 	
-	<td width="15"><label for="eventName">Division: </label></td>
-	<td width="35">	
-			<select class="form-control" name="filterDivision" id="filterDivision" >
+	<td width="15%"><label for="filterDivision">Division: </label></td>
+	<td width="35%">	
+	<select class="form-control" name="filterDivision" id="filterDivision" >
 			<option value=""></option>
 			<option value="A" <?php if($_SESSION["filterDivision"] == 'A'){echo("selected");}?>>A</option>
 			<option value="B" <?php if($_SESSION["filterDivision"] == 'B'){echo("selected");}?>>B</option>
@@ -113,13 +115,45 @@
 	</td>
 	</tr>
 	<tr>
-	<td><label># of Results: </label></td><td>
-	<input type="number" class="form-control" size="10" onkeydown="limit(this);" onkeyup="limit(this);" name="teamNumber" id="teamNumber" min="0" 	max="999" step="1" value=<?php echo '"'.$_SESSION["teamFilterNumber"].'"' ?>>
+	<td width="15%"><label for="filterState">Team State: </label></td>
+	<td width="35%">
+	<select class="form-control" name="filterState" id="filterState" >
+			<option value=""></option>
+			<?php
+			if ($_SESSION["stateCodeList"] != null) {	
+				$results = $_SESSION["stateCodeList"];
+				foreach($results as $row) {	
+					echo '<option value="'.$row['REF_DATA_CODE'].'" '; if($_SESSION["filterState"] == $row['REF_DATA_CODE']){echo("selected");} echo '>'.$row['DISPLAY_TEXT'].'</option>';
+				}
+			}
+			?>
+	</select>
+	</td>
+	
+	<td width="15%"><label for="filterRegion">Team Region: </label></td>
+	<td width="35%">	
+	<select class="form-control" name="filterRegion" id="filterRegion" >
+			<option value=""></option>
+			<?php
+			if ($_SESSION["regionCodeList"] != null) {	
+				$results = $_SESSION["regionCodeList"];
+				foreach($results as $row) {	
+					echo '<option value="'.$row['REF_DATA_CODE'].'" '; if($_SESSION["filterRegion"] == $row['REF_DATA_CODE']){echo("selected");} echo '>'.$row['DISPLAY_TEXT'].'</option>';
+				}
+			}
+			?>
+	</select>
+	</td>
+	</tr>
+	<tr>
+	<td><label for="filterMyTeams">Team Filter: </label></td><td>
+	<input type="radio"  name="filterMyTeams" id="filterMyTeams1" value="NO" <?php if($_SESSION["filterMyTeams"] == 'NO'){echo("checked");}?>> <label class='radio1' for="filterMyTeams1">All Teams</label>&nbsp;&nbsp;
+	<input type="radio" name="filterMyTeams" id="filterMyTeams2" value="YES" <?php if($_SESSION["filterMyTeams"] == 'YES'){echo("checked");}?>> <label class='radio1' for="filterMyTeams2">My Teams</label>&nbsp;&nbsp;
 	</td>
 	<td></td>
 	<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchTeam">Search</button>
 		<button type="button" class="btn btn-xs btn-warning" name="clearSearchEvent" onclick="clearFilterCriteria()">Clear</button>
-	</td>	
+	</td>		
 	</tr>
 	
 	</table>
@@ -131,6 +165,8 @@
             <tr>
                 <th data-field="name" data-align="right" data-sortable="true">Team Name</th>
                 <th data-field="division" data-align="right" data-sortable="true">Team Division</th>
+                <th data-field="division" data-align="right" data-sortable="true">Team State</th>
+                <th data-field="division" data-align="right" data-sortable="true">Team Region</th>
                 <th data-field="actions" data-sortable="true">Actions</th>
             </tr>
         </thead>
@@ -141,9 +177,15 @@
 					paginationRow($index);
 					echo '<td>'; echo $team['1']; echo '</td>';
 					echo '<td>'; echo $team['2']; echo '</td>';
+					echo '<td>'; echo $team[4]; echo '</td>';
+					echo '<td>'; echo $team[5]; echo '</td>';
 					echo '<td>';
-					echo '<button type="submit" class="btn btn-xs btn-primary" name="editTeam" value="'.$team['0'].'">Edit Team</button> &nbsp;'; 				
-					echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTeam" onclick="return confirmDelete(\'team\')" value='.$team['0'].'>Delete</button>&nbsp;';
+					if ($team[3] == 1) {
+						echo '<button type="submit" class="btn btn-xs btn-primary" name="editTeam" value="'.$team['0'].'">Edit Team</button> &nbsp;'; 				
+						echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteTeam" onclick="return confirmDelete(\'team\')" value='.$team['0'].'>Delete</button>&nbsp;';
+					} else {
+						echo '<button type="submit" class="btn btn-xs btn-success" name="viewTeam" value="'.$team['0'].'">View Team</button> &nbsp;'; 		
+					}
 					echo '</td>';	
 					echo '</tr>';		
     		}

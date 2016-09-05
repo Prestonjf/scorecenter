@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.1, 05.08.2016 
+ * @version: 1.16.2, 09.05.2016  
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -39,6 +39,13 @@ include_once('logon_check.php');
 	// Security Level Check
 	include_once('role_check.php');
 	checkUserRole(2);
+	
+	// Edit or Readonly
+	$disable = '';
+	if ($_SESSION["disableRecord"] != null and $_SESSION["disableRecord"] == 1) {
+		$disable = 'disabled';	
+	}
+	
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -62,6 +69,14 @@ include_once('logon_check.php');
 		}
 		if ($('#teamDivision').val().trim() == '') {
 			displayError("<strong>Validation Error:</strong> Team Divison is required.");
+			return false;
+		}
+		if ($('#teamState').val().trim() == '') {
+			displayError("<strong>Validation Error:</strong> Team State is required.");
+			return false;
+		}
+		if ($('#teamRegion').val().trim() == '') {
+			displayError("<strong>Validation Error:</strong> Team Region is required.");
 			return false;
 		}
 		return true;
@@ -96,38 +111,72 @@ include_once('logon_check.php');
 	 <hr>
 	<table width="100%" class="borderless">
 	<tr>
-	<td width="20%"><label for="eventName">Team Name:<span class="red">*</span></label></td>
+	<td width="20%"><label for="teamName">Team Name:<span class="red">*</span></label></td>
 	<td width="30%">
-	<input type="text" size="40" class="form-control" name="teamName" id="teamName" value="<?php echo $_SESSION["teamName"];?>">
+	<input type="text" size="40" class="form-control" name="teamName" id="teamName" <?php echo $disable; ?> value="<?php echo $_SESSION["teamName"];?>">
 	</td>
-	<td width="20%"><label for="eventName">Team City: </label></td>
-	<td width="30%">
-	<input type="text" size="40" class="form-control" name="teamCity" id="teamCity" value="<?php echo $_SESSION["teamCity"];?>">
-	</td>
-	</tr>
-	<tr>
-	<td><label for="eventName">Team Phone Number: </label></td>
+	<td><label for="teamDivision">Division:<span class="red">*</span></label></td>
 	<td>
-	<input type="text" size="40" class="form-control" name="teamPhone" id="teamPhone" value="<?php echo $_SESSION["teamPhone"];?>">
-	</td>
-	<td><label for="eventName">Team Email Address: </label></td>
-	<td>
-	<input type="text" size="40" class="form-control" name="teamEmail" id="teamEmail" value="<?php echo $_SESSION["teamEmail"];?>">
-	</td>
-	</tr>
-	<tr>
-	<td><label for="eventName">Division:<span class="red">*</span></label></td>
-	<td>
-	<select class="form-control" name="teamDivision" id="teamDivision" >
+	<select class="form-control" name="teamDivision" id="teamDivision" <?php echo $disable; ?>>
 			<option value=""></option>
 			<option value="A" <?php if($_SESSION["teamDivision"] == 'A'){echo("selected");}?>>A</option>
 			<option value="B" <?php if($_SESSION["teamDivision"] == 'B'){echo("selected");}?>>B</option>
 			<option value="C" <?php if($_SESSION["teamDivision"] == 'C'){echo("selected");}?>>C</option>
 	</select>
 	</td>
-	<td></td>
-	<td></td>
 	</tr>
+	
+	<tr>
+	<td width="20%"><label for="teamState">Team State:<span class="red">*</span></label></td>
+	<td width="30%">
+	<select class="form-control" name="teamState" id="teamState" <?php echo $disable; ?>>
+			<option value=""></option>
+			<?php
+			if ($_SESSION["stateCodeList"] != null) {	
+				$results = $_SESSION["stateCodeList"];
+				foreach($results as $row) {	
+					echo '<option value="'.$row['REF_DATA_CODE'].'" '; if($_SESSION["teamState"] == $row['REF_DATA_CODE']){echo("selected");} echo '>'.$row['DISPLAY_TEXT'].'</option>';
+				}
+			}
+			?>
+	</select>
+	</td>
+	<td width="20%"><label for="teamCity">Team City: </label></td>
+	<td width="30%">
+	<input type="text" size="40" class="form-control" name="teamCity" id="teamCity" <?php echo $disable; ?> value="<?php echo $_SESSION["teamCity"];?>">
+	</td>
+	</tr>
+	
+	<tr>
+	<td width="20%"><label for="teamRegion">Team Region:<span class="red">*</span></label></td>
+	<td width="30%">
+	<select class="form-control" name="teamRegion" id="teamRegion" <?php echo $disable; ?>>
+			<option value=""></option>
+			<?php
+			if ($_SESSION["regionCodeList"] != null) {	
+				$results = $_SESSION["regionCodeList"];
+				foreach($results as $row) {	
+					echo '<option value="'.$row['REF_DATA_CODE'].'" '; if($_SESSION["teamRegion"] == $row['REF_DATA_CODE']){echo("selected");} echo '>'.$row['DISPLAY_TEXT'].'</option>';
+				}
+			}
+			?>
+	</select>
+	</td>
+	<td width="20%"></td>
+	<td width="30%"></td>
+	</tr>
+	
+	<tr>
+	<td><label for="teamPhone">Team Phone Number: </label></td>
+	<td>
+	<input type="text" size="40" class="form-control" name="teamPhone" id="teamPhone" <?php echo $disable; ?> value="<?php echo $_SESSION["teamPhone"];?>">
+	</td>
+	<td><label for="teamEmail">Team Email Address: </label></td>
+	<td>
+	<input type="text" size="40" class="form-control" name="teamEmail" id="teamEmail" <?php echo $disable; ?> value="<?php echo $_SESSION["teamEmail"];?>">
+	</td>
+	</tr>
+
 	
 	<tr>
 	<td><label>Team Description: </label></td>
@@ -135,15 +184,17 @@ include_once('logon_check.php');
 	</tr>
 	<tr>
 		<td colspan="4">
-			<textarea class="form-control"  name="teamDescription" id="teamDescription" spellcheck="true" rows="5" cols="100"><?php echo $_SESSION["teamDescription"];?></textarea>
+			<textarea class="form-control"  name="teamDescription" id="teamDescription" spellcheck="true" rows="5" cols="100" <?php echo $disable; ?>><?php echo $_SESSION["teamDescription"];?></textarea>
 		</td>
 	</tr>
 	</table>
 	
 	<hr>
 
-     <button type="submit" class="btn btn-xs btn-danger" name="saveTeam" onclick="return validate();" value="<?php echo $_SESSION["teamId"];?>">Save</button>
- 	 <button type="submit" class="btn btn-xs btn-primary" name="cancelTeam" value="0">Cancel</button>
+	<?php if ($disable != 'disabled') { ?>
+    	<button type="submit" class="btn btn-xs btn-danger" name="saveTeam" onclick="return validate();" value="<?php echo $_SESSION["teamId"];?>">Save</button>
+    <?php } ?>
+ 	<button type="submit" class="btn btn-xs btn-primary" name="cancelTeam" value="0">Cancel</button>
 
 
       <hr>

@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.1, 05.08.2016 
+ * @version: 1.16.2, 09.05.2016 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -36,6 +36,7 @@
     echo '<link rel="icon" type="image/png" href="img/favicon.png" />';
     echo '<link href="css/tablesorter.css" rel="stylesheet">';
     echo '<link href="css/popBox1.3.0.css" rel="stylesheet" type="text/css" />';
+    echo '<link href="css/scorecenter.css" rel="stylesheet">';
 
 
     echo '<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->';

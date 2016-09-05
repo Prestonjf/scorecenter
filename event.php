@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.1, 05.08.2016 
+ * @version: 1.16.2, 09.05.2016 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -65,7 +65,9 @@ session_start();
 	
 	function clearFilterCriteria() {
 		document.getElementById('eventName').value = '';
-		document.getElementById('eventsNumber').value = '';
+		document.getElementById('filterMyEvents1').checked = true;
+		document.getElementById('filterMyEvents2').checked = false;
+		document.getElementById('filterMyEvents3').checked = false;
 	}
   
   </script>
@@ -96,19 +98,21 @@ session_start();
 	 <hr>
 	<table width="90%" class="borderless">
 	<tr>
-	<td width="15"><label for="eventName">Event Name: </label></td>
-	<td width="35">
+	<td width="15%"><label for="eventName">Event Name: </label></td>
+	<td width="35%">
 	<input type="text" size="20" class="form-control" name="eventName" id="eventName" value=<?php echo '"'.$_SESSION["eventFilterName"].'"' ?>>
 	</td>
 	
-	<td width="15"></td>
-	<td width="35">
+	<td width="15%"><label for="filterMyEvents">Event Filter: </label></td>
+	<td width="35%">
+	<input type="radio"  name="filterMyEvents" id="filterMyEvents1" value="OFFICIAL" <?php if($_SESSION["filterMyEvents"] == 'OFFICIAL'){echo("checked");}?>> <label class='radio1' for="filterMyEvents1">Official Events</label>&nbsp;&nbsp;
+	<input type="radio" name="filterMyEvents" id="filterMyEvents2" value="MY" <?php if($_SESSION["filterMyEvents"] == 'MY'){echo("checked");}?>> <label class='radio1' for="filterMyEvents2">My Events</label>&nbsp;&nbsp;
+	<input type="radio"  name="filterMyEvents" id="filterMyEvents3" value="ALL" <?php if($_SESSION["filterMyEvents"] == 'ALL'){echo("checked");}?>> <label class='radio1' for="filterMyEvents3">All Events</label>&nbsp;&nbsp;
 	</td>
 	</tr>
 	<tr>
-	<td><label># of Results: </label></td><td>
-	<input type="number" class="form-control" size="10" onkeydown="limit(this);" onkeyup="limit(this);" name="eventsNumber" id="eventsNumber" min="0" 	max="999" step="1" value=<?php echo '"'.$_SESSION["eventFilterNumber"].'"' ?>>
-	</td>
+	<td></td>
+	<td></td>
 	<td></td>
 	<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchEvent">Search</button>
 		<button type="button" class="btn btn-xs btn-warning" name="clearSearchEvent" onclick="clearFilterCriteria()">Clear</button>
@@ -134,8 +138,13 @@ session_start();
       			paginationRow($index);
       			echo '<td>'; echo $event['1']; echo '</td>';
 				echo '<td>';
-				echo '<button type="submit" class="btn btn-xs btn-primary" name="editEvent" value="'.$event['0'].'">Edit Event</button> &nbsp;'; 				
-				echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteEvent" onclick="return confirmDelete(\'event\')" value='.$event['0'].'>Delete</button>&nbsp;';
+				if ($event[2] == 1) {
+					echo '<button type="submit" class="btn btn-xs btn-primary" name="editEvent" value="'.$event[0].'">Edit Event</button> &nbsp;'; 				
+					echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteEvent" onclick="return confirmDelete(\'event\')" value='.$event[0].'>Delete</button>&nbsp;';
+				}
+				else {
+					echo '<button type="submit" class="btn btn-xs btn-success" name="viewEvent" value="'.$event[0].'">View Event</button> &nbsp;'; 				
+				}
 				echo '</td>';	
 				echo '</tr>';	
     		}

@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.1, 05.08.2016 
+ * @version: 1.16.2, 09.05.2016 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -152,8 +152,18 @@
 			<td width="25%"><label for="userName">Phone Number: </label></td>
 			<td width="25%"><input type="text" size="40" class="form-control" name="userPhoneNumber" id="userPhoneNumber" onblur="validatePhoneNumber(this)"
 							placeholder="xxx-xxx-xxxx" value="<?php echo $_SESSION["userPhoneNumber"]; ?>"></td>
-			<td width="25%"></td>
-			<td width="25%"></td>
+			<td width="25%"><label for="state">State: </label></td>
+			<td width="25%"><select class="form-control" name="state" id="state" >
+			<option value=""></option>
+			<?php
+			if ($_SESSION["stateCodeList"] != null) {	
+				$results = $_SESSION["stateCodeList"];
+				foreach($results as $row) {	
+					echo '<option value="'.$row['REF_DATA_CODE'].'" '; if($_SESSION["state"] == $row['REF_DATA_CODE']){echo("selected");} echo '>'.$row['DISPLAY_TEXT'].'</option>';
+				}
+			}
+			?>
+		</select></td>
 		</tr>
 		<tr>
 			<td width="25%"><label for="password">Password:<?php if ($_SESSION["accountMode"] == 'create') { ?><span class="red">*</span><?php } ?></label></td>

@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.1, 05.08.2016 
+ * @version: 1.16.2, 09.05.2016  
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -46,14 +46,24 @@
   $(document).ready(function(){
 		// Load link tournament selects
     	loadLinkedTournaments();
-    <?php 
-		$x = 0;
-		if ($_SESSION["EXPORT_GENERATED_USERS_FLAG"] != null) $x = 1; 		
-	?>
-	var x = <?php echo $x; ?>;
-	if (x != null && x == 1) {
-		location.href = "controller.php?command=exportUserPasswords";
-	}
+	    <?php 
+			$x = 0;
+			if ($_SESSION["EXPORT_GENERATED_USERS_FLAG"] != null) $x = 1; 		
+		?>
+		var x = <?php echo $x; ?>;
+		if (x != null && x == 1) {
+			location.href = "controller.php?command=exportUserPasswords";
+		}
+		
+		$("input[name='filterMyEvents']").change(function() {
+			loadFilteredEvents();
+		});
+		$('#filterState').on('change',function() {
+			loadDivisonTeams();
+		});
+		$('#filterRegion').on('change',function() {
+			loadDivisonTeams();
+		});
 	});
 	
 	  function saveMessage(message) {
@@ -307,18 +317,35 @@
 		return "&numberEvents="+document.getElementById('numberEvents').value+"&numberTeams="+document.getElementById('numberTeams').value;
 	}
 	
+	function loadFilteredEvents() {
+		var option = $('input[name=filterMyEvents]:checked').val();
+		xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				document.getElementById('eventsSelectDiv').innerHTML = xmlhttp.responseText;
+			}
+		}	
+        xmlhttp.open("GET","controller.php?command=loadFilteredEvents&option="+option,true);
+        xmlhttp.send();
+		
+	}
+	
 	function loadDivisonTeams() {
 		var division = document.getElementById('tournamentDivision').value;
+		var filterState = document.getElementById('filterState').value;
+		var filterRegion = document.getElementById('filterRegion').value;
+		
 		xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {
 			if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && xmlhttp.responseText.indexOf("teamAdded") > -1) {
 				document.getElementById('teamsSelectDiv').innerHTML = xmlhttp.responseText;
 			}
 		}	
-        xmlhttp.open("GET","controller.php?command=loadDivisionTeams&division="+division,true);
+        xmlhttp.open("GET","controller.php?command=loadDivisionTeams&division="+division+"&filterState="+filterState+"&filterRegion="+filterRegion,true);
         xmlhttp.send();
 		
 	}
+	
 	
 	function loadLinkedTournaments() {
 		var division = document.getElementById('tournamentDivision').value;
@@ -380,7 +407,11 @@
     		$teams = null;
 			$verifiers = $mysqli->query("SELECT DISTINCT USER_ID, CONCAT(LAST_NAME,', ',FIRST_NAME,' (', USERNAME,')') AS USER
     									 FROM USER WHERE ROLE_CODE='VERIFIER' ORDER BY UPPER(LAST_NAME) ASC");
+    									 
     		$events = $mysqli->query("SELECT DISTINCT * FROM EVENT ORDER BY NAME ASC");
+    		if($_SESSION["filterMyEvents"] == 'OFFICIAL') $events = $mysqli->query("SELECT DISTINCT * FROM EVENT WHERE OFFICIAL_EVENT_FLAG=1 ORDER BY NAME ASC");
+    		else if($_SESSION["filterMyEvents"] == 'MY') $events = $mysqli->query("SELECT DISTINCT * FROM EVENT WHERE CREATED_BY=".getCurrentUserId()." ORDER BY NAME ASC");
+    		
     		if ($_SESSION["tournamentDivision"] == null or $_SESSION["tournamentDivision"] == '') $teams = $mysqli->query("SELECT DISTINCT * FROM TEAM ORDER BY NAME ASC");
     		else $teams = $mysqli->query("SELECT DISTINCT * FROM TEAM WHERE DIVISION = '".$_SESSION["tournamentDivision"]."' ORDER BY NAME ASC"); 
     		$supervisors = $mysqli->query("SELECT DISTINCT X.* FROM (
@@ -598,7 +629,7 @@
 	<span class="input-group-btn">
 	<button type="button" class="btn btn-xs btn-primary" onclick="addTournEvent()" name="addEvent">Add Event</button>
 	</span>
-	<div class="col-xs-4 col-md-4">
+	<div class="col-xs-4 col-md-4" id="eventsSelectDiv">
 		<select class="form-control" name="eventAdded" id="eventAdded">
 			<option value=""></option>
 			<?php
@@ -611,6 +642,9 @@
         	?>
 		</select>
 		</div>
+		<input type="radio"  name="filterMyEvents" id="filterMyEvents1" value="OFFICIAL" <?php if($_SESSION["filterMyEvents"] == 'OFFICIAL'){echo("checked");}?>>&nbsp;<label class='radio1' for="filterMyEvents1">Official Events</label>&nbsp;&nbsp;
+	<input type="radio" name="filterMyEvents" id="filterMyEvents2" value="MY" <?php if($_SESSION["filterMyEvents"] == 'MY'){echo("checked");}?>>&nbsp;<label class='radio1' for="filterMyEvents2">My Events</label>&nbsp;&nbsp;
+	<input type="radio"  name="filterMyEvents" id="filterMyEvents3" value="ALL" <?php if($_SESSION["filterMyEvents"] == 'ALL'){echo("checked");}?>>&nbsp;<label class='radio1' for="filterMyEvents3">All Events</label>&nbsp;&nbsp;<img src="img/question_blue.png" alt="check_green" height="10" width="10" data-toggle="tooltip" title="Events can be filtered by those marked as official, events you created, and all events.">
 		</div>
 	<?php if ($_SESSION["tournamentId"] != null AND $_SESSION["tournamentId"] != '') { 
 		//echo $_SESSION["insertuser"];
@@ -679,6 +713,36 @@
         	?>
 		</select>
 	</div>
+	
+		<label style="float: left; font-weight: normal;" for="filterState">Team State: <img src="img/question_blue.png" alt="check_green" height="10" width="10" data-toggle="tooltip" title="Teams associated with a state can be filtered."></label>
+		<div class="col-xs-2 col-md-2" id="teamsSelectStateDiv">
+		<select class="form-control" name="filterState" id="filterState">
+			<option value=""></option>
+			<?php
+			if ($_SESSION["stateCodeList"] != null) {	
+				$results = $_SESSION["stateCodeList"];
+				foreach($results as $row) {	
+					echo '<option value="'.$row['REF_DATA_CODE'].'" '; if($_SESSION["filterState"] == $row['REF_DATA_CODE']){echo("selected");} echo '>'.$row['DISPLAY_TEXT'].'</option>';
+				}
+			}
+			?>
+		</select>
+		</div>
+		
+		<label style="float: left; font-weight: normal;" for="filterRegion">Team Region: <img src="img/question_blue.png" alt="check_green" height="10" width="10" data-toggle="tooltip" title="Teams associated with a region can be filtered."></label>
+		<div class="col-xs-2 col-md-2" id="teamsSelectRegionDiv">
+		<select class="form-control" name="filterRegion" id="filterRegion">
+			<option value=""></option>
+			<?php
+			if ($_SESSION["regionCodeList"] != null) {	
+				$results = $_SESSION["regionCodeList"];
+				foreach($results as $row) {	
+					echo '<option value="'.$row['REF_DATA_CODE'].'" '; if($_SESSION["filterRegion"] == $row['REF_DATA_CODE']){echo("selected");} echo '>'.$row['DISPLAY_TEXT'].'</option>';
+				}
+			}
+			?>
+		</select>
+		</div>
 	</div>
 	<hr>
 	

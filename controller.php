@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.1, 05.08.2016 
+ * @version: 1.16.2, 09.05.2016
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -46,6 +46,8 @@ require_once('login.php');
 // Begin MAIN METHOD -------------------------->	
 if (isset($_POST['login'])) {		
 	if (login($mysqli)) {
+		// initialize Session Settings
+		init($mysqli);
 		loadDefaultSettings();
 		header("Location: index.php");
 		exit();
@@ -107,18 +109,6 @@ else if ($_GET['command'] != null and $_GET['command'] == 'updateResultPage') {
 }
 
 // All Commands Below Require An Active Session
-// Session Timeout 60 Minutes
-if ($_SESSION['sessionTimeout'] + ((60 * 12) * 60) < time()) {
-	session_destroy();
-	session_start();
-	if ($_GET['command'] != 'loadIndexLogin')
-		$_SESSION['errorSessionTimeout'] = '1';
-	header("Location: logon.php");	
-	exit();
-}
-else {
-	$_SESSION['sessionTimeout'] = time();
-}
 
 if ($_GET['command'] != null and ($_GET['command'] == 'loadIndex' or $_GET['command'] =='loadIndexLogin')) {
 	header("Location: index.php");	
@@ -173,9 +163,10 @@ else if (isset($_GET['addNewEvent'])) {
 	header("Location: event_detail.php");
 	exit();
 }
-else if (isset($_GET['editEvent'])) {
+else if (isset($_GET['editEvent']) or isset($_GET['viewEvent']) ) {
 	clearEvent();	
-	loadEvent($_GET['editEvent'], $mysqli);
+	if (isset($_GET['viewEvent'])) { loadEvent($_GET['viewEvent'], $mysqli); $_SESSION["disableRecord"] = 1; }
+	else { loadEvent($_GET['editEvent'], $mysqli); $_SESSION["disableRecord"] = 0; }
 	header("Location: event_detail.php");
 	exit();
 }
@@ -213,12 +204,15 @@ else if (isset($_GET['cancelUser'])) {
 }
 else if (isset($_GET['addNewTeam'])) {	
 	clearTeam();
+	loadStateList($mysqli);
 	header("Location: team_detail.php");
 	exit();
 }
-else if (isset($_GET['editTeam'])) {
-	clearTeam();	
-	loadTeam($_GET['editTeam'], $mysqli);
+else if (isset($_GET['editTeam']) || isset($_GET['viewTeam'])) {
+	clearTeam();
+	loadStateList($mysqli);
+	if (isset($_GET['viewTeam'])) { $_SESSION["disableRecord"] = 1;  loadTeam($_GET['viewTeam'], $mysqli);}
+	else { $_SESSION["disableRecord"] = 0; loadTeam($_GET['editTeam'], $mysqli); }	
 	header("Location: team_detail.php");
 	exit();
 }
@@ -273,7 +267,7 @@ else if (isset($_GET['searchTournament']) or ($_GET['command'] != null and $_GET
 }
 else if (isset($_GET['searchEvent']) or ($_GET['command'] != null and $_GET['command'] == 'loadAllEvents')) {
 	if (isset($_GET['searchEvent'])) {
-		$_SESSION["eventFilterNumber"] = $_GET['eventsNumber'];
+		$_SESSION["filterMyEvents"] = $_GET['filterMyEvents'];
 		$_SESSION["eventFilterName"] = $_GET['eventName'];
 	}
 	loadAllEvents($mysqli);
@@ -282,9 +276,11 @@ else if (isset($_GET['searchEvent']) or ($_GET['command'] != null and $_GET['com
 }
 else if (isset($_GET['searchTeam']) or ($_GET['command'] != null and $_GET['command'] == 'loadAllTeams')) {
 	if (isset($_GET['searchTeam'])) {
-		$_SESSION["teamFilterNumber"] = $_GET['teamNumber'];
-		$_SESSION["teamFilterName"] = $_GET['teamName'];
+		$_SESSION["teamFilterName"] = $_GET['teamFilterName'];
 		$_SESSION["filterDivision"] = $_GET['filterDivision'];
+		$_SESSION["filterState"] = $_GET['filterState'];
+		$_SESSION["filterRegion"] = $_GET['filterRegion'];
+		$_SESSION["filterMyTeams"] = $_GET['filterMyTeams'];
 	}
 	loadAllTeams($mysqli);
 	header("Location: team.php");
@@ -471,7 +467,11 @@ else if (isset($_GET['cancelTournament'])) {
 	exit();
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'loadDivisionTeams') {
-	loadDivisionTeams($_GET['division'], $mysqli);
+	loadDivisionTeams($_GET['division'],$_GET['filterState'],$_GET['filterRegion'], $mysqli);
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'loadFilteredEvents') {
+	loadFilteredEvents($_GET['option'], $mysqli);
 	exit();
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'loadLinkedTournaments') {
@@ -984,14 +984,34 @@ else {
 		}
 	}
 	
-	
-	
-	
-	function loadDivisionTeams($division, $mysqli) {
-		$query = "SELECT DISTINCT * FROM TEAM ";
-		if ($division != null and $division != '') $query .= " WHERE DIVISION = '".$division. "' ";
+	function loadFilteredEvents($option, $mysqli) {
+		$_SESSION["filterMyEvents"] = $option;
+		$query = "SELECT DISTINCT * FROM EVENT WHERE 1=1 ";
+		if ($option == 'OFFICIAL') $query .= " AND OFFICIAL_EVENT_FLAG=1 ";
+		else if ($option == 'MY') $query .= " AND CREATED_BY=".getCurrentUserId();
 		$query .= " ORDER BY NAME ASC ";
 		$results = $mysqli->query($query);
+		
+		echo '<select class="form-control" name="eventAdded" id="eventAdded">';
+		echo '<option value=""></option>';
+		if ($results) {
+        	while($eventRow = $results->fetch_array()) {
+            	echo '<option value="'.$eventRow['0'].'">'.$eventRow['1'].'</option>';		
+             }
+        }
+		echo '</select>';
+	}
+	
+	function loadDivisionTeams($division, $filterState, $filterRegion, $mysqli) {
+		$_SESSION["filterState"] = $filterState;
+		$_SESSION["filterRegion"] = $filterRegion;
+		$query = "SELECT DISTINCT * FROM TEAM WHERE 1=1 ";
+		if ($division != null and $division != '') $query .= " AND DIVISION = '".$division. "' ";
+		if ($filterState != null and $filterState != '') $query .= " AND STATE = '".$filterState. "' ";
+		if ($filterRegion != null and $filterRegion != '') $query .= " AND REGION = '".$filterRegion. "' ";
+		$query .= " ORDER BY NAME ASC ";
+		$results = $mysqli->query($query);
+		
 		echo '<select class="form-control" name="teamAdded" id="teamAdded">';
 		echo '<option value=""></option>';
 		if ($results) {
@@ -1158,6 +1178,15 @@ else {
  				
  				$date = strtotime($tournamentRow['4']);
  				$_SESSION["tournamentDate"] = date('m/d/Y', $date);
+ 				
+ 			// Set 'FILTER EVENTS' Filter to Default 
+			if ($_SESSION["filterMyEvents"] == null) {
+				if (getCurrentRole() == 'SUPERUSER') $_SESSION["filterMyEvents"] = 'OFFICIAL';
+				else $_SESSION["filterMyEvents"] = 'OFFICIAL';
+			}
+			if ($_SESSION["filterState"] === null) {
+				$_SESSION["filterState"] = getUserState();
+			}
  				
     		}
 	
@@ -1621,11 +1650,26 @@ else {
 
 	// MANAGE EVENTS SCREEN ---------------------------------------
 	function loadAllEvents($mysqli) {
+			// Set 'FILTER EVENTS' Filter to Default 
+			if ($_SESSION["filterMyEvents"] == null) {
+				if (getCurrentRole() == 'SUPERUSER') $_SESSION["filterMyEvents"] = 'OFFICIAL';
+				else $_SESSION["filterMyEvents"] = 'OFFICIAL';
+			}
+			
 			$eventList = array();
-			$query = "Select * from EVENT WHERE 1=1 ";
+			$query = "SELECT *, CASE WHEN CREATED_BY=".getCurrentUserId()." OR 'SUPERUSER'='".getCurrentRole()."' THEN 1 ELSE 0 END AS EDIT_ACCESS FROM EVENT WHERE 1=1 ";
+			
 			if ($_SESSION["eventFilterName"] != null) {
 				$query = $query . " AND NAME LIKE '".$_SESSION["eventFilterName"]."%' " ;
 			}
+			if ($_SESSION["filterMyEvents"] != null and $_SESSION["filterMyEvents"] == 'MY') {
+				$query = $query . " AND CREATED_BY = '".getCurrentUserId()."' " ;
+			}
+			else if ($_SESSION["filterMyEvents"] != null and $_SESSION["filterMyEvents"] == 'OFFICIAL') {
+				$query = $query . " AND OFFICIAL_EVENT_FLAG = 1 " ;
+			}
+			
+			
 			$query = $query . " ORDER BY NAME ASC ";
 			if ($_SESSION["eventFilterNumber"] != null) {
 				$query = $query . " LIMIT ".$_SESSION["eventFilterNumber"];
@@ -1633,11 +1677,11 @@ else {
 			
 			$result = $mysqli->query($query); 
  			if ($result) {
-				while($eventRow = $result->fetch_array()) {
+				while($eventRow = $result->fetch_array(MYSQLI_BOTH)) {
  					$eventRecord = array();	
-					array_push($eventRecord, $eventRow['0']);
-					array_push($eventRecord, $eventRow['1']);
- 				
+					array_push($eventRecord, $eventRow[0]);
+					array_push($eventRecord, $eventRow[1]);
+					array_push($eventRecord, $eventRow['EDIT_ACCESS']);
 					array_push($eventList, $eventRecord);
 				}
 			}
@@ -1650,22 +1694,27 @@ else {
 		$_SESSION["eventId"] = null;
 		$_SESSION["eventName"] = null;
 		$_SESSION["eventDescription"] = null;
+		$_SESSION["disableRecord"] = 0;
 	}
 
 
 	function loadEvent($id, $mysqli) {
 		$result = $mysqli->query("SELECT * FROM EVENT WHERE EVENT_ID = " .$id); 
  			if ($result) {
- 				$eventRow = $result->fetch_row();	
+ 				$eventRow = $result->fetch_array(MYSQLI_BOTH);	
  				$_SESSION["eventId"] = $eventRow['0'];
  				$_SESSION["eventName"] = $eventRow['1'];
  				$_SESSION["eventDescription"] = $eventRow['2'];
- 				$_SESSION["scoreSystemCode"] = $eventRow['3'];			
+ 				$_SESSION["scoreSystemCode"] = $eventRow['3'];
+ 				$_SESSION["officialEventFlag"] = $eventRow['OFFICIAL_EVENT_FLAG'];
+ 							
     		}
 	}
 
 
 	function saveEvent($mysqli) {
+		if ($_SESSION["officialEventFlag"] == null) $_SESSION["officialEventFlag"] = 0;
+		
 		// if Event id is null create new
 		if ($_SESSION["eventId"] == null) { 
 			$result = $mysqli->query("select max(EVENT_ID) + 1 from EVENT");
@@ -1674,17 +1723,17 @@ else {
 			if ($row != null and $row['0'] != null) $id = $row['0'];  
 			$_SESSION["eventId"] = $id;
 			
-			$query = $mysqli->prepare("INSERT INTO EVENT (EVENT_ID, NAME, COMMENTS, SCORE_SYSTEM_CODE) VALUES (".$id.", ?, ?,?) ");
+			$query = $mysqli->prepare("INSERT INTO EVENT (EVENT_ID, NAME, COMMENTS, SCORE_SYSTEM_CODE, CREATED_BY,OFFICIAL_EVENT_FLAG) VALUES (".$id.", ?, ?,?, ?,?) ");
 			
-			$query->bind_param('sss',$_GET["eventName"], $_GET["eventDescription"], $_GET["scoreSystemCode"]);
+			$query->bind_param('sssii',$_GET["eventName"], $_GET["eventDescription"], $_GET["scoreSystemCode"], getCurrentUserId(), $_GET["officialEventFlag"]);
 			
 			$query->execute();
 			$query->free_result();
 		}
 		else {
-			$query = $mysqli->prepare("UPDATE EVENT SET NAME=?, COMMENTS=?, SCORE_SYSTEM_CODE=? WHERE EVENT_ID=".$_SESSION["eventId"]);
+			$query = $mysqli->prepare("UPDATE EVENT SET NAME=?, COMMENTS=?, SCORE_SYSTEM_CODE=?, OFFICIAL_EVENT_FLAG=?  WHERE EVENT_ID=".$_SESSION["eventId"]);
 			
-			$query->bind_param('sss',$_GET["eventName"], $_GET["eventDescription"], $_GET["scoreSystemCode"]);
+			$query->bind_param('sssi',$_GET["eventName"], $_GET["eventDescription"], $_GET["scoreSystemCode"], $_GET["officialEventFlag"]);
 			$query->execute();
 			$query->free_result();
 		}
@@ -1914,18 +1963,44 @@ else {
 		$_SESSION["teamPhone"] = null;
 		$_SESSION["teamEmail"] = null;
 		$_SESSION["teamDivision"] = null;
+		$_SESSION["teamState"] = null;
+		$_SESSION["teamRegion"] = null;
 		$_SESSION["teamDescription"] = null;
+		$_SESSION["disableRecord"] = 0;
 	}
 	
 	function loadAllTeams($mysqli) {
+			// Set 'My Teams' & State Filter to Default 
+			if ($_SESSION["filterState"] === null) {
+				$_SESSION["filterState"] = getUserState();
+			}
+			if ($_SESSION["filterMyTeams"] === null) {
+				if (getCurrentRole() == 'SUPERUSER') $_SESSION["filterMyTeams"] = 'NO';
+				else $_SESSION["filterMyTeams"] = 'YES';
+			}
+			
 			$teamList = array();
-			$query = "Select * from TEAM WHERE 1=1 ";
+			$query = "SELECT T.*, RD.DISPLAY_TEXT as D1, RD1.DISPLAY_TEXT as D2, CASE WHEN T.CREATED_BY=".getCurrentUserId()." OR 'SUPERUSER'='".getCurrentRole()."' THEN 1 ELSE 0 END AS EDIT_ACCESS FROM TEAM T 
+			LEFT JOIN REF_DATA RD on RD.REF_DATA_CODE=T.STATE AND RD.DOMAIN_CODE='STATE' 
+			LEFT JOIN REF_DATA RD1 on RD1.REF_DATA_CODE=T.REGION AND RD1.DOMAIN_CODE='REGION'
+			WHERE 1=1  ";
+			
 			if ($_SESSION["teamFilterName"] != null) {
 				$query = $query . " AND NAME LIKE '".$_SESSION["teamFilterName"]."%' " ;
 			}
 			if ($_SESSION["filterDivision"] != null and $_SESSION["filterDivision"] != '') {
 				$query = $query . " AND DIVISION = '".$_SESSION["filterDivision"]."' " ;
 			}
+			if ($_SESSION["filterState"] != null and $_SESSION["filterState"] != '') {
+				$query = $query . " AND STATE = '".$_SESSION["filterState"]."' " ;
+			}
+			if ($_SESSION["filterRegion"] != null and $_SESSION["filterRegion"] != '') {
+				$query = $query . " AND REGION = '".$_SESSION["filterRegion"]."' " ;
+			}
+			if ($_SESSION["filterMyTeams"] != null and $_SESSION["filterMyTeams"] == 'YES') {
+				$query = $query . " AND CREATED_BY = '".getCurrentUserId()."' " ;
+			}
+			
 			$query = $query . " ORDER BY NAME ASC ";
 			if ($_SESSION["teamFilterNumber"] != null) {
 				$query = $query . " LIMIT ".$_SESSION["teamFilterNumber"];
@@ -1933,12 +2008,14 @@ else {
 			
 			$result = $mysqli->query($query); 
  			if ($result) {
-				while($teamRow = $result->fetch_array()) {
+				while($teamRow = $result->fetch_array(MYSQLI_BOTH)) {
  					$teamRecord = array();	
-					array_push($teamRecord, $teamRow['0']);
-					array_push($teamRecord, $teamRow['1']);
-					array_push($teamRecord, $teamRow['6']);
- 				
+					array_push($teamRecord, $teamRow[0]);
+					array_push($teamRecord, $teamRow[1]);
+					array_push($teamRecord, $teamRow[6]);
+					array_push($teamRecord, $teamRow['EDIT_ACCESS']);
+					array_push($teamRecord, $teamRow['D1']);
+					array_push($teamRecord, $teamRow['D2']);
 					array_push($teamList, $teamRecord);
 				}
 			}
@@ -1949,14 +2026,18 @@ else {
 	function loadTeam($id, $mysqli) {
 		$result = $mysqli->query("SELECT * FROM TEAM WHERE TEAM_ID = " .$id); 
  			if ($result) {
- 				$eventRow = $result->fetch_row();	
- 				$_SESSION["teamId"] = $eventRow['0'];
- 				$_SESSION["teamName"] = $eventRow['1'];
- 				$_SESSION["teamCity"] = $eventRow['2']; 
-				$_SESSION["teamPhone"] = $eventRow['4'];
-				$_SESSION["teamEmail"] = $eventRow['3'];
-				$_SESSION["teamDescription"] = $eventRow['5'];
-				$_SESSION["teamDivision"] = $eventRow['6'];			
+ 				$teamRow = $result->fetch_array(MYSQLI_BOTH);	
+ 				$_SESSION["teamId"] = $teamRow[0];
+ 				$_SESSION["teamName"] = $teamRow[1];
+ 				$_SESSION["teamCity"] = $teamRow[2]; 
+				$_SESSION["teamDivision"] = $teamRow[6];
+				$_SESSION["teamState"] = $teamRow['STATE'];
+				$_SESSION["teamRegion"] = $teamRow['REGION'];
+				if ($_SESSION["disableRecord"] != 1) {
+					$_SESSION["teamPhone"] = $teamRow[4];
+					$_SESSION["teamEmail"] = $teamRow[3];
+					$_SESSION["teamDescription"] = $teamRow[5];
+				}			
     		}
 	}
 	
@@ -1969,17 +2050,17 @@ else {
 			if ($row != null and $row['0'] != null) $id = $row['0'];  
 			$_SESSION["teamId"] = $id;
 			
-			$query = $mysqli->prepare("INSERT INTO TEAM (TEAM_ID, NAME, CITY, PHONE_NUMBER, EMAIL_ADDRESS, DESCRIPTION, DIVISION) VALUES (".$id.",?,?,?,?,?,?) ");
+			$query = $mysqli->prepare("INSERT INTO TEAM (TEAM_ID, NAME, CITY, PHONE_NUMBER, EMAIL_ADDRESS, DESCRIPTION, DIVISION, CREATED_BY, STATE, REGION) VALUES (".$id.",?,?,?,?,?,?,?,?,?) ");
 			
-			$query->bind_param('ssssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"], $_GET["teamDescription"], $_GET["teamDivision"]);
+			$query->bind_param('ssssssiss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"], $_GET["teamDescription"], $_GET["teamDivision"], getCurrentUserId(),$_GET["teamState"],$_GET["teamRegion"]);
 			
 			$query->execute();
 			$query->free_result();
 		}
 		else {
-			$query = $mysqli->prepare("UPDATE TEAM SET NAME=?, CITY=?, PHONE_NUMBER=?, EMAIL_ADDRESS=?, DESCRIPTION=?, DIVISION=? WHERE TEAM_ID=".$_SESSION["teamId"]);
+			$query = $mysqli->prepare("UPDATE TEAM SET NAME=?, CITY=?, PHONE_NUMBER=?, EMAIL_ADDRESS=?, DESCRIPTION=?, DIVISION=?, STATE=?, REGION=? WHERE TEAM_ID=".$_SESSION["teamId"]);
 			
-			$query->bind_param('ssssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"], $_GET["teamDescription"], $_GET["teamDivision"]);
+			$query->bind_param('ssssssss',$_GET["teamName"], $_GET["teamCity"],$_GET["teamPhone"],$_GET["teamEmail"], $_GET["teamDescription"], $_GET["teamDivision"],$_GET["teamState"],$_GET["teamRegion"]);
 			$query->execute();
 			$query->free_result();
 		}
@@ -3361,7 +3442,7 @@ else {
 		$query->execute();
 		$result = $query->get_result();
 		$count = $result->num_rows;
-		$account = $result->fetch_row();
+		$account = $result->fetch_array(MYSQLI_BOTH); //->fetch_row();-
 		$query->free_result();
 
 		
@@ -3377,6 +3458,7 @@ else {
 			$userSessionInfo->setLastName($account['5']);
 			$userSessionInfo->setRole($account['3']);
 			$userSessionInfo->setPhoneNumber($account['8']);
+			$userSessionInfo->setState($account['STATE_CODE']);
 			
 			$url = explode("/", $_SERVER[REQUEST_URI]);
 			$tmp = ''; 
@@ -3484,6 +3566,7 @@ else {
 		$_SESSION["firstName"] = '';
 		$_SESSION["lastName"] = '';
 		$_SESSION["vPassword"] = '';
+		$_SESSION["state"] = '';		
 	}
 	
 	function loadAccount() {
@@ -3493,6 +3576,7 @@ else {
 			$_SESSION["firstName"] = $userSessionInfo->getFirstName();
 			$_SESSION["lastName"] = $userSessionInfo->getLastName();
 			$_SESSION["userPhoneNumber"] = $userSessionInfo->getPhoneNumber();
+			$_SESSION["state"] = $userSessionInfo->getState();;
 		}
 	}
 	
@@ -3503,6 +3587,7 @@ else {
 		$lastName = $_POST['lastName'];
 		$regCode = $_POST['regCode'];
 		$phoneNumber = $_POST['userPhoneNumber'];
+		$stateCode = $_POST['state'];
 		
 		$_SESSION["userName"] = $userName;
 		$_SESSION["password"] = $password;
@@ -3510,6 +3595,7 @@ else {
 		$_SESSION["lastName"] = $lastName;
 		$_SESSION["vPassword"] = $password;
 		$_SESSION["userPhoneNumber"] = $phoneNumber;
+		$_SESSION["state"] = $stateCode;
 		
 		// Encrypt Password
 		$encryptedPassword = crypt($password);
@@ -3550,11 +3636,11 @@ else {
 			$id = 0;
 			if ($row != null and $row['0'] != null) $id = $row['0'];  
 			
-			$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER) 
-				VALUES (".$id.",?,?,?,?,?,?,?) ");
+			$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER, STATE_CODE) 
+				VALUES (".$id.",?,?,?,?,?,?,?,?) ");
 
 			$activeFlag = 1;	
-			$query->bind_param('sssssis',$userName, $encryptedPassword, $role,$firstName, $lastName, $activeFlag, $phoneNumber);		
+			$query->bind_param('sssssiss',$userName, $encryptedPassword, $role,$firstName, $lastName, $activeFlag, $phoneNumber,$stateCode);		
 			$query->execute();
 			$query->free_result();	
 			$_SESSION["accountCreationSuccess"] = "1";
@@ -3584,11 +3670,11 @@ else {
 				return false;
 			}
 			
-			$sql = "UPDATE USER SET USERNAME=?, PASSWORD=?, FIRST_NAME=?, LAST_NAME=?,PHONE_NUMBER=? WHERE USER_ID=? ";
-			if ($password == null or $password == '') $sql = "UPDATE USER SET USERNAME=?, FIRST_NAME=?, LAST_NAME=?,PHONE_NUMBER=? WHERE USER_ID=? ";
+			$sql = "UPDATE USER SET USERNAME=?, PASSWORD=?, FIRST_NAME=?, LAST_NAME=?,PHONE_NUMBER=?,STATE_CODE=? WHERE USER_ID=? ";
+			if ($password == null or $password == '') $sql = "UPDATE USER SET USERNAME=?, FIRST_NAME=?, LAST_NAME=?,PHONE_NUMBER=?,STATE_CODE=? WHERE USER_ID=? ";
 			$query = $mysqli->prepare($sql);
-			if ($password == null or $password == '') $query->bind_param('ssssi',$userName, $firstName,$lastName,$phoneNumber, $userId);		
-			else  $query->bind_param('sssssi',$userName, $encryptedPassword, $firstName,$lastName,$phoneNumber, $userId);		
+			if ($password == null or $password == '') $query->bind_param('sssssi',$userName, $firstName,$lastName,$phoneNumber,$stateCode, $userId);		
+			else  $query->bind_param('ssssssi',$userName, $encryptedPassword, $firstName,$lastName,$phoneNumber,$stateCode, $userId);		
 			$query->execute();
 			$query->free_result();	
 		
@@ -3598,12 +3684,50 @@ else {
 		return true;
 	}
 	
+	
+	// GENERAL FUNCTIONS AND UTILITIES ---------------------------------------
+	
+	function init($mysqli) {
+		loadStateList($mysqli);
+		loadRegionList($mysqli);
+	}
+	
 	function loadDefaultSettings() {
 		$_SESSION["primaryRowColor"] = "FFFFFF"; // Default Green. Primary Row D1ECD1
 		$_SESSION["primaryColumnColor"] = "FFFFFF"; // Default Gray. Primary Column D1D1D1
 		$_SESSION["secondaryRowColor"] = "FFFFFF"; // Default White. Secondary Row FFFFFF
 		$_SESSION["secondaryColumnColor"] = "FFFFFF"; // Default Green/Gray. Secondary Column CEDCCE
 	}
+	
+	function loadStateList($mysqli) {
+		if ($_SESSION["stateCodeList"] == null) {
+			// load state code list
+			$query = " SELECT REF_DATA_CODE, DISPLAY_TEXT FROM REF_DATA WHERE DOMAIN_CODE='STATE' ORDER BY SORT_ORDER ASC ";
+			$results = $mysqli->query($query); 
+			$result = array();
+			while ($row = $results->fetch_array(MYSQLI_BOTH)) {				
+				array_push($result, $row);
+			}
+			$_SESSION["stateCodeList"] = $result;
+		}
+	}
+	
+		function loadRegionList($mysqli) {
+		if ($_SESSION["regionCodeList"] == null) { 
+			// load state code list
+			$query = " SELECT REF_DATA_CODE, DISPLAY_TEXT FROM REF_DATA WHERE DOMAIN_CODE='REGION' ORDER BY SORT_ORDER ASC ";
+			$results = $mysqli->query($query); 
+			$result = array();
+			while ($row = $results->fetch_array(MYSQLI_BOTH)) {				
+				array_push($result, $row);
+			}
+			$_SESSION["regionCodeList"] = $result;
+		}
+	}
+	
+
+	
+	
 		
 		
 ?>

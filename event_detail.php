@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.1, 05.08.2016 
+ * @version: 1.16.2, 09.05.2016 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -40,6 +40,13 @@ include_once('logon_check.php');
 	// Security Level Check
 	include_once('role_check.php');
 	checkUserRole(2);
+	
+	// Edit or Readonly
+	$disable = '';
+	if ($_SESSION["disableRecord"] != null and $_SESSION["disableRecord"] == 1) {
+		$disable = 'disabled';	
+	}
+	
 
 ?>
 <!DOCTYPE html>
@@ -112,17 +119,22 @@ include_once('logon_check.php');
 	<tr>
 	<td width="40%"><label for="eventName">Event Name:<span class="red">*</span></label></td>
 	<td width="60%">
-	<input type="text" size="40" class="form-control" name="eventName" id="eventName" value="<?php echo $_SESSION["eventName"];?>">
+	<input type="text" size="40" class="form-control" name="eventName" id="eventName" <?php echo $disable; ?> value="<?php echo $_SESSION["eventName"];?>">
+	</td>
+	</tr>
+	<tr>
+	<td width="40%"><label for="officialEventFlag">Official Event: </label></td>
+	<td width="60%"><input type="checkbox" id="officialEventFlag" name="officialEventFlag" <?php if ($_SESSION["officialEventFlag"] == 1) echo 'checked'; ?> value="1" <?php if (getCurrentRole() != 'SUPERUSER') echo 'disabled'; ?>> 
 	</td>
 	</tr>
 	<tr>
 	<td><label for="eventName">Winning Scoring System (For Auto Calculation):<span class="red">*</span></label></td>
 	<td>
-	<input type="radio" name="scoreSystemCode" id="scoreSystemCode1" value="HIGHRAW" <?php if ($_SESSION["scoreSystemCode"] =='HIGHRAW' or $_SESSION["scoreSystemCode"] == null) echo 'checked';?>> <label for="scoreSystemCode1">High Raw Score</label><br />
-	<input type="radio" name="scoreSystemCode" id="scoreSystemCode2" value="HIGHRAWTIER" <?php if ($_SESSION["scoreSystemCode"] =='HIGHRAWTIER') echo 'checked';?>> <label for="scoreSystemCode2">High Raw Score / Tier Ranked</label><br />
-	<input type="radio" name="scoreSystemCode" id="scoreSystemCode3" value="LOWRAW" <?php if ($_SESSION["scoreSystemCode"] =='LOWRAW') echo 'checked';?>> <label for="scoreSystemCode3">Low Raw Score</label><br />
-	<input type="radio" name="scoreSystemCode" id="scoreSystemCode4" value="LOWRAWTIER" <?php if ($_SESSION["scoreSystemCode"] =='LOWRAWTIER') echo 'checked';?>> <label for="scoreSystemCode4">Low Raw Score / Tier Ranked</label><br />
-	<input type="radio" name="scoreSystemCode" id="scoreSystemCode5" value="HIGHRAWTIER4LOW" <?php if ($_SESSION["scoreSystemCode"] =='HIGHRAWTIER4LOW') echo 'checked';?>> <label for="scoreSystemCode5">High Raw Score / Tier Ranked / 4th Tier Low</label><br />
+	<input type="radio" name="scoreSystemCode" id="scoreSystemCode1" value="HIGHRAW" <?php echo $disable; ?>  <?php if ($_SESSION["scoreSystemCode"] =='HIGHRAW' or $_SESSION["scoreSystemCode"] == null) echo 'checked';?>> <label for="scoreSystemCode1">High Raw Score</label><br />
+	<input type="radio" name="scoreSystemCode" id="scoreSystemCode2" value="HIGHRAWTIER" <?php echo $disable; ?>  <?php if ($_SESSION["scoreSystemCode"] =='HIGHRAWTIER') echo 'checked';?>> <label for="scoreSystemCode2">High Raw Score / Tier Ranked</label><br />
+	<input type="radio" name="scoreSystemCode" id="scoreSystemCode3" value="LOWRAW" <?php echo $disable; ?>  <?php if ($_SESSION["scoreSystemCode"] =='LOWRAW') echo 'checked';?>> <label for="scoreSystemCode3">Low Raw Score</label><br />
+	<input type="radio" name="scoreSystemCode" id="scoreSystemCode4" value="LOWRAWTIER" <?php echo $disable; ?>  <?php if ($_SESSION["scoreSystemCode"] =='LOWRAWTIER') echo 'checked';?>> <label for="scoreSystemCode4">Low Raw Score / Tier Ranked</label><br />
+	<input type="radio" name="scoreSystemCode" id="scoreSystemCode5" value="HIGHRAWTIER4LOW" <?php echo $disable; ?>  <?php if ($_SESSION["scoreSystemCode"] =='HIGHRAWTIER4LOW') echo 'checked';?>> <label for="scoreSystemCode5">High Raw Score / Tier Ranked / 4th Tier Low</label><br />
 	</td>
 	</tr>
 	
@@ -132,16 +144,17 @@ include_once('logon_check.php');
 	</tr>
 	<tr>
 		<td colspan="2">
-			<textarea class="form-control"  name="eventDescription" id="eventDescription" spellcheck="true" rows="5" cols="100"><?php echo $_SESSION["eventDescription"];?></textarea>
+			<textarea class="form-control"  name="eventDescription" id="eventDescription" spellcheck="true" rows="5" cols="100" <?php echo $disable; ?>><?php echo $_SESSION["eventDescription"];?></textarea>
 		</td>
 	</tr>
 	</table>
 	
 	<hr>
-
-     <button type="submit" class="btn btn-xs btn-danger" name="saveEvent" onclick="return validate();" value="<?php echo $_SESSION["eventId"];?>">Save</button>
- 	 <button type="submit" class="btn btn-xs btn-primary" name="cancelEvent" value="0">Cancel</button>
-
+	
+	<?php if ($disable != 'disabled') { ?>
+		<button type="submit" class="btn btn-xs btn-danger" name="saveEvent" onclick="return validate();" value="<?php echo $_SESSION["eventId"];?>">Save</button>
+ 	<?php } ?>
+ 	<button type="submit" class="btn btn-xs btn-primary" name="cancelEvent" value="0">Cancel</button>
 
       <hr>
 	<?php include_once 'footer.php'; ?>
