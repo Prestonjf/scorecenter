@@ -478,7 +478,7 @@
 			value=<?php echo '"'.$_SESSION["numberTeams"].'"' ?>></td>
 	</tr>
 	<tr>
-		<td><label for="highestScore">Last/First Place Point (Primary):<span class="red">*</span></label></td>
+		<td><label for="highestScore">Max Points Per Event (Primary):<span class="red">*</span> <img src="img/question_blue.png" alt="question_blue" height="10" width="10" data-toggle="tooltip" title="If this is a low score wins tournament, this should be the points given to the last place team."></label></td>
 		<td><input type="text" class="form-control" name="highestScore" id="highestScore" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
 			value=<?php echo '"'.$_SESSION["highestScore"].'"' ?>></td>
 		<td><label for="highestScore">Total Points:<span class="red">*</span></label></td>
@@ -488,7 +488,7 @@
 			<label for="totalPointsWins1">High Score Wins</label></td>
 	</tr>
 	<tr>
-	<td><label for="highestScoreAlt">Last/First Place Point (Alternate):<span class="red">*</span></label></td>
+	<td><label for="highestScoreAlt">Max Points Per Event (Alternate):<span class="red">*</span> <img src="img/question_blue.png" alt="question_blue" height="10" width="10" data-toggle="tooltip" title="If this is a low score wins tournament, this should be the points given to the last place team."></label></td>
 	<td><input type="text" class="form-control" name="highestScoreAlt" id="highestScoreAlt" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);"
 		value=<?php echo '"'.$_SESSION["highestScoreAlt"].'"' ?>></td>
 	<td>
@@ -496,10 +496,10 @@
 	</td>
 	</tr>
 	<tr>
-	<td><label for="pointsForNP">Points For NP:<span class="red">*</span></label></td>
+	<td><label for="pointsForNP">Points For NP:<span class="red">*</span> <img src="img/question_blue.png" alt="question_blue" height="10" width="10" data-toggle="tooltip" title="If this is a low score wins tournament, No Participation teams will earn max points (as defined above) + x points where x is specified by this field."></label></td>
 	<td><input type="text" class="form-control" name="pointsForNP" id="pointsForNP" onkeydown="limitNumberNegatives(this);" onkeyup="limitNumberNegatives(this);"
 		value=<?php echo '"'.$_SESSION["pointsForNP"].'"' ?>></td>
-	<td><label for="pointsForDQ">Points For DQ:<span class="red">*</span></label></td>
+	<td><label for="pointsForDQ">Points For DQ:<span class="red">*</span> <img src="img/question_blue.png" alt="question_blue" height="10" width="10" data-toggle="tooltip" title="If this is a low score wins tournament, Disqualified teams will earn max points (as defined above) + y points where y is specified by this field."></label></td>
 	<td><input type="text" class="form-control" name="pointsForDQ" id="pointsForDQ" onkeydown="limitNumberNegatives(this);" onkeyup="limitNumberNegatives(this);"
 		value=<?php echo '"'.$_SESSION["pointsForDQ"].'"' ?>></td>
 	<td>

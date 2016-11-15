@@ -24,6 +24,7 @@
     
 	
 // Validates that the user session information has been set and is valid
+// Also handles System Timeout
 
 $userSessionInfo = null;
 if($_SESSION["userSessionInfo"] == null){
@@ -56,9 +57,10 @@ else {
 	}
 }
 
-// Session Timeout 60 Minutes
-$minutes = 60;
-if ($_SESSION['sessionTimeout'] + ((60 * 12) * $minutes) < time()) {
+// Session Timeout 8 hours
+$hours = 8;
+$minutes = 60*$hours;
+if ($_SESSION['sessionTimeout'] + (60 * $minutes) < time()) {
 	session_destroy();
 	session_start();
 	if ($_GET['command'] != 'loadIndexLogin')

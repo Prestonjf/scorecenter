@@ -41,6 +41,8 @@ function limit(element) {
 	
 // Screen Alerts	
 function displayError(message) {
+	clearError();
+	clearSuccess();
 	document.getElementById('errors').style.display = "block";
 	document.getElementById('errors').innerHTML = message;
 	document.body.scrollTop = document.documentElement.scrollTop = 0;	
@@ -50,6 +52,8 @@ function clearError() {
 	document.getElementById('errors').innerHTML = "";
 }
 function displaySuccess(message) {
+	clearError();
+	clearSuccess();
 	document.getElementById('messages').style.display = "block";
 	document.getElementById('messages').innerHTML = message;
 	document.body.scrollTop = document.documentElement.scrollTop = 0;

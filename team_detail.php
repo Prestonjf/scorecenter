@@ -81,6 +81,13 @@ include_once('logon_check.php');
 		}
 		return true;
 	}
+	
+	function validateDelete() {
+		if(confirm('Are you sure you wish to unlink this coach?')) {
+			return true;
+		}
+		return false;
+	}
 
   
   </script>
@@ -188,7 +195,46 @@ include_once('logon_check.php');
 		</td>
 	</tr>
 	</table>
-	
+
+      <hr>
+      
+      	<h2>Coaches</h2>
+        <table class="table table-hover" id="coachTable">
+        <thead>
+            <tr>
+                <th width="30%" data-field="name" data-align="right" data-sortable="true">Coach Name</th>
+                <th width="60%" data-field="name" data-align="right" data-sortable="true">Coach Email / Username</th>
+				<th width="10%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="coachTableBody">
+         <?php
+	        
+			$coachList = $_SESSION["coachList"];
+			$coachCount = 0;
+			if ($coachList) {
+				foreach ($coachList as $coach) {
+					echo '<tr>';
+      				echo '<td>'; echo $coach['3']; echo '</td>';
+					echo '<td>'; echo $coach['4']; echo '</td>';
+					echo '<td>';
+					if ($disable != 'disabled') {
+						echo '<button type="submit" class="btn btn-xs btn-danger" onclick="return validateDelete()" name="deleteCoach" value='.$coach[2].'>Delete</button>';
+					}
+					echo '</td>';
+					echo '</tr>';
+					
+					$coachCount++;
+				}
+			}        
+        ?>  
+        </tbody>
+        </table>
+	<?php if ($disable != 'disabled') { ?>
+	<div class="input-group">
+			<button type="submit" class="btn btn-xs btn-primary" name="addCoach">Add Coach</button>
+	</div>
+	<?php } ?>
 	<hr>
 
 	<?php if ($disable != 'disabled') { ?>
@@ -196,7 +242,7 @@ include_once('logon_check.php');
     <?php } ?>
  	<button type="submit" class="btn btn-xs btn-primary" name="cancelTeam" value="0">Cancel</button>
 
-
+      
       <hr>
 	<?php include_once 'footer.php'; ?>
 
@@ -212,7 +258,10 @@ include_once('logon_check.php');
     <?php 
     	if ($_SESSION['saveTeamError'] != null and $_SESSION['saveTeamError'] == '1') { ?>
     	<script type="text/javascript">displayError("<strong>Cannot Add Team:</strong> Team has already been added.");</script>
-   	<?php $_SESSION['saveTeamError'] = null; } ?>
+   	<?php $_SESSION['saveTeamError'] = null; } 
+   	 if ($_SESSION['duplicateCoachError'] != null and $_SESSION['duplicateCoachError'] == '1') { ?>
+    	<script type="text/javascript">displayError("<strong>Cannot Add Coach:</strong> Coach has already been added.");</script>
+   	<?php $_SESSION['duplicateCoachError'] = null; } ?>
     
   </body>
 </html>

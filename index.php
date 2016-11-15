@@ -145,9 +145,7 @@ require_once('login.php');
         </tbody>
     	</table>
     	
-    	<?php } else {   	 
- 	
-    	?>
+    	<?php } else if (getCurrentRole() ==='SUPERVISOR') {   	 ?>
 		<h2>My Events</h2>
 		
 		<table width="90%" class="borderless">
@@ -172,7 +170,7 @@ require_once('login.php');
 					WHERE TE.USER_ID = ".$userSessionInfo->getUserId() . " ORDER BY NAME ASC ";
 					$result1 = $mysqli->query($query);	
 			    if ($result1) {				 
-             		while($tournamentRow = $result->fetch_array()) {
+             		while($tournamentRow = $result1->fetch_array()) {
              			echo '<option '; if ($_SESSION["userTournament"] == $tournamentRow['0']) echo ' selected ';
 						echo ' value="'.$tournamentRow['0'].'">'.$tournamentRow['1'].'</option>';		
              		}
@@ -264,12 +262,111 @@ require_once('login.php');
           </table>
 		
 		
+		<?php } else if (getCurrentRole() ==='COACH') { ?>
+		<h2>My Tournaments</h2>
+		
+		<table width="90%" class="borderless">
+		<tr>
+			<td width="15%"><label for="fromDate">Tournament Date: </label></td>
+			<td width="35%">
+			<div class="controls"><div class="input-group">
+			<input type="text" size="20" class="date-picker form-control" readonly="true" name="userEventDate" id="userEventDate" value=<?php echo '"'.$_SESSION["userEventDate"].'"' ?>>
+			<label for="userEventDate" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
+			</div></div></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td width="15%"><label for="fromDate">Tournament: </label></td>
+			<td width="35%">
+			<select class="form-control" name="userTournament" id="userTournament">
+			<option value=""></option>
+			<?php
+				$query = "SELECT DISTINCT T.TOURNAMENT_ID, T.NAME
+					FROM TOURNAMENT T
+					INNER JOIN TOURNAMENT_TEAM TT on TT.TOURNAMENT_ID=T.TOURNAMENT_ID	
+					INNER JOIN TEAM_COACH TC ON TC.TEAM_ID=TT.TEAM_ID							
+					WHERE TC.USER_ID = ".$userSessionInfo->getUserId() . " ORDER BY NAME ASC ";
+					$result1 = $mysqli->query($query);	
+			    if ($result1) {				 
+             		while($tournamentRow = $result1->fetch_array()) {
+             			echo '<option '; if ($_SESSION["userTournament"] == $tournamentRow['0']) echo ' selected ';
+						echo ' value="'.$tournamentRow['0'].'">'.$tournamentRow['1'].'</option>';		
+             		}
+             	}
+        	?>
+		</select>
+		</td>
+			<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchUserEvent">Search</button>
+			<button type="button" class="btn btn-xs btn-warning" name="clearSearchUserEvents" onclick="clearDates()">Clear</button></td>
+		</tr>
+		</table>
+	<script type="text/javascript">
+		$(".date-picker").datepicker({
+			changeMonth: true,
+			changeYear: true
+		});
+	</script>
+
+<hr>
+		
+		<table class="table table-hover">
+        <thead>
+            <tr>
+                <th data-field="name" data-align="right" data-sortable="true">Tournament Name</th>
+                <th data-field="division" data-align="center" data-sortable="true">Division</th>
+                <th data-field="location" data-sortable="true">Location</th>
+                <th data-field="date" data-sortable="true">Date</th>
+                <th data-field="actions" data-sortable="true">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+         <?php
+ 			
+			$query = "SELECT DISTINCT T.TOURNAMENT_ID, DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE1', T.NAME as tName, T.DIVISION, T.LOCATION
+					FROM TOURNAMENT_TEAM TT 
+					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TT.TOURNAMENT_ID 
+					INNER JOIN TEAM_COACH TC ON TC.TEAM_ID=TT.TEAM_ID								
+					WHERE TC.USER_ID = ".$userSessionInfo->getUserId();
+					
+					if ($_SESSION["userEventDate"] != null and $_SESSION["userEventDate"] != '') { 
+					 	$date1 = strtotime($_SESSION["userEventDate"]); 			
+ 						$date = date('Y-m-d', $date1 );
+						$query = $query . " AND T.DATE = '".$date."' ";
+					}
+					
+					if ($_SESSION["userTournament"] != null and $_SESSION["userTournament"] != '') {
+						$query = $query . " AND T.TOURNAMENT_ID = " . $_SESSION["userTournament"];
+					}
+					
+					$query = $query ." ORDER BY UPPER(T.NAME) ASC, T.DATE DESC "; 
+	
+         	$result = $mysqli->query($query);			
+ 			if ($result) {
+ 				if ($result->num_rows == 0) { echo '<tr><td colspan="9">No Tournaments Found</td></tr>';}
+      			while($row = $result->fetch_array()) {
+	      			echo '<tr>';
+	      			echo '<td>'; echo $row[2]; echo '</td>';
+					echo '<td>'; echo $row[3]; echo '</td>';
+					echo '<td>'; echo $row[4]; echo '</td>';
+					echo '<td>'; echo $row[1]; echo '</td>';
+	
+					echo '<td>';
+					echo '<button type="submit" class="btn btn-xs btn-primary" name="selfSchedule" value="'.$row['0'].'">Self Schedule</button> &nbsp;'; 				
+					echo '</td>';					
+					echo '</tr>';	
+      			}
+    		}
+        ?>
+          </tbody>
+          </table>
+		
+		
+		
 		<?php } ?>
 		</form>
 
 
         </div><!--/.col-xs-12.col-sm-9-->
-
         <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar">
           <div class="list-group">
             <a href="#" class="list-group-item active">Quick Links</a>
@@ -278,7 +375,7 @@ require_once('login.php');
 
           </div>
         </div><!--/.sidebar-offcanvas-->
-      </div><!--/row-->
+      </div><!--/row-->   
 
       <hr>
 

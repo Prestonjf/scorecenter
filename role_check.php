@@ -48,6 +48,7 @@ function checkUserRole($level) {
 		else if ('ADMIN' == $role) $userLevel = 1;
 		else if ('VERIFIER' == $role) $userLevel = 2;
 		else if ('SUPERVISOR' == $role) $userLevel = 3;
+		else if ('COACH' == $role) $userLevel = 4;
 	
 		if ($userLevel > $level) {
 			header("location: index.php");
@@ -77,6 +78,7 @@ function isUserAccess($level) {
 		else if ('ADMIN' == $role) $userLevel = 1;
 		else if ('VERIFIER' == $role) $userLevel = 2;
 		else if ('SUPERVISOR' == $role) $userLevel = 3;
+		else if ('COACH' == $role) $userLevel = 4;
 	
 		if ($userLevel > $level) {
 			return false;

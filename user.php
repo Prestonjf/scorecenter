@@ -38,7 +38,15 @@
 	
 	// Security Level Check
 	include_once('role_check.php');
-	checkUserRole(0);
+	checkUserRole(1);
+	
+	// Edit or Readonly
+	$disabled = '';
+	$disable = false;
+	if (($_SESSION["pageCommand"] != null and $_SESSION["pageCommand"] == 'selectCoach') || getCurrentRole() == 'ADMIN') {
+		$disabled = 'disabled';
+		$disable = true;	
+	}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -58,9 +66,12 @@
 	});
 	
 	function clearFilterCriteria() {
+		var command = '<?php echo $_SESSION["pageCommand"]; ?>';
+		
 		document.getElementById('userFirstName').value = '';
 		document.getElementById('userLastName').value = '';
-		document.getElementById('userRole').value = '';
+		if (command != 'selectCoach')
+			document.getElementById('userRole').value = '';
 		document.getElementById('userFilterNumber').value = '100';
 	}
   
@@ -102,12 +113,13 @@
 	<tr>
 	<td width="15"><label for="userRole">Role: </label></td>
 	<td width="35">
-			<select class="form-control" name="userRole" id="userRole">
+			<select class="form-control" name="userRole" id="userRole" <?php echo $disabled; ?>>
 			<option value="" <?php if ($_SESSION["userRole"] == null or $_SESSION["userRole"] == '') echo 'selected'; ?> ></option>
 			<option value="SUPERUSER" <?php if ($_SESSION["userRole"] == 'SUPERUSER') echo 'selected'; ?>>Super User</option>
 			<option value="ADMIN" <?php if ($_SESSION["userRole"] == 'ADMIN') echo 'selected'; ?> >Admin</option>
 			<option value="VERIFIER" <?php if ($_SESSION["userRole"] == 'VERIFIER') echo 'selected'; ?>>Verifier</option>
 			<option value="SUPERVISOR" <?php if ($_SESSION["userRole"] == 'SUPERVISOR') echo 'selected'; ?>>Supervisor</option>
+			<option value="COACH" <?php if ($_SESSION["userRole"] == 'COACH') echo 'selected'; ?>>Coach</option>
 			</select>
 	</td>
 	<td width="15"></td>
@@ -145,7 +157,11 @@
       			echo '<td>'; echo $user['3']; echo '</td>'; 
       			echo '<td>'; echo $user['4']; echo '</td>';
       			echo '<td>'; 
-				echo '<button type="submit" class="btn btn-xs btn-primary" name="editUser" value="'.$user['0'].'">Edit User</button> &nbsp;'; 				
+				if (!$disable) { echo '<button type="submit" class="btn btn-xs btn-primary" name="editUser" value="'.$user['0'].'">Edit User</button> &nbsp;'; }	
+				else {
+					$sValue = $user['0'].'-'.$user['2'].', '. $user['1'].'-'.$user['3'];
+					echo '<button type="submit" class="btn btn-xs btn-primary" name="selectUser" value="'.$sValue.'">Select User</button> &nbsp;';
+				}		
 				echo '</td>';	
 				echo '</tr>';	
     		}

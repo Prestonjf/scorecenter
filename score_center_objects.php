@@ -192,4 +192,211 @@ class slideshowSlide {
 	   
    }
 }
+
+// SELF SCHEDULE OBJECT
+class selfSchedule {
+	
+   private $tournamentId;
+   private $tournamentName;
+   private $tournamentDate;
+   private $tournamentDivision;
+   private $tournamentLocation;
+   private $tournamentScheduleId;
+   private $startTime;
+   private $endTime;
+   private $selfScheduleOpenFlag = false;
+   private $periodList;
+   private $eventList;
+   public $teamList = array();
+   public $currentPeriodId;
+  
+   
+   public function __construct() {
+	
+   }
+   
+   	public function setTournamentId($tournamentId) {
+		$this->tournamentId = $tournamentId;
+	}
+	public function getTournamentId() {
+		return $this->tournamentId;
+	}
+	
+		public function setTournamentName($tournamentName) {
+		$this->tournamentName = $tournamentName;
+	}
+	public function getTournamentName() {
+		return $this->tournamentName;
+	}
+	
+		public function setTournamentDate($tournamentDate) {
+		$this->tournamentDate = $tournamentDate;
+	}
+	public function getTournamentDate() {
+		return $this->tournamentDate;
+	}
+	
+		public function setTournamentDivision($tournamentDivision) {
+		$this->tournamentDivision = $tournamentDivision;
+	}
+	public function getTournamentDivision() {
+		return $this->tournamentDivision;
+	}
+	
+		public function setTournamentLocation($tournamentLocation) {
+		$this->tournamentLocation = $tournamentLocation;
+	}
+	public function getTournamentLocation() {
+		return $this->tournamentLocation;
+	}
+	
+		public function setTournamentScheduleId($tournamentScheduleId) {
+		$this->tournamentScheduleId = $tournamentScheduleId;
+	}
+	public function getTournamentScheduleId() {
+		return $this->tournamentScheduleId;
+	}
+	
+		public function setStartTime($startTime) {
+		$this->startTime = $startTime;
+	}
+	public function getStartTime() {
+		return $this->startTime;
+	}
+	
+		public function setEndTime($endTime) {
+		$this->endTime = $endTime;
+	}
+	public function getEndTime() {
+		return $this->endTime;
+	}
+	
+	public function setPeriodList($periodList) {
+		$this->periodList = $periodList;
+	}
+	public function getPeriodList() {
+		return $this->periodList;
+	}
+	
+		public function setSelfScheduleOpenFlag($selfScheduleOpenFlag) {
+		$this->selfScheduleOpenFlag = $selfScheduleOpenFlag;
+	}
+	public function getSelfScheduleOpenFlag() {
+		return $this->selfScheduleOpenFlag;
+	}
+	
+		public function setEventList($eventList) {
+		$this->eventList = $eventList;
+	}
+	public function getEventList() {
+		return $this->eventList;
+	}
+}
+
+// SELF SCHEDULE PERIOD OBJECT
+class selfSchedulePeriod {
+	private $schedulePeriodId;
+	private $startTime;
+	private $endTime;
+	private $periodInterval;
+	private $periodNumber;
+	
+	public function __construct() {
+	
+   	}
+	public function setSchedulePeriodId($schedulePeriodId) {
+		$this->schedulePeriodId = $schedulePeriodId;
+	}
+	public function getSchedulePeriodId() {
+		return $this->schedulePeriodId;
+	}
+	public function setStartTime($startTime) {
+		$this->startTime = $startTime;
+	}
+	public function getStartTime() {
+		return $this->startTime;
+	}
+	
+	public function setEndTime($endTime) {
+		$this->endTime = $endTime;
+	}
+	public function getEndTime() {
+		return $this->endTime;
+	}
+	
+	public function setPeriodInterval($periodInterval) {
+		$this->periodInterval = $periodInterval;
+	}
+	public function getPeriodInterval() {
+		return $this->periodInterval;
+	}
+	
+	public function setPeriodNumber($periodNumber) {
+		$this->periodNumber = $periodNumber;
+	}
+	public function getPeriodNumber() {
+		return $this->periodNumber;
+	}
+}
+
+// SELF SCHEDULE EVENT OBJECT
+class selfScheduleEvent {
+	public $tournEventId;
+	public $scheduleEventId;
+	public $eventName;
+	public $allDayFlag;
+	public $periodsList;
+	public $periodLength;
+	public $periodInterval;
+	public $teamLimit;
+	public $selfScheduleFlag;
+
+	
+	public function __construct() {
+	
+   }
+		
+	
+}
+
+// SELF SCHEDULE EVENT PERIOD OBJECT
+class selfScheduleEventPeriod {
+	public $scheduleEventPeriodId;
+	public $scheduleEventId;
+	public $schedulePeriodId;
+	public $allDayFlag;
+	public $periodStartTime;
+	public $periodEndTime;
+	public $periodInterval;
+	public $teamLimit;
+	public $slotsOpen = 0;
+	public $periodNumber;
+
+	
+	public function __construct() {
+	
+   }	
+}
+
+   // SELF SCHEDULE TEAM
+class selfScheduleTeam {
+	  public $teamId;
+	  public $tournTeamId;
+	  public $teamName;
+	  public $teamNumber;
+	  public $scheduleTeamId;
+	  public $teamLinkedToEventFlag = false;
+	  public $teamAvailableFlag = false;
+	  public $teamAvailableId = 0;
+	  public $teamSelectedFlag = false;
+	  public $linkedPeriodsList = array();
+	
+	public function __construct() {
+	
+   }  
+}
+
+
+
+
 ?>

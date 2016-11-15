@@ -27,6 +27,11 @@ session_start();
 include_once('score_center_objects.php');
 include_once('mail_functions.php');
 include_once('role_check.php');
+
+include_once('functions/constants.php');
+include_once('functions/self_schedule_functions.php');
+include_once('functions/global_functions.php');
+
 include_once('libs/score_center_global_settings.php');
 require_once('libs/PHPExcel.php');
 
@@ -48,7 +53,6 @@ if (isset($_POST['login'])) {
 	if (login($mysqli)) {
 		// initialize Session Settings
 		init($mysqli);
-		loadDefaultSettings();
 		header("Location: index.php");
 		exit();
 	} else {
@@ -70,6 +74,7 @@ else if ($_GET['command'] != null and $_GET['command'] == 'createAccount') {
 else if ($_GET['command'] != null and $_GET['command'] == 'createNewAccount') {
 	if (manageAccount($mysqli,'create')) {
 		login($mysqli);
+		init($mysqli);
 		header("Location: index.php");
 		exit();
 	}	
@@ -204,13 +209,13 @@ else if (isset($_GET['cancelUser'])) {
 }
 else if (isset($_GET['addNewTeam'])) {	
 	clearTeam();
-	loadStateList($mysqli);
+	//loadStateList($mysqli);
 	header("Location: team_detail.php");
 	exit();
 }
 else if (isset($_GET['editTeam']) || isset($_GET['viewTeam'])) {
 	clearTeam();
-	loadStateList($mysqli);
+	//loadStateList($mysqli);
 	if (isset($_GET['viewTeam'])) { $_SESSION["disableRecord"] = 1;  loadTeam($_GET['viewTeam'], $mysqli);}
 	else { $_SESSION["disableRecord"] = 0; loadTeam($_GET['editTeam'], $mysqli); }	
 	header("Location: team_detail.php");
@@ -236,6 +241,20 @@ else if (isset($_GET['saveTeam'])) {
 else if (isset($_GET['cancelTeam'])) {	
 	clearTeam();
 	header("Location: team.php");
+	exit();
+}
+else if (isset($_GET['addCoach'])) {
+	$_SESSION["pageCommand"] = 'selectCoach';
+	$_SESSION["userRole"] = 'COACH';
+	cacheTeam();
+	loadAllUsers($mysqli);
+	header("Location: user.php");
+	exit();
+}
+else if (isset($_GET['deleteCoach'])) {
+	cacheTeam();
+	deleteCoach($mysqli, $_GET['deleteCoach']);
+	header("Location: team_detail.php");
 	exit();
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'validateDeleteTeam') {
@@ -287,9 +306,11 @@ else if (isset($_GET['searchTeam']) or ($_GET['command'] != null and $_GET['comm
 	exit();	
 }
 else if (isset($_GET['searchUsers']) or ($_GET['command'] != null and $_GET['command'] == 'loadAllUsers')) {
+	if ($_GET['command'] != null and $_GET['command'] == 'loadAllUsers') { $_SESSION["pageCommand"] = ''; }
 	$_SESSION["userFirstName"] = $_GET['userFirstName'];
 	$_SESSION["userLastName"] = $_GET['userLastName'];
-	$_SESSION["userRole"] = $_GET['userRole'];
+	if ($_SESSION["pageCommand"] == null || $_SESSION["pageCommand"] == '')
+		$_SESSION["userRole"] = $_GET['userRole'];
 	$_SESSION["userFilterNumber"] = $_GET['userFilterNumber'];
 
 	loadAllUsers($mysqli);
@@ -301,6 +322,13 @@ else if (isset($_GET['editUser'])) {
 	loadUser($_GET['editUser'], $mysqli);
 	header("Location: user_detail.php");
 	exit();
+}
+else if (isset($_GET['selectUser'])) {
+	if ($_SESSION["pageCommand"] == 'selectCoach' AND $_GET["selectUser"] != null) {
+		addCoach();
+		header("Location: team_detail.php");
+		exit();
+	}
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'resetUserPassword') {
 	resetUserPassword($mysqli,$_GET['id']);
@@ -491,6 +519,99 @@ else if ($_GET['command'] != null and $_GET['command'] == 'addTeam') {
 else if ($_GET['command'] != null and $_GET['command'] == 'addVerifier') {
 	cacheTournamnent();
 	addVerifier($_GET['verifierAdded'], $mysqli);
+	exit();
+}
+
+// Self Schedule Commands
+else if (isset($_GET['selfSchedule'])) {
+	loadSelfSchedule($mysqli, $_GET['selfSchedule']);
+	header("Location: self_schedule.php");
+	exit();
+}
+else if (isset($_GET['cancelScheduleSettings'])) {
+	
+	// Add navigation controller
+	header("Location: tournament.php");
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'selfScheduleNavigation') {
+	if ($_GET['tab'] != null AND $_GET['tab'] == 'SETTINGS') $_SESSION["selfSchedulScreen"] = 'SETTINGS';
+	else if ($_GET['tab'] != null AND $_GET['tab'] == 'SCHEDULE') $_SESSION["selfSchedulScreen"] = 'SCHEDULE';
+	else if ($_GET['tab'] != null AND $_GET['tab'] == 'MYSCHEDULE') $_SESSION["selfSchedulScreen"] = 'MYSCHEDULE';
+	header("Location: self_schedule.php");
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'addPeriod') {
+	cacheSelfScheduleSettings();
+	addPeriod();
+	echo getPeriodsTable();
+	exit();	
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'deletePeriod') {
+	cacheSelfScheduleSettings();
+	deletePeriod($mysqli);
+	echo getPeriodsTable();
+	exit();	
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'addEventPeriod') {
+	cacheSelfScheduleSettings();
+	if (addEventPeriod()) echo getEventPeriodsTable();
+	exit();	
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'reloadEventPeriods') {
+	echo getEventPeriodsTable();
+	exit();	
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'deleteEventPeriod') {
+	cacheSelfScheduleSettings();
+	if (deleteEventPeriod($mysqli)) echo getEventPeriodsTable();	
+	exit();	
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'deleteAllEventPrds') {
+	cacheSelfScheduleSettings();
+	if (deleteAllEventPeriods($mysqli)) echo getEventPeriodsTable();	
+	exit();	
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'scheduleEventPeriod') {
+	if (loadScheduleEventPeriod($mysqli)) {
+		header("Location: self_schedule_period.php");
+		exit();
+	}
+	else {
+		header("Location: self_schedule.php");
+		exit();
+	}
+}
+
+
+else if (isset($_GET['saveScheduleSettings'])) {	
+	cacheSelfScheduleSettings();
+	saveSelfScheduleSettings($mysqli);
+	header("Location: self_schedule.php");
+	exit();
+}
+else if (isset($_GET['cancelSelfSchedulePeriod'])) {
+	$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+	loadSelfSchedule($mysqli, $selfSchedule->getTournamentId());
+	header("Location: self_schedule.php");
+	exit();	
+}
+else if (isset($_GET['saveSelfSchedulePeriod'])) {
+	header("Location: self_schedule_period.php");
+	exit();	
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'addTeamEventPeriod') {
+	if (addTeamEventPeriod($mysqli, $_GET['tournTeamId'], $_GET['scheduleEventPeriodId'])) echo getPeriodScheduler();
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'removeTeamEventPeriod') {
+	if (removeTeamEventPeriod($mysqli, $_GET['tournTeamId'], $_GET['scheduleEventPeriodId'], $_GET['scheduleTeamId'])) echo getPeriodScheduler();
+	exit();
+}
+else if  ($_GET['command'] != null and $_GET['command'] == 'selectScheduleTeam') {
+	selectScheduleTeam($_GET['tournTeamId']);
+	echo getMyTeams();
+	echo getScheduleOverview();
 	exit();
 }
 
@@ -725,6 +846,7 @@ else {
 
 	}
 	
+	
 	function exportUserPasswords() {
 		// Build spreadsheet to export
 		// filename for download
@@ -747,6 +869,60 @@ else {
 		fclose($output);
 		$_SESSION["EXPORT_GENERATED_USERS_FLAG"] = null;
 		$_SESSION["EXPORT_GENERATED_USERS"] = null;	
+	}
+	
+		function generateUser($mysqli, $role, $id) {			
+			// GENERATE USER NAME
+			$flag = True;
+			$username = '';
+			while ($flag) {
+				$n = rand(0, 9999999); 
+				$e = explode(" ", $role); 
+				$d = 'user'; 
+				$y = date("Y");
+				$username = strtolower($e[0].$y.$d.$n);
+					
+				$exists = $mysqli->query("SELECT 1 FROM USER WHERE USERNAME = ".$username); 
+				if ($exists) {
+					$userNameRow = $exists->fetch_row();
+					if ($userNameRow == null OR $userNameRow['0'] == null) $flag = False;
+				} else {
+					$flag = False;
+				}
+			}
+			
+			// GENERATE PASSWORD
+			$passowrd = $username . rand(0, 9);
+			$encryptPwd = crypt($passowrd);
+			$sql .= " INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER, AUTO_CREATED_FLAG) 
+			VALUES (".$id.",'".$username."','".$encryptPwd."','SUPERVISOR','".$event['1']."','Supervisor',1,'',1); ";
+						
+			$event['5'] = $id;
+			$eventList[$count] = $event;
+			$count++;			
+			$row = array();
+			array_push($row, $role); array_push($row,$username);  array_push($row,$passowrd);
+			
+
+			
+			// filename for download
+		  	$filename = $_SESSION["tournamentName"]." Supervisors " . $_SESSION["tournamentDivision"] . ".csv";
+		  	header("Content-Disposition: attachment; filename=\"$filename\"");
+		  	header("Content-Type: text/csv; charset=utf-8");
+		  		
+		  	$output = fopen('php://output', 'w');
+		
+			$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
+			$users = $_SESSION["EXPORT_GENERATED_USERS"];
+			$headings = array();
+			array_push($headings,"Event Name");
+			array_push($headings,"Username");
+			array_push($headings,"Password");
+			fputcsv($output, $headings);
+			foreach ($users as $row) {
+				fputcsv($output, $row);
+			}
+			fclose($output);
 	}
 	
 	function clearTournament() {
@@ -1298,7 +1474,7 @@ else {
 		if ($_SESSION["tournamentId"] == null) { 
 			$result = $mysqli->query("select max(TOURNAMENT_ID) + 1 from TOURNAMENT");
 			$row = $result->fetch_row(); 
-			$id = 0;
+			$id = 1;
 			if ($row != null and $row['0'] != null) $id = $row['0'];  
 			$_SESSION["tournamentId"] = $id;
 			$userId = getCurrentUserId();
@@ -2037,8 +2213,25 @@ else {
 					$_SESSION["teamPhone"] = $teamRow[4];
 					$_SESSION["teamEmail"] = $teamRow[3];
 					$_SESSION["teamDescription"] = $teamRow[5];
-				}			
+				}	
+				
+				$_SESSION["coachList"] = array();	
+				$result = $mysqli->query("select TC.TEAM_COACH_ID, U.USER_ID, U.FIRST_NAME, U.LAST_NAME,U.USERNAME FROM USER U INNER JOIN TEAM_COACH TC ON  TC.USER_ID=U.USER_ID WHERE TC.TEAM_ID=" .$id); 
+				if ($result) {
+					$coachList = array();
+ 					while ($row = $result->fetch_array(MYSQLI_BOTH)) {
+	 					$coach = array();
+	 					array_push($coach, $row['TEAM_COACH_ID']);
+	 					array_push($coach, $row['TEAM_ID']);
+	 					array_push($coach, $row['USER_ID']);
+	 					array_push($coach, $row['LAST_NAME'].', '.$row['FIRST_NAME']);
+	 					array_push($coach, $row['USERNAME']);
+	 					array_push($coachList, $coach);	
+ 					}	
+ 					$_SESSION["coachList"] = $coachList;
+ 				}
     		}
+    		
 	}
 	
 	function saveTeam($mysqli) {
@@ -2064,6 +2257,28 @@ else {
 			$query->execute();
 			$query->free_result();
 		}
+		
+		// Save Coaches
+		foreach ($_SESSION["coachList"] as $coach) {
+			if ($coach[0] == null || $coach[0] == '') { 
+				$result = $mysqli->query("select max(TEAM_COACH_ID) + 1 from TEAM_COACH");
+				$row = $result->fetch_row(); 
+				$id = 0;
+				if ($row != null and $row['0'] != null) $id = $row['0'];  
+	
+				$query = $mysqli->prepare("INSERT INTO TEAM_COACH (TEAM_COACH_ID, TEAM_ID, USER_ID) VALUES (".$id.",?,?) ");
+				$query->bind_param('ii',$_SESSION["teamId"], $coach[2]);
+				
+				$query->execute();
+				$query->free_result();			
+			}
+			else {
+				
+			}
+		}
+		
+		//  
+		
 		// save Confirmation
 		$_SESSION['savesuccessTeam'] = "1";	
 	}
@@ -2080,6 +2295,69 @@ else {
 		$_SESSION['deleteTeamSuccess'] = "1";
 		return true;
 	
+	}
+	
+	function addCoach($mysqli) {
+		// TEAM_COACH_ID, TEAM_ID, USER_ID, NAME, USER_EMAIL	
+		$coachList = $_SESSION["coachList"];
+		if (!$coachList) $coachList = array();
+		
+		// Add coach if they are not already added 
+		$values = explode('-', $_GET['selectUser']);
+		
+		// Validate Coach has not already been linked
+		$exits = false;
+		foreach ($coachList as $coach) {
+			if ($coach[2] == $values[0]) {
+				$exists = true;
+				$_SESSION['duplicateCoachError'] = 1;
+				break;
+			}
+		}
+		
+		if (!$exists) {
+			$coach = array();
+			array_push($coach, '');
+			array_push($coach, '');
+			array_push($coach, $values[0]);
+			array_push($coach, $values[1]);
+			array_push($coach, $values[2]);
+			
+			array_push($coachList, $coach);
+			$_SESSION["coachList"] = $coachList;
+		}		
+	}
+	
+	function deleteCoach($mysqli, $userId) {
+		$coachList = $_SESSION["coachList"];
+		$coachCount = 0;
+		if ($coachList) {
+			foreach ($coachList as $coach) {
+				if ($userId == $coach[2]) {
+					unset($coachList[$coachCount]);
+					$_SESSION["coachList"] = $coachList;
+					if ($coach[0] != null AND $coach[0] != '') {
+						$query = $mysqli->prepare("DELETE FROM TEAM_COACH WHERE TEAM_COACH_ID = ?");	
+						$query->bind_param('i',$coach[0]);	
+						$query->execute();						
+					}
+					
+					break;
+				}
+				$coachCount++;
+			}
+		}
+	}
+	
+	function cacheTeam() {
+ 		$_SESSION["teamName"] = $_GET["teamName"];
+ 		$_SESSION["teamCity"] = $_GET["teamCity"]; 
+		$_SESSION["teamDivision"] = $_GET["teamDivision"];
+		$_SESSION["teamState"] = $_GET["teamState"];
+		$_SESSION["teamRegion"] = $_GET["teamRegion"];
+		$_SESSION["teamPhone"] = $_GET["teamPhone"];
+		$_SESSION["teamEmail"] = $_GET["teamEmail"];
+		$_SESSION["teamDescription"] = $_GET["teamDescription"];		
 	}
 	
 	function isTeamCreated($mysqli) {
@@ -3685,9 +3963,663 @@ else {
 	}
 	
 	
+	// SELF SCHEDULE FUNCTIONS -----------------------------------------------
+	
+	function loadSelfSchedule($mysqli, $id) {
+		$selfSchedule = new SelfSchedule();
+		$selfSchedule->setTournamentId($id);
+		// Old Schedule (For Caching)
+		$oldSelfSchedule = unserialize($_SESSION["selfSchedule"]);
+		
+		// Load Basic Tournament Information
+		$query = " SELECT NAME, LOCATION, DIVISION, DATE_FORMAT(DATE,'%m/%d/%Y') 'DATE1' FROM TOURNAMENT WHERE TOURNAMENT_ID=".$selfSchedule->getTournamentId();
+		$results = $mysqli->query($query); 
+		while ($row = $results->fetch_array(MYSQLI_BOTH)) {				
+			$selfSchedule->setTournamentName($row['NAME']);
+			$selfSchedule->setTournamentLocation($row['LOCATION']);
+			$selfSchedule->setTournamentDivision($row['DIVISION']);
+			$selfSchedule->setTournamentDate($row['DATE1']);
+			break;
+		}
+		// Load Basic Schedule Information
+		$query = " SELECT TOURNAMENT_SCHEDULE_ID, OPEN_FLAG, DATE_FORMAT(START_TIME,'%H:%i') 'START_TIME', DATE_FORMAT(END_TIME,'%H:%i') 'END_TIME' FROM TOURNAMENT_SCHEDULE WHERE TOURNAMENT_ID=".$selfSchedule->getTournamentId();
+		$results = $mysqli->query($query);
+		if ($results) {
+			$row = $results->fetch_array(MYSQLI_BOTH);			
+			$selfSchedule->setTournamentScheduleId($row['TOURNAMENT_SCHEDULE_ID']);
+			$selfSchedule->setSelfScheduleOpenFlag($row['OPEN_FLAG']);
+			$selfSchedule->setStartTime($row['START_TIME']);
+			$selfSchedule->setEndTime($row['END_TIME']);
+		}
+		
+		
+		// Load Periods
+		if ($selfSchedule->getTournamentScheduleId() != null and $selfSchedule->getTournamentScheduleId() != '') {
+			$periods = array();
+			$query = " SELECT SCHEDULE_PERIOD_ID, DATE_FORMAT(START_TIME,'%h:%i %p') START_TIME1,DATE_FORMAT(END_TIME,'%h:%i %p') END_TIME, PERIOD_NUMBER, PERIOD_INTERVAL_COUNT FROM SCHEDULE_PERIOD WHERE TOURNAMENT_SCHEDULE_ID=".$selfSchedule->getTournamentScheduleId()." ORDER BY START_TIME ASC ";
+			$results = $mysqli->query($query); 
+			while ($row = $results->fetch_array(MYSQLI_BOTH)) {				
+				$period = new SelfSchedulePeriod();
+				$period->setSchedulePeriodId($row['SCHEDULE_PERIOD_ID']);
+				$period->setStartTime($row['START_TIME1']);
+				$period->setEndTime($row['END_TIME']);
+				$period->setPeriodNumber($row['PERIOD_NUMBER']);
+				$period->setPeriodInterval($row['PERIOD_INTERVAL_COUNT']);
+				array_push($periods, $period);
+			}
+			$selfSchedule->setPeriodList($periods);
+		}
+		
+		// Load Events Periods
+		$query = "SELECT TE.TOURN_EVENT_ID,E.NAME, SE.SCHEDULE_EVENT_ID, SE.ALL_DAY_FLAG, SE.ALLOW_SCHEDULE_FLAG, SE.PERIOD_LENGTH, SE.PERIOD_TEAM_LIMIT, SE.PERIOD_INTERVAL, 
+		SEP.SCHEDULE_EVENT_PERIOD_ID,SEP.PERIOD_TEAM_LIMIT AS P_LIMIT,DATE_FORMAT(SEP.PERIOD_START_TIME,'%h:%i %p') PERIOD_START_TIME, DATE_FORMAT(SEP.PERIOD_END_TIME,'%h:%i %p') PERIOD_END_TIME,SEP.PERIOD_INTERVAL AS P_INTERVAL, SEP.PERIOD_NUMBER, SEP.PERIOD_TEAM_LIMIT-count(ST.SCHEDULE_TEAM_ID) AS P_COUNT
+		FROM TOURNAMENT_EVENT TE
+		INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID
+		LEFT JOIN SCHEDULE_EVENT SE ON SE.TOURN_EVENT_ID=TE.TOURN_EVENT_ID
+		LEFT JOIN SCHEDULE_EVENT_PERIOD SEP ON SEP.SCHEDULE_EVENT_ID=SE.SCHEDULE_EVENT_ID
+		LEFT JOIN SCHEDULE_TEAM ST ON ST.SCHEDULE_EVENT_PERIOD_ID=SEP.SCHEDULE_EVENT_PERIOD_ID
+		WHERE TE.TOURNAMENT_ID=".$selfSchedule->getTournamentId()." GROUP BY TE.TOURN_EVENT_ID,SEP.SCHEDULE_EVENT_PERIOD_ID, SE.SCHEDULE_EVENT_ID ORDER BY UPPER(E.NAME) ASC, SEP.PERIOD_START_TIME ASC ";
+
+		$results = $mysqli->query($query); 
+		$events = array();
+		$tournEventId  = -1;
+		$event = new selfScheduleEvent();
+		$event->periodsList = array();
+		$count = 0;
+		while ($row = $results->fetch_array(MYSQLI_BOTH)) {	
+			if ($tournEventId != $row['TOURN_EVENT_ID'] and $count != 0) {
+				
+				array_push($events, $event);
+				$event = new selfScheduleEvent();
+				$event->periodsList = array();
+				$count = 0;
+			}
+			if ($count == 0) {
+				$event->tournEventId = $row['TOURN_EVENT_ID'];
+				$event->scheduleEventId = $row['SCHEDULE_EVENT_ID'];
+				$event->eventName = $row['NAME'];
+				$event->selfScheduleFlag = $row['ALLOW_SCHEDULE_FLAG'];
+				$event->allDayFlag = $row['ALL_DAY_FLAG'];
+				$event->periodLength = $row['PERIOD_LENGTH'];
+				$event->periodInterval = $row['PERIOD_INTERVAL'];
+				$event->teamLimit = $row['PERIOD_TEAM_LIMIT'];
+			}
+			$tournEventId = $row['TOURN_EVENT_ID'];
+			$period = new selfScheduleEventPeriod();
+			$period->scheduleEventPeriodId = $row['SCHEDULE_EVENT_PERIOD_ID'];
+			$period->scheduleEventId = $row['SCHEDULE_EVENT_ID'];
+			//$period->schedulePeriodId = $row['SCHEDULE_PERIOD_ID'];
+			$period->allDayFlag = $row['ALL_DAY_FLAG'];
+			$period->periodStartTime = $row['PERIOD_START_TIME'];
+			$period->periodEndTime = $row['PERIOD_END_TIME'];
+			$period->periodInterval = $row['P_INTERVAL'];
+			$period->teamLimit = $row['P_LIMIT'];
+			$period->slotsOpen = $row['P_COUNT'];
+			$period->periodNumber = $row['PERIOD_NUMBER'];
+			if ($period->scheduleEventPeriodId)
+				array_push($event->periodsList, $period);
+			$count++;
+		}
+		if ($count > 0) { array_push($events, $event); } //array_unshift($events, $event);
+		$selfSchedule->setEventList($events);
+		
+		// Determine which teams the logged in user can modify at this Tournament
+		$availableTeams = array();
+		$query = "SELECT TT.TOURN_TEAM_ID, T.TEAM_ID, T.NAME from TEAM_COACH TC
+		INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=TC.TEAM_ID
+		INNER JOIN TEAM T ON TC.TEAM_ID=T.TEAM_ID
+		WHERE TT.TOURNAMENT_ID=".$selfSchedule->getTournamentId()." AND TC.USER_ID=".getCurrentUserId();
+		$results = $mysqli->query($query); 
+		while ($row = $results->fetch_array(MYSQLI_BOTH)) {								
+			array_push($availableTeams, $row['TOURN_TEAM_ID']);
+		}
+		
+		// Load Teams at the Tournament
+		$teams = array();
+		$count = 0;
+		$query = " SELECT T.TEAM_ID, T.NAME, TT.TOURN_TEAM_ID, TT.TEAM_NUMBER, GROUP_CONCAT(TS.SCHEDULE_EVENT_PERIOD_ID, '') as PERIODS 
+		FROM TOURNAMENT_TEAM TT 
+		INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
+		LEFT JOIN SCHEDULE_TEAM TS ON TS.TOURN_TEAM_ID=TT.TOURN_TEAM_ID
+		WHERE TT.TOURNAMENT_ID=".$selfSchedule->getTournamentId()." 
+		GROUP BY TT.TOURN_TEAM_ID
+		ORDER BY CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC, T.NAME ASC ";
+		$results = $mysqli->query($query); 
+			while ($row = $results->fetch_array(MYSQLI_BOTH)) {				
+				$team = new selfScheduleTeam();
+				$team->teamId = $row['TEAM_ID'];
+				$team->teamName = $row['NAME'];
+				$team->teamNumber = $row['TEAM_NUMBER'];
+				$team->tournTeamId = $row['TOURN_TEAM_ID'];
+				$team->teamAvailableFlag = false;
+				
+				if ($row['TEAM_NUMBER'] != null) {
+					$team->linkedPeriodsList = explode(",",$row['PERIODS']);
+				}
+				if (in_array($team->tournTeamId, $availableTeams) || isUserAccess(1)) {
+					$team->teamAvailableFlag = true;
+					$team->teamAvailableId = $count;
+					$count++;
+				}
+				
+				
+				if ($oldSelfSchedule) {
+					foreach ($oldSelfSchedule->teamList as $oldTeam) {
+						if ($oldTeam->tournTeamId == $team->tournTeamId) {
+							if ($oldTeam->teamSelectedFlag) {
+								$team->teamSelectedFlag = true;
+							}
+							break;
+						}
+					}
+				}
+				
+				array_push($teams, $team);
+			}
+			$selfSchedule->teamList = $teams;
+		
+
+			
+		$_SESSION["selfSchedule"] = serialize($selfSchedule);
+		
+		// Determine what tab to default
+		$_SESSION["selfSchedulScreen"] = 'SCHEDULE';
+	}
+	
+	function addPeriod() {
+		$period = new selfSchedulePeriod();
+		$period->setPeriodInterval($_GET['periodInterval']);
+		$period->setPeriodNumber($_GET['periodNumber']);
+		
+		$startTime = DateTime::createFromFormat('H:i',$_GET['periodStartTime']); 
+		$period->setStartTime($startTime->format('h:i A'));
+		$endTime = DateTime::createFromFormat('H:i',$_GET['periodEndTime']); 
+		$period->setEndTime($endTime->format('h:i A'));
+		
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		// Periods cannot overlap and must be between start and end time
+		$list = $selfSchedule->getPeriodList();
+		if ($list == null) $list = array();
+		if (True) {
+			array_push($list, $period);
+		}
+		// Sort Period List
+		usort($list, "sortPeriodsListAsc");
+		$selfSchedule->setPeriodList($list);
+		$_SESSION["selfSchedule"] = serialize($selfSchedule);
+	}
+	
+	
+	function addEventPeriod() {
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		$success = true;
+		
+		// get event row
+		$event;
+		$count = 0;
+		$eventList = $selfSchedule->getEventList();
+		foreach ($eventList as $eventInfo) {
+			if ($_GET['eventRow'] == $count) {
+				$event = $eventInfo;
+				break;
+			}	
+			$count++;	
+		}
+			
+		if ($_GET['allDayEventFlag'] == '0') {		
+			$period = new selfScheduleEventPeriod();		
+			$period->periodNumber = $_GET['addPeriodNumber'];
+			$period->teamLimit = $_GET['addPeriodTeamLimit'];
+			$period->slotsOpen = $_GET['addPeriodTeamLimit'];
+			//get period info from periods
+			$periodInfo;
+			foreach ($selfSchedule->getPeriodList() as $periodRow) {
+				if ($period->periodNumber == $periodRow->getPeriodNumber()) {
+					$periodInfo = $periodRow;
+					break;
+				}
+			}
+			
+			$period->periodStartTime = $periodInfo->getStartTime();
+			$period->periodEndTime = $periodInfo->getEndTime();
+			$period->periodInterval = $periodInfo->getPeriodInterval();
+			
+			// add eventPeriod to event unless already exists
+			if ($event->periodsList == null) $event->periodsList = array();
+			else {
+				foreach($event->periodsList as $pItem) {
+					if ($pItem->periodStartTime == $period->periodStartTime) {
+						$success = false;
+						echo 'error1';
+						break;
+					}
+				}
+			}
+			if($success) {
+				array_push($event->periodsList, $period);	
+				usort($event->periodsList, "sortPeriodsAsc");
+				$eventList[$count] = $event;
+				$selfSchedule->setEventList($eventList);
+				$_SESSION["selfSchedule"] = serialize($selfSchedule);
+			}
+		}
+		else {
+			// generate periods
+			$length = $_GET['aPeriodLength'];
+			$interval = $_GET['aPeriodInterval'];
+			$limit = $_GET['aTeamLimit'];
+			$startTime = DateTime::createFromFormat('m/d/Y H:i', $selfSchedule->getTournamentDate().' '.$selfSchedule->getStartTime()); 
+			$endTime = DateTime::createFromFormat('m/d/Y H:i', $selfSchedule->getTournamentDate().' '.$selfSchedule->getEndTime()); 
+			$periodStartTime = DateTime::createFromFormat('m/d/Y H:i', $selfSchedule->getTournamentDate().' '.$selfSchedule->getStartTime()); 
+			$periodEndTime = DateTime::createFromFormat('m/d/Y H:i', $selfSchedule->getTournamentDate().' '.$selfSchedule->getStartTime()); 
+			$lenFMT = 'PT'.$length.'M';
+			$intervalFMT = 'PT'.$interval.'M';
+			
+			$periodEndTime->add(new DateInterval($lenFMT));
+			
+			$event->periodsList = array();
+			$count2 = 1;
+			while ($periodEndTime <= $endTime) {
+				$period = new selfScheduleEventPeriod();	
+				$period->periodStartTime = $periodStartTime->format('h:i A');
+				$period->periodEndTime = $periodEndTime->format('h:i A');
+				$period->periodInterval = $interval;
+				$period->teamLimit = $limit;
+				$period->slotsOpen = $limit;
+				$period->periodNumber = $count2;
+				$period->scheduleEventId = $event->scheduleEventId;
+				$period->allDayFlag = 1;
+				
+				$periodStartTime->add(new DateInterval($lenFMT)); 
+				$periodStartTime->add(new DateInterval($intervalFMT));
+				$periodEndTime->add(new DateInterval($intervalFMT));  $periodEndTime->add(new DateInterval($lenFMT)); 			
+				
+				array_push($event->periodsList, $period);	
+				$count2++;
+			}
+			
+			
+			$eventList[$count] = $event;
+			$selfSchedule->setEventList($eventList);
+			$_SESSION["selfSchedule"] = serialize($selfSchedule);
+		}
+		return $success;
+	}
+	
+	function sortPeriodsAsc($a, $b) {
+		$a = DateTime::createFromFormat('h:i A',$a->periodStartTime);
+		$b = DateTime::createFromFormat('h:i A',$b->periodStartTime);
+		if ($a < $b) return -1;
+		if ($a > $b) return 1;
+		return 0;
+	}
+	function sortPeriodsListAsc($a, $b) {
+		$a = DateTime::createFromFormat('h:i A',$a->getStartTime());
+		$b = DateTime::createFromFormat('h:i A',$b->getEndTime());
+		if ($a < $b) return -1;
+		if ($a > $b) return 1;
+		return 0;
+	}
+	
+	function deletePeriod($mysqli) {
+		$id = $_GET['schedulePeriodId'];
+		$rowNum = $_GET['periodRow'];
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		$list = $selfSchedule->getPeriodList();
+		unset($list[$rowNum]);
+		$list = array_values($list);
+		if ($id != null AND $id != '') {
+			$result = $mysqli->query("DELETE FROM SCHEDULE_PERIOD WHERE SCHEDULE_PERIOD_ID = " .$id);
+		}
+		
+		$selfSchedule->setPeriodList($list);
+		$_SESSION["selfSchedule"] = serialize($selfSchedule);
+	}
+	
+	function deleteEventPeriod($mysqli) {
+		$id = $_GET['scheduleEventPeriodId'];
+		$eventRow = $_GET['eventRow'];
+		$periodRow = $_GET['periodRow'];
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		
+		$result = $mysqli->query("SELECT * FROM SCHEDULE_TEAM WHERE SCHEDULE_EVENT_PERIOD_ID = " .$id);
+		if ($result->num_rows > 0) {
+			echo 'error1';
+			return false;
+		}
+		if ($id and $id != '') {
+			$result = $mysqli->query("DELETE FROM SCHEDULE_EVENT_PERIOD WHERE SCHEDULE_EVENT_PERIOD_ID = " .$id);
+		}
+		if ($selfSchedule->getEventList()) {
+			$count = 0;
+			foreach($selfSchedule->getEventList() as $event) {
+				if ($eventRow == $count) {
+					$list = $event->periodsList;
+					unset($list[$periodRow]);
+					$list = array_values($list);
+					$event->periodsList = $list;	
+					break;
+				}
+				$count++;
+			}
+		}
+		$_SESSION["selfSchedule"] = serialize($selfSchedule);
+		return true;
+	}
+	
+	function deleteAllEventPeriods($mysqli) {
+		$eventRow = $_GET['eventRowId'];		
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		$count = 0;
+		foreach ($selfSchedule->getEventList() as $event) {
+			if ($eventRow == $count) {
+				if ($event->scheduleEventId AND $event->scheduleEventId != '') {
+					$result = $mysqli->query("SELECT * FROM SCHEDULE_TEAM ST
+											INNER JOIN SCHEDULE_EVENT_PERIOD SEP ON SEP.SCHEDULE_EVENT_PERIOD_ID = ST.SCHEDULE_EVENT_PERIOD_ID
+											WHERE SEP.SCHEDULE_EVENT_ID = " .$event->scheduleEventId);
+					if ($result->num_rows > 0) {
+						echo 'error1';
+						return false;
+					}
+				}
+				
+				foreach ($event->periodsList as $period) {
+					if ($period->scheduleEventPeriodId AND $period->scheduleEventPeriodId != '') {
+						$result = $mysqli->query("DELETE FROM SCHEDULE_EVENT_PERIOD WHERE SCHEDULE_EVENT_PERIOD_ID = " .$period->scheduleEventPeriodId);
+					}	
+				}
+				$event->periodsList = array();			
+				break;
+			}
+			$count++;
+		}
+		$_SESSION["selfSchedule"] = serialize($selfSchedule);
+		return true;
+	}
+	
+	function cacheSelfScheduleSettings() {
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		$selfSchedule->setStartTime($_GET['tournamentStartTime']);
+		$selfSchedule->setEndTime($_GET['tournamentEndTime']);
+		$selfSchedule->setSelfScheduleOpenFlag($_GET['selfScheduleOpen']);
+		
+		// Event info (period already cached)
+		$count = 0;
+		foreach ($selfSchedule->getEventList() as $event) {
+			$event->allDayFlag = $_GET['allDayEventFlag'.$count];
+			$event->selfScheduleFlag = $_GET['selfScheduleFlag'.$count];
+			$event->periodLength = $_GET['periodLength'.$count];
+			$event->periodInterval = $_GET['periodInterval'.$count];
+			$event->teamLimit = $_GET['teamLimit'.$count];
+			$count++;
+		}
+		
+		
+		
+		$_SESSION["selfSchedule"] = serialize($selfSchedule);
+	}
+	
+	function saveSelfScheduleSettings($mysqli) {
+			$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+			
+			$startTime = DateTime::createFromFormat('m/d/Y H:i', $selfSchedule->getTournamentDate().' '.$selfSchedule->getStartTime()); 
+			$startTime1 = $startTime->format('Y-m-d H:i:s');
+			$endTime = DateTime::createFromFormat('m/d/Y H:i', $selfSchedule->getTournamentDate().' '.$selfSchedule->getEndTime()); 
+			$endTime1 = $endTime->format('Y-m-d H:i:s');
+			$tournamentId = $selfSchedule->getTournamentId();
+			$openFlag = $selfSchedule->getSelfScheduleOpenFlag();
+			
+			if ($selfSchedule->getTournamentScheduleId() == null or $selfSchedule->getTournamentScheduleId() == '') {			
+				$result = $mysqli->query("select max(TOURNAMENT_SCHEDULE_ID) + 1 from TOURNAMENT_SCHEDULE");
+				$row = $result->fetch_row(); 
+				$id = 1;
+				if ($row != null and $row['0'] != null) $id = $row['0'];  
+				
+				$query = $mysqli->prepare("INSERT INTO TOURNAMENT_SCHEDULE (TOURNAMENT_SCHEDULE_ID, TOURNAMENT_ID, START_TIME, END_TIME, OPEN_FLAG) VALUES (".$id.",?,?,?,?) ");
+					
+				$query->bind_param('issi',$tournamentId, $startTime1, $endTime1, $openFlag);		
+				$query->execute();
+				$query->free_result();	
+				$selfSchedule->setTournamentScheduleId($id);
+			}
+			else {
+				$query = $mysqli->prepare("UPDATE TOURNAMENT_SCHEDULE SET START_TIME=?, END_TIME=?, OPEN_FLAG=? WHERE TOURNAMENT_SCHEDULE_ID=".$selfSchedule->getTournamentScheduleId());	
+				$query->bind_param('ssi',$startTime1, $endTime1, $openFlag);	
+				$query->execute();
+				$query->free_result();				
+			}
+			
+			foreach ($selfSchedule->getPeriodList() as $period) {
+				$startTime = DateTime::createFromFormat('m/d/Y h:i A', $selfSchedule->getTournamentDate().' '.$period->getStartTime()); 
+				$startTime1 = $startTime->format('Y-m-d H:i:s');
+				$endTime = DateTime::createFromFormat('m/d/Y h:i A', $selfSchedule->getTournamentDate().' '.$period->getEndTime()); 
+				$endTime1 = $endTime->format('Y-m-d H:i:s');
+				
+				if ($period->getSchedulePeriodId() == null or $period->getSchedulePeriodId() == '') {
+					$result = $mysqli->query("select max(SCHEDULE_PERIOD_ID) + 1 from SCHEDULE_PERIOD");
+					$row = $result->fetch_row(); 
+					$id = 1;
+					if ($row != null and $row['0'] != null) $id = $row['0'];  
+					
+					$query = $mysqli->prepare("INSERT INTO SCHEDULE_PERIOD (SCHEDULE_PERIOD_ID, TOURNAMENT_SCHEDULE_ID, START_TIME, END_TIME, PERIOD_NUMBER, PERIOD_INTERVAL_COUNT) VALUES (".$id.",".$selfSchedule->getTournamentScheduleId().",?,?,".$period->getPeriodNumber().",".$period->getPeriodInterval().") ");
+						
+					$query->bind_param('ss', $startTime1, $endTime1);		
+					$query->execute();
+					$query->free_result();	
+					$period->setSchedulePeriodId($id);
+				}
+				else {
+
+				}
+			} 
+			
+			// save Event List
+			if ($selfSchedule->getEventList()) {
+				foreach ($selfSchedule->getEventList() as $event) {
+					$allDayFlag = 0; if ($event->allDayFlag) $allDayFlag = $event->allDayFlag;
+					$periodLength = 0; if ($event->periodLength) $periodLength = $event->periodLength;
+					$teamLimit = 0; if ($event->teamLimit) $teamLimit = $event->teamLimit;
+					$periodInterval = 0; if ($event->periodInterval) $periodInterval = $event->periodInterval;
+					$selfScheduleFlag = 0; if ($event->selfScheduleFlag) $selfScheduleFlag = $event->selfScheduleFlag;
+					
+					if ($event->scheduleEventId == null or $event->scheduleEventId == '') {
+						$result = $mysqli->query("select max(SCHEDULE_EVENT_ID) + 1 from SCHEDULE_EVENT");
+						$row = $result->fetch_row(); 
+						$id = 1;
+						if ($row != null and $row['0'] != null) $id = $row['0'];  
+						
+						$query = $mysqli->prepare("INSERT INTO SCHEDULE_EVENT (SCHEDULE_EVENT_ID, TOURNAMNET_SCHEDULE_ID, TOURN_EVENT_ID, ALL_DAY_FLAG, PERIOD_LENGTH, PERIOD_TEAM_LIMIT, PERIOD_INTERVAL, ALLOW_SCHEDULE_FLAG) VALUES (".$id.",".$selfSchedule->getTournamentScheduleId().",".$event->tournEventId.",?,?,?,?,? ) ");
+						
+						$query->bind_param('iiiii', $allDayFlag, $periodLength, $teamLimit, $periodInterval,$selfScheduleFlag);		
+						$query->execute();
+						$query->free_result();	
+						$event->scheduleEventId = $id;
+					}
+					else {
+						$query = $mysqli->prepare("UPDATE SCHEDULE_EVENT SET ALL_DAY_FLAG=?,PERIOD_LENGTH=?,PERIOD_TEAM_LIMIT=?,PERIOD_INTERVAL=?, ALLOW_SCHEDULE_FLAG=? WHERE SCHEDULE_EVENT_ID=".$event->scheduleEventId);
+							
+						$query->bind_param('iiiii', $allDayFlag, $periodLength, $teamLimit, $periodInterval,$selfScheduleFlag);			
+						$query->execute();
+						$query->free_result();	
+					}
+			
+					if ($event->periodsList) {
+						foreach ($event->periodsList as $period) {
+							$pTeamLimit = $period->teamLimit;
+							$pPeriodInterval = $period->periodInterval;
+							$pPeriodNumber = $period->periodNumber;
+							$pStartTime = DateTime::createFromFormat('m/d/Y h:i A', $selfSchedule->getTournamentDate().' '.$period->periodStartTime); 
+							$pStartTime = $pStartTime->format('Y-m-d H:i:s');
+							$pEndTime = DateTime::createFromFormat('m/d/Y h:i A', $selfSchedule->getTournamentDate().' '.$period->periodEndTime); 
+							$pEndTime = $pEndTime->format('Y-m-d H:i:s');
+							
+							if ($period->scheduleEventPeriodId == null or $period->scheduleEventPeriodId == '') {
+								// Save newly added Periods
+								$result = $mysqli->query("select max(SCHEDULE_EVENT_PERIOD_ID) + 1 from SCHEDULE_EVENT_PERIOD");
+								$row = $result->fetch_row(); 
+								$id = 1;
+								if ($row != null and $row['0'] != null) $id = $row['0'];  
+								
+								$query = $mysqli->prepare("INSERT INTO SCHEDULE_EVENT_PERIOD (SCHEDULE_EVENT_PERIOD_ID, SCHEDULE_EVENT_ID, PERIOD_TEAM_LIMIT, PERIOD_START_TIME, PERIOD_END_TIME, PERIOD_INTERVAL, PERIOD_NUMBER) VALUES (".$id.",".$event->scheduleEventId.",?,?,?,?,? ) ");
+								
+								$query->bind_param('issis', $pTeamLimit, $pStartTime, $pEndTime, $pPeriodInterval,$pPeriodNumber);		
+								$query->execute();
+								$query->free_result();	
+								$period->scheduleEventPeriodId = $id;
+								
+								
+							}
+							else {
+								
+							}
+						}						
+					}
+					else if ($event->allDayFlag == 1 and ($event->periodsList == null or sizeof($event->periodsList) < 1) ) {
+					
+				
+					}
+				}
+			}
+			
+			
+			$_SESSION["selfSchedule"] = serialize($selfSchedule);
+			$_SESSION["selfScheduleSaveSuccess"] = "1";
+	}
+	
+	function selectScheduleTeam($tournTeamId) {
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		foreach($selfSchedule->teamList as $team) {
+			if ($team->tournTeamId == $tournTeamId) {
+				if ($team->teamSelectedFlag) $team->teamSelectedFlag = false;
+				else $team->teamSelectedFlag = true;
+				break;
+			}
+		}	
+		$_SESSION["selfSchedule"] = serialize($selfSchedule);
+	}
+	
+	function loadScheduleEventPeriod($mysqli) {
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		$scheduleEventPeriodId = $_GET['scheduleEventPeriodId'];
+		
+		if ($scheduleEventPeriodId == null OR $scheduleEventPeriodId == '') {
+			$errors = array(ERROR_SELF_SCHEDULE_SCHEDULE_TEAM_2);
+			$_SESSION['scorecenter_errors'] = $errors;
+			return false;
+		}
+		
+		if ($selfSchedule->getSelfScheduleOpenFlag() == 0 AND !isUserAccess(1)) {
+			$errors = array(ERROR_SELF_SCHEDULE_SCHEDULE_TEAM_1);
+			$_SESSION['scorecenter_errors'] = $errors;
+			return false;
+		}
+		$selfSchedule->currentPeriodId = $scheduleEventPeriodId;
+		$query = " SELECT ST.SCHEDULE_TEAM_ID, ST.TOURN_TEAM_ID FROM SCHEDULE_TEAM ST WHERE ST.SCHEDULE_EVENT_PERIOD_ID = ".$scheduleEventPeriodId;
+		$results = $mysqli->query($query); 
+		foreach ($selfSchedule->teamList as $team) {
+			$team->scheduleTeamId = '';
+			$team->teamLinkedToEventFlag = false;
+			while ($row = $results->fetch_array(MYSQLI_BOTH)) {	
+				if ($row['TOURN_TEAM_ID'] == $team->tournTeamId) {
+					$team->scheduleTeamId = $row['SCHEDULE_TEAM_ID'];
+					$team->teamLinkedToEventFlag = true;		
+					break;
+				}				
+			}
+			$results->data_seek(0);
+		}
+	
+		$_SESSION["selfSchedule"] = serialize($selfSchedule);
+		return true;
+	}
+	
+	function addTeamEventPeriod($mysqli, $tournTeamId, $scheduleEventPeriodId) {
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		
+		// Validate Team limit
+		$period = null;
+		foreach ($selfSchedule->getEventList() as $event1) {
+			foreach ($event1->periodsList as $period1) {
+				if ($period1->scheduleEventPeriodId == $scheduleEventPeriodId) {
+					$period = $period1;
+					//$event = $event1;
+					break;
+				}
+			}
+		}
+		
+		// Validate Team Limit
+		$query = " SELECT ST.SCHEDULE_TEAM_ID as TEAM_COUNT FROM SCHEDULE_TEAM ST WHERE ST.SCHEDULE_EVENT_PERIOD_ID = ".$scheduleEventPeriodId;
+		$results = $mysqli->query($query); 
+		if ($results) {
+			if ($results->num_rows >= $period->teamLimit) {
+				echo 'error1';
+				return false;
+			}
+		}
+		
+		
+		// Validate Team is not already schedule to event.
+		$query = " SELECT ST.SCHEDULE_TEAM_ID FROM SCHEDULE_TEAM ST 
+					INNER JOIN SCHEDULE_EVENT_PERIOD SEC ON ST.SCHEDULE_EVENT_PERIOD_ID=SEC.SCHEDULE_EVENT_PERIOD_ID
+					WHERE SEC.SCHEDULE_EVENT_ID = ".$period->scheduleEventId." AND ST.TOURN_TEAM_ID=".$tournTeamId;
+		$results = $mysqli->query($query); 
+		if ($results) {
+			if ($results->num_rows >= 1) {
+				echo 'error2';
+				return false;
+			}
+		}
+		
+		foreach ($selfSchedule->teamList as $team) {
+			if ($team->tournTeamId == $tournTeamId) {
+				$team->teamLinkedToEventFlag = true;
+				// delete schedule team record if exists??
+				
+				// save Schedule_TEAM record
+				$result = $mysqli->query("select max(SCHEDULE_TEAM_ID) + 1 from SCHEDULE_TEAM");
+					$row = $result->fetch_row(); 
+					$id = 1;
+					if ($row != null and $row['0'] != null) $id = $row['0'];  
+					$query = $mysqli->prepare("INSERT INTO SCHEDULE_TEAM (SCHEDULE_TEAM_ID, SCHEDULE_EVENT_PERIOD_ID, TOURN_TEAM_ID) VALUES (".$id.",".$scheduleEventPeriodId.",".$team->tournTeamId.") ");				
+						$query->execute();
+						$query->free_result();	
+						$team->scheduleTeamId = $id;
+				break;
+			}	
+		}
+	
+		$_SESSION["selfSchedule"] = serialize($selfSchedule);
+		return true;
+	}
+	
+	function removeTeamEventPeriod($mysqli, $tournTeamId, $scheduleEventPeriodId, $scheduleTeamId) {
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		
+		// validation?
+		
+		foreach ($selfSchedule->teamList as $team) {
+			if ($team->tournTeamId == $tournTeamId) {
+				$team->teamLinkedToEventFlag = false;
+				
+				$result = $mysqli->query("DELETE FROM SCHEDULE_TEAM WHERE SCHEDULE_TEAM_ID=".$scheduleTeamId);
+				$team->scheduleTeamId = '';
+				break;
+			}	
+		}
+	
+		$_SESSION["selfSchedule"] = serialize($selfSchedule);
+		return true;
+		
+	}
+	
+	
+	
+	
 	// GENERAL FUNCTIONS AND UTILITIES ---------------------------------------
 	
 	function init($mysqli) {
+		loadDefaultSettings();
 		loadStateList($mysqli);
 		loadRegionList($mysqli);
 	}

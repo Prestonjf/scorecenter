@@ -107,8 +107,8 @@ session_start();
         <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar">
           <div class="list-group">
             <a href="#" class="list-group-item active">Quick Links</a>
-            <a href="#" target="_blank" class="list-group-item">Dynamic Link 1</a>
-            <a href="#" target="_blank" class="list-group-item">Dynamic Link 2</a>
+            <a href="http://scorecenter.prestonsproductions.com/" target="_blank" class="list-group-item">Tournament Score Center Help</a>
+            <a href="#" class="list-group-item">&nbsp;</a>
           </div>
         </div><!--/.sidebar-offcanvas-->
         

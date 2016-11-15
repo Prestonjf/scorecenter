@@ -40,3 +40,32 @@ th.rotate > div {
 .radio1 {
 	font-weight: normal;
 }
+
+.borderless td {
+  			padding-top: 1em;
+			padding-right: 2em;
+  			border: none;
+}
+
+th.selfSchedule {
+	text-align:center;
+	background-color: #c8dbeb;
+}
+
+tr.selfScheduleDisplay {
+	height: 3em;
+}
+td.selfScheduleDisplay {
+	border: 2px solid white;
+}
+
+
+.idCircle {
+	width: 10px;
+	height: 10px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	display: inline-block;
+	white-space: nowrap;
+}
