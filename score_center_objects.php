@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.2, 09.05.2016 
+ * @version: 1.16.3, 12.07.2016 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -193,6 +193,26 @@ class slideshowSlide {
    }
 }
 
+class tournamentResultHeader {
+	public $eventName;
+	public $trialEventFlag;
+	public $completedFlag;
+	public $tournEventId;
+	
+	public function __construct() {
+	
+   }	
+}
+
+class EventResult {
+	public $eventName;
+	public $teamList = array();
+	
+	public function __construct() {
+	
+   }
+}
+
 // SELF SCHEDULE OBJECT
 class selfSchedule {
 	
@@ -209,6 +229,7 @@ class selfSchedule {
    private $eventList;
    public $teamList = array();
    public $currentPeriodId;
+   public $tournTeamSelectedId;
   
    
    public function __construct() {
@@ -350,13 +371,12 @@ class selfScheduleEvent {
 	public $periodInterval;
 	public $teamLimit;
 	public $selfScheduleFlag;
+	public $eventStartTime;
 
 	
 	public function __construct() {
 	
-   }
-		
-	
+   }	
 }
 
 // SELF SCHEDULE EVENT PERIOD OBJECT
@@ -394,6 +414,20 @@ class selfScheduleTeam {
 	public function __construct() {
 	
    }  
+}
+
+// NAVIGATION HANDLER
+class navigationHandler {
+	public $toPath;
+	public $fromPath;
+	public $pathCain = array();
+	public $command;
+	public $parameters = array();
+	
+	
+	public function __construct() {
+	
+   } 
 }
 
 

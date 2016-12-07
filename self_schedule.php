@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.2, 09.05.2016 
+ * @version: 1.16.3, 12.07.2016 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -44,7 +44,12 @@
   <script type="text/javascript">
   //$(document).ready(function() { });
 	
+	// validate save
 	function validate() {
+		if ($('#tournamentStartTime').val() == '' || $('#tournamentEndTime').val() == '' || $('#selfScheduleOpen').val() == '') {
+			 displayError('<?php echo ERROR_SELF_SCHEDULE_1; ?>');
+			return false;
+		}
 		var disabled = $('#selfScheduleSettingsForm').find(':input:disabled').removeAttr('disabled');
 		return true;
 	}
@@ -97,7 +102,7 @@
 					}					
 				}
 			}	
-	        xmlhttp.open("GET","controller.php?command=deletePeriod&schedulePeriodId="+element.value+"&periodRow="+row,true);
+	        xmlhttp.open("GET","controller.php?command=deletePeriod&schedulePeriodId="+element.value+"&periodRow="+row+"&"+$('#selfScheduleSettingsForm').serialize(),true);
 	        xmlhttp.send();
         } 
 	}
@@ -107,7 +112,7 @@
 		var flag = 0;
 		if ($('#allDayEventFlag'+id).prop('checked') == true) {
 			flag = 1;
-			if ($('#periodLength'+id).val() == '' || $('#periodLength'+id).val() == '0' || $('#periodInterval'+id).val() == '' || $('#periodInterval'+id).val() == '0' || $('#teamLimit'+id).val() == '' || $('#teamLimit'+id).val() == '0')
+			if ($('#periodLength'+id).val() == '' || $('#periodLength'+id).val() == '0' || $('#periodInterval'+id).val() == '' || $('#periodInterval'+id).val() == '0' || $('#teamLimit'+id).val() == '' || $('#teamLimit'+id).val() == '0' || $('#eventStartTime'+id).val() == null || $('#eventStartTime'+id).val() == '')
 				valid = false;
 			if (periodListSize != null && periodListSize > 1) {
 				valid = false;
@@ -128,11 +133,11 @@
 				}
 				else {
 					document.getElementById('eventPeriodsTableDiv').innerHTML = xmlhttp.responseText;
-					//displaySuccess('<?php echo SUCCESS_SELF_SCHEDULE_PERIOD_DELETED; ?>');
+					
 				}					
 			}
 			}	
-		       xmlhttp.open("GET","controller.php?command=addEventPeriod&addPeriodNumber="+$('#selectedPeriod'+id).val()+"&addPeriodTeamLimit="+$('#periodTeamLimit'+id).val()+"&eventRow="+id+"&aPeriodLength="+$('#periodLength'+id).val()+"&aPeriodInterval="+$('#periodInterval'+id).val()+"&aTeamLimit="+$('#teamLimit'+id).val()+"&allDayEventFlag="+flag+"&"+$('#selfScheduleSettingsForm').serialize(),true);
+		       xmlhttp.open("GET","controller.php?command=addEventPeriod&addPeriodNumber="+$('#selectedPeriod'+id).val()+"&addPeriodTeamLimit="+$('#periodTeamLimit'+id).val()+"&eventRow="+id+"&aPeriodLength="+$('#periodLength'+id).val()+"&aPeriodInterval="+$('#periodInterval'+id).val()+"&aTeamLimit="+$('#teamLimit'+id).val()+"&aEventStartTime="+$('#eventStartTime'+id).val()+"&allDayEventFlag="+flag+"&"+$('#selfScheduleSettingsForm').serialize(),true);
 		       xmlhttp.send();	
 	    } else {
 	        displayError('<?php echo ERROR_SELF_SCHEDULE_PERIOD_ADD; ?>');
@@ -200,6 +205,7 @@
 	function allDayEventChecked(row, periodListSize) {
 		if (periodListSize == null || periodListSize < 1) {
 			if ($('#allDayEventFlag'+row).prop('checked') == true) {
+				$('#eventStartTime'+row).prop('disabled', false);
 				$('#periodLength'+row).prop('disabled', false);	
 				$('#periodInterval'+row).prop('disabled', false);	
 				$('#teamLimit'+row).prop('disabled', false);	
@@ -208,6 +214,7 @@
 				$('#periodTeamLimit'+row).prop('disabled', true); $('#periodTeamLimit'+row).val('');
 			}
 			else {
+				$('#eventStartTime'+row).prop('disabled', true);
 				$('#periodLength'+row).prop('disabled', true);	$('#periodLength'+row).val('0');
 				$('#periodInterval'+row).prop('disabled', true); $('#periodInterval'+row).val('0');
 				$('#teamLimit'+row).prop('disabled', true);	$('#teamLimit'+row).val('0');
@@ -238,6 +245,71 @@
 		}
 	}
 	
+	function scheduleEventPeriodCoach(scheduleEventId, scheduleEventPeriodId) {
+			xmlhttp = new XMLHttpRequest();
+			var tournTeamId = $("input:radio[name='tournTeamSelected']:checked").val(); 
+			if (tournTeamId != null && tournTeamId != '') {
+				xmlhttp.onreadystatechange = function() {
+					if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+						if (xmlhttp.responseText.trim() == 'error0') {
+							 displayError('<?php echo ERROR_SELF_SCHEDULE_Add_TEAM_0; ?>');	
+						}
+						else if (xmlhttp.responseText.trim() == 'error1') {
+							 displayError('<?php echo ERROR_SELF_SCHEDULE_Add_TEAM_1; ?>');	
+						}
+						else if (xmlhttp.responseText.trim() == 'error2') {
+							if(confirm('Your team is already scheduled for this event. Would you like to schedule for this period instead? ')) {
+								removeAddTeamPeriod(tournTeamId, scheduleEventPeriodId);
+							}
+							//displayError('<?php echo ERROR_SELF_SCHEDULE_Add_TEAM_2; ?>');
+						}
+						else if (xmlhttp.responseText.trim() == 'error3') {
+							if(confirm('Your team is already scheduled for this event period. Would you like to remove your team from this period? ')) {
+								removeTeamPeriod(tournTeamId, scheduleEventPeriodId);
+							}
+							//displayError('<?php echo ERROR_SELF_SCHEDULE_Add_TEAM_2; ?>');
+						}
+						else {
+							document.getElementById('overview').innerHTML = xmlhttp.responseText;
+						}					
+					}
+				}	
+			}
+	        xmlhttp.open("GET","controller.php?command=addTeamEventPeriod&tournTeamId="+tournTeamId+"&scheduleEventPeriodId="+scheduleEventPeriodId+"&mode=coach", true);
+	        xmlhttp.send();
+	}
+	
+	function removeAddTeamPeriod(tournTeamId, scheduleEventPeriodId) {
+			xmlhttp1 = new XMLHttpRequest();
+			xmlhttp1.onreadystatechange = function() {
+				if (xmlhttp1.readyState == 4 && xmlhttp1.status == 200) {
+					if (xmlhttp1.responseText.trim() == 'error1') {
+					
+					}
+					else {
+						document.getElementById('overview').innerHTML = xmlhttp1.responseText;
+					}					
+				}
+			}	
+	        xmlhttp1.open("GET","controller.php?command=removeAddTeamPeriod&tournTeamId="+tournTeamId+"&scheduleEventPeriodId="+scheduleEventPeriodId, true);
+	        xmlhttp1.send();
+	}
+	
+	function removeTeamPeriod(tournTeamId, scheduleEventPeriodId) {
+			xmlhttp1 = new XMLHttpRequest();
+			xmlhttp1.onreadystatechange = function() {
+				if (xmlhttp1.readyState == 4 && xmlhttp1.status == 200) {
+					if (xmlhttp1.responseText.trim() == 'error1') {
+					}
+					else {
+						document.getElementById('overview').innerHTML = xmlhttp1.responseText;
+					}					
+				}
+			}	
+	        xmlhttp1.open("GET","controller.php?command=removeTeamEventPeriod&tournTeamId="+tournTeamId+"&scheduleEventPeriodId="+ scheduleEventPeriodId+"&mode=coach", true);
+	        xmlhttp1.send();
+	}
+	
 	function selectScheduleTeam(tournTeamId) {
 			xmlhttp = new XMLHttpRequest();
 			xmlhttp.onreadystatechange = function() {
@@ -253,6 +325,21 @@
 			}	
 	        xmlhttp.open("GET","controller.php?command=selectScheduleTeam&tournTeamId="+tournTeamId,true);
 	        xmlhttp.send();
+	}
+	
+	function updateSelectedTeam(elm) {
+		if (elm.checked) {
+		    $.ajax({
+		        type     : "GET",
+		        cache    : false,
+		        url      : "controller.php?command=updateSelectedTeam&tournTeamId="+elm.value,
+		        data     : $(this).serialize(),
+		        success  : function(data) {
+			    	//displayError(data);	
+		           // $(".printArea").empty().append(data).css('visibility','visible');
+		        }
+		    });
+		}
 	}
 	
 	function displayTeams() {
@@ -303,44 +390,25 @@
 	      
       </ul>
 
-    <table width="100%" class="borderless">
-	<tr>
-	<td><label for="tournamentName">Tournament Name: </label></td>
-	<td><?php echo $selfSchedule->getTournamentName(); ?></td>	
-	<td><label for="tournamentDivision">Tournament Division: </label></td>
-	<td><?php echo $selfSchedule->getTournamentDivision(); ?></td>
-	<td><label for="tournamentDivision">Self Schedule Status: </label></td>
-	<td><?php if ($selfSchedule->getSelfScheduleOpenFlag() == 1) echo 'Open'; else echo 'Closed'; ?></td>
-	</tr>
-	<tr>
-	<td><label for="tournamentName">Tournament Location: </label></td>
-	<td><?php echo $selfSchedule->getTournamentLocation(); ?></td>	
-	<td><label for="tournamentDivision">Tournament Date: </label></td>
-	<td><?php echo $selfSchedule->getTournamentDate(); ?></td>
-	<td colspan="2"><button type="button" class="btn btn-xs btn-primary" name="exportSchedule">Export Schedule</button></td>
-	</tr>
-
-	
-	</table>
-     
-    <hr>
+	  <?php echo getSSTournamentHeader(); ?>
+	  
     <?php if ($_SESSION["selfSchedulScreen"] == 'SETTINGS') {?>
     <div id="settings">
 	    <h2>General Settings</h2>
 		<table width="100%" class="borderless">
 		<tr>
-		<td width="25%"><label for="tournamentStartTime">Tournament Start Time: </label></td>
+		<td width="25%"><label for="tournamentStartTime">Tournament Start Time:<span class="red">*</span></label></td>
 		<td width="25%">
 			<input type="time" class="form-control" name="tournamentStartTime" id="tournamentStartTime" value="<?php echo $selfSchedule->getStartTime(); ?>">
 		</td>
 		
-		<td width="25%"><label for="tournamentEndTime">Tournament End Time: </label></td>
+		<td width="25%"><label for="tournamentEndTime">Tournament End Time:<span class="red">*</span></label></td>
 		<td width="25%">
 			<input type="time" class="form-control" name="tournamentEndTime" id="tournamentEndTime" value="<?php echo $selfSchedule->getEndTime(); ?>">
 		</td>
 		</tr>
 		<tr>
-		<td width="25%"><label for="selfScheduleOpen">Self Scheduling Open: </label></td>
+		<td width="25%"><label for="selfScheduleOpen">Self Scheduling Open:<span class="red">*</span></label></td>
 		<td width="25%">
 			<select class="form-control" name="selfScheduleOpen" id="selfScheduleOpen">
 				<option value="0" <?php if($selfSchedule->getSelfScheduleOpenFlag() == 0){echo("selected");}?>>No</option>
@@ -352,8 +420,10 @@
 		<td width="25%"></td>
 		</tr>
 		</table>
+		<hr>		
+		<button type="submit" class="btn btn-xs btn-danger" name="saveScheduleSettings" onclick="return validate();" value="">Apply</button>
+		<button type="submit" class="btn btn-xs btn-primary" name="cancelScheduleSettings">Cancel</button>
 
-		<hr>
 		<h2>Add Periods</h2>
 		<div id="periodTableDiv">
 			<?php echo getPeriodsTable(); ?>
@@ -388,12 +458,15 @@
 		?>
 	</div> 
 	<br />	
- 	 <button type="submit" class="btn btn-xs btn-primary" name="cancelScheduleSettings">Cancel</button>
+ 	<button type="submit" class="btn btn-xs btn-primary" name="cancelScheduleSettings">Cancel</button>
 
 	<?php } else if ($_SESSION["selfSchedulScreen"] == 'MYSCHEDULE') { ?>
-	
 	<div id="mySchedule">
-
+		<?php
+			echo getMySchedule();
+		?>
+	<br>	
+	<button type="submit" class="btn btn-xs btn-primary" name="cancelScheduleSettings">Cancel</button>
 	</div>
 	<?php } ?>
 	

@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.2, 09.05.2016  
+ * @version: 1.16.3, 12.07.2016  
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -232,7 +232,7 @@ include_once('logon_check.php');
         </table>
 	<?php if ($disable != 'disabled') { ?>
 	<div class="input-group">
-			<button type="submit" class="btn btn-xs btn-primary" name="addCoach">Add Coach</button>
+			<button type="submit" class="btn btn-xs btn-primary" name="addCoach">Select Coach</button>
 	</div>
 	<?php } ?>
 	<hr>

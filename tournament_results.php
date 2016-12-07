@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.2, 09.05.2016 
+ * @version: 1.16.3, 12.07.2016 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -27,6 +27,7 @@
 	include_once('score_center_objects.php');
 	include_once('logon_check.php');
 	include_once('libs/score_center_global_settings.php');
+	include_once('functions/global_functions.php');
 	require_once 'login.php';
 	
 	$mysqli = mysqli_init();
@@ -120,7 +121,7 @@
 	}
 	
 	th.rotate {
-		height: 185px;
+		height: 230px;
 		white-space: nowrap;
 	}
 	th.rotate > div {
@@ -128,6 +129,11 @@
 		-webkit-transform: translate(-10px, 0px) rotate(270deg);
 		-ms-transform: translate(-10px, 0px) rotate(270deg);
 		width: 30px;
+	}
+	.unrotate {
+		transform: translate(0px, 0px) rotate(-270deg);
+		-webkit-transform: translate(0px, 0px) rotate(-270deg);
+		-ms-transform: translate(0px, 0px) rotate(-270deg);
 	}
 	
   
@@ -144,28 +150,18 @@
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Tournament Results</h1>
-	 <table width="100%">
-	 <tr>
-	 <td><h4>Tournament: <?php echo $_SESSION["tournamentName"] . ' - ' . $_SESSION["tournamentDate"]; ?></h4></td>
-	 <td><h4>Overall Points: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["pointsSystem"]; ?></span></h4></td>
-	 </tr>
-	 <tr>
-     <td><h4>Division: <?php echo $_SESSION["tournamentDivision"]; ?></h4></td>
-	 <td><h4></h4></td> <!-- Max Points Earned Per Event: <span style="font-weight:normal;font-size:14px;"><?php //echo $_SESSION["highestScore"]; ?></span> -->
-	 </tr>
-	 <tr>
-	 <td><h4>Events Completed: <?php echo $_SESSION["tournamentEventsCompleted"]; ?></h4></td>
-	 <td></td>
-	 </tr>
-	 </table>
-	 <hr>
-	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsCSV" value='.$row['0'].'>Export to .csv</button>
-	 	<button type="submit" class="btn btn-xs btn-success" name="exportResultsEXCEL" value='.$row['0'].'>Export to .xlsx</button>
+     <?php
+	     echo getTournamentHeader();
+	  ?>   
+	 	<button type="submit" class="btn btn-xs btn-primary" name="exportResultsCSV" value='.$row['0'].'>Export Results .csv</button>
+	 	<button type="submit" class="btn btn-xs btn-primary" name="exportResultsEXCEL" value='.$row['0'].'>Export Results .xlsx</button>
 	 	<!-- <input type="button" class="btn btn-xs btn-success" name="printResults" onclick="print();" value='Print'/> -->
 	 	&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;
-		<?php echo '<button type="submit" class="btn btn-xs btn-success" name="viewSlideShow" value="'.$row['0'].'" >View Slideshow</button>'; ?>
-		<?php echo '<button type="submit" class="btn btn-xs btn-success" name="exportSlideShowPDF" value="'.$row['0'].'" >Export Slideshow to .pdf</button>'; ?>
-	 <hr>
+		<?php echo '<button type="submit" class="btn btn-xs btn-primary" name="viewSlideShow" value="'.$row['0'].'" >View Slideshow</button>'; ?>
+		<?php echo '<button type="submit" class="btn btn-xs btn-primary" name="exportSlideShowPDF" value="'.$row['0'].'" >Export Slideshow .pdf</button>'; ?>
+		&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;
+		<?php echo '<button type="submit" class="btn btn-xs btn-primary" name="generateReports" value='.$row['0'].'>Generate Reports</button>'; ?>
+		<br><br>
 
 	<div id="resultsGrid">
 		<?php
@@ -179,16 +175,23 @@
 				<th <?php echo 'style="background-color: #'.$_SESSION["secondaryRowColor"].';border-bottom: 1px solid #000000;"'; ?> width="20%"><div><span class="sortableTH"><?php echo $_SESSION["tournamentName"]; ?><br /><?php echo 'Division: '.$_SESSION["tournamentDivision"]; ?><br /><?php echo 'Date: '.$_SESSION["tournamentDate"]; ?></span></div></th>
 				<?php
 				$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
+				$resultHeaderObj = unserialize($_SESSION['resultHeaderObj']);
+				$headerCount = 0;
 				if ($tournamentResultsHeader != null) {
 					foreach ($tournamentResultsHeader as $resultHeader) {
+						$headerObj = $resultHeaderObj[$headerCount];
 						$colWidth = sizeof($tournamentResultsHeader) + 2;
 						$colWidth = 75 / $colWidth;
 						
 						echo '<th width="'.$colWidth.'%" style="padding-left: none; border-bottom: 1px solid #000000;'; 
 						if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].';';
 						else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';
-						echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$resultHeader.'</span></div></th>';						
+						echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+						if ($headerObj->completedFlag == 1) echo '<img src="img/check_green.png" alt="check_green" height="20" width="20" class="unrotate">';
+						else echo '<img src="img/check_red.png" alt="check_red" height="20" width="20" class="unrotate">';									
+						echo ' '.$resultHeader.'</span></div></th>';
 						$rowCount++;
+						$headerCount++;
 					}
 				}
 				?>
@@ -249,16 +252,23 @@
 			 echo '<th style="background-color: #'.$_SESSION["secondaryRowColor"].';border-bottom: 1px solid #000000;" width="20%"><div><span class="sortableTH">'. $_SESSION["tournamentName"] . ' (Alternate)<br />Division: '.$_SESSION["tournamentDivision"].'<br /> Date: '.$_SESSION["tournamentDate"] .'</span></div></th> ';
 
 				$tournamentResultsHeader = $_SESSION['tournamentResultsHeader'];
+				$resultHeaderObj = unserialize($_SESSION['resultHeaderObj']);
+				$headerCount = 0;
 				if ($tournamentResultsHeader != null) {
 					foreach ($tournamentResultsHeader as $resultHeader) {
+						$headerObj = $resultHeaderObj[$headerCount];
 						$colWidth = sizeof($tournamentResultsHeader) + 2;
 						$colWidth = 75 / $colWidth;
 						
 						echo '<th width="'.$colWidth.'%" style="padding-left: none; border-bottom: 1px solid #000000;'; 
 						if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].';';
 						else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';';
-						echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$resultHeader.'</span></div></th>';						
+						echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+						if ($headerObj->completedFlag == 1) echo '<img src="img/check_green.png" alt="check_green" height="20" width="20" class="unrotate">';
+						else echo '<img src="img/check_red.png" alt="check_red" height="20" width="20" class="unrotate">';	
+						echo ' ' . $resultHeader.'</span></div></th>';						
 						$rowCount++;
+						$headerCount++;
 					}
 				}
 				echo '<th width="'. $colWidth.'%" style="border-bottom: 1px solid #000000;'; if ($rowCount % 2 == 0) echo ' background-color: #'.$_SESSION["primaryColumnColor"].'; '; else echo ' background-color: #'.$_SESSION["secondaryRowColor"].';'; echo '" class="rotate"><div><span class="sortableTH">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Total Score</span></div></th>';
@@ -304,6 +314,8 @@
 		  
 		  ?>
 		</div>
+		<img src="img/check_green.png" alt="check_green" height="20" width="20"> = Completed Event<br />
+		<img src="img/check_red.png" alt="check_red" height="20" width="20"> = Incomplete Event<br />
 		  * = Trial Event <br />
 		  + = Alternate Team <br /><br />
 		  

@@ -51,7 +51,7 @@
     'along with this program.  If not, see <a href="http://www.gnu.org/licenses/" target="_blank">http://www.gnu.org/licenses/</a>.<br /><br />'+
     
     '@package: Tournament Score Center (TSC) - Tournament scoring web application.<br />'+
-    '@version: 1.16.2, 09.05.2016<br />'+
+    '@version: 1.16.3, 12.07.2016<br />'+
     '@author: Preston Frazier <a href="http://scorecenter.prestonsproductions.com/index.php" target="_blank">http://scorecenter.prestonsproductions.com/index.php</a><br />'+ 
     '@license: <a href="http://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank">http://www.gnu.org/licenses/gpl-3.0.en.html</a> GPLv3<br />';
 	

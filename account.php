@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.2, 09.05.2016 
+ * @version: 1.16.3, 12.07.2016 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -47,12 +47,22 @@
 	<?php include_once('libs/head_tags.php'); ?>
   <script type="text/javascript">
   
-	function validate() {
+	function validate(role) {
 	var mode = '<?php echo $_SESSION["accountMode"]; ?>';
 		if (mode == 'create') {
 			if ($("#firstName").val().trim() == '' || $("#lastName").val().trim() == '' || $("#userName").val().trim() == ''
-			|| $("#regCode").val().trim() == '' || $("#password").val().trim() == '' || $("#vPassword").val().trim() == '') {
+			|| $("#password").val().trim() == '' || $("#vPassword").val().trim() == '') {
 				displayError("<strong>Required Fields:</strong> First Name, Last Name, Password, User Name, and Registration Code are required.");
+				return false;
+			}
+			
+			if ($("#regCode") != null && $("#regCode").val() != null && $("#regCode").val().trim() == '') {
+				displayError("<strong>Required Fields:</strong> Registration Code is required.");
+				return false;
+			}
+						
+			if ($("#regCode") == null && role == '') {
+				displayError("<strong>Required Fields:</strong> Role Code is required.");
 				return false;
 			}
 			
@@ -138,7 +148,15 @@
 			<td width="25%"><label for="userName">User Name / Email:<span class="red">*</span></label></td>
 			<td width="25%"><input type="text" size="40" class="form-control" name="userName" id="userName" onblur="validateEmail(this)" 
 							placeholder="john@doe.com"	value="<?php echo $_SESSION["userName"]; ?>"></td>
-			<?php if ($_SESSION["accountMode"] == 'create') { ?>
+			<?php $navigationHandler = unserialize($_SESSION["navigationHandler"]);
+				$navRole;
+				if ($navigationHandler AND $navigationHandler->parameters) $navRole = $navigationHandler->parameters[0];
+				
+			?>
+			<?php if ($_SESSION["accountMode"] == 'create' AND $navRole AND $navRole != '') { 
+					echo '<td width="25%"><label for="regCode">Role:</label></td>';
+					echo '<td width="25%">'.$navRole.'</td>';
+			 	} else if ($_SESSION["accountMode"] == 'create') { ?>
 				<td width="25%"><label for="regCode">Registration Code:<span class="red">*</span></label></td>
 				<td width="25%"><input type="text" autocomplete="off" size="40" class="form-control" name="regCode" id="regCode"></td>
 			<?php } else { 
@@ -174,10 +192,21 @@
 
 		</table>
 		
-		<?php if ($_SESSION["accountMode"] == 'create') { ?>
-			<input type="submit" class="btn btn-xs btn-danger" name="createNewAccount" onclick="return validate();" accesskey="" value="Create Account"/>
+		<?php 
+			// Confirmation Email Checkbox
+			if ($_SESSION["accountMode"] == 'create') {
+				echo '<input type="checkbox" id="emailConfirmationFlag" name="emailConfirmationFlag" ';
+				if ($_SESSION["emailConfirmationFlag"] == '1') echo 'checked ';
+				echo ' value="1"> <label for="emailConfirmationFlag">Send Email Confirmation </label><br><br> ';
+			}
+		?>	
+		
+		<?php if ($_SESSION["accountMode"] == 'create' AND $navigationHandler) { ?>
+			<input type="button" class="btn btn-xs btn-danger" name="createNewAccount" onclick="validate('<?php echo $navRole; ?>');" accesskey="" value="Create Account & Link"/>
+		<?php } else if ($_SESSION["accountMode"] == 'create') {?>
+			<input type="button" class="btn btn-xs btn-danger" name="createNewAccount" onclick="validate('<?php echo $navRole; ?>');" accesskey="" value="Create Account"/>
 		<?php } else { ?>
-			<input type="submit" class="btn btn-xs btn-danger" name="updateAccount" onclick="return validate();" value="Update Account"/>
+			<input type="button" class="btn btn-xs btn-danger" name="updateAccount" onclick="validate('');" value="Update Account"/>
 		<?php } ?>
 			<button type="submit" class="btn btn-xs btn-primary" name="cancelAccount">Cancel</button>
       

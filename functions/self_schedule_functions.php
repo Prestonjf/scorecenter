@@ -1,4 +1,27 @@
 <?php
+/**
+ * Tournament Score Center (TSC) - Tournament scoring web application.
+ * Copyright (C) 2016  Preston Frazier
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/.
+ *    
+ * @package: Tournament Score Center (TSC) - Tournament scoring web application.
+ * @version: 1.16.3, 12.07.2016 
+ * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
+ * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
+ */	
+	
 	include_once('score_center_objects.php');
 	
 	function getPeriodsTable() {
@@ -69,6 +92,7 @@
 				$html .= '<th class="selfSchedule"><label>All Day Event?</label><br><input type="checkbox" id="allDayEventFlag'.$count.'" name="allDayEventFlag'.$count.'" onchange="allDayEventChecked('.$count.','.sizeof($event->periodsList).');"value="1" '.$addButtonDisabled;
 				if ($event->allDayFlag and $event->allDayFlag == 1) $html .= ' checked ';
 				$html .='></th>
+				<th class="selfSchedule"><label>Start Time</label><br><input type="time" class="form-control" name="eventStartTime'.$count.'" id="eventStartTime'.$count.'" value="'.$event->eventStartTime.'" '.$allDayEventDisabled.'></th>
 				<th class="selfSchedule"><label>Period Length</label><br><input type="text" class="form-control" name="periodLength'.$count.'" id="periodLength'.$count.'" value="'.$event->periodLength.'" '.$allDayEventDisabled.'></th>
 				<th class="selfSchedule"><label>Period Interval</label><br><input type="text" class="form-control" name="periodInterval'.$count.'" id="periodInterval'.$count.'" value="'.$event->periodInterval.'" '.$allDayEventDisabled.'></th>
 				<th class="selfSchedule"><label>Max Teams per Period</label><br><input type="text" class="form-control" name="teamLimit'.$count.'" id="teamLimit'.$count.'" value="'.$event->teamLimit.'" '.$allDayEventDisabled.'></th>
@@ -77,7 +101,7 @@
 				if ($event->periodsList) {
 					$count2 = 0;
 					foreach ($event->periodsList as $period) {
-						$html .= '<tr><td colspan=3 bgcolor="e8e8e8">' . $period->periodNumber.'</td><td bgcolor="e8e8e8">' . $period->periodStartTime.'</td><td bgcolor="e8e8e8">' . $period->periodEndTime.'</td><td bgcolor="e8e8e8">' . $period->teamLimit;
+						$html .= '<tr><td colspan=3 bgcolor="e8e8e8">' . $period->periodNumber.'</td><td bgcolor="e8e8e8">' . $period->periodStartTime.'</td><td bgcolor="e8e8e8">' . $period->periodEndTime.'</td><td bgcolor="e8e8e8"></td><td bgcolor="e8e8e8">' . $period->teamLimit;
 						if ($event->allDayFlag != 1) {	
 							$html .= '<div style="float: right;"><button type="button" class="btn btn-xs btn-danger" name="deleteEventPeriod" onclick="deleteEventPrd(this,'.$count.','.$count2.');" value="'.$period->scheduleEventPeriodId.'" '.$addButtonDisabled.'>Delete</button></div>';
 						}
@@ -112,16 +136,21 @@
 	function getMyTeams() {
 		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
 		$html = '';
-		$html .= '<div style="float: left; overflow: hidden;"><label><a href="javascript: displayTeams();">My Teams:<br><br></a></label></div><div style="overflow: hidden; padding-left: 4em;" id="scheduleTeamsDiv">';
+		$html .= '<div style="float: left; overflow: hidden;"><label><a href="javascript: displayTeams();">Select Team:<br><br></a></label></div><div style="overflow: hidden; padding-left: 4em;" id="scheduleTeamsDiv">';
 		$count = 0;
 		foreach ($selfSchedule->teamList as $team) {
 			if ($team->teamAvailableFlag) {
-				if ($count > 0) $html .= ', ';
+				if ($count > 0 AND getCurrentRole() != 'COACH') $html .= ', ';
+				else if ($count > 0) $html .= '<br>';
 				$selected = false;
+				$checked = '';
+				if ($team->tournTeamId == $selfSchedule->tournTeamSelectedId) $checked = 'checked';
+				if (getCurrentRole() == 'COACH') $html .= '<input type="radio" name="tournTeamSelected" onchange="updateSelectedTeam(this)" value="'.$team->tournTeamId.'" '.$checked.'> ';
 				if ($team->teamSelectedFlag) $selected = true;
-				$html .= '<a href="javascript: selectScheduleTeam('.$team->tournTeamId.');"><div style="display: inline-block; white-space: nowrap;';
+				$html .= '<div style="display: inline-block; white-space: nowrap;';
 				if ($selected) $html .= ' background: #c8dbeb; border-radius: 5px; ';
-				$html .= '"><div class="idCircle" style="background: '.getCircleColor($count).';"></div> '.$team->teamName.'</div></a>';
+				$html .= '"><a href="javascript: selectScheduleTeam('.$team->tournTeamId.');"><div class="idCircle" style="background: '.getCircleColor($count).';"></div> '.$team->teamName.'</a> ';
+				$html .= '</div>';
 				$count++;
 			}
 		}
@@ -200,11 +229,12 @@
 		$tdwidth = 10;
 		$periodMap = array();
 		$html = '';
+		$html .= '<span class="red">*</span> = Self Schedule Event';
 		// print header
 		$html .= '<table width="100%"><tr class="selfScheduleDisplay"><td width="20%" bgcolor="c8dbeb" align="center" class="selfScheduleDisplay"></td>';
 		if ($selfSchedule != null AND $selfSchedule->getPeriodList()) {
 			foreach ($selfSchedule->getPeriodList() as $period) {
-				$html .= '<td bgcolor="c8dbeb" align="center" class="selfScheduleDisplay"><h4>'.$period->getStartTime().'</h4></td>';
+				$html .= '<td bgcolor="c8dbeb" align="center" class="selfScheduleDisplay" data-toggle="tooltip" title="'.$period->getStartTime().' - '.$period->getEndTime().'"><h4>'.$period->getStartTime().'</h4></td>';
 				array_push($periodMap, $period->getStartTime());
 			}
 		}		
@@ -216,9 +246,15 @@
 		// Event Rows For Blocked Periods
 		if ($selfSchedule != null AND $selfSchedule->getEventList() != null) {
 			foreach ($selfSchedule->getEventList() as $event) {
+				$ssEvent = '';
+				if ($event->selfScheduleFlag) $ssEvent = '<span class="red">*</span>';
 				if ($event->scheduleEventId == '') $event->scheduleEventId = '-1';
 				if ($event->allDayFlag != 1) {
-					$html .= '<tr class="selfScheduleDisplay"><td width="20%" bgcolor="c8dbeb" class="selfScheduleDisplay" style="padding-left: 0.5em;">'.$event->eventName.'</td>';
+					$html .= '<tr class="selfScheduleDisplay"><td width="20%" bgcolor="c8dbeb" class="selfScheduleDisplay" style="padding-left: 0.5em;">';
+					
+				if (isUserAccess(1)) 
+					$html .= '<input type="image" src="img/arrow_purple.png" class="downloadImg" name="exportEvent" alt="arrow_purple" height="20" width="20" value="'.$event->scheduleEventId.'"> ';
+					$html .= $event->eventName.$ssEvent.'</td>';
 					if ($event->periodsList != null) {
 						foreach ($periodMap as $map) {
 							$exists = false;
@@ -226,7 +262,14 @@
 								if ($period->scheduleEventPeriodId == '') $period->scheduleEventPeriodId = '-1';
 								if ($map == $period->periodStartTime) {
 									if ($event->selfScheduleFlag == 1) {
-										$html .= '<td class="selfScheduleDisplay" align="center" bgcolor="c8dbeb" width="'.$tdwidth.'%"><a href="javascript: scheduleEventPeriod('.$event->scheduleEventId.','.$period->scheduleEventPeriodId.')">'.$period->slotsOpen.' of '.$period->teamLimit.'</a><br>';
+										$backgroundColor = 'c8dbeb';
+										if ($period->slotsOpen == 0) $backgroundColor = 'ebc8c8';
+										if (getCurrentRole() == 'COACH') {
+										$html .= '<td class="selfScheduleDisplay" align="center" bgcolor="'.$backgroundColor.'" width="'.$tdwidth.'%" data-toggle="tooltip" title="'.$period->periodStartTime.' - '.$period->periodEndTime.'"><a href="javascript: scheduleEventPeriodCoach('.$event->scheduleEventId.','.$period->scheduleEventPeriodId.')">'.$period->slotsOpen.' of '.$period->teamLimit.'</a><br>';
+										}
+										else {
+										$html .= '<td class="selfScheduleDisplay" align="center" bgcolor="'.$backgroundColor.'" width="'.$tdwidth.'%" data-toggle="tooltip" title="'.$period->periodStartTime.' - '.$period->periodEndTime.'"><a href="javascript: scheduleEventPeriod('.$event->scheduleEventId.','.$period->scheduleEventPeriodId.')">'.$period->slotsOpen.' of '.$period->teamLimit.'</a><br>';
+										}
 										if (true) {
 											foreach($selfSchedule->teamList as $team) {
 												if ($team->teamAvailableFlag) {
@@ -239,6 +282,7 @@
 												}
 											}
 										}
+										if (getCurrentRole() == 'COACH') $html .= '</div></a>';
 										$html .= '</td>';
 									} else {
 										$html .= '<td class="selfScheduleDisplay" align="center" bgcolor="c8dbeb" width="'.$tdwidth.'%">Open</td>';
@@ -268,12 +312,31 @@
 		// Event Rows For All Day Events
 		if ($selfSchedule != null AND $selfSchedule->getEventList() != null) {
 			foreach ($selfSchedule->getEventList() as $event) {
+				if ($event->scheduleEventId == '') $event->scheduleEventId = '-1';
+				$ssEvent = '';
+				if ($event->selfScheduleFlag) $ssEvent = '<span class="red">*</span>';
+				$count = 1;
 				if ($event->allDayFlag == 1) {
-					$html .= '<table width="100%"><tr class="selfScheduleDisplay"><td width="20%" class="selfScheduleDisplay" bgcolor="c8dbeb" style="padding-left: 0.5em;">'.$event->eventName.'</td>';
+					$html .= '<table width="100%"><tr class="selfScheduleDisplay"><td width="20%" class="selfScheduleDisplay" bgcolor="c8dbeb" style="padding-left: 0.5em;">';
+					if (isUserAccess(1)) 
+						$html .= '<input type="image" src="img/arrow_purple.png" class="downloadImg" name="exportEvent" alt="arrow_purple" height="20" width="20" value="'.$event->scheduleEventId.'"> ';
+					$html .= $event->eventName.$ssEvent.'</td>';
 					if ($event->periodsList != null) {
-						foreach ($event->periodsList as $period) {	
+						foreach ($event->periodsList as $period) {
+							if ($period->scheduleEventPeriodId == '') $period->scheduleEventPeriodId = '-1';
+							if ($count % 21 == 0) { 
+								$html .= '</tr><tr class="selfScheduleDisplay"><td width="20%" class="selfScheduleDisplay" bgcolor="FFFFFF" style="padding-left: 0.5em;">&nbsp;</td>';
+								$count = 1;
+							}
 							if ($event->selfScheduleFlag == 1) {
-								$html .= '<td class="selfScheduleDisplay" bgcolor="c8dbeb" align="center" data-toggle="tooltip" title="'.$period->periodStartTime.' - '.$period->periodEndTime.'"><a href="javascript: scheduleEventPeriod('.$event->scheduleEventId.','.$period->scheduleEventPeriodId.')"><div style="font-size:60%;">'.$period->periodStartTime.'<br>'.$period->slotsOpen.' of '.$period->teamLimit.'</div></a>';
+								$backgroundColor = 'c8dbeb';
+								if ($period->slotsOpen == 0) $backgroundColor = 'ebc8c8';
+								if (getCurrentRole() == 'COACH') {
+									$html .= '<td class="selfScheduleDisplay" bgcolor="'.$backgroundColor.'" width="4%" align="center" data-toggle="tooltip" title="'.$period->periodStartTime.' - '.$period->periodEndTime.'"><a href="javascript: scheduleEventPeriodCoach('.$event->scheduleEventId.','.$period->scheduleEventPeriodId.')"><div style="font-size:60%;">'.$period->periodStartTime.'<br>'.$period->slotsOpen.' of '.$period->teamLimit.'</div></a>';
+								} 
+								else {
+								$html .= '<td class="selfScheduleDisplay" bgcolor="'.$backgroundColor.'" width="4%" align="center" data-toggle="tooltip" title="'.$period->periodStartTime.' - '.$period->periodEndTime.'"><a href="javascript: scheduleEventPeriod('.$event->scheduleEventId.','.$period->scheduleEventPeriodId.')"><div style="font-size:60%;">'.$period->periodStartTime.'<br>'.$period->slotsOpen.' of '.$period->teamLimit.'</div></a>';
+								}
 								if (true) {
 									foreach($selfSchedule->teamList as $team) {
 										if ($team->teamAvailableFlag) {
@@ -289,18 +352,62 @@
 								$html .= '</td>';
 							}
 							else {
-								$html .= '<td class="selfScheduleDisplay" bgcolor="c8dbeb" align="center" ><div style="font-size:60%;">Open</div></td>';
+								$html .= '<td class="selfScheduleDisplay" width="4%" bgcolor="c8dbeb" align="center" ><div style="font-size:60%;">Open</div></td>';
 								//width="'.$tdwidth.'%"
 							}
+							$count++;	
 						}
 					}
 					$count++;
-					$html .= '</tr></table>';
+					$html .= '</tr></table><br>';
 				}
 			}	
 		}
 
 		
+		return $html;
+	}
+	
+	function getMySchedule() {
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		$myTeams = array();
+		$html = '';
+		$html .= '<span class="red">*</span> = Self Schedule Event';
+		$html .= '<table width="100%" class="borderless"><thead><tr class="selfScheduleDisplay"><td width="20%" bgcolor="c8dbeb" align="center" class="selfScheduleDisplay"></td>';
+		foreach ($selfSchedule->teamList as $team) {
+			if ($team->teamAvailableFlag) {
+				$html .= '<td bgcolor="c8dbeb" align="center" class="selfScheduleDisplay"><h4>'.$team->teamName.'</h4></td>';
+				array_push($myTeams, $team);
+			}
+		}
+		$html .= '</tr></thead><tbody>';
+		
+		foreach ($selfSchedule->getEventList() as $event) {
+			$html .= '<tr class="selfScheduleDisplay">';
+			$ssEvent = '';
+			if ($event->selfScheduleFlag) $ssEvent = '<span class="red">*</span>';
+			$html .= '<td bgcolor="c8dbeb" align="left" class="selfScheduleDisplay" style="padding-left: 0.5em;">'.$event->eventName.$ssEvent.'</td>';
+			foreach($myTeams as $myTeam) {
+				$exists = false;
+				foreach ($event->periodsList as $period) {	
+					if (in_array($period->scheduleEventPeriodId,$myTeam->linkedPeriodsList)) {
+						$html .= '<td bgcolor="c8dbeb" align="center" class="selfScheduleDisplay">'.$period->periodStartTime.' - '.$period->periodEndTime.'</td>';
+						$exists = true;
+						break;
+					}
+				}
+				if (!$exists AND $event->selfScheduleFlag) {
+					$html .= '<td bgcolor="e8e8e8" align="center" class="selfScheduleDisplay">Not Registered</td>';
+				}
+				else if (!$exists) {
+					$html .= '<td bgcolor="e8e8e8" align="center" class="selfScheduleDisplay">No Self Schedule</td>';
+				}
+			}
+
+			$html .= '</tr>';
+		}
+		
+		$html .= '</tbody></table>';
 		return $html;
 	}
 	
@@ -321,21 +428,10 @@
 		
 		$html = '';
 		// Header		
-		$html .= '<h1 style="margin-bottom: 0px;">Self Schedule: '.$event->eventName.' ('.$period->periodStartTime.' - '.$period->periodEndTime.')</h1>';
-	    $html .= '<table width="100%" class="borderless">';
-		$html .= '<tr>';
-		$html .= '<td width="25%"><label for="tournamentName">Tournament Name: </label></td>';
-		$html .= '<td width="25%">'.$selfSchedule->getTournamentName().'</td>';
-		$html .= '<td width="25%"><label for="tournamentDivision">Tournament Division: </label></td>';
-		$html .= '<td width="25%">'.$selfSchedule->getTournamentDivision().'</td>';
-		$html .= '</tr><tr>';
-		$html .= '<td width="25%"><label for="tournamentName">Tournament Location: </label></td>';
-		$html .= '<td width="25%">'.$selfSchedule->getTournamentLocation().'</td>';
-		$html .= '<td width="25%"><label for="tournamentDivision">Tournament Date: </label></td>';
-		$html .= '<td width="25%">'.$selfSchedule->getTournamentDate().'</td>';
-		$html .= '</tr></table> <hr>';
+		$html .= '<h1 style="margin-bottom: 5px;">Self Schedule: '.$event->eventName.' ('.$period->periodStartTime.' - '.$period->periodEndTime.')</h1>';
+		$html .= getSSTournamentHeader();
 		$html .= '<div style="float: left; overflow: hidden;"><button type="submit" class="btn btn-xs btn-primary" name="cancelSelfSchedulePeriod">Cancel</button></div>';
-		$html .= '<h6><div style="padding-left: 5em; overflow: hidden;">*Instructions: <br>To schedule your team, click the add button. To remove your team from the schedule, click remove. Each team can only be scheduled once per event. Every action you make will be saved automatically. Other teams may be scheduling at the same time. You will receive an error message if there are no remaining slots.</div></h6>';
+		$html .= '<h6><div style="padding-left: 5em; overflow: hidden;">1.To schedule your team, click the add button. <br>2. To remove your team from the schedule, click remove.<br><br>Each team can only be scheduled once per event. Every action you make will be saved automatically. Other teams may be scheduling at the same time. You will receive an error message if there are no remaining slots.</div></h6>';
 		$html .= '<hr>';
 		
 		$html .= '<div style="float: left; overflow: hidden; width: 40%;">';
@@ -416,5 +512,263 @@
 		
 		return $html;
 	}
+	
+	function setSelectedSelfScheduleTeam($tournTeamId) {
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		$selfSchedule->tournTeamSelectedId = $tournTeamId;
+		$_SESSION["selfSchedule"] = serialize($selfSchedule);	
+	}
+	
+	// Generate Schedule Overiew PDF
+	function exportScheduleOverview() {
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		$periodMap = array();
+		
+		require('libs/fpdf/fpdf.php');
+		$pdf = new FPDF();
+		$pdf->SetTitle('Tournament Schedule Overview', true);
+		$pdf->AddPage('L');
+		$pdf->SetAutoPageBreak(true, 1); 
+		
+		// OVERVIEW HEADER
+		$pdf->SetFont('Arial','',18);
+		$pdf->SetTextColor(0);
+		$pdf->Cell(0,10,$selfSchedule->getTournamentName().' Schedule',0,0,'L');
+		$pdf->Ln();
+
+		$pdf->SetFont('Arial','',9);
+		$pdf->SetTextColor(0);
+		$pdf->SetFillColor(200,219,235);
+		$pdf->SetDrawColor(255,255,255);
+		$pdf->setLineWidth(.3);	
+		$pdf->Cell(40,6,'',1,0,'C',true);	
+		foreach ($selfSchedule->getPeriodList() as $period) {
+			$pdf->Cell(20,6,$period->getStartTime(),1,0,'C',true);
+			array_push($periodMap, $period->getStartTime());
+		}
+		$pdf->Ln();
+		
+		// OVERVIEW BLOCK SCHEDULE -
+		foreach ($selfSchedule->getEventList() as $event) {
+			if ($event->allDayFlag != 1) {
+				$pdf->SetFillColor(200,219,235);
+				$pdf->Cell(40,6,$event->eventName,1,0,'L',true);
+				foreach ($periodMap as $map) {
+					$exists = false;
+					foreach ($event->periodsList as $period) {	
+						if ($map == $period->periodStartTime) {
+							if ($event->selfScheduleFlag == 1) {
+								$pdf->SetFillColor(200,219,235);
+								$pdf->Cell(20,6,$period->teamLimit. ' Teams',1,0,'C',true);
+							}
+							else {
+								$pdf->SetFillColor(200,219,235);
+								$pdf->Cell(20,6,'Open',1,0,'C',true);
+							}
+							$exists = true;
+						} 
+					}
+					if (!$exists) {
+						$pdf->SetFillColor(232,232,232);
+						$pdf->Cell(20,6,'',1,0,'C',true);
+					}
+				}
+				$pdf->Ln();
+			}
+		}
+		$pdf->Ln();
+		// OVERVIEW ALL DAY SCHEDULE -
+		foreach ($selfSchedule->getEventList() as $event) {
+			$count = 1;
+			if ($event->allDayFlag == 1) {
+				$pdf->SetFont('Arial','',9);
+				$pdf->SetFillColor(200,219,235);
+				$pdf->Cell(40,6,$event->eventName,1,0,'L',true);
+				foreach ($event->periodsList as $period) {	
+					if ($count % 21 == 0) { 
+						$pdf->Ln();
+						$pdf->SetFillColor(255,255,255);
+						$pdf->Cell(40,6,'',1,0,'L',true);
+					}
+						if ($event->selfScheduleFlag == 1) {
+							$pdf->SetFont('Arial','',4);
+							$pdf->SetFillColor(200,219,235);
+							$pdf->Cell(8,6,$period->periodStartTime,1,0,'C',true);
+						}
+						else {
+							$pdf->SetFont('Arial','',4);
+							$pdf->SetFillColor(200,219,235);
+							$pdf->Cell(8,6,$period->periodStartTime,1,0,'C',true);
+						}
+					$count++;	
+				}
+				$pdf->Ln();$pdf->Ln();
+			}
+		}
+
+		$filename = str_replace(' ','_',$selfSchedule->getTournamentName());
+		$pdf->Output('D', $filename.'_Schedule.pdf',true);
+	}
+	
+	function exportEventSchedule($scheduleEventId) {
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		
+		foreach ($selfSchedule->getEventList() as $event) {
+			if ($scheduleEventId == $event->scheduleEventId) {
+				$filename = $event->eventName. "_Schedule.csv";
+			  	header("Content-Disposition: attachment; filename=\"$filename\"");
+			  	header("Content-Type: text/csv; charset=utf-8");
+			  	$output = fopen('php://output', 'w');
+			  	
+			  	// Event Title
+			  	$title = array($selfSchedule->getTournamentName() .': '.$event->eventName . '');
+			  	fputcsv($output, $title);
+			  	fputcsv($output, array());
+			  	
+			  	// Periods
+			  	if ($event->periodsList != null) {
+			  		foreach($event->periodsList as $period) {
+				  		// Team List For Period
+				  		$teams = array();
+				  		foreach ($selfSchedule->teamList as $team) {
+							if (in_array($period->scheduleEventPeriodId, $team->linkedPeriodsList)) {
+								array_push($teams, array($team->teamName,$team->teamNumber));
+							}
+						}
+				  		
+				  		fputcsv($output, array($period->periodStartTime.' - '.$period->periodEndTime));	
+				  		if ($event->selfScheduleFlag) {
+					  		for ($i = 1; $i <= $period->teamLimit; $i++) {
+						  		$teamName = '';
+						  		$teamNumber = '';
+						  		if (sizeof($teams) >= $i) {
+							  		$x = $teams[$i-1];
+							  		$teamName = $x[0];
+							  		$teamNumber = $x[1];
+						  		}
+	
+						  		$row = array($i.': '.$teamName,$teamNumber); 
+						  		fputcsv($output, $row);
+					  		}	
+				  		}
+				  		else {
+					  		fputcsv($output, array('Open',''));
+				  		}			  		
+				  		fputcsv($output, array());
+			  		}
+			  	
+			  	
+			  	}
+			  	fclose($output);
+			  	exit;
+				break;				
+			}
+		}
+	}
+	
+	function exportAllEventsSchedule() {
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		$filename = $selfSchedule->getTournamentName(). "_Event_Schedules.csv";
+		header("Content-Disposition: attachment; filename=\"$filename\"");
+		header("Content-Type: text/csv; charset=utf-8");
+		$output = fopen('php://output', 'w');
+		
+		fputcsv($output, array($filename));
+		fputcsv($output, array());
+			  	
+		foreach ($selfSchedule->getEventList() as $event) {
+			  	// Event Title
+			  	$title = array($event->eventName . '');
+			  	fputcsv($output, $title);
+			  	
+			  	// Periods
+			  	if ($event->periodsList != null) {
+			  		foreach($event->periodsList as $period) {
+				  		// Team List For Period
+				  		$teams = array();
+				  		foreach ($selfSchedule->teamList as $team) {
+							if (in_array($period->scheduleEventPeriodId, $team->linkedPeriodsList)) {
+								array_push($teams, array($team->teamName,$team->teamNumber));
+							}
+						}
+				  		
+				  		fputcsv($output, array($period->periodStartTime.' - '.$period->periodEndTime));	
+				  		if ($event->selfScheduleFlag) {
+					  		for ($i = 1; $i <= $period->teamLimit; $i++) {
+						  		$teamName = '';
+						  		$teamNumber = '';
+						  		if (sizeof($teams) >= $i) {
+							  		$x = $teams[$i-1];
+							  		$teamName = $x[0];
+							  		$teamNumber = $x[1];
+						  		}
+	
+						  		$row = array($i.': '.$teamName,$teamNumber); 
+						  		fputcsv($output, $row);
+					  		}
+				  		}	
+				  		else {
+					  		fputcsv($output, array('Open',''));	
+				  		}		  		
+				  		fputcsv($output, array());
+			  		}
+			  	
+			  	
+			  	}
+			  	fputcsv($output, array());
+			  	fputcsv($output, array());
+			}
+		fclose($output);
+		exit;
+	}
+	
+	function exportMySchedule() {
+		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		$myTeams = array();
+		
+		$filename = $selfSchedule->getTournamentName(). "_My_Schedule.csv";
+		header("Content-Disposition: attachment; filename=\"$filename\"");
+		header("Content-Type: text/csv; charset=utf-8");
+		$output = fopen('php://output', 'w');
+		$header = array();
+		array_push($header, $selfSchedule->getTournamentName());
+		
+		foreach ($selfSchedule->teamList as $team) {
+			if ($team->teamAvailableFlag) {
+				array_push($myTeams, $team);
+				array_push($header, $team->teamName);
+			}
+		}
+		
+		fputcsv($output, $header);
+		fputcsv($output, array());
+		
+		foreach ($selfSchedule->getEventList() as $event) {
+			$row = array();
+			$ssEvent = '';
+			if ($event->selfScheduleFlag) $ssEvent = '*';
+			array_push($row,$event->eventName.$ssEvent);
+			foreach($myTeams as $myTeam) {
+				$exists = false;
+				foreach ($event->periodsList as $period) {	
+					if (in_array($period->scheduleEventPeriodId,$myTeam->linkedPeriodsList)) {
+						array_push($row, $period->periodStartTime .' - '.$period->periodEndTime);
+						$exists = true;
+						break;
+					}
+				}
+				if (!$exists AND $event->selfScheduleFlag) {
+					array_push($row, 'Not Registered');
+				}
+				else if (!$exists) {
+					array_push($row, 'No Self Schedule');
+				}
+			}
+			fputcsv($output, $row);	
+		}
+		fclose($output);
+		exit;
+	}
+	
 	
 ?>

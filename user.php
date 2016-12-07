@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.2, 09.05.2016 
+ * @version: 1.16.3, 12.07.2016 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -43,7 +43,7 @@
 	// Edit or Readonly
 	$disabled = '';
 	$disable = false;
-	if (($_SESSION["pageCommand"] != null and $_SESSION["pageCommand"] == 'selectCoach') || getCurrentRole() == 'ADMIN') {
+	if (($_SESSION["pageCommand"] != null and ($_SESSION["pageCommand"] == 'selectCoach' || $_SESSION["pageCommand"] == 'selectVerifier' || $_SESSION["pageCommand"] == 'selectSupervisor')) || getCurrentRole() == 'ADMIN') {
 		$disabled = 'disabled';
 		$disable = true;	
 	}
@@ -101,7 +101,7 @@
      
      <h1>Manage Users</h1>
 	 <hr>
-	<table width="90%" class="borderless">
+	<table width="100%" class="borderless">
 	<tr>
 	<td width="15"><label for="userFirstName">First Name: </label></td>
 	<td width="35">
@@ -111,8 +111,8 @@
 	<td width="35"><input type="text" size="20" class="form-control" name="userLastName" id="userLastName" value=<?php echo '"'.$_SESSION["userLastName"].'"' ?>></td>
 	</tr>
 	<tr>
-	<td width="15"><label for="userRole">Role: </label></td>
-	<td width="35">
+	<td><label for="userRole">Role: </label></td>
+	<td>
 			<select class="form-control" name="userRole" id="userRole" <?php echo $disabled; ?>>
 			<option value="" <?php if ($_SESSION["userRole"] == null or $_SESSION["userRole"] == '') echo 'selected'; ?> ></option>
 			<option value="SUPERUSER" <?php if ($_SESSION["userRole"] == 'SUPERUSER') echo 'selected'; ?>>Super User</option>
@@ -122,8 +122,8 @@
 			<option value="COACH" <?php if ($_SESSION["userRole"] == 'COACH') echo 'selected'; ?>>Coach</option>
 			</select>
 	</td>
-	<td width="15"></td>
-	<td width="35"></td>
+	<td></td>
+	<td></td>
 	</tr>
 	<tr>
 	<td><label># of Results: </label></td><td>
@@ -169,7 +169,13 @@
         ?>
           </tbody>
           </table>
-		<?php paginationFooter($_SESSION["userList"]); ?>
+		<?php paginationFooter($_SESSION["userList"]); 	
+		
+		echo '<button type="submit" class="btn btn-xs btn-primary" name="adminCreateUser" value="'.$_SESSION["pageCommand"].'">Create User</button> ';
+		echo '<button type="submit" class="btn btn-xs btn-primary" name="cancelSelectUser" value="'.$_SESSION["pageCommand"].'">Cancel</button>';
+		?>
+		
+		
       <hr>
 	<?php include_once 'footer.php'; ?>
 

@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.2, 09.05.2016 
+ * @version: 1.16.3, 12.07.2016 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -25,6 +25,7 @@
 		
 	session_start(); 
 	include_once('score_center_objects.php');
+	include_once('functions/global_functions.php');
 	include_once('functions/self_schedule_functions.php');
 	include_once('functions/constants.php');
 	include_once('logon_check.php');
@@ -32,7 +33,7 @@
 	
 	// Security Level Check
 	include_once('role_check.php');
-	checkUserRole(4);
+	checkUserRole(1);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -64,7 +65,8 @@
 	}
 	
 	function removeTeamPeriod(element, tournTeamId, scheduleEventPeriodId, scheduleTeamId) {
-		xmlhttp = new XMLHttpRequest();
+		if (confirm('Are you sure you want to remove this team from this event period?')) {
+			xmlhttp = new XMLHttpRequest();
 			xmlhttp.onreadystatechange = function() {
 				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 					if (xmlhttp.responseText.trim() == 'error1') {
@@ -78,6 +80,7 @@
 			}	
 	        xmlhttp.open("GET","controller.php?command=removeTeamEventPeriod&tournTeamId="+tournTeamId+"&scheduleEventPeriodId="+ scheduleEventPeriodId+"&scheduleTeamId="+scheduleTeamId, true);
 	        xmlhttp.send();
+	    }
 	}
 
 
@@ -106,7 +109,7 @@
       
      <div id="periodSchedulerDiv"> 
     <?php
-	echo getPeriodScheduler();
+		echo getPeriodScheduler();
 
 	?>
      </div>

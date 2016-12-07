@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.2, 09.05.2016  
+ * @version: 1.16.3, 12.07.2016  
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -26,7 +26,7 @@
 	session_start(); 
 	include_once('score_center_objects.php');
 	include_once('logon_check.php');
-	
+	include_once('functions/global_functions.php');
 	require_once 'login.php';
 	$mysqli = mysqli_init();
 	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
@@ -96,21 +96,10 @@
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Enter Scores</h1>
-	 <table width="100%">
-	 <tr>
-     <td><h4>Tournament: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentName"] . ' - ' . $_SESSION["tournamentDate"]; ?></span></h4></td>
-	 <td><h4>Overall Points: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["pointsSystem"]; ?></span></h4></td>
-	</tr>
-	 <tr>
-	 <td><h4>Division: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentDivision"]; ?></span></h4></td>
-     <td><!--<h4>Max Points Earned Per Event: <span style="font-weight:normal;font-size:14px;"><?php //echo $_SESSION["highestScore"]; ?></span></h4>--></td>	
-	</tr>
-	</table>
-	<br />
-     <h6>Events Completed: <?php echo $_SESSION["tournamentEventsCompleted"]; ?></h6>
-     <?php
-     echo' <button type="submit" class="btn btn-xs btn-success" name="printScore" value='.$_SESSION["tournamentId"].'>View Results</button>&nbsp;';
-     //echo '<button type="submit" class="btn btn-xs btn-success" name="viewStatistics" value='.$_SESSION["tournamentId"].'>View Statistics</button>&nbsp;';
+
+	 <?php
+	     echo getTournamentHeader();
+		 echo' <button type="submit" class="btn btn-xs btn-primary" name="printScore" value='.$_SESSION["tournamentId"].'>View Results</button>&nbsp;';
      ?>
 	 <hr>
 
@@ -152,8 +141,8 @@
 				echo '</td>';
 				echo '<td>';
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="enterEventScores" value="'.$row['3'].'">Enter Scores</button> &nbsp;
-				<button type="submit" class="btn btn-xs btn-success" name="exportEventScores" value="'.$row['3'].'">Results</button>&nbsp;
-				<button type="submit" class="btn btn-xs btn-success" name="exportEventAwards" value="'.$row['3'].'">Awards</button>  '; 				
+				<button type="submit" class="btn btn-xs btn-primary" name="exportEventScores" value="'.$row['3'].'">Results</button>&nbsp;
+				<button type="submit" class="btn btn-xs btn-primary" name="exportEventAwards" value="'.$row['3'].'">Awards</button>  '; 				
 				echo '</td>';
 					
 				echo '</tr>';	
