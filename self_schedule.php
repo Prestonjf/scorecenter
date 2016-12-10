@@ -40,6 +40,8 @@
   <head>
 	<?php include_once('libs/head_tags.php'); ?>
 	<?php include_once('libs/pagination.php'); ?>
+	<link href="css/jquery.ui.timepicker.css" rel="stylesheet">
+	<script type="text/javascript" src="js/jquery.ui.timepicker.js"></script>
 	
   <script type="text/javascript">
   //$(document).ready(function() { });
@@ -133,6 +135,7 @@
 				}
 				else {
 					document.getElementById('eventPeriodsTableDiv').innerHTML = xmlhttp.responseText;
+					jQuery('#reloadDiv').click();
 					
 				}					
 			}
@@ -145,19 +148,16 @@
 	}
 	
 	function reloadPeriodEvents() {
-		xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function() {
-		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-			if (xmlhttp.responseText.trim() == 'error1' || xmlhttp.responseText.trim() == 'error2') {
-				// Error			
-			}
-			else {
-				$('#eventPeriodsTableDiv').html(xmlhttp.responseText);
-			}					
-		}
-		}	
-	       xmlhttp.open("GET","controller.php?command=reloadEventPeriods",true);
-	       xmlhttp.send();	
+	       	$.ajax({
+		        type     : "GET",
+		        cache    : false,
+		        url      : "controller.php?command=reloadEventPeriods",
+		        data     : $(this).serialize(),
+		        success  : function(data, $) {
+			    			document.getElementById('eventPeriodsTableDiv').innerHTML = data;
+			    			jQuery('#reloadDiv').click();
+		        }
+		    });	
 	}
 	
 	function deleteEventPrd(element, eventRow, periodRow) {
@@ -172,6 +172,7 @@
 					}
 					else {
 						document.getElementById('eventPeriodsTableDiv').innerHTML = xmlhttp.responseText;
+						jQuery('#reloadDiv').click();
 						//displaySuccess('<?php echo SUCCESS_SELF_SCHEDULE_PERIOD_DELETED; ?>');
 					}					
 				}
@@ -193,6 +194,7 @@
 					}
 					else {
 						document.getElementById('eventPeriodsTableDiv').innerHTML = xmlhttp.responseText;
+						jQuery('#reloadDiv').click();
 						displaySuccess('<?php echo SUCCESS_SELF_SCHEDULE_PERIODS_DELETED; ?>');
 					}					
 				}
@@ -350,7 +352,38 @@
 			$('#scheduleTeamsDiv').show();
 		}
 	}
-  
+	
+	jQuery(document).ready(function($){		
+		bindElements($);
+		
+		$('#reloadDiv').click(function() {	
+			bindElements($);
+		});
+	}); 
+	
+	
+	function bindElements(obj) {
+		var max = 300;
+		var i = 0;
+		while (i < max) {
+			if (obj('#eventStartTime'+i) == null) break;
+			else if ($('#eventStartTime'+i) != null) {
+			obj('#eventStartTime'+i).timepicker({ showPeriodLabels: true, showPeriod: true,showLeadingZero: true,showOn: 'button', button: '.timepicker_e_start_time'+i,defaultTime: '12:00'});
+			}
+			i++;
+		}
+	}
+	
+	function validateDate(ele) {
+	var pattern = /^((1[0-2]|0?[1-9]):([0-5][0-9]) ([AaPp][Mm]))$/;
+
+		if (!pattern.test(ele.value)) {
+			ele.value = '';
+		}
+	} 
+
+
+		</script>  
   </script>
     <style>
   
@@ -399,12 +432,24 @@
 		<tr>
 		<td width="25%"><label for="tournamentStartTime">Tournament Start Time:<span class="red">*</span></label></td>
 		<td width="25%">
-			<input type="time" class="form-control" name="tournamentStartTime" id="tournamentStartTime" value="<?php echo $selfSchedule->getStartTime(); ?>">
+			<div class="input-group">
+			<input type="text" class="form-control timepicker_t_start_time" name="tournamentStartTime" id="tournamentStartTime" onchange="validateDate(this)" value="<?php echo $selfSchedule->getStartTime(); ?>">
+			<span class="input-group-addon timepicker_t_start_time"><i class="glyphicon glyphicon-time"></i></span>
+			</div>
+		 <script type="text/javascript">	
+			$('#tournamentStartTime').timepicker({ showPeriodLabels: true, showPeriod: true,showLeadingZero: true,showOn: 'button', button: '.timepicker_t_start_time',defaultTime: '12:00'});
+		</script>
 		</td>
 		
 		<td width="25%"><label for="tournamentEndTime">Tournament End Time:<span class="red">*</span></label></td>
 		<td width="25%">
-			<input type="time" class="form-control" name="tournamentEndTime" id="tournamentEndTime" value="<?php echo $selfSchedule->getEndTime(); ?>">
+			<div class="input-group">
+			<input type="text" class="form-control timepicker_t_end_time" name="tournamentEndTime" id="tournamentEndTime"  onchange="validateDate(this)" value="<?php echo $selfSchedule->getEndTime(); ?>">
+			<span class="input-group-addon timepicker_t_end_time"><i class="glyphicon glyphicon-time"></i></span>
+			</div>
+			<script type="text/javascript">	
+			$('#tournamentEndTime').timepicker({ showPeriodLabels: true, showPeriod: true,showLeadingZero: true,showOn: 'button', button: '.timepicker_t_end_time',defaultTime: '12:00'});
+		</script>
 		</td>
 		</tr>
 		<tr>
@@ -432,8 +477,22 @@
 		<table class="borderless"><tr>
 		<td><button type="button" class="btn btn-xs btn-primary" name="addPeriod" onclick="addTimePeriod()" <?php echo $disable; ?>>Add Period</button></td>
 		<td><label for="periodNumber">Period Number: </label></td><td><input type="number" class="form-control" name="periodNumber" id="periodNumber" value="<?php echo $_SESSION["periodNumber"]; ?>" <?php echo $disable; ?>></td>
-		<td><label for="periodStartTime">Period Start Time: </label></td><td><input type="time" class="form-control" name="periodStartTime" id="periodStartTime" value="<?php echo $_SESSION["periodStartTime"]; ?>" <?php echo $disable; ?>></td>
-		<td><label for="periodEndTime">Period End Time: </label></td><td><input type="time" class="form-control" name="periodEndTime" id="periodEndTime" value="<?php echo $_SESSION["periodEndTime"]; ?>" <?php echo $disable; ?>></td>
+		<td><label for="periodStartTime">Period Start Time: </label></td>
+		<td>
+			<div class="input-group">
+			<input type="text" class="form-control timepicker_p_start_time" name="periodStartTime" id="periodStartTime"  onchange="validateDate(this)" value="<?php echo $_SESSION["periodStartTime"]; ?>" <?php echo $disable; ?>>
+			<span class="input-group-addon timepicker_p_start_time"><i class="glyphicon glyphicon-time"></i></span>
+		<script type="text/javascript">$('#periodStartTime').timepicker({ showPeriodLabels: true, showPeriod: true,showLeadingZero: true,showOn: 'button', button: '.timepicker_p_start_time',defaultTime: '12:00'});</script>
+			</div>
+		</td>
+		<td><label for="periodEndTime">Period End Time: </label></td>
+		<td>
+			<div class="input-group">
+			<input type="text" class="form-control timepicker_p_end_time" name="periodEndTime" id="periodEndTime"  onchange="validateDate(this)" value="<?php echo $_SESSION["periodEndTime"]; ?>" <?php echo $disable; ?>>
+			<span class="input-group-addon timepicker_p_end_time"><i class="glyphicon glyphicon-time"></i></span>
+			<script type="text/javascript">$('#periodEndTime').timepicker({ showPeriodLabels: true, showPeriod: true,showLeadingZero: true,showOn: 'button', button: '.timepicker_p_end_time',defaultTime: '12:00' });</script>
+			</div>
+		</td>
 		<td><label for="periodInterval">Interval Time After Period (Mins): </label></td><td><input type="number" class="form-control" name="periodInterval" id="periodInterval" value="<?php echo $_SESSION["periodInterval"]; ?>" <?php echo $disable; ?>></td>
 		</tr>
 		</table>
@@ -483,7 +542,7 @@
     <script src="js/jquery-1.11.3.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
-    
+    <div id="reloadDiv"></div>
     <?php 
     	if ($_SESSION['selfScheduleSaveSuccess'] != null and $_SESSION['selfScheduleSaveSuccess'] == '1') { ?>
     	<script type="text/javascript">displaySuccess('<?php echo SUCCESS_SELF_SCHEDULE_SAVED; ?>');</script>

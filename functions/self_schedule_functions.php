@@ -92,7 +92,13 @@
 				$html .= '<th class="selfSchedule"><label>All Day Event?</label><br><input type="checkbox" id="allDayEventFlag'.$count.'" name="allDayEventFlag'.$count.'" onchange="allDayEventChecked('.$count.','.sizeof($event->periodsList).');"value="1" '.$addButtonDisabled;
 				if ($event->allDayFlag and $event->allDayFlag == 1) $html .= ' checked ';
 				$html .='></th>
-				<th class="selfSchedule"><label>Start Time</label><br><input type="time" class="form-control" name="eventStartTime'.$count.'" id="eventStartTime'.$count.'" value="'.$event->eventStartTime.'" '.$allDayEventDisabled.'></th>
+				<th class="selfSchedule"><label>Start Time</label><br>
+				<div class="input-group">
+				<input type="text" class="form-control timepicker_e_start_time'.$count.'" name="eventStartTime'.$count.'" id="eventStartTime'.$count.'"  onchange="validateDate(this)" value="'.$event->eventStartTime.'" '.$allDayEventDisabled.'>
+				<span class="input-group-addon timepicker_e_start_time'.$count.'"><i class="glyphicon glyphicon-time"></i></span>
+				</div>
+
+				</th>
 				<th class="selfSchedule"><label>Period Length</label><br><input type="text" class="form-control" name="periodLength'.$count.'" id="periodLength'.$count.'" value="'.$event->periodLength.'" '.$allDayEventDisabled.'></th>
 				<th class="selfSchedule"><label>Period Interval</label><br><input type="text" class="form-control" name="periodInterval'.$count.'" id="periodInterval'.$count.'" value="'.$event->periodInterval.'" '.$allDayEventDisabled.'></th>
 				<th class="selfSchedule"><label>Max Teams per Period</label><br><input type="text" class="form-control" name="teamLimit'.$count.'" id="teamLimit'.$count.'" value="'.$event->teamLimit.'" '.$allDayEventDisabled.'></th>
@@ -111,7 +117,7 @@
 				}
 				$html .= '</body></table>';
 				
-				 $html .= '<table class="borderless" width="75%"><tr><td><button type="button" class="btn btn-xs btn-primary" name="addEventPeriod'.$count.'" onclick="return addNewEventPeriod(this,'.$count.','.sizeof($event->periodsList).');" value="" '.$addButtonDisabled.'>Add Period</button> <button type="button" class="btn btn-xs btn-danger" name="deleteAllEventPrds" onclick="deleteAllEventPeriods(this,'.$count.');" value="" ' .$addButtonDisabled.'>Delete All</button></td>
+				 $html .= '<table class="borderless" width="75%"><tr><td width="25%"><button type="button" class="btn btn-xs btn-primary" name="addEventPeriod'.$count.'" onclick="return addNewEventPeriod(this,'.$count.','.sizeof($event->periodsList).');" value="" '.$addButtonDisabled.'>Add Period</button> <button type="button" class="btn btn-xs btn-danger" name="deleteAllEventPrds" onclick="deleteAllEventPeriods(this,'.$count.');" value="" ' .$addButtonDisabled.'>Delete All</button></td>
 				 
 				 <td><label for="selectedPeriod'.$count.'">Period: </label></td><td><select class="form-control" name="selectedPeriod'.$count.'" id="selectedPeriod'.$count.'" '.$blockPeriodsDisable.'>
 				 <option value=""></option>';
@@ -524,7 +530,6 @@
 		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
 		$periodMap = array();
 		
-		require('libs/fpdf/fpdf.php');
 		$pdf = new FPDF();
 		$pdf->SetTitle('Tournament Schedule Overview', true);
 		$pdf->AddPage('L');
@@ -541,10 +546,12 @@
 		$pdf->SetFillColor(200,219,235);
 		$pdf->SetDrawColor(255,255,255);
 		$pdf->setLineWidth(.3);	
-		$pdf->Cell(40,6,'',1,0,'C',true);	
-		foreach ($selfSchedule->getPeriodList() as $period) {
-			$pdf->Cell(20,6,$period->getStartTime(),1,0,'C',true);
-			array_push($periodMap, $period->getStartTime());
+		$pdf->Cell(40,6,'',1,0,'C',true);
+		if ($selfSchedule->getPeriodList()) {	
+			foreach ($selfSchedule->getPeriodList() as $period) {
+				$pdf->Cell(20,6,$period->getStartTime(),1,0,'C',true);
+				array_push($periodMap, $period->getStartTime());
+			}
 		}
 		$pdf->Ln();
 		
@@ -612,6 +619,7 @@
 	
 	function exportEventSchedule($scheduleEventId) {
 		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+		if ($scheduleEventId == -1) return;
 		
 		foreach ($selfSchedule->getEventList() as $event) {
 			if ($scheduleEventId == $event->scheduleEventId) {

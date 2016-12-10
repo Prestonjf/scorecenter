@@ -345,7 +345,7 @@ else if (isset($_GET['editUser'])) {
 }
 else if (isset($_GET['selectUser'])) {
 	if ($_SESSION["pageCommand"] == 'selectCoach' AND $_GET["selectUser"] != null) {
-		addCoach();
+		addCoach('');
 		header("Location: team_detail.php");
 		exit();
 	}
@@ -4162,7 +4162,7 @@ else {
 			break;
 		}
 		// Load Basic Schedule Information
-		$query = " SELECT TOURNAMENT_SCHEDULE_ID, OPEN_FLAG, DATE_FORMAT(START_TIME,'%H:%i') 'START_TIME', DATE_FORMAT(END_TIME,'%H:%i') 'END_TIME' FROM TOURNAMENT_SCHEDULE WHERE TOURNAMENT_ID=".$selfSchedule->getTournamentId();
+		$query = " SELECT TOURNAMENT_SCHEDULE_ID, OPEN_FLAG, DATE_FORMAT(START_TIME,'%h:%i %p') 'START_TIME', DATE_FORMAT(END_TIME,'%h:%i %p') 'END_TIME' FROM TOURNAMENT_SCHEDULE WHERE TOURNAMENT_ID=".$selfSchedule->getTournamentId();
 		$results = $mysqli->query($query);
 		if ($results) {
 			$row = $results->fetch_array(MYSQLI_BOTH);			
@@ -4191,7 +4191,7 @@ else {
 		}
 		
 		// Load Events Periods
-		$query = "SELECT TE.TOURN_EVENT_ID,E.NAME, SE.SCHEDULE_EVENT_ID, SE.ALL_DAY_FLAG, SE.ALLOW_SCHEDULE_FLAG, SE.PERIOD_LENGTH, SE.PERIOD_TEAM_LIMIT, SE.PERIOD_INTERVAL, DATE_FORMAT(SE.EVENT_START_TIME,'%H:%i') as EVENT_START_TIME,
+		$query = "SELECT TE.TOURN_EVENT_ID,E.NAME, SE.SCHEDULE_EVENT_ID, SE.ALL_DAY_FLAG, SE.ALLOW_SCHEDULE_FLAG, SE.PERIOD_LENGTH, SE.PERIOD_TEAM_LIMIT, SE.PERIOD_INTERVAL, DATE_FORMAT(SE.EVENT_START_TIME,'%h:%i %p') as EVENT_START_TIME,
 		SEP.SCHEDULE_EVENT_PERIOD_ID,SEP.PERIOD_TEAM_LIMIT AS P_LIMIT,DATE_FORMAT(SEP.PERIOD_START_TIME,'%h:%i %p') PERIOD_START_TIME, DATE_FORMAT(SEP.PERIOD_END_TIME,'%h:%i %p') PERIOD_END_TIME,SEP.PERIOD_INTERVAL AS P_INTERVAL, SEP.PERIOD_NUMBER, SEP.PERIOD_TEAM_LIMIT-count(ST.SCHEDULE_TEAM_ID) AS P_COUNT
 		FROM TOURNAMENT_EVENT TE
 		INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID
@@ -4264,7 +4264,7 @@ else {
 		LEFT JOIN SCHEDULE_TEAM TS ON TS.TOURN_TEAM_ID=TT.TOURN_TEAM_ID
 		WHERE TT.TOURNAMENT_ID=".$selfSchedule->getTournamentId()." 
 		GROUP BY TT.TOURN_TEAM_ID
-		ORDER BY CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC, T.NAME ASC ";
+		ORDER BY T.NAME ASC, CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC ";
 		$results = $mysqli->query($query); 
 			while ($row = $results->fetch_array(MYSQLI_BOTH)) {				
 				$team = new selfScheduleTeam();
@@ -4317,9 +4317,9 @@ else {
 		$period->setPeriodInterval($_GET['periodInterval']);
 		$period->setPeriodNumber($_GET['periodNumber']);
 		
-		$startTime = DateTime::createFromFormat('H:i',$_GET['periodStartTime']); 
+		$startTime = DateTime::createFromFormat('h:i A',$_GET['periodStartTime']); 
 		$period->setStartTime($startTime->format('h:i A'));
-		$endTime = DateTime::createFromFormat('H:i',$_GET['periodEndTime']); 
+		$endTime = DateTime::createFromFormat('h:i A',$_GET['periodEndTime']); 
 		$period->setEndTime($endTime->format('h:i A'));
 		
 		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
@@ -4396,10 +4396,10 @@ else {
 			$limit = $_GET['aTeamLimit'];
 			$startTime = $_GET['aEventStartTime'];
 			
-			$startTime = DateTime::createFromFormat('m/d/Y H:i', $selfSchedule->getTournamentDate().' '.$_GET['aEventStartTime']); 
-			$endTime = DateTime::createFromFormat('m/d/Y H:i', $selfSchedule->getTournamentDate().' '.$selfSchedule->getEndTime()); 
+			$startTime = DateTime::createFromFormat('m/d/Y h:i A', $selfSchedule->getTournamentDate().' '.$_GET['aEventStartTime']); 
+			$endTime = DateTime::createFromFormat('m/d/Y h:i A', $selfSchedule->getTournamentDate().' '.$selfSchedule->getEndTime()); 
 			$periodStartTime = $startTime;
-			$periodEndTime = DateTime::createFromFormat('m/d/Y H:i', $selfSchedule->getTournamentDate().' '.$_GET['aEventStartTime']); 
+			$periodEndTime = DateTime::createFromFormat('m/d/Y h:i A', $selfSchedule->getTournamentDate().' '.$_GET['aEventStartTime']); 
 			$lenFMT = 'PT'.$length.'M';
 			$intervalFMT = 'PT'.$interval.'M';
 			
@@ -4551,9 +4551,9 @@ else {
 	function saveSelfScheduleSettings($mysqli) {
 			$selfSchedule = unserialize($_SESSION["selfSchedule"]);
 			
-			$startTime = DateTime::createFromFormat('m/d/Y H:i', $selfSchedule->getTournamentDate().' '.$selfSchedule->getStartTime()); 
+			$startTime = DateTime::createFromFormat('m/d/Y h:i A', $selfSchedule->getTournamentDate().' '.$selfSchedule->getStartTime()); 
 			$startTime1 = $startTime->format('Y-m-d H:i:s');
-			$endTime = DateTime::createFromFormat('m/d/Y H:i', $selfSchedule->getTournamentDate().' '.$selfSchedule->getEndTime()); 
+			$endTime = DateTime::createFromFormat('m/d/Y h:i A', $selfSchedule->getTournamentDate().' '.$selfSchedule->getEndTime()); 
 			$endTime1 = $endTime->format('Y-m-d H:i:s');
 			$tournamentId = $selfSchedule->getTournamentId();
 			$openFlag = $selfSchedule->getSelfScheduleOpenFlag();
@@ -4577,7 +4577,7 @@ else {
 				$query->execute();
 				$query->free_result();				
 			}
-			
+			if ($selfSchedule->getPeriodList()) {
 			foreach ($selfSchedule->getPeriodList() as $period) {
 				$startTime = DateTime::createFromFormat('m/d/Y h:i A', $selfSchedule->getTournamentDate().' '.$period->getStartTime()); 
 				$startTime1 = $startTime->format('Y-m-d H:i:s');
@@ -4601,6 +4601,7 @@ else {
 
 				}
 			} 
+			}
 			
 			// save Event List
 			if ($selfSchedule->getEventList()) {
@@ -4611,7 +4612,7 @@ else {
 					$periodInterval = 0; if ($event->periodInterval) $periodInterval = $event->periodInterval;
 					$selfScheduleFlag = 0; if ($event->selfScheduleFlag) $selfScheduleFlag = $event->selfScheduleFlag;
 					$eventStartTime = null; if ($event->eventStartTime) {
-						$eventStartTime = DateTime::createFromFormat('m/d/Y H:i', $selfSchedule->getTournamentDate().' '.$event->eventStartTime); 
+						$eventStartTime = DateTime::createFromFormat('m/d/Y h:i A', $selfSchedule->getTournamentDate().' '.$event->eventStartTime); 
 						$eventStartTime = $eventStartTime->format('Y-m-d H:i:s');
 					}
 					
