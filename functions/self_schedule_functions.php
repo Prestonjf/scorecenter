@@ -142,7 +142,17 @@
 	function getMyTeams() {
 		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
 		$html = '';
-		$html .= '<div style="float: left; overflow: hidden;"><label><a href="javascript: displayTeams();">Select Team:<br><br></a></label></div><div style="overflow: hidden; padding-left: 4em;" id="scheduleTeamsDiv">';
+		$html .= '<div style="float: left; overflow: hidden;"><label><a href="javascript: displayTeams();">Select Team: </a></label><br>';
+		
+		// Reserved Slots
+		if (isUserAccess(1)) {
+			$html .= '<div style="display: inline-block; white-space: nowrap; ';
+			if ($selfSchedule->reservedSelected) $html .= ' background: #c8dbeb; border-radius: 5px; ';
+			$html .= ' "><a href="javascript: selectScheduleTeam(-1);"><div class="idCircle" style="background: #FFFFFF; border: 1px solid black"></div> Reserved</a></div>';
+		}	
+		
+		$html .= '</div><div style="overflow: hidden; padding-left: 4em;" id="scheduleTeamsDiv">';
+	
 		$count = 0;
 		foreach ($selfSchedule->teamList as $team) {
 			if ($team->teamAvailableFlag) {
@@ -277,6 +287,18 @@
 										$html .= '<td class="selfScheduleDisplay" align="center" bgcolor="'.$backgroundColor.'" width="'.$tdwidth.'%" data-toggle="tooltip" title="'.$period->periodStartTime.' - '.$period->periodEndTime.'"><a href="javascript: scheduleEventPeriod('.$event->scheduleEventId.','.$period->scheduleEventPeriodId.')">'.$period->slotsOpen.' of '.$period->teamLimit.'</a><br>';
 										}
 										if (true) {
+											// Reserved List
+											if ($selfSchedule->reservedSelected) {
+												foreach($selfSchedule->reservedEventPeriods as $reservedPeriods) {
+													if ($reservedPeriods AND $reservedPeriods[0] AND $reservedPeriods[0] == $period->scheduleEventPeriodId) {
+														for ($i = 0; $i < $reservedPeriods[1]; $i++) {
+															$html .= '<div class="idCircle" style="background: #FFFFFF; border: 1px solid black";"></div> ';
+														}
+														break;
+													}
+												}
+											}
+											// Team List
 											foreach($selfSchedule->teamList as $team) {
 												if ($team->teamAvailableFlag) {
 													foreach($team->linkedPeriodsList as $linked) {
@@ -344,6 +366,18 @@
 								$html .= '<td class="selfScheduleDisplay" bgcolor="'.$backgroundColor.'" width="4%" align="center" data-toggle="tooltip" title="'.$period->periodStartTime.' - '.$period->periodEndTime.'"><a href="javascript: scheduleEventPeriod('.$event->scheduleEventId.','.$period->scheduleEventPeriodId.')"><div style="font-size:60%;">'.$period->periodStartTime.'<br>'.$period->slotsOpen.' of '.$period->teamLimit.'</div></a>';
 								}
 								if (true) {
+									// Reserved List
+									if ($selfSchedule->reservedSelected) {
+										foreach($selfSchedule->reservedEventPeriods as $reservedPeriods) {
+											if ($reservedPeriods AND $reservedPeriods[0] AND $reservedPeriods[0] == $period->scheduleEventPeriodId) {
+												for ($i = 0; $i < $reservedPeriods[1]; $i++) {
+													$html .= '<div class="idCircle" style="background: #FFFFFF; border: 1px solid black";"></div> ';
+												}
+												break;
+											}
+										}
+									}
+									// Team List			
 									foreach($selfSchedule->teamList as $team) {
 										if ($team->teamAvailableFlag) {
 											foreach($team->linkedPeriodsList as $linked) {
@@ -443,10 +477,17 @@
 		$html .= '<div style="float: left; overflow: hidden; width: 40%;">';
 		$html .= '<table class="table table-hover" id="availableTeamsTable"><thead><tr>
 		<th data-field="number" data-align="right" data-sortable="true">#</th>
-		<th data-field="number" data-align="right" data-sortable="true">Teams</th>
+		<th data-field="number" data-align="right" data-sortable="true">Available Teams</th>
 		<th data-field="number" data-align="right" data-sortable="true">Action</th>
 		</tr></thead>';
 		$html .= '<tbody id="teamTableBody">';
+		
+		// Filler Slot
+		$html .= '<tr><td></td>';
+		$html .= '<td>Reserved</td>';
+		$html .= '<td>';
+		if (isUserAccess(1)) $html .= '<button type="button" class="btn btn-xs btn-default" name="addTeamEventPeriod" onclick="addTeamPeriod(this,-1,'.$period->scheduleEventPeriodId.');" value=""' .$addButtonDisabled.'">Add</button>';
+		$html .= '</td>';
 		
 		if ($selfSchedule->teamList) {
 			foreach ($selfSchedule->teamList as $team) {
@@ -473,6 +514,7 @@
 		$html .= '<tbody id="scheduledTeamsTableBody">';
 		$count = 1;
 		$teamPosition = 0;
+		$noTeamPosition = 0;
 		$teamLimit = $period->teamLimit;
 		
 		while ($count <= $teamLimit) {
@@ -501,16 +543,18 @@
 				$html .= '</td></tr>';
 			}
 			else {
-				$html .= '<td></td><td></td>';
+				if ($noTeamPosition < sizeOf($selfSchedule->noTeams)) {
+					$reservedTeam = $selfSchedule->noTeams[$noTeamPosition];
+					$html .= '<td>Reserved</td><td>';
+					if (isUserAccess(1)) $html .= '<button type="button" class="btn btn-xs btn-default" name="removeTeamEventPeriod" onclick="removeTeamPeriod(this,-1,'.$period->scheduleEventPeriodId.','.$reservedTeam->scheduleTeamId.');" value=""' .$addButtonDisabled.'">Remove</button>';
+					$html .= '</td>';
+					$noTeamPosition++;
+				}
+				else {
+					$html .= '<td></td><td></td>';
+				}
 			}
-			
-			
-			
-			/**else {
-				$html .= '<tr><td>'.$count.'</td>';
-				$html .= '<td></td>';
-				$html .= '<td></td></tr>';
-			}**/
+
 			$count++;
 		}
 		$html .= '</tbody></table>';
@@ -643,9 +687,21 @@
 								array_push($teams, array($team->teamName,$team->teamNumber));
 							}
 						}
+						
+						// Reserved List For Period
+						$reservedSlots = array();
+						foreach($selfSchedule->reservedEventPeriods as $reservedPeriod) {
+							if ($reservedPeriod AND $reservedPeriod[0] == $period->scheduleEventPeriodId) {
+								for ($i=0;$i<$reservedPeriod[1];$i++) {
+									array_push($reservedSlots,1);
+								}
+								break;
+							}
+						}
 				  		
 				  		fputcsv($output, array($period->periodStartTime.' - '.$period->periodEndTime));	
 				  		if ($event->selfScheduleFlag) {
+					  		$reservedCount = 0;
 					  		for ($i = 1; $i <= $period->teamLimit; $i++) {
 						  		$teamName = '';
 						  		$teamNumber = '';
@@ -653,6 +709,10 @@
 							  		$x = $teams[$i-1];
 							  		$teamName = $x[0];
 							  		$teamNumber = $x[1];
+						  		}
+						  		else if ($reservedCount < sizeof($reservedSlots)) {
+							  		$teamName = 'Reserved';
+							  		$reservedCount++;
 						  		}
 	
 						  		$row = array($i.': '.$teamName,$teamNumber); 
@@ -699,9 +759,21 @@
 								array_push($teams, array($team->teamName,$team->teamNumber));
 							}
 						}
+						
+						// Reserved List For Period
+						$reservedSlots = array();
+						foreach($selfSchedule->reservedEventPeriods as $reservedPeriod) {
+							if ($reservedPeriod AND $reservedPeriod[0] == $period->scheduleEventPeriodId) {
+								for ($i=0;$i<$reservedPeriod[1];$i++) {
+									array_push($reservedSlots,1);
+								}
+								break;
+							}
+						}
 				  		
 				  		fputcsv($output, array($period->periodStartTime.' - '.$period->periodEndTime));	
 				  		if ($event->selfScheduleFlag) {
+					  		$reservedCount = 0;
 					  		for ($i = 1; $i <= $period->teamLimit; $i++) {
 						  		$teamName = '';
 						  		$teamNumber = '';
@@ -709,6 +781,10 @@
 							  		$x = $teams[$i-1];
 							  		$teamName = $x[0];
 							  		$teamNumber = $x[1];
+						  		}
+						  		else if ($reservedCount < sizeof($reservedSlots)) {
+							  		$teamName = 'Reserved';
+							  		$reservedCount++;
 						  		}
 	
 						  		$row = array($i.': '.$teamName,$teamNumber); 

@@ -228,6 +228,9 @@ class selfSchedule {
    private $periodList;
    private $eventList;
    public $teamList = array();
+   public $noTeams = array();
+   public $reservedEventPeriods = array();
+   public $reservedSelected = false;
    public $currentPeriodId;
    public $tournTeamSelectedId;
   
