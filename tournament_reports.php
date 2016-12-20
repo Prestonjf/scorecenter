@@ -35,8 +35,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<?php include_once('libs/head_tags.php'); ?>
-	<?php include_once('libs/pagination.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
+	<?php include_once('functions/pagination.php'); ?>
 	
 	<script type="text/javascript">
 	
@@ -53,17 +53,15 @@
 		.reportHeader {
 			width:100%; 
 			padding: 0.1em; 
-			background-color: #ebc8c8;
+			background-color: #eeeeee;
 			margin-bottom: 0.5em;
 			border-radius: 6px;
-			padding-left: 0em;
+			padding-left: 1em;
 		}
 		.reportTd {
 			width: 50%;
 			align-content: left;
-			padding-bottom: 1em;
-			
-			
+			padding-bottom: 1em; 
 		}
 	</style>
 </head>
@@ -96,7 +94,7 @@
 		 <hr>
 		 </div>
 		 <div>
-		 <button type="button" class="btn btn-xs btn-primary" name="generateTournamentReport2" onclick="generateReport('1')">Generate Preset 2</button>&nbsp;&nbsp;&nbsp;
+		 <button type="button" class="btn btn-xs btn-primary" name="generateTournamentReport2" onclick="generateReport('2')">Generate Preset 2</button>&nbsp;&nbsp;&nbsp;
 		 <img src="img/question_blue.png" alt="question_blue" height="10" width="10" data-toggle="tooltip" title="A one page report is generated per event. All ranks listed.">&nbsp;&nbsp;&nbsp;Event Results For All Events
 		 <hr>
 		 </div>

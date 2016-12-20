@@ -38,8 +38,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<?php include_once('libs/head_tags.php'); ?>
-	<?php include_once('libs/pagination.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
+	<?php include_once('functions/pagination.php'); ?>
 	<link href="css/jquery.ui.timepicker.css" rel="stylesheet">
 	<script type="text/javascript" src="js/jquery.ui.timepicker.js"></script>
 	
@@ -380,7 +380,21 @@
 		if (!pattern.test(ele.value)) {
 			ele.value = '';
 		}
+	}
+	
+	function validateUnschedule() {
+		var value = prompt("To unschedule all teams from this tournament, type DELETE. You will not be able to undo this action once clicking ok.");
+  		if (value == 'DELETE') 
+			return true;
+		return false;
 	} 
+	
+	function validateReset() {
+		var value = prompt("To delete this tournament schedule, type DELETE. You will not be able to undo this action once clicking ok.");
+  		if (value == 'DELETE') 
+			return true;
+		return false;
+	}
 
 
 		</script>  
@@ -423,8 +437,20 @@
 	      
       </ul>
 
-	  <?php echo getSSTournamentHeader(); ?>
-	  
+	  <?php echo getSSTournamentHeader();
+	  		if (isUserAccess(1)) {
+			echo '<button type="submit" class="btn btn-xs btn-primary" name="exportScheduleOverview">Export Schedule</button> ';
+			echo '<button type="submit" class="btn btn-xs btn-primary" name="exportScheduleAllEvents">Export All Events</button>';
+			echo '&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;';
+			echo '<button type="submit" class="btn btn-xs btn-danger" name="unscheduleAllTeams" onclick="return validateUnschedule();" value="'.$selfSchedule->getTournamentId().'">Unschedule All Teams</button> ';
+			echo '<button type="submit" class="btn btn-xs btn-danger" name="resetSelfSchedule" onclick="return validateReset();" value="'.$selfSchedule->getTournamentId().'">Delete Self Schedule</button>';
+		}
+		else {
+			echo '<button type="submit" class="btn btn-xs btn-primary" name="exportMySchedule">Export My Schedule</button> ';
+		}
+	  ?>
+	  <br />
+	  <br />
     <?php if ($_SESSION["selfSchedulScreen"] == 'SETTINGS') {?>
     <div id="settings">
 	    <h2>General Settings</h2>

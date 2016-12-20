@@ -26,6 +26,7 @@
 	session_start(); 
 	include_once('score_center_objects.php');
 	include_once('logon_check.php');
+	include_once('functions/global_functions.php');
 
 	// Security Level Check
 	include_once('role_check.php');
@@ -38,7 +39,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<?php include_once('libs/head_tags.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
 	
   
 
@@ -151,7 +152,10 @@
 					clearSuccess();
 					if (xmlhttp.responseText.trim() == 'error') {
 						//error message
-						displayError("<strong>Cannot Delete Event:</strong> Scores have already been entered for this event.")					
+						displayError("<strong>Cannot Delete Event:</strong> Scores have already been entered for this event.");				
+					}
+					else if (xmlhttp.responseText.trim() == 'error1') {
+						displayError("<strong>Cannot Delete Event:</strong> Self Schedule has already been created for this event. ");	
 					}
 					else {
 						// success message
@@ -175,6 +179,10 @@
 					if (xmlhttp.responseText.trim() == 'error') {
 						//error message
 						displayError("<strong>Cannot Delete Team:</strong> Scores have already been entered for this team.")	
+					}
+					else if (xmlhttp.responseText.trim() == 'error1') {
+						//error message
+						displayError("<strong>Cannot Delete Team:</strong> Team has already self scheduled for this tournament.")	
 					}
 					else {
 						// success message
@@ -373,6 +381,25 @@
 		return false;	
 	}
 	
+	function clearSupervisors(rowNum) {
+		var exists = false;
+		if (confirm('Are you sure you want to unlink the supervisor from this event?')) exists = true;
+		else if (confirm('Are you sure you want to unlink all supervisors?')) exists = true;
+		if (exists) {
+			$.ajax({
+		        type     : "GET",
+		        cache    : false,
+		        url      : "controller.php?command=clearLinkedSupervisors&rowNum="+rowNum+generateEventParamsString()+getNumberEventsTeams(),
+		        data     : null,
+		        success  : function(data) {
+			        		$('#eventTableBody').html(data);
+			    			//document.getElementById('eventTableBody').innerHTML = data;
+			    			//jQuery('#reloadDiv').click();
+		        }
+		    });
+		}
+	}
+	
   
   </script>
   <style>
@@ -414,7 +441,7 @@
     		
     		if ($_SESSION["tournamentDivision"] == null or $_SESSION["tournamentDivision"] == '') $teams = $mysqli->query("SELECT DISTINCT * FROM TEAM ORDER BY NAME ASC");
     		else $teams = $mysqli->query("SELECT DISTINCT * FROM TEAM WHERE DIVISION = '".$_SESSION["tournamentDivision"]."' ORDER BY NAME ASC"); 
-    		$supervisors = $mysqli->query("SELECT DISTINCT X.* FROM (
+    		/**$supervisors = $mysqli->query("SELECT DISTINCT X.* FROM (
 										SELECT DISTINCT U.USER_ID, CONCAT(U.LAST_NAME,', ',U.FIRST_NAME,' (', U.USERNAME,')') AS USER
 										FROM USER U WHERE U.ROLE_CODE='SUPERVISOR' AND COALESCE(U.AUTO_CREATED_FLAG,0) <> 1 AND ACCOUNT_ACTIVE_FLAG=1
 										UNION
@@ -423,7 +450,7 @@
 										INNER JOIN TOURNAMENT_EVENT TE on TE.USER_ID=U1.USER_ID and TE. TOURNAMENT_ID=".$_SESSION["tournamentId"]."
 										WHERE U1.ROLE_CODE='SUPERVISOR'
 										) X
-										ORDER BY UPPER(X.USER) ASC");
+										ORDER BY UPPER(X.USER) ASC"); **/
         ?>
   
   	<form action="controller.php" id="form1" method="GET">
@@ -579,10 +606,10 @@
         <thead>
             <tr>
                 <th width="20%" data-field="name" data-align="right" data-sortable="true">Event Name</th>
-                <th width="30%" data-field="name" data-align="right" data-sortable="true">Supervisor</th>
-                <th width="20%" data-field="trial" data-align="center" data-sortable="true">Trial Event?</th>
-                <th width="20%" data-field="trial" data-align="center" data-sortable="true">No Prim/Alt?</th>
-				<th width="10%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
+                <th width="45%" data-field="name" data-align="right" data-sortable="true">Supervisor</th>
+                <th width="12%" data-field="trial" data-align="center" data-sortable="true">Trial Event? <img src="img/question_blue.png" alt="check_green" height="10" width="10" data-toggle="tooltip" title="Selecting Yes indicates a trial event, which is not calculated in the overall points."></th>
+                <th width="12%" data-field="trial" data-align="center" data-sortable="true">No Prim/Alt? <img src="img/question_blue.png" alt="check_green" height="10" width="10" data-toggle="tooltip" title="Selecting Yes indicates primary and alternate teams are scored together for this event."></th>
+				<th width="11%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
         <tbody id="eventTableBody">
@@ -594,7 +621,7 @@
 					echo '<tr>';
       				echo '<td>'; echo $event['1']; echo '</td>';
       				echo '<td>';
-      				echo '<select  class="form-control" name="eventSupervisor'.$eventCount.'" id="eventSupervisor'.$eventCount.'">';
+      			/**	echo '<select  class="form-control" name="eventSupervisor'.$eventCount.'" id="eventSupervisor'.$eventCount.'">';
       				echo '<option value=""></option>';
       				if ($supervisors) {
              			while($supervisorRow = $supervisors->fetch_array()) {
@@ -602,7 +629,12 @@
              			}
              		}    
              		mysql_data_seek($supervisors, 0);				
-      				echo '</select>'; 
+      				echo '</select>'; **/
+      				$supervisor = $event['5'];
+      				echo '<table width="100%"><tr><td width="35%"><button type="submit" class="btn btn-xs btn-primary" name="addSupervisor" value="'.$eventCount.'">Select Supervisor</button> <button type="button" onclick="clearSupervisors('.$eventCount.')" class="btn btn-xs btn-primary" name="deleteSupervisor" value="'.$eventCount.'">Clear</button></td>';
+      				echo '<td><input type="text" readonly class="form-control" style=" display: inline; white-space:nowrap;" name="eventSupervisor'.$eventCount.'" id="eventSupervisor'.$eventCount.'" value="';
+      				if ($supervisor AND $supervisor[0]) echo $supervisor['2'] .', '. $supervisor['1'].' ('.$supervisor['3'].')';     				
+      				echo '"></td></tr></table>';
       				echo '</td>';
 					echo '<td>'; 
 					echo '<select  class="form-control" name="trialEvent'.$eventCount.'" id="trialEvent'.$eventCount.'">';
@@ -651,6 +683,7 @@
 	?>
 	<br />
 	<button type="submit" class="btn btn-xs btn-primary" onclick="return generateUserLogins();" name="generateSupervisorLogins">Generate Supervisor Logins</button>
+	<button type="button" class="btn btn-xs btn-primary" onclick="clearSupervisors(-1);" name="clearlinkedSupervisors">Clear All Supervisors</button>
 	<?php } ?>
 	<hr>
 	
@@ -751,7 +784,7 @@
         <thead>
             <tr>
                 <th width="30%" data-field="name" data-align="right" data-sortable="true">Verifier Name</th>
-                <th width="60%" data-field="name" data-align="right" data-sortable="true">Verifier Email</th>
+                <th width="60%" data-field="name" data-align="right" data-sortable="true">Verifier Email / Username</th>
 				<th width="10%" data-field="actions" data-align="center" data-sortable="true">Actions</th>
             </tr>
         </thead>
@@ -777,25 +810,9 @@
         ?>  
         </tbody>
         </table>
-	<?php if (getCurrentRole() != 'VERIFIER') { ?>
-	<div class="input-group">
-	<span class="input-group-btn">
-	<button type="button" class="btn btn-xs btn-primary" onclick="addTournVerifier()" name="addVerifier">Add Verifier</button>
-	</span>
-	<div class="col-xs-4 col-md-4" id="verifierSelectDiv">
-		<select class="form-control" name="verifierAdded" id="verifierAdded">
-			<option value=""></option>
-			<?php
-			    if ($verifiers) {
-             		while($verifierRow = $verifiers->fetch_array()) {
-             			echo '<option value="'.$verifierRow['0'].'">'.$verifierRow['1'].'</option>';
-             			
-             		}
-             	}
-        	?>
-		</select>
-	</div>
-	</div>
+	<?php if (getCurrentRole() != 'VERIFIER') { 
+		echo '<div class="input-group"><button type="submit" class="btn btn-xs btn-primary" name="addVerifier">Select Verifier</button></div>';
+	?>
 	<?php } ?>
 	<hr>
 
@@ -822,7 +839,9 @@
 	<?php 
 		if ($_SESSION['savesuccessTournament'] != null and $_SESSION['savesuccessTournament'] == '1') { ?>
 		<script type="text/javascript">saveMessage('Tournament');</script>
-   	<?php $_SESSION['savesuccessTournament'] = null; } ?> 	
+   	<?php $_SESSION['savesuccessTournament'] = null; } 
+	   	displayErrors();	   	
+   	?> 	
 	<div id="exportDiv"></div>
   </body>
 </html>

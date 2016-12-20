@@ -245,7 +245,7 @@
 		$tdwidth = 10;
 		$periodMap = array();
 		$html = '';
-		$html .= '<span class="red">*</span> = Self Schedule Event';
+		$html .= '<span class="red">*</span> = Self Schedule Event <span style="background-color:#ebc8c8;">&nbsp;&nbsp;&nbsp;&nbsp;</span> = No Slots Available';
 		// print header
 		$html .= '<table width="100%"><tr class="selfScheduleDisplay"><td width="20%" bgcolor="c8dbeb" align="center" class="selfScheduleDisplay"></td>';
 		if ($selfSchedule != null AND $selfSchedule->getPeriodList()) {
@@ -852,6 +852,37 @@
 		}
 		fclose($output);
 		exit;
+	}
+	
+	function unscheduleTeams($id, $mysqli) {
+		$result = $mysqli->query("DELETE TS.* FROM SCHEDULE_TEAM TS
+			INNER JOIN SCHEDULE_EVENT_PERIOD SEP ON SEP.SCHEDULE_EVENT_PERIOD_ID=TS.SCHEDULE_EVENT_PERIOD_ID
+			INNER JOIN SCHEDULE_EVENT SE ON SE.SCHEDULE_EVENT_ID=SEP.SCHEDULE_EVENT_ID
+			INNER JOIN TOURNAMENT_SCHEDULE TTS ON TTS.TOURNAMENT_SCHEDULE_ID=SE.TOURNAMENT_SCHEDULE_ID
+			WHERE TTS.TOURNAMENT_ID=".$id);
+	}
+	
+	function resetSelfSchedule($id, $mysqli) {
+		$result = $mysqli->query("DELETE TS.* FROM SCHEDULE_TEAM TS
+			INNER JOIN SCHEDULE_EVENT_PERIOD SEP ON SEP.SCHEDULE_EVENT_PERIOD_ID=TS.SCHEDULE_EVENT_PERIOD_ID
+			INNER JOIN SCHEDULE_EVENT SE ON SE.SCHEDULE_EVENT_ID=SEP.SCHEDULE_EVENT_ID
+			INNER JOIN TOURNAMENT_SCHEDULE TTS ON TTS.TOURNAMENT_SCHEDULE_ID=SE.TOURNAMENT_SCHEDULE_ID
+			WHERE TTS.TOURNAMENT_ID=".$id);
+			
+		$result = $mysqli->query("DELETE SEP.* FROM SCHEDULE_EVENT_PERIOD SEP
+			INNER JOIN SCHEDULE_EVENT SE ON SE.SCHEDULE_EVENT_ID=SEP.SCHEDULE_EVENT_ID
+			INNER JOIN TOURNAMENT_SCHEDULE TTS ON TTS.TOURNAMENT_SCHEDULE_ID=SE.TOURNAMENT_SCHEDULE_ID
+			WHERE TTS.TOURNAMENT_ID=".$id);
+		
+		$result = $mysqli->query("DELETE SE.* FROM SCHEDULE_EVENT SE 
+			INNER JOIN TOURNAMENT_SCHEDULE TTS ON TTS.TOURNAMENT_SCHEDULE_ID=SE.TOURNAMENT_SCHEDULE_ID
+			WHERE TTS.TOURNAMENT_ID=".$id);
+			
+		$result = $mysqli->query("DELETE SP.* FROM SCHEDULE_PERIOD SP
+			INNER JOIN TOURNAMENT_SCHEDULE TTS ON TTS.TOURNAMENT_SCHEDULE_ID=SP.TOURNAMENT_SCHEDULE_ID
+			WHERE TTS.TOURNAMENT_ID=".$id);
+			
+		$result = $mysqli->query("DELETE TTS.* FROM TOURNAMENT_SCHEDULE TTS WHERE TTS.TOURNAMENT_ID=".$id);
 	}
 	
 	

@@ -26,6 +26,7 @@
 session_start(); 
 include_once('score_center_objects.php');
 include_once('logon_check.php');
+include_once('functions/global_functions.php');
 
 	require_once 'login.php';
 	$mysqli = mysqli_init();
@@ -67,7 +68,7 @@ include_once('logon_check.php');
 <html lang="en">
   <head> 
   
-	<?php include_once('libs/head_tags.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
 	
   <script type="text/javascript">
   
@@ -551,14 +552,6 @@ include_once('logon_check.php');
   
   </script>
     <style>
-  	.borderless td {
-  			padding-top: 1em;
-			padding-right: 2em;
-  			border: none;
-  	}
-	.red {
-		color: red;
-	}
 	
 		fieldset.utility-border {
 		border: 1px solid #eee !important;
@@ -619,24 +612,11 @@ include_once('logon_check.php');
        if ($_SESSION["pointsSystem"]=='High Score Wins' )  $pointsLabel = 'First Place Points'; ?>
         
      <h1>Enter Event Scores</h1>
-	 <table width="100%">
-	 <tr>
-     <td width="50%"><h4>Tournament: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentName"]. ' - ' . $_SESSION["tournamentDate"]; ?></span></h4></td>
-	 <td width="50%"><h4>Event: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventName"]; ?></span></h4></td>
-	 </tr>
-	 <tr>
-     <td><h4>Division: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["tournamentDivision"]; ?></span></h4></td>
-	 <td><h4>Supervisor: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["eventSupervisor"]; ?></span></h4></td>
-	 </tr>
-	 <tr>
-	 <td><h4>Event Scoring Algorithm: <span style="font-weight:normal;font-size:14px;"><?php echo $_SESSION["scoreSystemText"]; ?> Wins</span></h4></td>
-	 <td></td>
-<!--	 <tr>
-	 <td><h4><?php //echo $pointsLabel;?> (Alternate Teams): <span style="font-weight:normal;font-size:14px;"><?//php echo $_SESSION["highestScoreAlt"]; ?></span></h4></td>
-	 <td><h4><?php //echo $pointsLabel;?> (Primary Teams): <span style="font-weight:normal;font-size:14px;"><?php //echo $_SESSION["highestScore"]; ?></span></h4></td>
-	 </tr> -->
-	 </tr>
-	 </table>
+
+     <?php 
+	   echo	getTournamentEventHeader();  
+	  ?>
+
 	 <div class="instructions">
      <h6>* Instructions: 
      <a href="#" id="showInstructions" class="showLink" onclick="showInstructions('instructionsText');return false;">Click to Show</a> 

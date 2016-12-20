@@ -42,9 +42,18 @@ th.rotate > div {
 }
 
 .borderless td {
-  			padding-top: 1em;
+  			padding-top: .5em;
+  			padding-bottom: .5em;
 			padding-right: 2em;
   			border: none;
+}
+
+.headerstyle  {
+	padding-left: 1em; 
+	background-color: #eeeeee; 
+	border-radius: 6px;
+	#border: 1px solid #FFFFFF;
+	#padding-bottom: .5em;
 }
 
 th.selfSchedule {

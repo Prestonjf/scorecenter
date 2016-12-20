@@ -46,30 +46,234 @@
 	    }
 	}
 	
-	// Display Tournament Header
-	function getTournamentHeader() {
-		$html = '<div style="padding-left: 1em; border: 1px solid #FFFFFF; background-color:#eeeeee; border-radius: 6px; ">';
-		$html .= '<table width="100%">';
-		$html .= '<tr>';
-		$html .= '<td><h4>Tournament:<span style="font-weight:normal;font-size:14px;"> '.$_SESSION["tournamentName"]. '</span></h4></td>';
-		$html .= '<td><h4>Date: <span style="font-weight:normal;font-size:14px;">'.$_SESSION["tournamentDate"] .'</span></h4></td>';
-		$html .= '</tr>';
-		$html .= '<tr>';
-		$html .= '<td><h4>Division:<span style="font-weight:normal;font-size:14px;"> '.$_SESSION["tournamentDivision"]. '<span></h4></td>';
-		$html .= '<td><h4>Location:<span style="font-weight:normal;font-size:14px;"> '.$_SESSION["tournamentLocation"]. '<span></h4></td>';
-		$html .= '</tr>';
-		$html .= '<tr>';
-		$html .= '<td><h4>Events Completed:<span style="font-weight:normal;font-size:14px;"> '.$_SESSION["tournamentEventsCompleted"].' </span></h4></td>';
-		$html .= '<td><h4>Overall Points: <span style="font-weight:normal;font-size:14px;">'.$_SESSION["pointsSystem"] .'</span></h4></td>';
-		$html .= '</tr>';
+	// Display Tournament Search Header
+	function getTournamentSearchHeader() {
+		$html = '<div class="headerstyle">';
+		$html .= '<table width="100%" class="borderless" >';
+		$html .= '<tr><td><label for="fromDate">From Date: </label></td>';
+		
+		$html .= '<td><div class="controls"><div class="input-group">
+	<input type="text" size="20" class="date-picker form-control" readonly="true" name="fromDate" id="fromDate" value='; $html .= '"'.$_SESSION["fromTournamentDate"].'"' ; $html .= '>
+	<label for="fromDate" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
+	</div></div></td>';
+	
+		$html .= '<td for="toDate"><label>To Date: </label></td>';
+		$html .= '<td><div class="controls"><div class="input-group">
+	<input type="text" size="20" class="date-picker form-control" readonly="true" name="toDate" id="toDate" value='; $html .= '"'.$_SESSION["toTournamentDate"].'"'; $html .= '>
+	<label for="toDate" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
+	</div></div></td></tr>';
+		
+		$html .= '<tr><td><label for="tournamentsNumber">Limit Result Count: </label></td>';
+		$html .= '<td><input type="number" class="form-control" size="10" onkeydown="limit(this);" onkeyup="limit(this);" name="tournamentsNumber" id="tournamentsNumber" min="0" max="999"
+		step="1" value='; $html .= '"'.$_SESSION["tournamentsNumber"].'"'; $html .= '></td>';
+		
+		$html .= '<td colspan="2" align="right";></td></tr>';
 		$html .= '</table></div><br>';
 		return $html;
+	}
+	
+	// Display Team Search Header
+	function getTeamSearchHeader() {
+		$html = '<div class="headerstyle">';
+		$html .= '<table width="100%" class="borderless">';
+		$html .= '<tr><td><label for="teamFilterName">Team Name: </label></td>';
+		$html .= '<td><input type="text" size="20" class="form-control" name="teamFilterName" id="teamFilterName" value="'.$_SESSION["teamFilterName"].'"></td>';
+		$html .= '<td><label for="filterDivision">Division: </label></td>';
+		$html .= '<td><select class="form-control" name="filterDivision" id="filterDivision" >
+			<option value=""></option>
+			<option value="A"'; if($_SESSION["filterDivision"] == 'A'){$html .= ' selected ';}$html .= ' >A</option>
+			<option value="B"'; if($_SESSION["filterDivision"] == 'B'){$html .= ' selected ';}$html .= ' >B</option>
+			<option value="C"'; if($_SESSION["filterDivision"] == 'C'){$html .= ' selected ';}$html .= ' >C</option>
+			</select></td></tr>';
+			
+		$html .= '<tr><td><label for="filterState">Team State: </label></td>';
+		$html .= '<td><select class="form-control" name="filterState" id="filterState" >
+			<option value=""></option>';
+
+			if ($_SESSION["stateCodeList"] != null) {	
+				$results = $_SESSION["stateCodeList"];
+				foreach($results as $row) {	
+					$html .= '<option value="'.$row['REF_DATA_CODE'].'" '; if($_SESSION["filterState"] == $row['REF_DATA_CODE']){$html .=' selected ';} $html .= '>'.$row['DISPLAY_TEXT'].'</option>';
+				}
+			}
+		$html .= '</select></td>';
+		
+		$html .= '<td><label for="filterRegion">Team Region: </label></td>';
+		$html .= '<td><select class="form-control" name="filterRegion" id="filterRegion" >
+			<option value=""></option>';
+
+			if ($_SESSION["regionCodeList"] != null) {	
+				$results = $_SESSION["regionCodeList"];
+				foreach($results as $row) {	
+					$html .= '<option value="'.$row['REF_DATA_CODE'].'" '; if($_SESSION["filterRegion"] == $row['REF_DATA_CODE']){$html .= ' selected ';} $html .= '>'.$row['DISPLAY_TEXT'].'</option>';
+				}
+			}
+
+		$html .= '</select></td></tr>';
+		
+		$html .= '<tr><td><label for="filterMyTeams">Team Filter: </label></td>';
+		$html .= '<td><input type="radio"  name="filterMyTeams" id="filterMyTeams1" value="NO"'; if($_SESSION["filterMyTeams"] == 'NO'){$html .= ' checked ';}$html .= '> <label class="radio1" for="filterMyTeams1">All Teams</label>&nbsp;&nbsp;
+	<input type="radio" name="filterMyTeams" id="filterMyTeams2" value="YES"'; if($_SESSION["filterMyTeams"] == 'YES'){$html .= ' checked ';} $html .= '> <label class="radio1" for="filterMyTeams2">My Teams</label>&nbsp;&nbsp;</td>';
+		$html .= '<td><label></label></td>';
+		$html .= '<td></td></tr>';
+		$html .= '</table></div><br>';
+		return $html;
+	}
+	
+	// Display Event Search Header
+	function getEventSearchHeader() {
+		$html = '<div class="headerstyle">';
+		$html .= '<table width="100%" class="borderless">';
+		$html .= '<tr><td><label for="eventName">Event Name: </label></td>';
+		$html .= '<td><input type="text" size="20" class="form-control" name="eventName" id="eventName" value="'.$_SESSION["eventFilterName"].'"></td>';
+		$html .= '<td><label for="filterMyEvents">Event Filter: </label></td>';
+		$html .= '<td><input type="radio"  name="filterMyEvents" id="filterMyEvents1" value="OFFICIAL"'; if($_SESSION["filterMyEvents"] == 'OFFICIAL'){$html .=' checked ';} $html .='> <label class="radio1" for="filterMyEvents1">Official Events</label>&nbsp;&nbsp;
+	<input type="radio" name="filterMyEvents" id="filterMyEvents2" value="MY"'; if($_SESSION["filterMyEvents"] == 'MY'){$html .=' checked ';} $html .='> <label class="radio1" for="filterMyEvents2">My Events</label>&nbsp;&nbsp;
+	<input type="radio"  name="filterMyEvents" id="filterMyEvents3" value="ALL"'; if($_SESSION["filterMyEvents"] == 'ALL'){$html .=' checked ';}$html .='> <label class="radio1" for="filterMyEvents3">All Events</label>&nbsp;&nbsp;</td></tr>';
+		$html .= '</table></div><br>';
+		return $html;
+	}
+	
+	// Display User Search Header
+	function getUserSearchHeader($disabled,$isSuperUser) {
+		$html = '<div class="headerstyle">';
+		$html .= '<table width="100%" class="borderless">';
+		$html .= '<tr><td><label for="userFirstName">First Name: </label></td>';
+		$html .= '<td><input type="text" size="20" class="form-control" name="userFirstName" id="userFirstName" value="'.$_SESSION["userFirstName"].'"></td>';
+		$html .= '<td><label for="userLastName">Last Name: </label></td>';
+		$html .= '<td><input type="text" size="20" class="form-control" name="userLastName" id="userLastName" value="'.$_SESSION["userLastName"].'"></td></tr>';
+		$html .= '<tr><td><label for="userRole">Role: </label></td>';
+		$html .= '<td><select class="form-control" name="userRole" id="userRole" '.$disabled.'>
+			<option value="" '; if ($_SESSION["userRole"] == null or $_SESSION["userRole"] == '') $html .= ' selected '; $html .= '></option>
+			<option value="SUPERUSER" '; if ($_SESSION["userRole"] == 'SUPERUSER') $html .= ' selected '; $html .= ' >Super User</option>
+			<option value="ADMIN" '; if ($_SESSION["userRole"] == 'ADMIN') $html .= ' selected '; $html .= ' >Admin</option>
+			<option value="VERIFIER" '; if ($_SESSION["userRole"] == 'VERIFIER') $html .=  ' selected '; $html .= ' >Verifier</option>
+			<option value="SUPERVISOR" '; if ($_SESSION["userRole"] == 'SUPERVISOR') $html .= ' selected '; $html .= ' >Supervisor</option>
+			<option value="COACH" '; if ($_SESSION["userRole"] == 'COACH') $html .= ' selected '; $html .= ' >Coach</option>
+			</select></td>';
+		if ($isSuperUser) {
+			$html .= '<td><label for="autoCreatedFlag">Include Auto Created: </label></td>';
+			$html .= '<td>
+			<select class="form-control" name="autoCreatedFlag" id="autoCreatedFlag" '.$disabled.'>
+			<option value="NO" '; if ($_SESSION["autoCreatedFlag"] == 'NO') $html .= ' selected '; $html .= ' >No</option>
+			<option value="YES" '; if ($_SESSION["autoCreatedFlag"] == 'YES') $html .= ' selected '; $html .= ' >Yes</option>
+			</select>
+			</td>';
+		}
+		else {
+			$html .= '<td></td>';
+			$html .= '<td></td>';
+		}
+		$html .= '</tr>';
+		$html .= '<tr><td for="userFilterNumber"><label>Limit Result Count: </label></td>';
+		$html .= '<td><input type="number" class="form-control" size="10" onkeydown="limit(this);" onkeyup="limit(this);" name="userFilterNumber" id="userFilterNumber" min="0" max="999" step="1" value="'.$_SESSION["userFilterNumber"].'"></td>';
+		$html .= '<td><label></label></td>';
+		$html .= '<td></td></tr>';
+		$html .= '</table></div><br>';
+		return $html;
+	}
+	
+	// Display Supervisor Home Search Header
+	function getSupervisorHomeSearchHeader($mysqli, $userSessionInfo) {
+		$html = '<div class="headerstyle">';
+		$html .= '<table width="100%" class="borderless">';
+		$html .= '<tr><td><label for="userEventDate">Event Date: </label></td>';
+		$html .= '<td><div class="controls"><div class="input-group">
+			<input type="text" size="20" class="date-picker form-control" readonly="true" name="userEventDate" id="userEventDate" value="'.$_SESSION["userEventDate"].'">
+			<label for="userEventDate" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
+			</div></div></td>';
+		$html .= '<td><label for="userTournament">Tournament: </label></td>';
+		$html .= '<td><select class="form-control" name="userTournament" id="userTournament">
+			<option value=""></option>';
+				$query = "SELECT DISTINCT T.TOURNAMENT_ID, T.NAME
+					FROM TOURNAMENT T
+					INNER JOIN TOURNAMENT_EVENT TE on TE.TOURNAMENT_ID=T.TOURNAMENT_ID 									
+					WHERE TE.USER_ID = ".$userSessionInfo->getUserId() . " ORDER BY NAME ASC ";
+					$result1 = $mysqli->query($query);	
+			    if ($result1) {				 
+             		while($tournamentRow = $result1->fetch_array()) {
+             			$html .= '<option '; if ($_SESSION["userTournament"] == $tournamentRow['0']) $html .= ' selected ';
+						$html .= ' value="'.$tournamentRow['0'].'">'.$tournamentRow['1'].'</option>';		
+             		}
+             	}
+		$html .= '</select></td></tr>';
+		$html .= '</table></div><br>';
+		return $html;
+	}
+	
+	function getCoachHomeSearchHeader($mysqli, $userSessionInfo) {
+		$html = '<div class="headerstyle">';
+		$html .= '<table width="100%" class="borderless">';
+		$html .= '<tr><td><label for="userEventDate">Tournament: </label></td>';
+		$html .= '<td><div class="controls"><div class="input-group">
+			<input type="text" size="20" class="date-picker form-control" readonly="true" name="userEventDate" id="userEventDate" value="'.$_SESSION["userEventDate"].'">
+			<label for="userEventDate" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
+			</div></div></td>';
+		$html .= '<td><label for="userTournament">Tournament: </label></td>';
+		$html .= '<td><select class="form-control" name="userTournament" id="userTournament">
+			<option value=""></option>';
+				$query = "SELECT DISTINCT T.TOURNAMENT_ID, T.NAME
+					FROM TOURNAMENT T
+					INNER JOIN TOURNAMENT_TEAM TT on TT.TOURNAMENT_ID=T.TOURNAMENT_ID	
+					INNER JOIN TEAM_COACH TC ON TC.TEAM_ID=TT.TEAM_ID							
+					WHERE TC.USER_ID = ".$userSessionInfo->getUserId() . " ORDER BY NAME ASC ";
+					$result1 = $mysqli->query($query);	
+			    if ($result1) {				 
+             		while($tournamentRow = $result1->fetch_array()) {
+             			$html .= '<option '; if ($_SESSION["userTournament"] == $tournamentRow['0']) $html .= ' selected ';
+						$html .= ' value="'.$tournamentRow['0'].'">'.$tournamentRow['1'].'</option>';		
+             		}
+             	}
+
+		$html .= '</select></td></tr>';
+		$html .= '</table></div><br>';
+		return $html;
+	}
+	
+	// Display Tournament Header
+	function getTournamentHeader() {
+		$html = '<div class="headerstyle">';
+		$html .= '<table width="100%" class="borderless">';
+		$html .= '<tr><td><label>Tournament: </label></td>';
+		$html .= '<td>'.$_SESSION["tournamentName"].'</td>';
+		$html .= '<td><label>Location: </label></td>';
+		$html .= '<td>'.$_SESSION["tournamentLocation"].'</td></tr>';
+		$html .= '<tr><td><label>Division: </label></td>';
+		$html .= '<td>'.$_SESSION["tournamentDivision"].'</td>';
+		$html .= '<td><label>Events Completed: </label></td>';
+		$html .= '<td>'.$_SESSION["tournamentEventsCompleted"].'</td></tr>';
+		$html .= '<tr><td><label>Date: </label></td>';
+		$html .= '<td>'.$_SESSION["tournamentDate"].'</td>';
+		$html .= '<td><label>Overall Points: </label></td>';
+		$html .= '<td>'.$_SESSION["pointsSystem"].'</td></tr>';
+		$html .= '</table></div><br>';
+		return $html;
+	}
+	
+	// Display Tournament Event Header
+	function getTournamentEventHeader() {
+		$html = '<div class="headerstyle">';
+		$html .= '<table width="100%" class="borderless">';
+		$html .= '<tr><td><label>Tournament: </label></td>';
+		$html .= '<td>'.$_SESSION["tournamentName"].'</td>';
+		$html .= '<td><label>Event: </label></td>';
+		$html .= '<td>'.$_SESSION["eventName"].'</td></tr>';
+		$html .= '<tr><td><label>Division: </label></td>';
+		$html .= '<td>'.$_SESSION["tournamentDivision"].'</td>';
+		$html .= '<td><label>Supervisor: </label></td>';
+		$html .= '<td>'.$_SESSION["eventSupervisor"].'</td></tr>';
+		$html .= '<tr><td><label>Date: </label></td>';
+		$html .= '<td>'.$_SESSION["tournamentDate"].'</td>';
+		$html .= '<td><label>Event Scoring Algorithm: </label></td>';
+		$html .= '<td>'.$_SESSION["scoreSystemText"].'</td></tr>';
+		$html .= '</table></div><br>';
+		return $html;	
 	}
 	
 	// Display Self Schedule Tournament Header
 	function getSSTournamentHeader() {
 		$selfSchedule = unserialize($_SESSION["selfSchedule"]); 
-		$html = '<div style="padding-left: 1em; background-color: #eeeeee; border-radius: 6px;">';
+		$html = '<div class="headerstyle">';
 		$html .= '<table width="100%" class="borderless">';
 		$html .= '<tr>';
 		$html .= '<td><label for="tournamentName">Tournament Name: </label></td>';
@@ -85,17 +289,10 @@
 		$html .= '<td><label for="tournamentDivision">Tournament Date: </label></td>';
 		$html .= '<td>'.$selfSchedule->getTournamentDate().'</td>';
 		$html .= '<td colspan="2">';
-		if (isUserAccess(1)) {
-			$html .= '<button type="submit" class="btn btn-xs btn-primary" name="exportScheduleOverview">Export Schedule</button> ';
-			$html .= '<button type="submit" class="btn btn-xs btn-primary" name="exportScheduleAllEvents">Export All Events</button>';
-		}
-		else {
-			$html .= '<button type="submit" class="btn btn-xs btn-primary" name="exportMySchedule">Export My Schedule</button> ';
-		}
 		$html .= '</td>';
 		$html .= '</tr>';
 		$html .= '</table>';	     
-	    $html .= '<hr></div>';
+	    $html .= '</div><br>';
 		
 		return $html;
 	}

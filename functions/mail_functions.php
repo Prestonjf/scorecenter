@@ -55,17 +55,20 @@
 		$row = $result->fetch_row();
 	
 		$host = $_SERVER['HTTP_HOST'];
+		$dir = dirname($_SERVER['PHP_SELF']);
+		if ($dir == '/') $dir = '';
+		$protocol = (!empty($_SERVER['HTTPS']) AND $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
 		$msg = "Hello ".$name.", \n\n";
 		$msg .= $row['0'];	
 		$msg .= "\n\n\n";
 		$msg = str_replace('<account name>',$address,$msg);
-		$msg .= "Reset Password Link: \n http://".$host."/scorecenter/controller.php?command=passwordResetProcess&id=".$userId."&ep=".$encryptedPassword."&sa=".$salt."&nn=".uniqid();
+		$msg .= "Reset Password Link: \n ".$protocol.$host.$dir."/controller.php?command=passwordResetProcess&id=".$userId."&ep=".$encryptedPassword."&sa=".$salt."&nn=".uniqid();
 	
 		$msgHtml = "Hello ".$name.", <br /><br />";
 		$msgHtml .= $row['0'];	
 		$msgHtml .= "<br /><br /><br />";
 		$msgHtml = str_replace('<account name>',$address,$msgHtml);
-		$msgHtml .= "Reset Password Link: <br /> http://".$host."/scorecenter/controller.php?command=passwordResetProcess&id=".$userId."&ep=".$encryptedPassword."&sa=".$salt."&nn=".uniqid();
+		$msgHtml .= "Reset Password Link: <br /> ".$protocol.$host.$dir."/controller.php?command=passwordResetProcess&id=".$userId."&ep=".$encryptedPassword."&sa=".$salt."&nn=".uniqid();
 	
 		sendMail($mysqli, $address,"Tournament Score Center Password Reset",$msg, $msgHtml);
 	}

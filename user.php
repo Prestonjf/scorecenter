@@ -26,6 +26,7 @@
 	session_start(); 
 	include_once('score_center_objects.php');
 	include_once('logon_check.php');
+	include_once('functions/global_functions.php');
 	require_once 'login.php';
 	$mysqli = mysqli_init();
 	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
@@ -51,8 +52,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<?php include_once('libs/head_tags.php'); ?>
-	<?php include_once('libs/pagination.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
+	<?php include_once('functions/pagination.php'); ?>
 	
   <script type="text/javascript">
   $(document).ready(function(){
@@ -100,44 +101,16 @@
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Manage Users</h1>
-	 <hr>
-	<table width="100%" class="borderless">
-	<tr>
-	<td width="15"><label for="userFirstName">First Name: </label></td>
-	<td width="35">
-	<input type="text" size="20" class="form-control" name="userFirstName" id="userFirstName" value=<?php echo '"'.$_SESSION["userFirstName"].'"' ?>></td>
-	
-	<td width="15"><label for="userLastName">Last Name: </label></td>
-	<td width="35"><input type="text" size="20" class="form-control" name="userLastName" id="userLastName" value=<?php echo '"'.$_SESSION["userLastName"].'"' ?>></td>
-	</tr>
-	<tr>
-	<td><label for="userRole">Role: </label></td>
-	<td>
-			<select class="form-control" name="userRole" id="userRole" <?php echo $disabled; ?>>
-			<option value="" <?php if ($_SESSION["userRole"] == null or $_SESSION["userRole"] == '') echo 'selected'; ?> ></option>
-			<option value="SUPERUSER" <?php if ($_SESSION["userRole"] == 'SUPERUSER') echo 'selected'; ?>>Super User</option>
-			<option value="ADMIN" <?php if ($_SESSION["userRole"] == 'ADMIN') echo 'selected'; ?> >Admin</option>
-			<option value="VERIFIER" <?php if ($_SESSION["userRole"] == 'VERIFIER') echo 'selected'; ?>>Verifier</option>
-			<option value="SUPERVISOR" <?php if ($_SESSION["userRole"] == 'SUPERVISOR') echo 'selected'; ?>>Supervisor</option>
-			<option value="COACH" <?php if ($_SESSION["userRole"] == 'COACH') echo 'selected'; ?>>Coach</option>
-			</select>
-	</td>
-	<td></td>
-	<td></td>
-	</tr>
-	<tr>
-	<td><label># of Results: </label></td><td>
-	<input type="number" class="form-control" size="10" onkeydown="limit(this);" onkeyup="limit(this);" name="userFilterNumber" id="userFilterNumber" min="0" 	max="999" step="1" value=<?php echo '"'.$_SESSION["userFilterNumber"].'"' ?>>
-	</td>
-	<td></td>
-	<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchUsers">Search</button>
-		<button type="button" class="btn btn-xs btn-warning" name="clearSearchEvent" onclick="clearFilterCriteria()">Clear</button>
-	</td>
-	
-	</tr>
-	</table>
+     
+     <?php
+	     echo getUserSearchHeader($disabled, isUserAccess(0));
+	    ?>
 
-<hr>
+		<button type="submit" class="btn btn-xs btn-warning" name="searchUsers">Search</button>
+		<button type="button" class="btn btn-xs btn-warning" name="clearSearchEvent" onclick="clearFilterCriteria()">Clear</button>
+		<br>
+		<br>
+		
 		<?php paginationHeader($_SESSION["userList"]); ?>
         <table class="table table-hover">
         <thead>
@@ -171,7 +144,7 @@
           </table>
 		<?php paginationFooter($_SESSION["userList"]); 	
 		
-		echo '<button type="submit" class="btn btn-xs btn-primary" name="adminCreateUser" value="'.$_SESSION["pageCommand"].'">Create User</button> ';
+		if ($disable) echo '<button type="submit" class="btn btn-xs btn-primary" name="adminCreateUser" value="'.$_SESSION["pageCommand"].'">Create User</button> ';
 		echo '<button type="submit" class="btn btn-xs btn-primary" name="cancelSelectUser" value="'.$_SESSION["pageCommand"].'">Cancel</button>';
 		?>
 		

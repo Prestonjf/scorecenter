@@ -35,7 +35,7 @@ include_once('score_center_objects.php');
 				generatePreset1($mysqli);
 				break;
 			case 2:
-			
+				generatePreset2($mysqli);
 				break;
 			default:
 				break;		
@@ -48,6 +48,8 @@ include_once('score_center_objects.php');
 	}
 	
 	function generatePreset1($mysqli) {
+		
+		// Generate PDF For each Team
 		
 		$pdf = new FPDF();
 		$pdf->SetTitle($_SESSION["tournamentName"]. ' Event Results', true);
@@ -67,7 +69,10 @@ include_once('score_center_objects.php');
 		exit();	
 	}
 	
-	// NEED TO CHECK FOR HIGH LOW WIN FLAG
+	function generatePreset2($mysqli) {
+		
+	}
+	
 	function getEventResults($mysqli) {
 		$sql = 'select E.NAME, GROUP_CONCAT(T1.NAME ORDER BY SCORE ASC) AS TEAM
 					from TOURNAMENT_EVENT TE

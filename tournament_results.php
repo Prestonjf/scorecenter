@@ -26,7 +26,6 @@
 	session_start(); 
 	include_once('score_center_objects.php');
 	include_once('logon_check.php');
-	include_once('libs/score_center_global_settings.php');
 	include_once('functions/global_functions.php');
 	require_once 'login.php';
 	
@@ -46,7 +45,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<?php include_once('libs/head_tags.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
 	<script src='js/spectrum.js'></script>
 	<link rel='stylesheet' href='css/spectrum.css' />
   

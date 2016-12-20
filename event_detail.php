@@ -52,7 +52,7 @@ include_once('logon_check.php');
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<?php include_once('libs/head_tags.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
 	
   <script type="text/javascript">
    $(document).ready(function(){

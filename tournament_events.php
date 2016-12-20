@@ -45,7 +45,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<?php include_once('libs/head_tags.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
 	
   <script type="text/javascript">
   $(document).ready(function(){
@@ -73,14 +73,6 @@
   
   </script>
     <style>
-  	.borderless td {
-  			padding-top: 1em;
-			padding-right: 2em;
-  			border: none;
-  	}
-	.red {
-		color: red;
-	}
   
   
   </style>
@@ -101,7 +93,8 @@
 	     echo getTournamentHeader();
 		 echo' <button type="submit" class="btn btn-xs btn-primary" name="printScore" value='.$_SESSION["tournamentId"].'>View Results</button>&nbsp;';
      ?>
-	 <hr>
+     <br />
+      <br />
 
         <table class="table table-hover">
         <thead>

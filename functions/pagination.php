@@ -38,7 +38,7 @@
 		if ($_SESSION["resultsPage"] == null) $_SESSION["resultsPage"] = 1;
 		$resultStart = ($_SESSION["resultsPage"]-1) * PAGEROWS;
 		if ($totalResults != 0) $resultStart = $resultStart + 1;
-		$resultEnd = (($_SESSION["resultsPage"]-1) * PAGEROWS) + 14;
+		$resultEnd = (($_SESSION["resultsPage"]-1) * PAGEROWS) + 15;
 		if ($totalPages == 1) $resultEnd = $totalResults;
 		$pageCount = 1;
 
@@ -70,7 +70,7 @@
 		if ($_SESSION["resultsPage"] == null) $_SESSION["resultsPage"] = 1;
 		$resultStart = ($_SESSION["resultsPage"]-1) * PAGEROWS;
 		if ($totalResults != 0) $resultStart = $resultStart + 1;
-		$resultEnd = (($_SESSION["resultsPage"]-1) * PAGEROWS) + 14;
+		$resultEnd = (($_SESSION["resultsPage"]-1) * PAGEROWS) + 15;
 		if ($totalPages == 1) $resultEnd = $totalResults;
 		$pageCount = 1;
 		

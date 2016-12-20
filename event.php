@@ -26,6 +26,7 @@
 session_start(); 
 	include_once('score_center_objects.php');
 	include_once('logon_check.php');
+	include_once('functions/global_functions.php');
 	require_once 'login.php';
 	$mysqli = mysqli_init();
 	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
@@ -43,8 +44,8 @@ session_start();
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<?php include_once('libs/head_tags.php'); ?>
-	<?php include_once('libs/pagination.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
+	<?php include_once('functions/pagination.php'); ?>
 	
   <script type="text/javascript">
   $(document).ready(function(){
@@ -95,33 +96,14 @@ session_start();
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Manage Events</h1>
-	 <hr>
-	<table width="90%" class="borderless">
-	<tr>
-	<td width="15%"><label for="eventName">Event Name: </label></td>
-	<td width="35%">
-	<input type="text" size="20" class="form-control" name="eventName" id="eventName" value=<?php echo '"'.$_SESSION["eventFilterName"].'"' ?>>
-	</td>
+     <?php
+	    echo getEventSearchHeader(); 
+	  ?>
+	<button type="submit" class="btn btn-xs btn-warning" name="searchEvent">Search</button>
+	<button type="button" class="btn btn-xs btn-warning" name="clearSearchEvent" onclick="clearFilterCriteria()">Clear</button>
+	<br>
+	<br>
 	
-	<td width="15%"><label for="filterMyEvents">Event Filter: </label></td>
-	<td width="35%">
-	<input type="radio"  name="filterMyEvents" id="filterMyEvents1" value="OFFICIAL" <?php if($_SESSION["filterMyEvents"] == 'OFFICIAL'){echo("checked");}?>> <label class='radio1' for="filterMyEvents1">Official Events</label>&nbsp;&nbsp;
-	<input type="radio" name="filterMyEvents" id="filterMyEvents2" value="MY" <?php if($_SESSION["filterMyEvents"] == 'MY'){echo("checked");}?>> <label class='radio1' for="filterMyEvents2">My Events</label>&nbsp;&nbsp;
-	<input type="radio"  name="filterMyEvents" id="filterMyEvents3" value="ALL" <?php if($_SESSION["filterMyEvents"] == 'ALL'){echo("checked");}?>> <label class='radio1' for="filterMyEvents3">All Events</label>&nbsp;&nbsp;
-	</td>
-	</tr>
-	<tr>
-	<td></td>
-	<td></td>
-	<td></td>
-	<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchEvent">Search</button>
-		<button type="button" class="btn btn-xs btn-warning" name="clearSearchEvent" onclick="clearFilterCriteria()">Clear</button>
-	</td>
-	
-	</tr>
-	</table>
-
-<hr>
 		<?php paginationHeader($_SESSION["eventsList"]); ?>
         <table class="table table-hover">
         <thead>			

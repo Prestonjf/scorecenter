@@ -25,15 +25,14 @@
 	
 session_start();
 include_once('score_center_objects.php');
-include_once('mail_functions.php');
 include_once('role_check.php');
 
+include_once('functions/mail_functions.php');
 include_once('functions/constants.php');
 include_once('functions/global_functions.php');
 include_once('functions/self_schedule_functions.php');
 include_once('functions/report_functions.php');
 
-include_once('libs/score_center_global_settings.php');
 require_once('libs/PHPExcel.php');
 
 
@@ -134,7 +133,7 @@ else if ($_GET['command'] != null and $_GET['command'] == 'updateResultPage') {
 }
 
 // All Commands Below Require An Active Session
-include_once('logon_check.php');
+//include_once('logon_check.php');
 
 if ($_GET['command'] != null and ($_GET['command'] == 'loadIndex' or $_GET['command'] =='loadIndexLogin')) {
 	header("Location: index.php");	
@@ -267,9 +266,34 @@ else if (isset($_GET['cancelTeam'])) {
 else if (isset($_GET['addCoach'])) {
 	$_SESSION["pageCommand"] = 'selectCoach';
 	$_SESSION["userRole"] = 'COACH';
+	$_SESSION["autoCreatedFlag"] = 'NO';
 	cacheTeam();
 	loadAllUsers($mysqli);
 	header("Location: user.php");
+	exit();
+}
+else if (isset($_GET['addVerifier'])) {
+	$_SESSION["pageCommand"] = 'selectVerifier';
+	$_SESSION["userRole"] = 'VERIFIER';
+	$_SESSION["autoCreatedFlag"] = 'NO';
+	cacheTournamnent();
+	loadAllUsers($mysqli);
+	header("Location: user.php");
+	exit();
+}
+else if (isset($_GET['addSupervisor'])) {
+	$_SESSION["pageCommand"] = 'selectSupervisor';
+	$_SESSION["userRole"] = 'SUPERVISOR';
+	$_SESSION["autoCreatedFlag"] = 'NO';
+	$_SESSION["addSupervisorEventRowId"] = $_GET['addSupervisor'];
+	cacheTournamnent();
+	loadAllUsers($mysqli);
+	header("Location: user.php");
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'clearLinkedSupervisors') {
+	cacheTournamnent();
+	unlinkEventSupervisors($_GET['rowNum'], $mysqli);
 	exit();
 }
 else if (isset($_GET['deleteCoach'])) {
@@ -330,6 +354,7 @@ else if (isset($_GET['searchUsers']) or ($_GET['command'] != null and $_GET['com
 	if ($_GET['command'] != null and $_GET['command'] == 'loadAllUsers') { $_SESSION["pageCommand"] = ''; }
 	$_SESSION["userFirstName"] = $_GET['userFirstName'];
 	$_SESSION["userLastName"] = $_GET['userLastName'];
+	$_SESSION["autoCreatedFlag"] = $_GET['autoCreatedFlag'];
 	if ($_SESSION["pageCommand"] == null || $_SESSION["pageCommand"] == '')
 		$_SESSION["userRole"] = $_GET['userRole'];
 	$_SESSION["userFilterNumber"] = $_GET['userFilterNumber'];
@@ -351,12 +376,12 @@ else if (isset($_GET['selectUser'])) {
 		exit();
 	}
 	else if ($_SESSION["pageCommand"] == 'selectSupervisor' AND $_GET["selectUser"] != null) {
-		//addCoach();
+		addSupervisor('');
 		header("Location: tournament_detail.php");
 		exit();
 	}
 	else if ($_SESSION["pageCommand"] == 'selectVerifier' AND $_GET["selectUser"] != null) {
-		//addCoach();
+		addVerifier('');
 		header("Location: tournament_detail.php");
 		exit();
 	}
@@ -513,6 +538,8 @@ else if (isset($_GET['viewStatistics'])) {
 else if (isset($_GET['saveTournament'])) {
 	cacheTournamnent();
 	saveTournament($mysqli);
+	clearTournament();
+	loadAllTournaments($mysqli);
 	header("Location: tournament.php");
 	exit();
 }
@@ -566,15 +593,15 @@ else if ($_GET['command'] != null and $_GET['command'] == 'addTeam') {
 	addTeam($_GET['teamAdded'], $mysqli);
 	exit();
 }
-else if ($_GET['command'] != null and $_GET['command'] == 'addVerifier') {
+else if ($_GET['command'] != null and $_GET['command'] == 'addVerifier') { // Depricated
 	cacheTournamnent();
-	addVerifier($_GET['verifierAdded'], $mysqli);
+	addVerifier('');
 	exit();
 }
 
 // Self Schedule Commands
 else if (isset($_GET['selfSchedule'])) {
-	loadSelfSchedule($mysqli, $_GET['selfSchedule']);
+	loadSelfSchedule($mysqli, $_GET['selfSchedule'],false);
 	header("Location: self_schedule.php");
 	exit();
 }
@@ -623,7 +650,8 @@ else if ($_GET['command'] != null and $_GET['command'] == 'deleteAllEventPrds') 
 	exit();	
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'scheduleEventPeriod') {
-	if (loadScheduleEventPeriod($mysqli)) {
+	$scheduleEventPeriodId = $_GET['scheduleEventPeriodId'];		
+	if (loadScheduleEventPeriod($mysqli, $scheduleEventPeriodId)) {
 		header("Location: self_schedule_period.php");
 		exit();
 	}
@@ -645,7 +673,7 @@ else if (isset($_GET['saveScheduleSettings'])) {
 }
 else if (isset($_GET['cancelSelfSchedulePeriod'])) {
 	$selfSchedule = unserialize($_SESSION["selfSchedule"]);
-	loadSelfSchedule($mysqli, $selfSchedule->getTournamentId());
+	loadSelfSchedule($mysqli, $selfSchedule->getTournamentId(),true);
 	header("Location: self_schedule.php");
 	exit();	
 }
@@ -657,13 +685,19 @@ else if ($_GET['command'] != null and $_GET['command'] == 'addTeamEventPeriod') 
 	if ($_GET['mode'] == 'coach') {
 		if (addTeamEventPeriod($mysqli, $_GET['tournTeamId'], $_GET['scheduleEventPeriodId'], 'coach')) { 
 			$selfSchedule = unserialize($_SESSION["selfSchedule"]);
-			loadSelfSchedule($mysqli, $selfSchedule->getTournamentId());
+			loadSelfSchedule($mysqli, $selfSchedule->getTournamentId(),true);
 			echo getMyTeams(); 
 			echo getScheduleOverview(); 
 		}
 	}
 	else {
-		if (addTeamEventPeriod($mysqli, $_GET['tournTeamId'], $_GET['scheduleEventPeriodId'], 'admin')) echo getPeriodScheduler();
+		$scheduleEventPeriodId = $_GET['scheduleEventPeriodId'];
+		if (addTeamEventPeriod($mysqli, $_GET['tournTeamId'], $scheduleEventPeriodId, 'admin')) {
+			$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+			loadSelfSchedule($mysqli, $selfSchedule->getTournamentId(),true);
+			loadScheduleEventPeriod($mysqli, $scheduleEventPeriodId);
+			echo getPeriodScheduler();
+		}
 	}
 	exit();
 }
@@ -672,13 +706,19 @@ else if ($_GET['command'] != null and $_GET['command'] == 'removeTeamEventPeriod
 		$id = getScheduleTeamId($mysqli, $_GET['tournTeamId'], $_GET['scheduleEventPeriodId']);
 		if (removeTeamEventPeriod($mysqli, $_GET['tournTeamId'], $_GET['scheduleEventPeriodId'], $id)) { 
 			$selfSchedule = unserialize($_SESSION["selfSchedule"]);			
-			loadSelfSchedule($mysqli, $selfSchedule->getTournamentId());
+			loadSelfSchedule($mysqli, $selfSchedule->getTournamentId(),true);
 			echo getMyTeams(); 
 			echo getScheduleOverview(); 
 		}
 	}
 	else {
-		if (removeTeamEventPeriod($mysqli, $_GET['tournTeamId'], $_GET['scheduleEventPeriodId'], $_GET['scheduleTeamId'])) echo getPeriodScheduler();
+		$scheduleEventPeriodId = $_GET['scheduleEventPeriodId'];
+		if (removeTeamEventPeriod($mysqli, $_GET['tournTeamId'], $scheduleEventPeriodId, $_GET['scheduleTeamId'])) {
+			$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+			loadSelfSchedule($mysqli, $selfSchedule->getTournamentId(),true);
+			loadScheduleEventPeriod($mysqli, $scheduleEventPeriodId);
+			echo getPeriodScheduler();
+		}
 	}
 	exit();
 }
@@ -689,7 +729,7 @@ else if ($_GET['command'] != null and $_GET['command'] == 'removeAddTeamPeriod')
 	removeTeamEventPeriod($mysqli, $tournTeamId, $scheduleEventPeriodId, $id);
 	if (addTeamEventPeriod($mysqli, $tournTeamId, $scheduleEventPeriodId, 'coach')) { 
 		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
-		loadSelfSchedule($mysqli, $selfSchedule->getTournamentId());
+		loadSelfSchedule($mysqli, $selfSchedule->getTournamentId(),true);
 		echo getMyTeams(); 
 		echo getScheduleOverview(); 
 	}
@@ -715,6 +755,20 @@ else if (isset($_GET['exportScheduleAllEvents'])) {
 }
 else if (isset($_GET['exportMySchedule'])) {
 	exportMySchedule();
+	exit();
+}
+else if (isset($_GET['unscheduleAllTeams'])) {
+	$id = $_GET['unscheduleAllTeams'];
+	unscheduleTeams($id, $mysqli);
+	loadSelfSchedule($mysqli, $id,false);
+	header("Location: self_schedule.php");
+	exit();
+}
+else if (isset($_GET['resetSelfSchedule'])) {
+	$id = $_GET['resetSelfSchedule'];
+	resetSelfSchedule($id, $mysqli);
+	loadSelfSchedule($mysqli, $id,false);
+	header("Location: self_schedule.php");
 	exit();
 }
 else if (isset($_GET['generateReports'])) {
@@ -802,6 +856,35 @@ else {
 	
 	
 	function deleteTournament($id, $mysqli) {
+		
+		// Delete Self Schedule
+		// Schedule Team
+		$result = $mysqli->query("DELETE TS.* FROM SCHEDULE_TEAM TS
+			INNER JOIN SCHEDULE_EVENT_PERIOD SEP ON SEP.SCHEDULE_EVENT_PERIOD_ID=TS.SCHEDULE_EVENT_PERIOD_ID
+			INNER JOIN SCHEDULE_EVENT SE ON SE.SCHEDULE_EVENT_ID=SEP.SCHEDULE_EVENT_ID
+			INNER JOIN TOURNAMENT_SCHEDULE TTS ON TTS.TOURNAMENT_SCHEDULE_ID=SE.TOURNAMENT_SCHEDULE_ID
+			WHERE TTS.TOURNAMENT_ID=".$id);
+			
+		// Delete Schedule Event Period
+		$result = $mysqli->query("DELETE SEP.* FROM SCHEDULE_EVENT_PERIOD SEP
+			INNER JOIN SCHEDULE_EVENT SE ON SE.SCHEDULE_EVENT_ID=SEP.SCHEDULE_EVENT_ID
+			INNER JOIN TOURNAMENT_SCHEDULE TTS ON TTS.TOURNAMENT_SCHEDULE_ID=SE.TOURNAMENT_SCHEDULE_ID
+			WHERE TTS.TOURNAMENT_ID=".$id);
+		
+		// Delete Schedule Event
+		$result = $mysqli->query("DELETE SE.* FROM SCHEDULE_EVENT SE 
+			INNER JOIN TOURNAMENT_SCHEDULE TTS ON TTS.TOURNAMENT_SCHEDULE_ID=SE.TOURNAMENT_SCHEDULE_ID
+			WHERE TTS.TOURNAMENT_ID=".$id);
+			
+		// Delete Schedule Period
+		$result = $mysqli->query("DELETE SP.* FROM SCHEDULE_PERIOD SP
+			INNER JOIN TOURNAMENT_SCHEDULE TTS ON TTS.TOURNAMENT_SCHEDULE_ID=SP.TOURNAMENT_SCHEDULE_ID
+			WHERE TTS.TOURNAMENT_ID=".$id);
+			
+		// Delete Tournament Schedule
+		$result = $mysqli->query("DELETE TTS.* FROM TOURNAMENT_SCHEDULE TTS WHERE TTS.TOURNAMENT_ID=".$id);
+		
+		
 		// Delete From TEAM_EVENT_SCORE
 		$result = $mysqli->query("DELETE TES.* FROM TEAM_EVENT_SCORE TES 
 										INNER JOIN TOURNAMENT_TEAM TT ON TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID 
@@ -895,7 +978,7 @@ else {
 			if ($_GET['trialEvent'.$count] != null) {	
 				
 				$event['2'] = $_GET['trialEvent'.$count];	
-				$event['5'] = $_GET['eventSupervisor'.$count];	
+				//$event['5'] = $_GET['eventSupervisor'.$count];	
 				$event['7'] = $_GET['primAltFlag'.$count];
 				
 				$eventList[$count] = $event;
@@ -915,7 +998,6 @@ else {
 	function generateUsersForEvents($mysqli, $id) {
 		// Delete linked users if auto_created flag = 1
 		$result = $mysqli->query("DELETE FROM USER_LOGIN_LOG WHERE USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE INNER JOIN USER U on u.USER_ID=TE.USER_ID WHERE TE.TOURNAMENT_ID=".$id." AND U.AUTO_CREATED_FLAG = 1)");
-		//$result = $mysqli->query("UPDATE TOURNAMENT_EVENT TE SET TE.USER_ID = NULL WHERE TE.TOURNAMENT_ID=".$id.")");
 		$result = $mysqli->query("DELETE U1.* FROM USER U1 WHERE U1.AUTO_CREATED_FLAG = 1 AND U1.USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE WHERE TE.TOURNAMENT_ID=".$id.")");
 		
 
@@ -936,7 +1018,8 @@ else {
 			$flag = True;
 			$username = '';
 			while ($flag) {
-				$n = rand(0, 9999); $e = explode(" ", $event['1']); $d = $_SESSION["tournamentDivision"]; $y = date("Y");
+				$eventName = str_replace('\'','',$event['1']); $eventName = str_replace('\"','',$eventName); $eventName = str_replace('\\','',$eventName);
+				$n = rand(0, 9999); $e = explode(" ", $eventName); $d = $_SESSION["tournamentDivision"]; $y = date("Y");
 				$username = strtolower($e[0].$y.$d.$n);
 				
 				$exists = $mysqli->query("SELECT 1 FROM TEAM WHERE TEAM_ID = ".$selectedTeam); 
@@ -951,14 +1034,15 @@ else {
 			$passowrd = $username . rand(0, 9);
 			$encryptPwd = crypt($passowrd);
 			$sql .= " INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER, AUTO_CREATED_FLAG) 
-				VALUES (".$id.",'".$username."','".$encryptPwd."','SUPERVISOR','".$event['1']."','Supervisor',1,'',1); ";
-					
-			$event['5'] = $id;
+				VALUES (".$id.",'".$username."','".$encryptPwd."','SUPERVISOR','".$eventName."','Supervisor',1,'',1); ";
+			
+			$supervisor = array($id, $eventName,'Supervisor',$username);
+			$event['5'] = $supervisor;
 			$eventList[$count] = $event;
 			$count++;
 			
 			$row = array();
-			array_push($row,$event['1']); array_push($row,$username);  array_push($row,$passowrd);
+			array_push($row,$username); array_push($row,$username);  array_push($row,$passowrd);
 			array_push($eventRows, $row);
 			$id++;
 		}
@@ -972,8 +1056,6 @@ else {
 		  $result->free();
 		 }
 		} while ($mysqli->more_results() && $mysqli->next_result());
-		
-		//$_SESSION["insertuser"] = $sql;
 		
 		$_SESSION["EXPORT_GENERATED_USERS"] = $eventRows;
 		$_SESSION["EXPORT_GENERATED_USERS_FLAG"] = 1;
@@ -1006,7 +1088,7 @@ else {
 		$_SESSION["EXPORT_GENERATED_USERS"] = null;	
 	}
 	
-		function generateUser($mysqli, $role, $id) {			
+	/**	function generateUser($mysqli, $role, $id) {			
 			// GENERATE USER NAME
 			$flag = True;
 			$username = '';
@@ -1030,9 +1112,10 @@ else {
 			$passowrd = $username . rand(0, 9);
 			$encryptPwd = crypt($passowrd);
 			$sql .= " INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER, AUTO_CREATED_FLAG) 
-			VALUES (".$id.",'".$username."','".$encryptPwd."','SUPERVISOR','".$event['1']."','Supervisor',1,'',1); ";
-						
-			$event['5'] = $id;
+			VALUES (".$id.",'".$username."','".$encryptPwd."','SUPERVISOR','".addslashes($event['1'])."','Supervisor',1,'',1); ";
+					
+			$supervisor = array($id, addslashes($event['1']),'Supervisor',$username);			
+			$event['5'] = $supervisor;
 			$eventList[$count] = $event;
 			$count++;			
 			$row = array();
@@ -1058,7 +1141,7 @@ else {
 				fputcsv($output, $row);
 			}
 			fclose($output);
-	}
+	}**/
 	
 	function clearTournament() {
 		$_SESSION["tournamentName"] = null;
@@ -1131,8 +1214,37 @@ else {
 			}
 	}
 	
-		function addVerifier($selectedVerifier,$mysqli) {
-		// Validation: cannot add existing Team or blank	
+		function addVerifier($str) {
+			// USER_ID - LAST_NAME, FIRST_NAME - USERNAME	
+			$verifierList = $_SESSION["verifierList"];
+			if (!$verifierList) $verifierList = array();
+			
+			// Add coach if they are not already added 
+			$values = '';		
+			if ($_GET['selectUser']) $values = explode('-', $_GET['selectUser']);
+			else if ($str) $values = explode('-',$str);
+			
+			// Validate Coach has not already been linked
+			$exits = false;
+			foreach ($verifierList as $verifier) {
+				if ($verifier[0] == $values[0]) {
+					$exists = true;
+					$_SESSION['scorecenter_errors'] = array(ERROR_TOURNAMENT_ADD_VERIFIER);
+					break;
+				}
+			}
+			
+			if (!$exists) {
+				$verifier = array();
+				array_push($verifier, $values[0]);
+				array_push($verifier, $values[1]);
+				array_push($verifier, $values[2]);
+				array_push($verifier, '');
+				array_push($verifierList, $verifier);
+				$_SESSION["verifierList"] = $verifierList;
+			}	
+			
+		/**Validation: cannot add existing Team or blank	
 			$verifierList = null;
 			if ($_SESSION["verifierList"] == null) $verifierList = array();
 			else $verifierList = $_SESSION["verifierList"];
@@ -1161,7 +1273,37 @@ else {
 			}
 			else {
 				echo $errorStr;
+			} **/
+	}
+	
+	function addSupervisor($str) {
+		$eventList = $_SESSION["eventList"];
+		if ($eventList == null) $eventList = array();
+		$rowId = $_SESSION["addSupervisorEventRowId"];
+		$count = 0;
+		$values = '';		
+		if ($_GET['selectUser']) $values = explode('-', $_GET['selectUser']);
+		else if ($str) $values = explode('-',$str);
+		$name = explode(',', $values[1]);
+		
+		foreach ($eventList as $event) {
+			if ($count == $rowId) {
+				$supervisor = $event[5];
+				$supervisor[0] = $values[0];
+				$supervisor[1] = $name[1];
+				$supervisor[2] = $name[0];
+				$supervisor[3] = $values[2];
+				
+				$event[5] = $supervisor;
+				$eventList[$count] = $event;
+				break;
 			}
+			$count++;
+		}
+		// $_SESSION['scorecenter_errors'] = array(ERROR_TOURNAMENT_ADD_VERIFIER);
+		$_SESSION["addSupervisorEventRowId"] = null;
+		$_SESSION["eventList"] = $eventList;
+		
 	}
 	
 	function addEvent($selectedEvent, $mysqli) {
@@ -1192,7 +1334,8 @@ else {
 				$result = $mysqli->query("SELECT NAME FROM EVENT WHERE EVENT_ID = ".$selectedEvent); 
 				$row1 = $result->fetch_row();
 	
-				$event = array($selectedEvent, $row1['0'], "","","1", "", ""); // 0: EVENT_ID 1: NAME 2:TRIAL_EVENT 3: TOURN_EVENT_ID 4: New Event 0/1 5: USER_ID 6: USER NAME
+				// 0: EVENT_ID 1: NAME 2:TRIAL_EVENT 3: TOURN_EVENT_ID 4: New Event 0/1 5: USER_ID 6: USER NAME 7: P&A
+				$event = array($selectedEvent, $row1['0'], "","","1", array(null,null,null,null), "", 0); 				
 				array_push($eventList, $event);
 				$_SESSION["eventList"] = $eventList;
 				reloadTournamentEvent($mysqli);
@@ -1201,27 +1344,67 @@ else {
 			}
 	}
 	
+	function unlinkEventSupervisors($rowNum, $mysqli) {
+		$eventList = $_SESSION["eventList"];
+		$count = 0;
+		$userIds = '-10';
+		foreach ($eventList as $event) { 
+			$user = $event['5'];
+			if ($rowNum == -1) {
+				if (!$user[0] || $user[0] == '') $user[0] = -10;
+				$userIds .= ','. $user[0];
+				$event['5'] = array(null,null,null,null);
+				$event['6'] = null;	
+				$eventList[$count] = $event;	
+			}
+			else if ($rowNum == $count) {
+				$result = $mysqli->query("UPDATE TOURNAMENT_EVENT SET USER_ID = null WHERE TOURN_EVENT_ID = " .$event[3]);
+				$result = $mysqli->query("DELETE FROM USER WHERE AUTO_CREATED_FLAG = 1 AND USER_ID = " .$user[0]);
+				$event['5'] = array(null,null,null,null);
+				$event['6'] = null;
+				$eventList[$count] = $event;
+				break;
+			}
+			$count++;
+		}
+		if ($rowNum == -1) {
+			$result = $mysqli->query("UPDATE TOURNAMENT_EVENT SET USER_ID = null WHERE TOURNAMENT_ID=".$_SESSION["tournamentId"]);
+			$result = $mysqli->query("DELETE FROM USER WHERE AUTO_CREATED_FLAG = 1 AND USER_ID IN (".$userIds.")");
+		}
+		
+		$_SESSION["eventList"] = $eventList;
+		reloadTournamentEvent($mysqli);
+	}
+	
 	function deleteTournamentTeam($mysqli, $row) {
 		// Remove From Cache
 		$teamList = $_SESSION["teamList"];
 		$count = 0;
+		$valid = true;
 		if ($teamList) {
 			foreach ($teamList as $key => $team) { 
 				if ($row == $count) {				
 					$result = $mysqli->query("SELECT TES.SCORE FROM TEAM_EVENT_SCORE TES WHERE TES.TOURN_TEAM_ID = " .$team[4]);
 					if ($result) {
 						$row = $result->fetch_row();
-						if ($row['0'] != null and $row['0'] != '') echo 'error';
-						else {
-							// delete tourn team
-							$result = $mysqli->query("DELETE FROM TOURNAMENT_TEAM WHERE TOURN_TEAM_ID = " .$team[4]);
-							unset($teamList[$key]);
-							$teamList = array_values($teamList);
-							$_SESSION["teamList"] = $teamList;
-							reloadTournamentTeam();
-						}
+						if ($row['0'] != null and $row['0'] != '') {$valid = false; echo 'error'; return;}
 					}
-					else {
+					// Cannot Delete team When team has Self Scheduled
+					$result = $mysqli->query("SELECT TOURN_TEAM_ID FROM SCHEDULE_TEAM WHERE TOURN_TEAM_ID = " .$team[4]);
+					if ($result) {
+						$row = $result->fetch_row();
+						if ($row['0'] != null and $row['0'] != '') {$valid = false; echo 'error1'; return;}
+					}
+
+					if ($valid AND $team[4] AND $team[4] != '') {
+						// delete tourn team
+						$result = $mysqli->query("DELETE FROM TOURNAMENT_TEAM WHERE TOURN_TEAM_ID = " .$team[4]);
+						unset($teamList[$key]);
+						$teamList = array_values($teamList);
+						$_SESSION["teamList"] = $teamList;
+						reloadTournamentTeam();
+					}
+					else if ($valid){
 						unset($teamList[$key]);
 						$teamList = array_values($teamList);
 						$_SESSION["teamList"] = $teamList;
@@ -1238,23 +1421,33 @@ else {
 		// Remove From Cache
 		$eventList = $_SESSION["eventList"];
 		$count = 0;
+		$valid = true;
 		if ($eventList) {
 			foreach ($eventList as $key => $event) { 
 				if ($row == $count) {
+					
 					$result = $mysqli->query("SELECT TES.SCORE FROM TEAM_EVENT_SCORE TES WHERE TES.TOURN_EVENT_ID = " .$event[3]);
 					if ($result) {
 						$row = $result->fetch_row();
-						if ($row['0'] != null and $row['0'] != '') echo 'error';
-						else {
-							// delete tourn event
-							$result = $mysqli->query("DELETE FROM TOURNAMENT_EVENT WHERE TOURN_EVENT_ID = " .$event[3]);
-							unset($eventList[$key]);
-							$eventList = array_values($eventList);
-							$_SESSION["eventList"] = $eventList;
-							reloadTournamentEvent($mysqli);
-						}
+						if ($row['0'] != null and $row['0'] != '') { $valid = false; echo 'error'; return;}
+					}
+					
+					// Cannot Delete event When Event has Self Schedule Periods
+					$result = $mysqli->query("SELECT TOURN_EVENT_ID FROM SCHEDULE_EVENT WHERE TOURN_EVENT_ID = " .$event[3]);
+					if ($result) {
+						$row = $result->fetch_row();
+						if ($row['0'] != null and $row['0'] != '') { $valid = false; echo 'error1'; return;}
+					}
+					
+					if ($valid AND $event[3] AND $event[3] != '') {
+						// delete tourn event
+						$result = $mysqli->query("DELETE FROM TOURNAMENT_EVENT WHERE TOURN_EVENT_ID = " .$event[3]);
+						unset($eventList[$key]);
+						$eventList = array_values($eventList);
+						$_SESSION["eventList"] = $eventList;
+						reloadTournamentEvent($mysqli);
 					} 
-					else {
+					else if ($valid){
 						unset($eventList[$key]);
 						$eventList = array_values($eventList);
 						$_SESSION["eventList"] = $eventList;
@@ -1405,7 +1598,7 @@ else {
 	}
 	
 	function reloadTournamentEvent($mysqli) {
-	    	$supervisors = $mysqli->query("SELECT DISTINCT X.* FROM (
+	    	/**$supervisors = $mysqli->query("SELECT DISTINCT X.* FROM (
 										SELECT DISTINCT U.USER_ID, CONCAT(U.LAST_NAME,', ',U.FIRST_NAME,' (', U.USERNAME,')') AS USER
 										FROM USER U WHERE U.ROLE_CODE='SUPERVISOR' AND COALESCE(U.AUTO_CREATED_FLAG,0) <> 1 AND ACCOUNT_ACTIVE_FLAG=1
 										UNION
@@ -1414,7 +1607,7 @@ else {
 										INNER JOIN TOURNAMENT_EVENT TE on TE.USER_ID=U1.USER_ID and TE. TOURNAMENT_ID=".$_SESSION["tournamentId"]."
 										WHERE U1.ROLE_CODE='SUPERVISOR'
 										) X
-										ORDER BY UPPER(X.USER) ASC");
+										ORDER BY UPPER(X.USER) ASC"); **/
     									 
 			$eventList = $_SESSION["eventList"];
 			$eventCount = 0;
@@ -1423,7 +1616,7 @@ else {
 					echo '<tr>';
       				echo '<td>'; echo $event['1']; echo '</td>';
       				echo '<td>';
-      				echo '<select  class="form-control" name="eventSupervisor'.$eventCount.'" id="eventSupervisor'.$eventCount.'">';
+      				/**echo '<select  class="form-control" name="eventSupervisor'.$eventCount.'" id="eventSupervisor'.$eventCount.'">';
       				echo '<option value=""></option>';
       				if ($supervisors) {
              			while($supervisorRow = $supervisors->fetch_array()) {
@@ -1431,7 +1624,12 @@ else {
              			}
              		}    
              		mysqli_data_seek($supervisors, 0);				
-      				echo '</select>'; 
+      				echo '</select>'; **/
+      				$supervisor = $event['5'];
+      				echo '<table width="100%"><tr><td width="35%"><button type="submit" class="btn btn-xs btn-primary" name="addSupervisor" value="'.$eventCount.'">Select Supervisor</button> <button type="button" onclick="clearSupervisors('.$eventCount.')" class="btn btn-xs btn-primary" name="deleteSupervisor" value="'.$eventCount.'">Clear</button></td>';
+      				echo '<td><input type="text" readonly class="form-control" style=" display: inline; white-space:nowrap;" name="eventSupervisor'.$eventCount.'" id="eventSupervisor'.$eventCount.'" value="';
+      				if ($supervisor AND $supervisor[0]) echo $supervisor['2'] .', '. $supervisor['1'].' ('.$supervisor['3'].')';     				
+      				echo '"></td></tr></table>';
       				echo '</td>';
 					echo '<td>'; 
 					echo '<select  class="form-control" name="trialEvent'.$eventCount.'" id="trialEvent'.$eventCount.'">';
@@ -1503,24 +1701,25 @@ else {
 	
 			// Load Events
 			$eventList = array();
-			$result = $mysqli->query("SELECT TE.EVENT_ID, E.NAME, TE.TRIAL_EVENT_FLAG, TE.TOURN_EVENT_ID, U.USER_ID, 
-									CONCAT(U.LAST_NAME,', ',U.FIRST_NAME,' (', U.USERNAME,')') AS USER, TE.PRIM_ALT_FLAG 
+			$result = $mysqli->query("SELECT TE.EVENT_ID, E.NAME, TE.TRIAL_EVENT_FLAG, TE.TOURN_EVENT_ID, U.USER_ID, U.FIRST_NAME, U.LAST_NAME, U.USERNAME, TE.PRIM_ALT_FLAG 
 									FROM TOURNAMENT_EVENT TE 
 									INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
 									INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID 
 									LEFT JOIN USER U on U.USER_ID=TE.USER_ID
 									WHERE TE.TOURNAMENT_ID= " .$id. " ORDER BY UPPER(E.NAME) ASC "); 
  			if ($result) {
- 				while($eventRow = $result->fetch_array()) {
+ 				while($eventRow = $result->fetch_array(MYSQLI_BOTH)) {
  					$event = array();
+ 					$supervisor = array($eventRow['USER_ID'], $eventRow['FIRST_NAME'], $eventRow['LAST_NAME'],$eventRow['USERNAME']);
+ 					
  					array_push($event, $eventRow['0']);
  					array_push($event, $eventRow['1']);
  					array_push($event, $eventRow['2']);
  					array_push($event, $eventRow['3']);
  					array_push($event, "0");
- 					array_push($event, $eventRow['4']);
- 					array_push($event, $eventRow['5']);
- 					array_push($event, $eventRow['6']);
+ 					array_push($event, $supervisor);
+ 					array_push($event, $eventRow['USER_ID']);
+ 					array_push($event, $eventRow['8']);
 				
  					array_push($eventList, $event);
  				}
@@ -1642,7 +1841,8 @@ else {
 		$eventList = $_SESSION["eventList"];
 		if ($eventList) {
 			foreach ($eventList as $event) {
-			if ($event['5'] == '' || $event['5'] == '0') $event['5'] = null; // USER ID Should be null if blank
+			$supervisor = $event['5']; // Supervisor Array	
+			$userId = $supervisor['0']; if ($userId == '') $userId = null;
 			
 			if ($event['3'] == null or $event['3'] == '') {
 				// Generate Next TOURN_EVENT_ID
@@ -1652,12 +1852,12 @@ else {
 				if ($row['0'] != null) $id = $row['0']; 
 				
 				$query = $mysqli->prepare("INSERT INTO TOURNAMENT_EVENT (TOURN_EVENT_ID, TOURNAMENT_ID, EVENT_ID, TRIAL_EVENT_FLAG, USER_ID, PRIM_ALT_FLAG) VALUES (".$id.", ?, ?, ?, ?,?) ");
-				$query->bind_param('iiiii',$_SESSION["tournamentId"],$event['0'], $event['2'], $event['5'],$event['7']); 
+				$query->bind_param('iiiii',$_SESSION["tournamentId"],$event['0'], $event['2'], $userId,$event['7']); 
 				$query->execute();
 			}
 			else {
 				$query = $mysqli->prepare("UPDATE TOURNAMENT_EVENT SET TRIAL_EVENT_FLAG=?, USER_ID=?, PRIM_ALT_FLAG=? WHERE TOURN_EVENT_ID=".$event['3']);			
-				$query->bind_param('iii',$event['2'], $event['5'], $event['7']);
+				$query->bind_param('iii',$event['2'], $userId, $event['7']);
 				$query->execute();
 			}
 			
@@ -2395,21 +2595,23 @@ else {
 		}
 		
 		// Save Coaches
-		foreach ($_SESSION["coachList"] as $coach) {
-			if ($coach[0] == null || $coach[0] == '') { 
-				$result = $mysqli->query("select max(TEAM_COACH_ID) + 1 from TEAM_COACH");
-				$row = $result->fetch_row(); 
-				$id = 0;
-				if ($row != null and $row['0'] != null) $id = $row['0'];  
-	
-				$query = $mysqli->prepare("INSERT INTO TEAM_COACH (TEAM_COACH_ID, TEAM_ID, USER_ID) VALUES (".$id.",?,?) ");
-				$query->bind_param('ii',$_SESSION["teamId"], $coach[2]);
-				
-				$query->execute();
-				$query->free_result();			
-			}
-			else {
-				
+		if ($_SESSION["coachList"]) {
+			foreach ($_SESSION["coachList"] as $coach) {
+				if ($coach[0] == null || $coach[0] == '') { 
+					$result = $mysqli->query("select max(TEAM_COACH_ID) + 1 from TEAM_COACH");
+					$row = $result->fetch_row(); 
+					$id = 0;
+					if ($row != null and $row['0'] != null) $id = $row['0'];  
+		
+					$query = $mysqli->prepare("INSERT INTO TEAM_COACH (TEAM_COACH_ID, TEAM_ID, USER_ID) VALUES (".$id.",?,?) ");
+					$query->bind_param('ii',$_SESSION["teamId"], $coach[2]);
+					
+					$query->execute();
+					$query->free_result();			
+				}
+				else {
+					
+				}
 			}
 		}
 		
@@ -2436,15 +2638,17 @@ else {
 	function processAccountNavigation($navigationHandler) {
 		if ($navigationHandler) {
 			
-			if ($navigationHandler->command = 'selectCoach') {				
+			if ($navigationHandler->command == 'selectCoach') {				
 				addCoach($_SESSION["userId"].'-'.$_SESSION["lastName"].', '.$_SESSION["firstName"].'-'.$_SESSION["userName"]);
 				$navigationHandler->fromPath = 'team_detail.php';
 			}
-			else if ($navigationHandler->command = 'selectSupervisor') {
-				
+			else if ($navigationHandler->command == 'selectSupervisor') {
+				addSupervisor($_SESSION["userId"].'-'.$_SESSION["lastName"].', '.$_SESSION["firstName"].'-'.$_SESSION["userName"]);
+				$navigationHandler->fromPath = 'tournament_detail.php';
 			}
-			else if ($navigationHandler->command = 'selectVerifier') {
-				
+			else if ($navigationHandler->command == 'selectVerifier') {
+				addVerifier($_SESSION["userId"].'-'.$_SESSION["lastName"].', '.$_SESSION["firstName"].'-'.$_SESSION["userName"]);
+				$navigationHandler->fromPath = 'tournament_detail.php';
 			}
 		}
 		$_SESSION["userId"] = null;
@@ -2773,9 +2977,15 @@ else {
 		return $array;
 	}
 	
+	// Primary Sort: Team Number
+	// Secondary Sort: Team Name
 	function sortTeamNumberAsc($a, $b) {
 		if ($a[1] < $b[1]) return -1;
 		if ($a[1] > $b[1]) return 1;
+		if ($a[1] === $b[1]) {
+			if ($a[2] < $b[2]) return -1;
+			if ($a[2] > $b[2]) return 1;
+		}
 		return 0;
 	}
 	
@@ -3724,6 +3934,12 @@ else {
 			if ($_SESSION["userRole"] != null) {
 				$query = $query . " AND ROLE_CODE = '".$_SESSION["userRole"]."' " ;
 			}
+			if ($_SESSION["pageCommand"] AND ($_SESSION["pageCommand"] == 'selectCoach' || $_SESSION["pageCommand"] == 'selectSupervisor' || $_SESSION["pageCommand"] == 'selectVerifier')) {
+				$query = $query . " AND COALESCE(AUTO_CREATED_FLAG,0) = 0 " ;
+			}
+			if (isUserAccess(0) AND ($_SESSION["autoCreatedFlag"] == null || $_SESSION["autoCreatedFlag"] == '' || $_SESSION["autoCreatedFlag"] == 'NO')) {
+				$query = $query . " AND COALESCE(AUTO_CREATED_FLAG,0) = 0 " ;
+			}
 			$query = $query . " ORDER BY UPPER(LAST_NAME) ASC ";
 			if ($_SESSION["userFilterNumber"] != null and $_SESSION["userFilterNumber"] != '0') {
 				$query = $query . " LIMIT ".$_SESSION["userFilterNumber"];
@@ -4146,7 +4362,7 @@ else {
 	
 	// SELF SCHEDULE FUNCTIONS -----------------------------------------------
 	
-	function loadSelfSchedule($mysqli, $id) {
+	function loadSelfSchedule($mysqli, $id, $loadCachedSchedule) {
 		$selfSchedule = new SelfSchedule();
 		$selfSchedule->setTournamentId($id);
 		// Old Schedule (For Caching)
@@ -4283,13 +4499,13 @@ else {
 					$team->teamAvailableId = $count;
 					if (getCurrentRole() == 'COACH') {
 						$team->teamSelectedFlag = true;
-						if ($selfSchedule->tournTeamSelectedId == null) $selfSchedule->tournTeamSelectedId = $team->tournTeamId;
+						if (!$selfSchedule->tournTeamSelectedId) $selfSchedule->tournTeamSelectedId = $team->tournTeamId;
 					}
 					$count++;
 				}
 				
 				
-				if ($oldSelfSchedule) {
+				if ($oldSelfSchedule AND $loadCachedSchedule) {
 					$selfSchedule->tournTeamSelectedId = $oldSelfSchedule->tournTeamSelectedId;
 					$selfSchedule->reservedSelected = $oldSelfSchedule->reservedSelected;
 					foreach ($oldSelfSchedule->teamList as $oldTeam) {
@@ -4464,7 +4680,7 @@ else {
 	}
 	function sortPeriodsListAsc($a, $b) {
 		$a = DateTime::createFromFormat('h:i A',$a->getStartTime());
-		$b = DateTime::createFromFormat('h:i A',$b->getEndTime());
+		$b = DateTime::createFromFormat('h:i A',$b->getStartTime());
 		if ($a < $b) return -1;
 		if ($a > $b) return 1;
 		return 0;
@@ -4719,9 +4935,8 @@ else {
 		$_SESSION["selfSchedule"] = serialize($selfSchedule);
 	}
 	
-	function loadScheduleEventPeriod($mysqli) {
+	function loadScheduleEventPeriod($mysqli, $scheduleEventPeriodId) {
 		$selfSchedule = unserialize($_SESSION["selfSchedule"]);
-		$scheduleEventPeriodId = $_GET['scheduleEventPeriodId'];
 		
 		if ($scheduleEventPeriodId == null OR $scheduleEventPeriodId == '') {
 			$errors = array(ERROR_SELF_SCHEDULE_SCHEDULE_TEAM_2);

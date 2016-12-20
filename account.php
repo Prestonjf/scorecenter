@@ -44,7 +44,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<?php include_once('libs/head_tags.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
   <script type="text/javascript">
   
 	function validate(role) {
@@ -159,12 +159,17 @@
 			 	} else if ($_SESSION["accountMode"] == 'create') { ?>
 				<td width="25%"><label for="regCode">Registration Code:<span class="red">*</span></label></td>
 				<td width="25%"><input type="text" autocomplete="off" size="40" class="form-control" name="regCode" id="regCode"></td>
-			<?php } else { 
+			<?php } else if (unserialize($_SESSION["userSessionInfo"])) { 
 				$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
 				$userRole = $userSessionInfo->getRole();
 				echo '<td width="25%"><label for="regCode">Role:</label></td>';
 				echo '<td width="25%">'.$userRole.'</td>';
-				} ?>
+				} 
+				else {
+					echo '<td width="25%"><label for="regCode"></label></td>';
+					echo '<td width="25%"></td>';
+				}
+				?>
 		</tr>
 		<tr>
 			<td width="25%"><label for="userName">Phone Number: </label></td>

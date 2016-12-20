@@ -26,6 +26,7 @@
 	session_start(); 
 	include_once('score_center_objects.php');
 	include_once('logon_check.php');
+	include_once('functions/global_functions.php');
 	
 	require_once 'login.php';
 	$mysqli = mysqli_init();
@@ -45,8 +46,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<?php include_once('libs/head_tags.php'); ?>
-	<?php include_once('libs/pagination.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
+	<?php include_once('functions/pagination.php'); ?>
 	
   <script type="text/javascript">
   $(document).ready(function(){
@@ -78,6 +79,7 @@
     <style>
   	.borderless td {
   			padding-top: 1em;
+  			padding-bottom: 1em;
 			padding-right: 2em;
   			border: none;
   	}
@@ -99,44 +101,18 @@
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Manage Tournaments</h1>
-	 <hr>
-	<table width="90%" class="borderless">
-	<tr>
-	<td width="15"><label for="fromDate">From Date: </label></td>
-	<td width="35">
-	<div class="controls"><div class="input-group">
-	<input type="text" size="20" class="date-picker form-control" readonly="true" name="fromDate" id="fromDate" value=<?php echo '"'.$_SESSION["fromTournamentDate"].'"' ?>>
-	<label for="fromDate" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
-	</div></div></td>
-	
-	<td width="15"><label for="toDate">To Date: </label></td>
-	<td width="35">
-	<div class="controls"><div class="input-group">
-	<input type="text" size="20" class="date-picker form-control" readonly="true" name="toDate" id="toDate" value=<?php echo '"'.$_SESSION["toTournamentDate"].'"' ?>>
-	<label for="toDate" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
-	</div></div></td>
-	</tr>
-	<tr>
-	<td><label># of Results: </label></td><td>
-	<input type="number" class="form-control" size="10" onkeydown="limit(this);" onkeyup="limit(this);" name="tournamentsNumber" id="tournamentsNumber" min="0" max="999"
-		step="1" value=<?php echo '"'.$_SESSION["tournamentsNumber"].'"' ?>>
-	</td>
-	<td></td>
-	<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchTournament">Search</button>
+	 <?php echo getTournamentSearchHeader(); ?>
+	 <button type="submit" class="btn btn-xs btn-warning" name="searchTournament">Search</button>
 		<button type="button" class="btn btn-xs btn-warning" name="clearSearchTournament" onclick="clearDates()">Clear</button>
-	</td>
-	
-	</tr>
-	</table>
-	
+	<br>
+	<br>
 	<script type="text/javascript">
 		$(".date-picker").datepicker({
 			changeMonth: true,
 			changeYear: true
 		});
 	</script>
-
-<hr>
+	
 		<?php $result = $mysqli->query($_SESSION["allTournaments"]);
 			$num_rows = $result->num_rows;
 			$resultArray = array_fill(0, $num_rows, '');

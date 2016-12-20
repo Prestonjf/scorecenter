@@ -27,6 +27,7 @@ session_start();
 include_once('score_center_objects.php');
 include_once('logon_check.php');
 include_once('role_check.php');
+include_once('functions/global_functions.php');
 require_once('login.php');
 
 	$mysqli = mysqli_init();
@@ -43,7 +44,7 @@ require_once('login.php');
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<?php include_once('libs/head_tags.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
 	
   <script type="text/javascript">
   	function clearDates() {
@@ -90,6 +91,17 @@ require_once('login.php');
 			</div>
           </div>
           
+        </div><!--/.col-xs-12.col-sm-9-->
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar">
+          <div class="list-group">
+            <a href="#" class="list-group-item active">Information</a>
+            <a href="http://scorecenter.prestonsproductions.com/" target="_blank" class="list-group-item">Tournament Score Center Help</a>
+            <a href="#" class="list-group-item">&nbsp;</a>
+
+          </div>
+        </div><!--/.sidebar-offcanvas-->
+      </div><!--/row--> 
+      
           <form action="controller.php" method="GET">
         
         <?php
@@ -148,48 +160,20 @@ require_once('login.php');
     	<?php } else if (getCurrentRole() ==='SUPERVISOR') {   	 ?>
 		<h2>My Events</h2>
 		
-		<table width="90%" class="borderless">
-		<tr>
-			<td width="15%"><label for="fromDate">Event Date: </label></td>
-			<td width="35%">
-			<div class="controls"><div class="input-group">
-			<input type="text" size="20" class="date-picker form-control" readonly="true" name="userEventDate" id="userEventDate" value=<?php echo '"'.$_SESSION["userEventDate"].'"' ?>>
-			<label for="userEventDate" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
-			</div></div></td>
-			<td></td>
-		</tr>
-		<tr>
-			<td width="15%"><label for="fromDate">Tournament: </label></td>
-			<td width="35%">
-			<select class="form-control" name="userTournament" id="userTournament">
-			<option value=""></option>
-			<?php
-				$query = "SELECT DISTINCT T.TOURNAMENT_ID, T.NAME
-					FROM TOURNAMENT T
-					INNER JOIN TOURNAMENT_EVENT TE on TE.TOURNAMENT_ID=T.TOURNAMENT_ID 									
-					WHERE TE.USER_ID = ".$userSessionInfo->getUserId() . " ORDER BY NAME ASC ";
-					$result1 = $mysqli->query($query);	
-			    if ($result1) {				 
-             		while($tournamentRow = $result1->fetch_array()) {
-             			echo '<option '; if ($_SESSION["userTournament"] == $tournamentRow['0']) echo ' selected ';
-						echo ' value="'.$tournamentRow['0'].'">'.$tournamentRow['1'].'</option>';		
-             		}
-             	}
-        	?>
-		</select>
-		</td>
-			<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchUserEvent">Search</button>
-			<button type="button" class="btn btn-xs btn-warning" name="clearSearchUserEvents" onclick="clearDates()">Clear</button></td>
-		</tr>
-		</table>
+		<?php
+			echo getSupervisorHomeSearchHeader($mysqli, $userSessionInfo);	
+		?>
+		
 	<script type="text/javascript">
 		$(".date-picker").datepicker({
 			changeMonth: true,
 			changeYear: true
 		});
 	</script>
-
-<hr>
+		<button type="submit" class="btn btn-xs btn-warning" name="searchUserEvent">Search</button>
+		<button type="button" class="btn btn-xs btn-warning" name="clearSearchUserEvents" onclick="clearDates()">Clear</button>
+		<br>
+		<br>
 		
 		<table class="table table-hover">
         <thead>
@@ -264,50 +248,22 @@ require_once('login.php');
 		
 		<?php } else if (getCurrentRole() ==='COACH') { ?>
 		<h2>My Tournaments</h2>
-		
-		<table width="90%" class="borderless">
-		<tr>
-			<td width="15%"><label for="fromDate">Tournament Date: </label></td>
-			<td width="35%">
-			<div class="controls"><div class="input-group">
-			<input type="text" size="20" class="date-picker form-control" readonly="true" name="userEventDate" id="userEventDate" value=<?php echo '"'.$_SESSION["userEventDate"].'"' ?>>
-			<label for="userEventDate" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
-			</div></div></td>
-			<td></td>
-		</tr>
-		<tr>
-			<td width="15%"><label for="fromDate">Tournament: </label></td>
-			<td width="35%">
-			<select class="form-control" name="userTournament" id="userTournament">
-			<option value=""></option>
-			<?php
-				$query = "SELECT DISTINCT T.TOURNAMENT_ID, T.NAME
-					FROM TOURNAMENT T
-					INNER JOIN TOURNAMENT_TEAM TT on TT.TOURNAMENT_ID=T.TOURNAMENT_ID	
-					INNER JOIN TEAM_COACH TC ON TC.TEAM_ID=TT.TEAM_ID							
-					WHERE TC.USER_ID = ".$userSessionInfo->getUserId() . " ORDER BY NAME ASC ";
-					$result1 = $mysqli->query($query);	
-			    if ($result1) {				 
-             		while($tournamentRow = $result1->fetch_array()) {
-             			echo '<option '; if ($_SESSION["userTournament"] == $tournamentRow['0']) echo ' selected ';
-						echo ' value="'.$tournamentRow['0'].'">'.$tournamentRow['1'].'</option>';		
-             		}
-             	}
-        	?>
-		</select>
-		</td>
-			<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchUserEvent">Search</button>
-			<button type="button" class="btn btn-xs btn-warning" name="clearSearchUserEvents" onclick="clearDates()">Clear</button></td>
-		</tr>
-		</table>
+		<?php
+		echo getCoachHomeSearchHeader($mysqli, $userSessionInfo);	
+			
+		?>
+
 	<script type="text/javascript">
 		$(".date-picker").datepicker({
 			changeMonth: true,
 			changeYear: true
 		});
 	</script>
-
-<hr>
+	
+		<button type="submit" class="btn btn-xs btn-warning" name="searchUserEvent">Search</button>
+		<button type="button" class="btn btn-xs btn-warning" name="clearSearchUserEvents" onclick="clearDates()">Clear</button>
+		<br>
+		<br>
 		
 		<table class="table table-hover">
         <thead>
@@ -364,18 +320,7 @@ require_once('login.php');
 		
 		<?php } ?>
 		</form>
-
-
-        </div><!--/.col-xs-12.col-sm-9-->
-        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar">
-          <div class="list-group">
-            <a href="#" class="list-group-item active">Quick Links</a>
-            <a href="http://scorecenter.prestonsproductions.com/" target="_blank" class="list-group-item">Tournament Score Center Help</a>
-            <a href="#" class="list-group-item">&nbsp;</a>
-
-          </div>
-        </div><!--/.sidebar-offcanvas-->
-      </div><!--/row-->   
+  
 
       <hr>
 

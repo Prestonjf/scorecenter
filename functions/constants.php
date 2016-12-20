@@ -37,6 +37,9 @@ define('ERROR_SELF_SCHEDULE_Add_TEAM_2', '<strong>Cannot Schedule Team: </strong
 define('ERROR_SELF_SCHEDULE_SCHEDULE_TEAM_1', '<strong>Cannot Schedule Team: </strong>Self Scheduling is currently closed.');
 define('ERROR_SELF_SCHEDULE_SCHEDULE_TEAM_2', '<strong>Cannot Schedule Team: </strong>This period is currently unavailable.');
 
+define('ERROR_TOURNAMENT_ADD_VERIFIER','<strong>Cannot Add Verifier:</strong> Verifier has already been added.');
+
+
 	
 	
 // Success Messages

@@ -26,6 +26,7 @@
 	session_start(); 
 	include_once('score_center_objects.php');
 	include_once('logon_check.php');
+	include_once('functions/global_functions.php');
 	require_once 'login.php';
 	$mysqli = mysqli_init();
 	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
@@ -43,8 +44,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<?php include_once('libs/head_tags.php'); ?>
-	<?php include_once('libs/pagination.php'); ?>
+	<?php include_once('functions/head_tags.php'); ?>
+	<?php include_once('functions/pagination.php'); ?>
 	
   <script type="text/javascript">
   $(document).ready(function(){
@@ -96,69 +97,12 @@
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Manage Teams</h1>
-	 <hr>
-	<table width="90%" class="borderless">
-	<tr>
-	<td width="15%"><label for="teamFilterName">Team Name: </label></td>
-	<td width="35%">
-	<input type="text" size="20" class="form-control" name="teamFilterName" id="teamFilterName" value=<?php echo '"'.$_SESSION["teamFilterName"].'"' ?>>
-	</td>
-	
-	<td width="15%"><label for="filterDivision">Division: </label></td>
-	<td width="35%">	
-	<select class="form-control" name="filterDivision" id="filterDivision" >
-			<option value=""></option>
-			<option value="A" <?php if($_SESSION["filterDivision"] == 'A'){echo("selected");}?>>A</option>
-			<option value="B" <?php if($_SESSION["filterDivision"] == 'B'){echo("selected");}?>>B</option>
-			<option value="C" <?php if($_SESSION["filterDivision"] == 'C'){echo("selected");}?>>C</option>
-	</select>
-	</td>
-	</tr>
-	<tr>
-	<td width="15%"><label for="filterState">Team State: </label></td>
-	<td width="35%">
-	<select class="form-control" name="filterState" id="filterState" >
-			<option value=""></option>
-			<?php
-			if ($_SESSION["stateCodeList"] != null) {	
-				$results = $_SESSION["stateCodeList"];
-				foreach($results as $row) {	
-					echo '<option value="'.$row['REF_DATA_CODE'].'" '; if($_SESSION["filterState"] == $row['REF_DATA_CODE']){echo("selected");} echo '>'.$row['DISPLAY_TEXT'].'</option>';
-				}
-			}
-			?>
-	</select>
-	</td>
-	
-	<td width="15%"><label for="filterRegion">Team Region: </label></td>
-	<td width="35%">	
-	<select class="form-control" name="filterRegion" id="filterRegion" >
-			<option value=""></option>
-			<?php
-			if ($_SESSION["regionCodeList"] != null) {	
-				$results = $_SESSION["regionCodeList"];
-				foreach($results as $row) {	
-					echo '<option value="'.$row['REF_DATA_CODE'].'" '; if($_SESSION["filterRegion"] == $row['REF_DATA_CODE']){echo("selected");} echo '>'.$row['DISPLAY_TEXT'].'</option>';
-				}
-			}
-			?>
-	</select>
-	</td>
-	</tr>
-	<tr>
-	<td><label for="filterMyTeams">Team Filter: </label></td><td>
-	<input type="radio"  name="filterMyTeams" id="filterMyTeams1" value="NO" <?php if($_SESSION["filterMyTeams"] == 'NO'){echo("checked");}?>> <label class='radio1' for="filterMyTeams1">All Teams</label>&nbsp;&nbsp;
-	<input type="radio" name="filterMyTeams" id="filterMyTeams2" value="YES" <?php if($_SESSION["filterMyTeams"] == 'YES'){echo("checked");}?>> <label class='radio1' for="filterMyTeams2">My Teams</label>&nbsp;&nbsp;
-	</td>
-	<td></td>
-	<td align="right"><button type="submit" class="btn btn-xs btn-warning" name="searchTeam">Search</button>
+	 <?php
+		echo getTeamSearchHeader();	 
+	?>
+		<button type="submit" class="btn btn-xs btn-warning" name="searchTeam">Search</button>
 		<button type="button" class="btn btn-xs btn-warning" name="clearSearchEvent" onclick="clearFilterCriteria()">Clear</button>
-	</td>		
-	</tr>
-	
-	</table>
-
-<hr>
+<br><br>
 		<?php paginationHeader($_SESSION["teamsList"]); ?>
         <table class="table table-hover">
         <thead>
