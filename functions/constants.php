@@ -48,5 +48,6 @@ define('SUCCESS_SELF_SCHEDULE_PERIODS_DELETED', '<strong>Deleted: </strong>Perio
 define('SUCCESS_SELF_SCHEDULE_SAVED', '<strong>Saved: </strong>Self Schedule has been saved.');		
 	
 	
-	
+// String Split Token
+define ('STRING_SPLIT_TOKEN','%***|***|***|***%');	
 ?>

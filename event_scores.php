@@ -51,13 +51,23 @@ include_once('functions/global_functions.php');
 		$disableTier = '';
 		$submitted = '';
 		$verified = '';
-        if ($userRole == 'SUPERVISOR' and $_SESSION["submittedFlag"] == '1') $disable = 'disabled';
-        if ($userRole == 'SUPERVISOR') $disableVerfiy = 'disabled';
+		     
         if ($_SESSION["submittedFlag"] == '1') $submitted = 'checked';
 	 	if ($_SESSION["verifiedFlag"] == '1') $verified = 'checked';
+	 	
+	 	// Supervisor Security
+	 	if ($userRole == 'SUPERVISOR') $disableVerfiy = 'disabled';
+	 	if ($userRole == 'SUPERVISOR' and $_SESSION["submittedFlag"] == '1') $disable = 'disabled';
+	 	
+	 	// Verifier Security 
+	 	if ($userRole == 'VERIFIER' and $_SESSION["verifiedFlag"] == '1') {
+		 	$disable = 'disabled';
+		 	$disableVerfiy = 'disabled'; 
+		}
 		
 		// Global Score Lock
 		if ($_SESSION["lockScoresFlag"] == 1) {$disable = 'disabled'; $disableVerfiy = 'disabled'; }
+		
 		// Disable Tier Depending on Algorithm		
 		if ($_SESSION["scoreSystemText"] == 'High Raw Score' or $_SESSION["scoreSystemText"] == 'Low Raw Score' or $disable == 'disabled') {
 			$disableTier = 'disabled';		
@@ -309,12 +319,17 @@ include_once('functions/global_functions.php');
 			displayError("<strong>Cannot Save Scores:</strong> Team cannot have a status of P (Participated) and earn a rank of 0.");
 			return false;
 		}
-		 if (document.getElementById('submittedFlag').checked) {
-			 if (userRole == 'SUPERVISOR') {
+		if (document.getElementById('submittedFlag').checked) {
+			if (userRole == 'SUPERVISOR') {
 				if (!confirm('This event has been marked as submitted. Only a score verifier will be able to modify them once saved. Do you wish to continue?')) return false;
-			 }
-		 }
-		 return true;		
+			}
+		}
+		if (document.getElementById('verifiedFlag').checked) {
+			if (userRole == 'VERIFIER') {
+				if (!confirm('This event has been marked as verified. Only an administrator will be able to modify them once saved. Do you wish to continue?')) return false;
+			}
+		}
+		return true;		
 	}
 	
 	function validateAlternate() {
@@ -631,7 +646,7 @@ include_once('functions/global_functions.php');
      <td><b><u>Status</u></b> Enter the team's status. Use the key below to determine the correct code. <br /><br /></td>
      </tr>
           <tr><td valign="top">2.</td>
-     <td><b><u>Raw Score</u></b> Enter the Raw Score (Exam Score, Calculated Score, Points Earned etc).<br /><br /></td>
+     <td><b><u>Raw Score</u></b> Enter the Raw Score (Exam Score, Calculated Score, Points Earned, etc).<br /><br /></td>
      </tr>
           <tr><td valign="top">3.</td>
      <td><b><u>Tier</u></b> Enter the Tier or Rank Group if applicable for each team. Drop down may be disabled if this does not apply to your event.<br /><br /></td>
@@ -640,16 +655,22 @@ include_once('functions/global_functions.php');
      <td><b><u>Calculate</u></b> Click the Calculate Ranks button at the bottom of the screen to allow the system to automatically calculate event ranks. (Calculation algorithm for this event is: <?php echo $_SESSION["scoreSystemText"]; ?> wins.) <br /><br /></td>
      </tr>
           <tr><td valign="top">5.</td>
-     <td><b><u>Ties</u></b> Once the Status, Raw Score, and Tier (if applicable) have been entered, the Raw Score field may change color. This means the team is tied with another team. Each tie will have a unique color. All ties must be broken. You may click the table headers to sort each column. This will assist in grouping and identifying ties. Use the tie break rank column to set the order in which the tie was won. Once all ties have been broken, click the Calculate Ranks button to update the ranks.<br /><br /></td>
+     <td><b><u>Ties</u></b> Once the Status, Raw Score, and Tier (if applicable) have been entered, the Raw Score field may change color. This means the team is tied with another team. Each tie will have a unique color. All ties must be broken. You may click the table headers to sort each column. This will assist in grouping and identified ties. Use the tie break rank column to set the order in which the tie was won. Once all ties have been broken, click the Calculate Ranks button to update the ranks.<br /><br /></td>
      </tr>
                <tr><td valign="top">6.</td>
      <td><b><u>Primary vs. Alternates</u></b> Primary teams and Alternate teams will be ranked independent of each other. These teams do not compete against one another. The Primary teams will be ranked starting at 1 and the Alternate teams will be ranked starting at 1. <br /><br /></td>
      </tr>
           <tr><td valign="top">7.</td>
-     <td><b><u>Rank Errors</u></b> If the ranks are not calculated correctly, you can manually set all the team's ranks. Enter 0 if the team's status is PX, NP, or DQ. Two team's cannot have the same rank unless the rank is 0. All ranks must be sequential starting at 1. (Clicking the Calculate Ranks button will overwrite the rank values)<br /><br /></td>
+     <td><b><u>Rank Errors</u></b> If the ranks are not calculated correctly (via the Calculate Ranks button), you can manually set all the team's ranks. Enter 0 if the team's status is PX, NP, or DQ. Two team's cannot have the same rank unless the rank is 0. All ranks must be sequential starting at 1. (Clicking the Calculate Ranks button will overwrite the rank values)<br /><br /></td>
      </tr>
           <tr><td valign="top">8.</td>
-     <td><b><u>Points Earned</u></b> Points earned will be calculated automatically and used for the overall tournament rankings. Tournament Winner: <?php echo $_SESSION["pointsSystem"]; ?>.) Participating teams will earn points corresponding to their rank value. Teams with a status of PX will earn last place points. Teams with a status of NP will earn last place points + <?php echo $_SESSION["pointsForNP"]; ?>. Teams with a status of DQ will earn last place points + <?php echo $_SESSION["pointsForDQ"]; ?>.<br /><br /></td>
+     <td><b><u>Points Earned</u></b> 
+	    <?php if ($_SESSION["pointsSystem"] == 'High Score Wins') {?>
+	     Points earned will be calculated automatically and used for the overall tournament rankings. Tournament Winner: <?php echo $_SESSION["pointsSystem"]; ?>. Primary participating teams (P) will earn (<?php echo $_SESSION["tournamentHighestScore"]+1; ?> - Rank) points. Teams with a status of (PX) will earn 1 point. Teams with a status of (NP) will earn (1 + <?php echo $_SESSION["pointsForNP"]; ?>) points. Teams with a status of (DQ) will earn (1 + <?php echo $_SESSION["pointsForDQ"]; ?>) points. Alternate Teams will be scored the same way except participating teams (P) will earn (<?php echo $_SESSION["highestScoreAlt"]+1; ?> - Rank) points.
+     <?php } else { ?>
+     Points earned will be calculated automatically and used for the overall tournament rankings. Tournament Winner: <?php echo $_SESSION["pointsSystem"]; ?>. Participating teams (P) will earn points corresponding to their rank. Teams with a status of (PX) will earn last place points. Teams with a status of (NP) will earn (last place + <?php echo $_SESSION["pointsForNP"]; ?>) points. Teams with a status of (DQ) will earn (last place + <?php echo $_SESSION["pointsForDQ"]; ?>) points. Primary Teams' last place points is <?php echo $_SESSION["tournamentHighestScore"]; ?>. Alternate Teams' last place is <?php echo $_SESSION["highestScoreAlt"]; ?>.
+     <?php } ?>
+     <br /><br /></td>
      </tr>
                <tr><td valign="top">9.</td>
      <td><b><u>Save</u></b> Click the save button to save the event scores. Event scores can be modified after the initial save if they have not yet been submitted. Once submitted, only a score verifier can modify the scores.<br /><br /></td>

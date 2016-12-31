@@ -39,7 +39,7 @@ session_start();
 	
 	// Security Level Check
 	include_once('role_check.php');
-	checkUserRole(2);
+	checkUserRole(1);
 ?>
 <!DOCTYPE html>
 <html lang="en">

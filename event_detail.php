@@ -39,7 +39,7 @@ include_once('logon_check.php');
 	
 	// Security Level Check
 	include_once('role_check.php');
-	checkUserRole(2);
+	checkUserRole(1);
 	
 	// Edit or Readonly
 	$disable = '';

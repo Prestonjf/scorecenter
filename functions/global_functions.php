@@ -46,6 +46,28 @@
 	    }
 	}
 	
+	// Return Team Status
+	function getEventStatus($key) {
+		$status = 'P';
+		switch($key) {
+			case 'P':
+				$status = 'P';
+				break;			
+			case 'N':
+				$status = 'NP';
+				break;
+			case 'X':
+				$status = 'PX';
+				break;
+			case 'D':
+				$status = 'DQ';
+				break;	
+			default:
+				$status = 'P';
+		}		
+		return $status;
+	}
+	
 	// Display Tournament Search Header
 	function getTournamentSearchHeader() {
 		$html = '<div class="headerstyle">';

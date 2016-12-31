@@ -166,7 +166,7 @@ session_start();
   </head>
   
   <body>
-  <?php include_once 'navbarMin.php'; ?>
+  <?php include_once 'navbar.php'; ?>
   
   	<form action="controller.php" method="GET" id="controllerForm">
      <div class="container">

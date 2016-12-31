@@ -41,6 +41,10 @@
 	<?php include_once('functions/head_tags.php'); ?>
 	<?php include_once('functions/pagination.php'); ?>
 	
+	<?php $selfSchedule = unserialize($_SESSION["selfSchedule"]); 
+		$disabled = false; 
+	?>
+	
   <script type="text/javascript">
   //$(document).ready(function() { });
 
@@ -82,6 +86,27 @@
 	        xmlhttp.send();
 	    }
 	}
+	
+	function reloadPeriodScheduler(mode,scheduleEventPeriodId) {
+		$.ajax({
+			type     : "GET",
+		    cache    : false,
+		    url      : "controller.php?command=refreshSelfSchedule&mode="+mode+"&scheduleEventPeriodId="+scheduleEventPeriodId,
+		    data     : $(this).serialize(),
+		    success  : function(data) {	
+			    //var d = data.split("<?php echo STRING_SPLIT_TOKEN;?>");
+			    $('#periodSchedulerDiv').html(data);
+		    }
+		});
+	}
+
+
+	setTimeout(refreshTimer, 7200000);
+	setInterval(refreshTimer, 5000);
+	
+	function refreshTimer() {
+		reloadPeriodScheduler('scheduler', '<?php echo $selfSchedule->currentPeriodId; ?>');
+	}
 
 
   
@@ -96,13 +121,7 @@
   <?php include_once 'navbar.php'; ?>
   
   	<form action="controller.php" method="GET" id="selfSchedulePeriodForm">
-     <div class="container">
-	     
-	     <?php $selfSchedule = unserialize($_SESSION["selfSchedule"]); 
-		     $disabled = false; 
-		     
-	     ?>
-	     
+     <div class="container">	     
      
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>

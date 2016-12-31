@@ -474,10 +474,11 @@
 		$html .= '<h6><div style="padding-left: 5em; overflow: hidden;">1.To schedule your team, click the add button. <br>2. To remove your team from the schedule, click remove.<br><br>Each team can only be scheduled once per event. Every action you make will be saved automatically. Other teams may be scheduling at the same time. You will receive an error message if there are no remaining slots.</div></h6>';
 		$html .= '<hr>';
 		
-		$html .= '<div style="float: left; overflow: hidden; width: 40%;">';
+		$html .= '<div style="float: left; overflow: hidden; width: 45%;">';
 		$html .= '<table class="table table-hover" id="availableTeamsTable"><thead><tr>
 		<th data-field="number" data-align="right" data-sortable="true">#</th>
-		<th data-field="number" data-align="right" data-sortable="true">Available Teams</th>
+		<th data-field="number" data-align="right" data-sortable="true">Teams</th>
+		<th data-field="number" data-align="right" data-sortable="true">Time</th>
 		<th data-field="number" data-align="right" data-sortable="true">Action</th>
 		</tr></thead>';
 		$html .= '<tbody id="teamTableBody">';
@@ -485,6 +486,7 @@
 		// Filler Slot
 		$html .= '<tr><td></td>';
 		$html .= '<td>Reserved</td>';
+		$html .= '<td></td>';
 		$html .= '<td>';
 		if (isUserAccess(1)) $html .= '<button type="button" class="btn btn-xs btn-default" name="addTeamEventPeriod" onclick="addTeamPeriod(this,-1,'.$period->scheduleEventPeriodId.');" value=""' .$addButtonDisabled.'">Add</button>';
 		$html .= '</td>';
@@ -494,6 +496,7 @@
 				if (!$team->teamLinkedToEventFlag) {
 					$html .= '<tr><td>'.$team->teamNumber.'</td>';
 					$html .= '<td>'.$team->teamName.'</td>';
+					$html .= '<td>'.$team->scheduledTime.'</td>';
 					$html .= '<td>';
 					if ($team->teamAvailableFlag) {
 						$html .= '<button type="button" class="btn btn-xs btn-danger" name="addTeamEventPeriod" onclick="addTeamPeriod(this,'.$team->tournTeamId.','.$period->scheduleEventPeriodId.');" value=""' .$addButtonDisabled.'">Add</button>';
@@ -505,10 +508,12 @@
 		}
 		$html .= '</tbody></table>';
 		$html .= '</div>';
-		$html .= '<div style="overflow: hidden; width: 60%; padding-left: 10%;">';
+		$html .= '<div style="overflow: hidden; width: 55%; padding-left: 5%;">';
 		$html .= '<table class="table table-hover" id="scheduledTeamsTable" ><thead><tr>
 		<th data-field="number" data-align="right" data-sortable="true"></th>
-		<th data-field="number" data-align="right" data-sortable="true">Scheduled Teams</th>
+		<th data-field="number" data-align="right" data-sortable="true">#</th>
+		<th data-field="number" data-align="right" data-sortable="true">Period Scheduled Teams</th>
+		<th data-field="number" data-align="right" data-sortable="true">Time</th>
 		<th data-field="number" data-align="right" data-sortable="true">Actions</th>
 		</tr></thead>';
 		$html .= '<tbody id="scheduledTeamsTableBody">';
@@ -535,7 +540,9 @@
 			}
 			
 			if ($team) {
-				$html .= '<td>'.$team->teamName.'</td>';				
+				$html .= '<td>'.$team->teamNumber.'</td>';
+				$html .= '<td>'.$team->teamName.'</td>';
+				$html .= '<td>'.$team->scheduledTime.'</td>';				
 				$html .= '<td>';
 				if ($team->teamAvailableFlag) {
 					$html .= '<button type="button" class="btn btn-xs btn-danger" name="removeTeamEventPeriod" onclick="removeTeamPeriod(this,'.$team->tournTeamId.','.$period->scheduleEventPeriodId.','.$team->scheduleTeamId.');" value=""' .$addButtonDisabled.'">Remove</button>';
@@ -545,13 +552,14 @@
 			else {
 				if ($noTeamPosition < sizeOf($selfSchedule->noTeams)) {
 					$reservedTeam = $selfSchedule->noTeams[$noTeamPosition];
-					$html .= '<td>Reserved</td><td>';
+					$html .= '<td></td>';
+					$html .= '<td>Reserved</td><td></td><td>';
 					if (isUserAccess(1)) $html .= '<button type="button" class="btn btn-xs btn-default" name="removeTeamEventPeriod" onclick="removeTeamPeriod(this,-1,'.$period->scheduleEventPeriodId.','.$reservedTeam->scheduleTeamId.');" value=""' .$addButtonDisabled.'">Remove</button>';
 					$html .= '</td>';
 					$noTeamPosition++;
 				}
 				else {
-					$html .= '<td></td><td></td>';
+					$html .= '<td></td><td></td><td></td><td></td>';
 				}
 			}
 
@@ -715,7 +723,7 @@
 							  		$reservedCount++;
 						  		}
 	
-						  		$row = array($i.': '.$teamName,$teamNumber); 
+						  		$row = array('* '.$teamNumber. ' '.$teamName); // $i
 						  		fputcsv($output, $row);
 					  		}	
 				  		}
@@ -787,7 +795,7 @@
 							  		$reservedCount++;
 						  		}
 	
-						  		$row = array($i.': '.$teamName,$teamNumber); 
+						  		$row = array('* '.$teamNumber . ' '. $teamName);  // $id
 						  		fputcsv($output, $row);
 					  		}
 				  		}	

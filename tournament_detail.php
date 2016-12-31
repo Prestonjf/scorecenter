@@ -30,7 +30,7 @@
 
 	// Security Level Check
 	include_once('role_check.php');
-	checkUserRole(2);
+	checkUserRole(1);
 	
 	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
 	$userRole = $userSessionInfo->getRole();

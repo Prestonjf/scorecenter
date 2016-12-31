@@ -337,11 +337,24 @@
 		        url      : "controller.php?command=updateSelectedTeam&tournTeamId="+elm.value,
 		        data     : $(this).serialize(),
 		        success  : function(data) {
-			    	//displayError(data);	
-		           // $(".printArea").empty().append(data).css('visibility','visible');
+
 		        }
 		    });
 		}
+	}
+	
+	function reloadSelfSchedule(mode) {
+		$.ajax({
+			type     : "GET",
+		    cache    : false,
+		    url      : "controller.php?command=refreshSelfSchedule&mode="+mode,
+		    data     : $(this).serialize(),
+		    success  : function(data) {	
+			    var d = data.split("<?php echo STRING_SPLIT_TOKEN;?>");
+			    $('#ssHeaderDiv').html(d[0]);
+		    	$('#overview').html(d[1]);
+		    }
+		});
 	}
 	
 	function displayTeams() {
@@ -396,8 +409,13 @@
 		return false;
 	}
 
-
-		</script>  
+	if ('SCHEDULE' == '<?php echo $_SESSION["selfSchedulScreen"]; ?>') {
+		setTimeout(refreshTimer, 7200000);
+		setInterval(refreshTimer, 5000);
+	}
+	function refreshTimer() {
+		reloadSelfSchedule('overview');
+	}
   </script>
     <style>
   
@@ -437,7 +455,9 @@
 	      
       </ul>
 
-	  <?php echo getSSTournamentHeader();
+	  <?php echo '<div id="ssHeaderDiv">'.getSSTournamentHeader().'</div>';
+		 	echo '<button type="button" class="btn btn-xs btn-primary" name="refreshSelfSchedule" id="refreshSelfSchedule" onclick="reloadSelfSchedule(\'overview\')" value="overview" >Refresh</button>';
+		 	echo '&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;';
 	  		if (isUserAccess(1)) {
 			echo '<button type="submit" class="btn btn-xs btn-primary" name="exportScheduleOverview">Export Schedule</button> ';
 			echo '<button type="submit" class="btn btn-xs btn-primary" name="exportScheduleAllEvents">Export All Events</button>';

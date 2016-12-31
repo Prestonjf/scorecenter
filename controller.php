@@ -66,6 +66,7 @@ else if (isset($_GET['logout']) or ($_GET['command'] != null and $_GET['command'
 	exit();
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'createAccount') {
+	initNoSession($mysqli);
 	clearAccount();
 	$_SESSION["accountMode"] = 'create';
 	header("Location: account.php");	
@@ -93,7 +94,7 @@ else if ($_GET['command'] != null and $_GET['command'] == 'createNewAccount') {
 	header("Location: account.php");	
 	exit();
 }
-else if (isset($_POST['cancelAccount'])) {
+else if (isset($_POST['cancelAccount']) OR ($_GET['command'] != null AND $_GET['command'] == 'cancelAccount')) {
 		$_SESSION["accountMode"] = null;
 		$navigationHandler = unserialize($_SESSION["navigationHandler"]);
 		// Return to Calling Screen if exists
@@ -804,6 +805,22 @@ else if (isset($_GET['adminCreateUser'])) {
 	header("Location: account.php");
 	exit();
 }
+else if ($_GET['command'] != null and $_GET['command'] == 'refreshSelfSchedule') {
+	$mode = $_GET['mode'];
+	$selfSchedule = unserialize($_SESSION["selfSchedule"]);
+	loadSelfSchedule($mysqli, $selfSchedule->getTournamentId(),true);
+	if ($mode == 'overview') {			
+		echo getSSTournamentHeader();
+		echo STRING_SPLIT_TOKEN;
+		echo getMyTeams(); 
+		echo getScheduleOverview(); 
+	} else if ($mode == 'scheduler') {
+		$scheduleEventPeriodId = $_GET['scheduleEventPeriodId'];
+		loadScheduleEventPeriod($mysqli, $scheduleEventPeriodId);
+		echo getPeriodScheduler();
+	}
+	exit();
+}
 // No commands were met. Return to Home Page
 else {	
 	//header("Location: index.php");
@@ -1170,6 +1187,7 @@ else {
 		$_SESSION["highestScoreAlt"] = null;
 		$_SESSION["pointsForNP"] = null;
 		$_SESSION["pointsForDQ"] = null;
+		$_SESSION["totalPointsWins"] = null;
 		
 	}
 	
@@ -4230,6 +4248,7 @@ else {
 		$_SESSION["lastName"] = '';
 		$_SESSION["vPassword"] = '';
 		$_SESSION["state"] = '';
+		$_SESSION["userPhoneNumber"] = '';
 		$_SESSION["emailConfirmationFlag"] = '';		
 	}
 	
@@ -4950,12 +4969,17 @@ else {
 			return false;
 		}
 		$selfSchedule->currentPeriodId = $scheduleEventPeriodId;
-		$query = " SELECT ST.SCHEDULE_TEAM_ID, ST.TOURN_TEAM_ID FROM SCHEDULE_TEAM ST WHERE ST.SCHEDULE_EVENT_PERIOD_ID = ".$scheduleEventPeriodId;
+		$query = " SELECT ST.SCHEDULE_TEAM_ID, ST.TOURN_TEAM_ID, ST.SCHEDULE_EVENT_PERIOD_ID, DATE_FORMAT(SEP.PERIOD_START_TIME,'%h:%i %p') AS PERIOD_START_TIME FROM SCHEDULE_TEAM ST 
+			INNER JOIN SCHEDULE_EVENT_PERIOD SEP ON SEP.SCHEDULE_EVENT_PERIOD_ID=ST.SCHEDULE_EVENT_PERIOD_ID
+			INNER JOIN SCHEDULE_EVENT_PERIOD SEP2 ON SEP2.SCHEDULE_EVENT_PERIOD_ID=".$scheduleEventPeriodId." 
+			WHERE SEP.SCHEDULE_EVENT_ID = SEP2.SCHEDULE_EVENT_ID";
+		
 		$results = $mysqli->query($query); 
+		
 		// Set Any Admin Filled Slots
 		$selfSchedule->noTeams = array();
 		while ($row = $results->fetch_array(MYSQLI_BOTH)) {	
-			if ($row['TOURN_TEAM_ID'] == -1) {
+			if ($row['TOURN_TEAM_ID'] == -1 AND $scheduleEventPeriodId == $row['SCHEDULE_EVENT_PERIOD_ID']) {
 				$noTeam = new selfScheduleTeam();
 				$noTeam->scheduleTeamId = $row['SCHEDULE_TEAM_ID'];
 				$noTeam->tournTeamId = -1;
@@ -4965,14 +4989,16 @@ else {
 		}
 		$results->data_seek(0);
 		
+		// Set Teams Linked To This Period And All Teams Scheduled Time
 		foreach ($selfSchedule->teamList as $team) {
 			$team->scheduleTeamId = '';
 			$team->teamLinkedToEventFlag = false;
+			$team->scheduledTime = '';
 			while ($row = $results->fetch_array(MYSQLI_BOTH)) {	
-				if ($row['TOURN_TEAM_ID'] == $team->tournTeamId) {
+				if ($row['TOURN_TEAM_ID'] == $team->tournTeamId) $team->scheduledTime = $row['PERIOD_START_TIME'];
+				if ($row['TOURN_TEAM_ID'] == $team->tournTeamId AND $scheduleEventPeriodId == $row['SCHEDULE_EVENT_PERIOD_ID']) {
 					$team->scheduleTeamId = $row['SCHEDULE_TEAM_ID'];
-					$team->teamLinkedToEventFlag = true;		
-					break;
+					$team->teamLinkedToEventFlag = true;					
 				}				
 			}
 			$results->data_seek(0);
@@ -5143,6 +5169,11 @@ else {
 	
 	function init($mysqli) {
 		loadDefaultSettings();
+		loadStateList($mysqli);
+		loadRegionList($mysqli);
+	}
+	
+	function initNoSession($mysqli) {
 		loadStateList($mysqli);
 		loadRegionList($mysqli);
 	}

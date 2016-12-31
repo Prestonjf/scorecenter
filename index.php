@@ -51,6 +51,15 @@ require_once('login.php');
 		document.getElementById('userEventDate').value = '';
 		document.getElementById('userTournament').value = '';	
 	}
+	
+	/**function getQuoteOfTheDay() {
+		$.get("http://api.forismatic.com/api/1.0/method=getQuote&key=1&lang=en&format=html", function(a) {
+			$('#quote').append(a);
+		});
+	}
+	
+	getQuoteOfTheDay();**/
+	
   </script>
       <style>
   	.borderless td {
@@ -92,11 +101,11 @@ require_once('login.php');
           </div>
           
         </div><!--/.col-xs-12.col-sm-9-->
-        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar">
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" style="height:auto;">
           <div class="list-group">
-            <a href="#" class="list-group-item active">Information</a>
+            <span class="list-group-item active">Information</span>
             <a href="http://scorecenter.prestonsproductions.com/" target="_blank" class="list-group-item">Tournament Score Center Help</a>
-            <a href="#" class="list-group-item">&nbsp;</a>
+            <a href="#" id="quote" class="list-group-item">&nbsp;</a>
 
           </div>
         </div><!--/.sidebar-offcanvas-->
@@ -129,6 +138,7 @@ require_once('login.php');
 		if (getCurrentRole() == 'ADMIN') {
 			$query .= " AND T.ADMIN_USER_ID =" .getCurrentUserId();
 		}
+		$query .= " ORDER BY T.DATE DESC ";
  		$result = $mysqli->query($query); 
 			
 
@@ -199,7 +209,7 @@ require_once('login.php');
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID 
 					INNER JOIN EVENT E on E.EVENT_ID=TE.EVENT_ID 
 					LEFT JOIN TEAM_EVENT_SCORE TES on TES.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TES.SCORE IS NOT NULL									
-					WHERE TE.USER_ID = ".$userSessionInfo->getUserId();
+					WHERE TE.USER_ID = ".$userSessionInfo->getUserId(); 
 					
 					if ($_SESSION["userEventDate"] != null and $_SESSION["userEventDate"] != '') { 
 					 	$date1 = strtotime($_SESSION["userEventDate"]); 			
@@ -212,7 +222,7 @@ require_once('login.php');
 					}
 					
 					$query = $query ." GROUP BY EVENT_ID,eNAME, TRIAL_EVENT_FLAG,TOURN_EVENT_ID, NUMBER_TEAMS
-					ORDER BY UPPER(E.NAME) ASC, T.DATE DESC "; 
+					ORDER BY T.DATE DESC, UPPER(E.NAME) ASC "; 
 	
          	$result = $mysqli->query($query);			
  			if ($result) {
@@ -294,7 +304,7 @@ require_once('login.php');
 						$query = $query . " AND T.TOURNAMENT_ID = " . $_SESSION["userTournament"];
 					}
 					
-					$query = $query ." ORDER BY UPPER(T.NAME) ASC, T.DATE DESC "; 
+					$query = $query ." ORDER BY T.DATE DESC, UPPER(T.NAME) ASC "; 
 	
          	$result = $mysqli->query($query);			
  			if ($result) {
@@ -348,7 +358,7 @@ require_once('login.php');
       
       
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="js/jquery-1.11.3.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
   </body>

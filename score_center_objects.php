@@ -407,6 +407,7 @@ class selfScheduleTeam {
 	  public $tournTeamId;
 	  public $teamName;
 	  public $teamNumber;
+	  public $scheduledTime;
 	  public $scheduleTeamId;
 	  public $teamLinkedToEventFlag = false;
 	  public $teamAvailableFlag = false;

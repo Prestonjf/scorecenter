@@ -81,48 +81,46 @@
 	  ?>   
 	 <table width="100%" >
 	 <tr>
-	 <td class="reportTd" valign="top"><div class="reportHeader"><h4><span class="red">*</span>Report Type</h4></div>
+	 <td class="reportTd" valign="top"><div class="reportHeader"><h4>Custom Report</h4></div>
+	 <label class="reportHeader">Report Type:<span class="red">*</span></label><br>
 		 <input type="radio" name="reportType" value="overall" /> Overall Results &nbsp;
 		 <input type="radio" name="reportType" value="event" /> Event Results &nbsp;
 		 <input type="radio" name="reportType" value="team" /> Team Results&nbsp;
+	 <hr>
+	 <label class="reportHeader">Selected Events:</label><br>
+	 <select class="form-control" name="tournamentEvent" id="tournamentEvent" multiple>
+			<option value="ALL">All</option>
+			<option value=""></option>
+		</select>
+	<hr>
+	<label class="reportHeader">Selected Teams:</label><br>
+		<select class="form-control" name="tournamentTeam" id="tournamentTeam" multiple>
+			<option value="ALL">All</option>
+			<option value=""></option>
+		</select>
+	<hr>
+	<label class="reportHeader">Output Type:<span class="red">*</span></label><br>
+		<input type="radio" name="outputType" value="pdf" /> .pdf &nbsp;
+		 <input type="radio" name="outputType" value="xlsx" /> .xlsx &nbsp;
+		 <input type="radio" name="outputType" value="csv" /> .csv &nbsp;
 	 </td>
 	 <td width="50%" align="left" valign="top" rowspan="4" valign="top" style="border-left: 5em solid white; ">
 		 <div class="reportHeader"><h4>Preset Reports <img src="img/question_blue.png" alt="question_blue" height="10" width="10" data-toggle="tooltip" title="Hover over the blue question mark to see a description of the preset report."></h4> </div>
 		 <div>
-		 <button type="button" class="btn btn-xs btn-primary" name="generateTournamentReport1" onclick="generateReport('1')">Generate Preset 1</button>&nbsp;&nbsp;&nbsp;
+		<label class="reportHeader">Preset 1</label><br>
+		 <button type="button" class="btn btn-xs btn-primary" name="generateTournamentReport1" onclick="generateReport('1')">Generate</button>&nbsp;&nbsp;&nbsp;
 		 <img src="img/question_blue.png" alt="question_blue" height="10" width="10" data-toggle="tooltip" title="A one page report is generated per team. Top 6 teams are listed per event. Team's finishing position is also listed per event.">&nbsp;&nbsp;&nbsp;Event Results to 6th Place + Team Rank
 		 <hr>
 		 </div>
 		 <div>
-		 <button type="button" class="btn btn-xs btn-primary" name="generateTournamentReport2" onclick="generateReport('2')">Generate Preset 2</button>&nbsp;&nbsp;&nbsp;
+		 <label class="reportHeader">Preset 2</label><br>
+		 <button type="button" class="btn btn-xs btn-primary" name="generateTournamentReport2" onclick="generateReport('2')">Generate</button>&nbsp;&nbsp;&nbsp;
 		 <img src="img/question_blue.png" alt="question_blue" height="10" width="10" data-toggle="tooltip" title="A one page report is generated per event. All ranks listed.">&nbsp;&nbsp;&nbsp;Event Results For All Events
 		 <hr>
 		 </div>
 		 
 	 </td>
-	 </tr>
-	 <tr>
-	 <td class="reportTd" valign="top"><div class="reportHeader"><h4>Selected Events</h4></div>
-
-	 </td>
-	 </tr>
-	 <tr>
-	 <td class="reportTd" valign="top"><div class="reportHeader"><h4>Selected Teams</h4></div>
-
-	 </td>
-	 </tr>
-	 <tr>
-	 <td class="reportTd" valign="top"><div class="reportHeader"><h4><span class="red">*</span>Output Type</h4></div>
-		 <input type="radio" name="outputType" value="pdf" /> .pdf &nbsp;
-		 <input type="radio" name="outputType" value="xlsx" /> .xlsx &nbsp;
-		 <input type="radio" name="outputType" value="csv" /> .csv &nbsp;
-	 </td>
-	 </tr>
-		 
-		 
-
-		 
-		 
+	 </tr>	 
 	 </table>
 
 

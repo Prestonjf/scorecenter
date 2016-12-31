@@ -39,26 +39,36 @@
 </script>
 
 <?php
-		include_once('role_check.php');
 		
-		$userName = "";
-		$role = "";
-		$firstName = "";
-		$lastName = "";
-		if($_SESSION["userSessionInfo"] != null) {
-			$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
-			if ($userSessionInfo->getUserName() != null) {
-				$userName = $userSessionInfo->getUserName();
-				$firstName = $userSessionInfo->getFirstName();
-				$lastName = $userSessionInfo->getLastName();
-			}
-			if ($userSessionInfo->getRole() != null) {
-				$role = $userSessionInfo->getRole();
+		include_once('role_check.php');
+		$isbasicMenu = false;
+		
+		if (strpos($_SERVER['REQUEST_URI'],'logon') !== false || strpos($_SERVER['REQUEST_URI'],'account') !== false || strpos($_SERVER['REQUEST_URI'],'slideshow') !== false) {
+			$isbasicMenu = true;
+		}
+		
+		if (!$isbasicMenu) {
+			$userName = "";
+			$role = "";
+			$firstName = "";
+			$lastName = "";
+			if($_SESSION["userSessionInfo"] != null) {
+				$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+				if ($userSessionInfo->getUserName() != null) {
+					$userName = $userSessionInfo->getUserName();
+					$firstName = $userSessionInfo->getFirstName();
+					$lastName = $userSessionInfo->getLastName();
+				}
+				if ($userSessionInfo->getRole() != null) {
+					$role = $userSessionInfo->getRole();
+				}
 			}
 		}
-?>
+		
 
-<nav class="navbar navbar-default">
+
+
+echo '<nav class="navbar navbar-default">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
@@ -70,39 +80,46 @@
       </button>
       <a class="navbar-brand" href="controller.php?command=loadIndex&">Tournament Score Center &nbsp;&nbsp;
       	<img alt="MISO Logo" src="img/misologo.png"  width="25" height="25" style="float: right;"></a>
-    </div>
+    </div>';
 
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <li class="<?php if (strpos($_SERVER['REQUEST_URI'],'index') !== false) echo 'active';  ?>">
-        <a href="controller.php?command=loadIndex&">Home<span class="sr-only">(current)</span></a></li>
-        <?php if (isUserAccess(2)) { ?>
-        <li class="<?php if (strpos($_SERVER['REQUEST_URI'],'index') === false) echo 'active';  ?>">
-        <a href="controller.php?command=loadAllTournaments&">Tournaments</a></li>
-        <?php } ?>      
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-      	<li><a href="controller.php?command=updateAccount&"><?php echo 'Hello, '.$firstName.' '.$lastName;?></a></li><li><a href="controller.php?command=logout&"><u>Logout</u></a></li>
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Settings<span class="caret"></span></a>
-          <ul class="dropdown-menu">
-           <?php if (isUserAccess(2)) { ?>
-            <li><a href="controller.php?command=loadAllTournaments&">Manage Tournaments</a></li>
-            <li><a href="controller.php?command=loadAllTeams&">Manage Teams</a></li>
-            <li><a href="controller.php?command=loadAllEvents&">Manage Events</a></li>
-            <?php if (isUserAccess(0)) { ?><li><a href="controller.php?command=loadAllUsers&">Manage Users</a></li> <?php } ?>
-            <li role="separator" class="divider"></li>
-            <?php if (isUserAccess(0)) { ?> <li><a href="controller.php?command=loadUtilities&">Utilities</a></li><?php } ?>
-            <?php } ?>
-            <li><a href="#" id="aboutLink" >About</a></li>
-            <li><a href="http://scorecenter.prestonsproductions.com" target="_blank" id="" >Help</a></li>
-			<li role="separator" class="divider"></li>
-			 <li><a href="controller.php?command=logout&">Logout</a></li>
-          </ul>
+    echo '<!-- Collect the nav links, forms, and other content for toggling -->';
+    echo '<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">';
+     echo '<ul class="nav navbar-nav">';
+     if (!$isbasicMenu) {
+       echo '<li class="'; if (strpos($_SERVER['REQUEST_URI'],'index') !== false) echo 'active';  echo'">';
+        echo '<a href="controller.php?command=loadIndex&">Home<span class="sr-only">(current)</span></a></li>';
+		if (isUserAccess(2)) {
+        	echo '<li class="'; if (strpos($_SERVER['REQUEST_URI'],'index') === false) echo 'active';  echo'">';
+        	echo '<a href="controller.php?command=loadAllTournaments&">Tournaments</a></li>';
+        }      
+      }
+      echo '</ul>';
+      echo '<ul class="nav navbar-nav navbar-right">';
+      if (!$isbasicMenu) {
+      	echo '<li><a href="controller.php?command=updateAccount&">Hello, '.$firstName.' '.$lastName.'</a></li><li><a href="controller.php?command=logout&"><u>Logout</u></a></li>';
+      }
+        echo '<li class="dropdown">';
+          echo '<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Settings<span class="caret"></span></a>';
+          echo '<ul class="dropdown-menu">';
+          if (!$isbasicMenu AND isUserAccess(2)) {
+            echo '<li><a href="controller.php?command=loadAllTournaments&">Manage Tournaments</a></li>';
+            if (isUserAccess(1)) { echo '<li><a href="controller.php?command=loadAllTeams&">Manage Teams</a></li>'; }
+            if (isUserAccess(1)) { echo '<li><a href="controller.php?command=loadAllEvents&">Manage Events</a></li>'; }
+            if (isUserAccess(0)) { echo '<li><a href="controller.php?command=loadAllUsers&">Manage Users</a></li>'; }
+            echo '<li role="separator" class="divider"></li>';
+            if (isUserAccess(0)) { echo '<li><a href="controller.php?command=loadUtilities&">Utilities</a></li>'; }
+           }
+            echo '<li><a href="#" id="aboutLink" >About</a></li>';
+            echo '<li><a href="http://scorecenter.prestonsproductions.com" target="_blank" id="" >Help</a></li>';
+           if (!$isbasicMenu) {
+			echo '<li role="separator" class="divider"></li>';
+			echo '<li><a href="controller.php?command=logout&">Logout</a></li>';
+			}
+          echo '</ul>
         </li>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
-<textarea id="aboutLinkBox" style="display: none;"></textarea>
+<textarea id="aboutLinkBox" style="display: none;"></textarea>';
+?>

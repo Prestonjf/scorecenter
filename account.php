@@ -46,6 +46,20 @@
   <head>
 	<?php include_once('functions/head_tags.php'); ?>
   <script type="text/javascript">
+	    
+	$(document).ready(function() {
+    	$('body').keyup(function(event) {
+	    	if (event.keyCode == 13) {
+		    	$('#save').click();	
+	    	}
+    	});
+    	
+	});
+	
+	function cancel() {
+		document.forms[0].action = document.forms[0].action + "?command=cancelAccount&";
+		document.forms[0].submit();
+	}
   
 	function validate(role) {
 	var mode = '<?php echo $_SESSION["accountMode"]; ?>';
@@ -68,8 +82,8 @@
 			
 			if ($("#password").val().trim() != $("#vPassword").val().trim()) {
 				displayError("<strong>Error:</strong> Verification Password does not match.");
-				$("#vPassword").val() = '';
-				$("#password").val() = '';
+				$("#vPassword").val('');
+				$("#password").val('');
 				return false;
 			}
 			
@@ -81,8 +95,8 @@
 			if ($("#password").val().trim() == '' && $("#vPassword").val().trim() == '') ;
 			else if ($("#password").val().trim() != $("#vPassword").val().trim()) {
 				displayError("<strong>Error:</strong> Verification Password does not match.");
-				$("#vPassword").val() = '';
-				$("#password").val() = '';
+				$("#vPassword").val('');
+				$("#password").val('');
 				return false;
 			}
 			if ($("#firstName").val().trim() == '' || $("#lastName").val().trim() == '' || $("#userName").val().trim() == '') {
@@ -128,7 +142,7 @@
   </head>
   
   <body>
-   <?php include_once 'navbarMin.php'; ?>
+   <?php include_once 'navbar.php'; ?>
   	<form action="controller.php" method="POST">
      <div class="container">
      
@@ -207,13 +221,13 @@
 		?>	
 		
 		<?php if ($_SESSION["accountMode"] == 'create' AND $navigationHandler) { ?>
-			<input type="button" class="btn btn-xs btn-danger" name="createNewAccount" onclick="validate('<?php echo $navRole; ?>');" accesskey="" value="Create Account & Link"/>
+			<input type="button" class="btn btn-xs btn-danger" name="createNewAccount" id="save" onclick="validate('<?php echo $navRole; ?>');" tabindex="1" value="Create Account & Link"/>
 		<?php } else if ($_SESSION["accountMode"] == 'create') {?>
-			<input type="button" class="btn btn-xs btn-danger" name="createNewAccount" onclick="validate('<?php echo $navRole; ?>');" accesskey="" value="Create Account"/>
+			<input type="button" class="btn btn-xs btn-danger" name="createNewAccount" id="save" onclick="validate('<?php echo $navRole; ?>');" tabindex="1" value="Create Account"/>
 		<?php } else { ?>
-			<input type="button" class="btn btn-xs btn-danger" name="updateAccount" onclick="validate('');" value="Update Account"/>
+			<input type="button" class="btn btn-xs btn-danger" name="updateAccount" id="save" onclick="validate('');" tabindex="1" value="Update Account"/>
 		<?php } ?>
-			<button type="submit" class="btn btn-xs btn-primary" name="cancelAccount">Cancel</button>
+			<input type="button" class="btn btn-xs btn-primary" onclick="cancel();" name="cancelAccount" value="Cancel" />
       
 
       <hr>
