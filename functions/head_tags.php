@@ -51,6 +51,7 @@
   	echo '<script src="js/jquery-ui-1.11.4/jquery-ui.js"></script>';
  	echo '<script type="text/javascript" src="js/jquery.tablesorter.js"></script>';
   	echo '<script type="text/javascript" src="js/scorecenter.js"></script>';
+  	echo '<script type="text/javascript" src="js/refresh_timeout.js"></script>';
   	echo '<script src="js/popBox1.3.0.js" type="text/javascript"></script>';
 	
 ?>

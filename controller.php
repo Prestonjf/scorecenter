@@ -46,7 +46,6 @@ require_once('login.php');
 		printf("Connect failed: %s\n", mysqli_connect_error());
 		exit();
 	}
-// if user not logged in. forward to login.php
 
 // Begin MAIN METHOD -------------------------->	
 if (isset($_POST['login'])) {		
@@ -133,8 +132,13 @@ else if ($_GET['command'] != null and $_GET['command'] == 'updateResultPage') {
 	exit();
 }
 
-// All Commands Below Require An Active Session
-//include_once('logon_check.php');
+// if user not logged in. forward to login.php - Application should exit if usersession is empty
+$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+if (!$userSessionInfo) {
+	$_SESSION['errorSessionTimeout'] = '1';
+	header("location: logon.php");
+	exit();
+}
 
 if ($_GET['command'] != null and ($_GET['command'] == 'loadIndex' or $_GET['command'] =='loadIndexLogin')) {
 	header("Location: index.php");	
@@ -1749,7 +1753,7 @@ else {
 			$teamList = array();
 			$result = $mysqli->query("SELECT TT.TEAM_ID, T.NAME, TT.TEAM_NUMBER, TT.ALTERNATE_FLAG, TT.TOURN_TEAM_ID, TT.BEST_NEW_TEAM_FLAG, TT.MOST_IMPROVED_TEAM_FLAG FROM TOURNAMENT_TEAM TT INNER JOIN TOURNAMENT TR on 		
 									TR.TOURNAMENT_ID=TT.TOURNAMENT_ID 
-									INNER JOIN TEAM T on T.TEAM_ID=TT.TEAM_ID WHERE TT.TOURNAMENT_ID= " .$id. " ORDER BY if(CAST(TT.TEAM_NUMBER AS UNSIGNED)=0,1,0), CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC, TEAM_NUMBER "); 
+									INNER JOIN TEAM T on T.TEAM_ID=TT.TEAM_ID WHERE TT.TOURNAMENT_ID= " .$id. " ORDER BY if(CAST(TT.TEAM_NUMBER AS UNSIGNED)=0,1,0), CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC, TEAM_NUMBER, T.NAME "); 
  			if ($result) {
  				while($teamRow = $result->fetch_array()) {
  					$team = array();

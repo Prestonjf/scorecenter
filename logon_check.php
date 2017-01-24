@@ -28,6 +28,7 @@
 
 $userSessionInfo = null;
 if($_SESSION["userSessionInfo"] == null){
+	session_destroy();
 	header("location: logon.php");
 	exit();
 }
@@ -35,7 +36,7 @@ if($_SESSION["userSessionInfo"] == null){
 else {
 	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
 	if ($userSessionInfo->getUserName() == null or $userSessionInfo->getAuthenticatedFlag() == null) {
-		$_SESSION["userSessionInfo"] = null;
+		session_destroy();
 		header("location: logon.php");
 		exit(); 
 	}
@@ -51,7 +52,7 @@ else {
 	}
 	$url =  $_SERVER[HTTP_HOST] . $tmp;
 	if ($url !== $userSessionInfo->getDomain()) {
-		$_SESSION["userSessionInfo"] = null; 
+		session_destroy();
 		header("location: logon.php");
 		exit(); 
 	}

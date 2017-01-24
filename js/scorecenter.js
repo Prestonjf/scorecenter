@@ -20,6 +20,9 @@
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
+ 
+ // Constants
+ var PAGEROWS = 15;
 
 // Delete Confirm
 function confirmDelete(name) {
@@ -73,9 +76,12 @@ function loadPage(p, total, pages) {
 		
 		$('#selectedPage').val(p);
 		
-		var start = (p-1) * 15;
-		var end = ((p-1) * 15) + 14;
+		var start = (p-1) * PAGEROWS;
+		if (p == 1) start = 0;
+		var end = ((p-1) * PAGEROWS) + PAGEROWS - 1;
+		if (p == 1) end = PAGEROWS-1;
 		var count = 0;
+		
 		while (count <= total) {
 			if (document.getElementById('resultPageRow'+count) != null) {
 				if (count >= start && count <= end) {

@@ -135,11 +135,11 @@
 				$rowCount = 0;
       			while($row = $result->fetch_array()) {
 					paginationRow($rowCount);
-					echo '<td>'; echo $row['1']; echo '</td>';
-					echo '<td>'; echo $row['3']; echo '</td>';
-					echo '<td>'; echo $row['2']; echo '</td>';
-					echo '<td>'; echo $row['4']; echo '</td>';
-					echo '<td>';
+					echo '<td width="20%">'; echo $row['1']; echo '</td>';
+					echo '<td width="5%">'; echo $row['3']; echo '</td>';
+					echo '<td width="20%">'; echo $row['2']; echo '</td>';
+					echo '<td width="10%">'; echo $row['4']; echo '</td>';
+					echo '<td width="45%">';
 					echo '<button type="submit" class="btn btn-xs btn-primary" name="enterScores" value="'.$row['0'].'">Enter Scores</button> &nbsp;'; 				
 					echo '<button type="submit" class="btn btn-xs btn-primary" name="printScore" value='.$row['0'].'>View Results</button>&nbsp;';
 					if (isUserAccess(1)) echo '<button type="submit" class="btn btn-xs btn-primary" name="loadTournament" value='.$row['0'].'>Edit Tournament</button>&nbsp;';
