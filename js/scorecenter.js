@@ -68,6 +68,8 @@ function clearSuccess() {
 }
 
 function loadPage(p, total, pages) {
+		if (total == 0) return;
+		
 		var currentPage = Number($('#selectedPage').val());
 		if (p == 'first') p = 1;
 		else if (p == 'previous') { if (currentPage == 1) p = currentPage; else p = currentPage - 1; }

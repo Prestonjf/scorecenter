@@ -92,8 +92,12 @@ include_once('functions/global_functions.php');
 					$ti = explode('%:%',$i);
 					if ($ti[2] AND $ti[2] > 0 AND $ti[2] <= 6) {
 						$teamName = $ti[0];
-						if (strlen($teamName) > 30) $teamName = substr($teamName, 0, 30).'.';
-						$pdf->Cell(30,10,$rank.' '.$teamName,0,0,'L');
+						$ti[3] = str_replace('%*%','',$ti[3]);
+						if (strlen($teamName) > 28) $teamName = substr($teamName, 0, 28).'.';
+						if ($ti[3] != 'P')
+							$pdf->Cell(30,10,getEventStatus($ti[3]).' '.$teamName,0,0,'L');
+						else
+							$pdf->Cell(30,10,$rank.' '.$teamName,0,0,'L');
 						$x = $pdf->GetX()-30;
 						$pdf->Ln(5);
 						$pdf->setX($x);
@@ -103,7 +107,7 @@ include_once('functions/global_functions.php');
 						if ($ti[2] == 0) $specificTeamRank = getEventStatus($ti[3]);
 						else $specificTeamRank = $ti[2];
 						
-						if (strlen($ti[0]) > 30) $specificTeam = substr($ti[0], 0, 30).'.';
+						if (strlen($ti[0]) > 28) $specificTeam = substr($ti[0], 0, 28).'.';
 						else $specificTeam = $ti[0];
 					}
 				}
@@ -173,14 +177,18 @@ include_once('functions/global_functions.php');
 				foreach($item as $i) {
 					$ti = explode('%:%',$i);
 					$teamName = $ti[0];
+					$ti[3] = str_replace('%*%','',$ti[3]);
 					if (strlen($teamName) > 40) $teamName = substr($teamName, 0, 40).'.';
-					$pdf->Cell(30,10,$rank.' '.$teamName,0,0,'L');
+					if ($ti[3] != 'P')
+						$pdf->Cell(30,10,getEventStatus($ti[3]).' '.$teamName,0,0,'L');
+					else 
+						$pdf->Cell(30,10,$rank.' '.$teamName,0,0,'L');
 					$x = $pdf->GetX()-30;
 					$pdf->Ln(5);
 					$pdf->setX($x);
 					
-					if ($rank % 25 == 0) {
-						$pdf->SetXY($pdf->GetX()+30+30,$y);
+					if ($rank % 30 == 0) {
+						$pdf->SetXY($pdf->GetX()+30+50,$y);
 					}
 					$rank++;
 				}
@@ -192,7 +200,7 @@ include_once('functions/global_functions.php');
 	}
 	
 	function getEventResults($mysqli) {
-		$sql = ' select E.NAME,COALESCE(TE.PRIM_ALT_FLAG,0) as PRIM_ALT, GROUP_CONCAT(CONCAT(T1.NAME,\'%:%\',TT1.TOURN_TEAM_ID,\'%:%\',TES1.SCORE,\'%:%\',TES1.TEAM_STATUS,\'%*%\') ORDER BY SCORE ASC) AS TEAM
+		$sql = ' select E.NAME,COALESCE(TE.PRIM_ALT_FLAG,0) as PRIM_ALT, GROUP_CONCAT(CONCAT(T1.NAME,\'%:%\',TT1.TOURN_TEAM_ID,\'%:%\',TES1.SCORE,\'%:%\',TES1.TEAM_STATUS,\'%*%\') ORDER BY FIELD(TES1.TEAM_STATUS,\'P\',\'X\',\'N\',\'D\'), SCORE ASC ) AS TEAM
 					from TOURNAMENT_EVENT TE
 					INNER JOIN EVENT E on TE.EVENT_ID=E.EVENT_ID
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TE.TOURNAMENT_ID

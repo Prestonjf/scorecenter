@@ -365,6 +365,8 @@
 				var lists = html.split('*****');
 				document.getElementById('tourn1LinkedDiv').innerHTML = lists[0];
 				document.getElementById('tourn2LinkedDiv').innerHTML = lists[1];
+				document.getElementById('previousTournLinkDiv').innerHTML = lists[2];
+				
 			}
 			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 				loadDivisonTeams();
@@ -597,6 +599,27 @@
 			</select>
 			</div>
 		</td>
+	</tr>
+	<tr>
+		<td><label for="stateBids">State Bids: </label></td>		
+		<td style="white-space: nowrap;"><input type="text" class="form-control" name="stateBids" id="stateBids" onkeydown="limitNumber(this);" onkeyup="limitNumber(this);" value=<?php echo '"'.$_SESSION["stateBids"].'"' ?>></td>
+		<td><label for="previousTournLinkDiv">Link Previous Tournament: </label></td>
+		<td>
+		<div id="previousTournLinkDiv" style="width: 100%;">
+			<select class="form-control" name="previousTournLinked" id="previousTournLinked">
+			<?php
+			    if ($previousTournLinked) {
+             		while($previousTournLinkedRow = mysql_fetch_array($previousTournLinked)) {
+             			echo '<option value="'.$previousTournLinkedRow['0'].'" '; if($_SESSION["previousTournLinked"] == $previousTournLinkedRow['0']){echo("selected");} echo '>'.$$previousTournLinkedRow['1'].'</option>';
+             			
+             		}
+             	}
+        	?>	
+			<option value=""></option>	
+			</select>
+		</div>
+		</td>	
+
 	</tr>
 	</table>
 	<hr>

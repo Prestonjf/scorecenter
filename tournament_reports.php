@@ -79,9 +79,9 @@
 	 <?php
 	     echo getTournamentHeader();
 	  ?>   
-	 <table width="100%" >
+	 <table width="100%">
 	 <tr>
-	 <td class="reportTd" valign="top"><div class="reportHeader"><h4>Custom Report</h4></div>
+	 <td class="reportTd" valign="top"><div class="reportHeader"><h4>Custom Report <img src="img/question_blue.png" alt="question_blue" height="10" width="10" data-toggle="tooltip" title="Select your criteria below to build a custom report for this tournament."> (Coming Soon!)</h4></div>
 	 <label class="reportHeader">Report Type:<span class="red">*</span></label><br>
 		 <input type="radio" name="reportType" value="overall" /> Overall Results &nbsp;
 		 <input type="radio" name="reportType" value="event" /> Event Results &nbsp;
@@ -104,7 +104,7 @@
 		 <input type="radio" name="outputType" value="xlsx" /> .xlsx &nbsp;
 		 <input type="radio" name="outputType" value="csv" /> .csv &nbsp;
 	 </td>
-	 <td width="50%" align="left" valign="top" rowspan="4" valign="top" style="border-left: 5em solid white; ">
+	 <td width="50%" align="left" valign="top" rowspan="4" valign="top" style="border-left: 10em solid white; ">
 		 <div class="reportHeader"><h4>Preset Reports <img src="img/question_blue.png" alt="question_blue" height="10" width="10" data-toggle="tooltip" title="Hover over the blue question mark to see a description of the preset report."></h4> </div>
 		 <div>
 		<label class="reportHeader">Preset 1</label><br>

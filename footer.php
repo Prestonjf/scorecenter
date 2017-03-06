@@ -26,5 +26,5 @@
 $date=date('Y'); ?>
     
       <footer>
-        <p>&copy; <?php echo $date; ?> Preston Frazier</p>
+        <p>&copy; 2015-<?php echo $date; ?> Tournament Score Center <i style="font-size: 75%;">by Preston Frazier</i></p>
       </footer>

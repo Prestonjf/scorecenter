@@ -35,6 +35,7 @@ class UserSessionInfo {
    private $phoneNumber;
    private $domain;
    private $state;
+   private $teamsCoached = array();
    
    
  
@@ -104,6 +105,12 @@ class UserSessionInfo {
 	}
 	public function getState() {
 		return $this->state;
+	}
+	public function setTeamsCoached($teamsCoached) {
+		$this->teamsCoached = $teamsCoached;
+	}
+	public function getTeamsCoached() {
+		return $this->teamsCoached;
 	}
    
    public function loadUserSessionInfo() {
@@ -233,6 +240,7 @@ class selfSchedule {
    public $reservedSelected = false;
    public $currentPeriodId;
    public $tournTeamSelectedId;
+   public $selfScheduleAlternateTeamFlag = false;
   
    
    public function __construct() {

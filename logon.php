@@ -107,7 +107,6 @@ session_start();
         <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar">
           <div class="list-group">
             <span class="list-group-item active">Information</span>
-            <a href="http://scorecenter.prestonsproductions.com/" target="_blank" class="list-group-item">Tournament Score Center Help</a>
             <a href="#" class="list-group-item">&nbsp;</a>
           </div>
         </div><!--/.sidebar-offcanvas-->

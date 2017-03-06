@@ -76,6 +76,7 @@ require_once('login.php');
   </head>
   <body>
   <?php include_once 'navbar.php'; ?>
+  <?php $userSessionInfo = unserialize($_SESSION["userSessionInfo"]); ?>
   <h1></h1>
   
      <div class="container">
@@ -104,8 +105,26 @@ require_once('login.php');
         <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" style="height:auto;">
           <div class="list-group">
             <span class="list-group-item active">Information</span>
-            <a href="http://scorecenter.prestonsproductions.com/" target="_blank" class="list-group-item">Tournament Score Center Help</a>
-            <a href="#" id="quote" class="list-group-item">&nbsp;</a>
+            <!--<a href="http://scorecenter.prestonsproductions.com/" target="_blank" class="list-group-item">Tournament Score Center Help</a>-->
+            <a href="#" id="quote" class="list-group-item">
+	            <table>
+		        	            <tr><td><b>Username:&nbsp;</b></td><td><?php echo $userSessionInfo->getUserName() ?></td></tr>
+		            <tr><td><b>Name:&nbsp;</b></td><td><?php echo $userSessionInfo->getFirstName() . ' ' . $userSessionInfo->getLastName() ?></td></tr>
+				<tr><td><b>Role:&nbsp;</b></td><td><?php echo getRoleName($userSessionInfo->getRole()) ?></td></tr>
+	            </table>
+	            <?php
+					if (getCurrentRole() ==='COACH' AND $userSessionInfo->getTeamsCoached()) {
+						
+						echo '<b>My Teams:&nbsp;</b><br />';
+						$count = 0;
+						foreach($userSessionInfo->getTeamsCoached() as $team) {
+							echo $team[1];
+							if ($count < sizeof($userSessionInfo->getTeamsCoached())-1) echo '<br />';
+							$count++;
+						}
+					}
+	            ?>
+	            &nbsp;</a>
 
           </div>
         </div><!--/.sidebar-offcanvas-->
@@ -114,7 +133,6 @@ require_once('login.php');
           <form action="controller.php" method="GET">
         
         <?php
-          	$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
           	if (isUserAccess(2)) {
           ?>
         <h2>Today's Tournaments</h2>

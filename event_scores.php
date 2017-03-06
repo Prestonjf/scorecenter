@@ -558,6 +558,11 @@ include_once('functions/global_functions.php');
 	    
 		}); 
 		
+		$('#eventScoresForm').submit(function() {
+					  var btn = $('#saveEventScores').clone().insertAfter("#saveEventScores").prop('id', 'saveEventScores1').prop('disabled','true');
+		  $(this).find("#saveEventScores").hide();
+		}); 
+		
 		
    		
     });
@@ -616,7 +621,7 @@ include_once('functions/global_functions.php');
   <body>
   <?php include_once 'navbar.php'; ?>
   
-  	<form action="controller.php" method="GET">
+  	<form action="controller.php" method="GET" id="eventScoresForm">
      <div class="container">
      
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
@@ -840,7 +845,7 @@ include_once('functions/global_functions.php');
           <br /> <br />
 
         <?php if ($disable != 'disabled')   { ?>
-		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"'; ?>>Save</button>
+		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" id="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"'; ?>>Save</button>
 		<button type="button" class="btn btn-xs btn-warning" id="calculateEventScores" name="calculateEventScores" onclick="calculateScorez('<?php echo addslashes($_SESSION["eventName"]); ?>','<?php echo $_SESSION["tournamentDivision"]; ?>','<?php echo $_SESSION["scoreSystemCode"]; ?>');" >Calculate Ranks</button>
 		<button type="button" class="btn btn-xs btn-warning" id="clearScores" name="clearScores" onclick="resetScores();" >Clear Scores</button>
 		<button type="submit" class="btn btn-xs btn-primary" name="cancelEventScores" onclick="return confirmCancel()">Cancel</button>

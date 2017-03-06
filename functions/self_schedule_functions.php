@@ -108,9 +108,9 @@
 					$count2 = 0;
 					foreach ($event->periodsList as $period) {
 						$html .= '<tr><td colspan=3 bgcolor="e8e8e8">' . $period->periodNumber.'</td><td bgcolor="e8e8e8">' . $period->periodStartTime.'</td><td bgcolor="e8e8e8">' . $period->periodEndTime.'</td><td bgcolor="e8e8e8"></td><td bgcolor="e8e8e8">' . $period->teamLimit;
-						if ($event->allDayFlag != 1) {	
+						//if ($event->allDayFlag != 1) {	
 							$html .= '<div style="float: right;"><button type="button" class="btn btn-xs btn-danger" name="deleteEventPeriod" onclick="deleteEventPrd(this,'.$count.','.$count2.');" value="'.$period->scheduleEventPeriodId.'" '.$addButtonDisabled.'>Delete</button></div>';
-						}
+					//	}
 						$html .= '</td></tr>';
 						$count2++;
 					}
@@ -393,9 +393,14 @@
 							}
 							else {
 								$html .= '<td class="selfScheduleDisplay" width="4%" bgcolor="c8dbeb" align="center" ><div style="font-size:60%;">Open</div></td>';
-								//width="'.$tdwidth.'%"
 							}
 							$count++;	
+						}
+					}
+					if (sizeof($event->periodsList) < 20) {
+						$spacerCount = 20 - sizeof($event->periodsList);
+						for ($i=0;$i<$spacerCount;$i++) {
+							$html .= '<td class="selfScheduleDisplay" width="4%" bgcolor="c8dbeb" align="center" ><div style="font-size:60%;"></div></td>';
 						}
 					}
 					$count++;

@@ -37,10 +37,18 @@
 		$totalPages = ceil(($totalResults) / PAGEROWS);
 		if ($_SESSION["resultsPage"] == null) $_SESSION["resultsPage"] = 1;
 		$resultStart = ($_SESSION["resultsPage"]-1) * PAGEROWS;
-		if ($totalResults != 0) $resultStart = $resultStart + 1;
+		$resultStart = $resultStart + 1;
 		$resultEnd = (($_SESSION["resultsPage"]-1) * PAGEROWS) + PAGEROWS;
 		if ($totalPages == 1) $resultEnd = $totalResults;
 		$pageCount = 1;
+		
+		if ($totalResults == 0) {
+			$resultStart = 0;
+			$resultEnd = 0;
+			$totalPages = 1;
+		}
+		
+		
 
 		echo '<input type="hidden" id="selectedPage" value="'.$pageCount.'" >';
 		echo '';
@@ -66,13 +74,19 @@
 	// Load Footer
 	function paginationFooter($results) {	
 		$totalResults = sizeof($results);
-		$totalPages = ceil(($totalResults+1) / PAGEROWS);
+		$totalPages = ceil(($totalResults) / PAGEROWS);
 		if ($_SESSION["resultsPage"] == null) $_SESSION["resultsPage"] = 1;
 		$resultStart = ($_SESSION["resultsPage"]-1) * PAGEROWS;
-		if ($totalResults != 0) $resultStart = $resultStart + 1;
+		$resultStart = $resultStart + 1;
 		$resultEnd = (($_SESSION["resultsPage"]-1) * PAGEROWS) + PAGEROWS;
 		if ($totalPages == 1) $resultEnd = $totalResults;
 		$pageCount = 1;
+		
+		if ($totalResults == 0) {
+			$resultStart = 0;
+			$resultEnd = 0;
+			$totalPages = 1;
+		}
 		
         echo '<div style="font-size: 13px;"><div style="width: 20%; border-top:1px solid #eee; float: left;">Results: <b><span id="pageStartId2">'.($resultStart).'</span></b> to <b><span id="pageEndId2">'.($resultEnd).'</span></b> of <b>'.$totalResults.'</b></div>';
 		echo '<div id="pagesId2" style="width: 80%; border-top:1px solid #eee; float: right; text-align:right;">Page: ';

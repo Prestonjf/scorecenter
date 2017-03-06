@@ -499,16 +499,21 @@
 		</td>
 		</tr>
 		<tr>
-		<td width="25%"><label for="selfScheduleOpen">Self Scheduling Open:<span class="red">*</span></label></td>
+		<td width="25%"><label for="selfScheduleOpen">Self Scheduling Status:<span class="red">*</span></label></td>
 		<td width="25%">
 			<select class="form-control" name="selfScheduleOpen" id="selfScheduleOpen">
-				<option value="0" <?php if($selfSchedule->getSelfScheduleOpenFlag() == 0){echo("selected");}?>>No</option>
-				<option value="1" <?php if($selfSchedule->getSelfScheduleOpenFlag() == 1){echo("selected");}?>>Yes</option>
+				<option value="0" <?php if($selfSchedule->getSelfScheduleOpenFlag() == 0){echo("selected");}?>>Closed</option>
+				<option value="1" <?php if($selfSchedule->getSelfScheduleOpenFlag() == 1){echo("selected");}?>>Open</option>
 			</select>
 		</td>
 		
-		<td width="25%"></td>
-		<td width="25%"></td>
+		<td width="25%"><label for="selfScheduleAlternateTeams">Alternate Teams Can Schedule:<span class="red">*</span></label></td>
+		<td width="25%">
+			<select class="form-control" name="selfScheduleAlternateTeams" id="selfScheduleAlternateTeams">
+				<option value="0" <?php if($selfSchedule->selfScheduleAlternateTeamFlag == 0){echo("selected");}?>>No</option>
+				<option value="1" <?php if($selfSchedule->selfScheduleAlternateTeamFlag == 1){echo("selected");}?>>Yes</option>
+			</select>
+		</td>
 		</tr>
 		</table>
 		<hr>		

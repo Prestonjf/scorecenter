@@ -45,50 +45,84 @@ session_start();
   <head>
 	<?php include_once('functions/head_tags.php'); ?>
 	<?php include_once('functions/pagination.php'); ?>
-	
+
+	 <script src="js/hammer.min.js"></script>
   <script type="text/javascript">
   	var slideshow = eval(<?php echo $_SESSION["resultSlideshow"]; ?>);
 	var slideshowIndex = 0;
 	var slideshowLength = Object.keys(slideshow).length;
   
+
+	
   $(document).ready(function(){
-  		//console.log(slideshow);
-		//document.getElementById('slideshow').innerHTML = slideshow;
-		generateSlideContent();
+  	//console.log(slideshow);
+	generateSlideContent();
+	
+	// Touch Actions
+	var hammertime = new Hammer(document.getElementById('slideshow'));
+	hammertime.on('swipeleft', function(ev) {
+		next();
+	});
+	hammertime.on('swiperight', function(ev) {
+		previous();
+	});
+	hammertime.on('tap', function(ev) {
+		nextAnimation();
+	});
+	hammertime.on('press', function(ev) {
+		previousAnimation();
+	});
+	hammertime.on('pinchin', function(ev) {
+		quit();
+	});
 	});
 	
-	//window.addEventListener("keydown", dealWithKeyboard, false);
-	//window.addEventListener("keypress", dealWithKeyboard, false);
+	
 	window.addEventListener("keyup", dealWithKeyboard, false);
 	 
 	function dealWithKeyboard(e) {
 		switch(e.keyCode) {	
 			case 37: // previous
-				if (slideshowIndex -1 >= 0) slideshowIndex--; 
-				generateSlideContent();
+				previous();
 				break;
 			case 38: // previousAnimation
-				if ((slideshow[slideshowIndex].animationPosition - 1) >= 0) slideshow[slideshowIndex].animationPosition = slideshow[slideshowIndex].animationPosition - 1;
-				generateSlideContent();
+				previousAnimation();
 				break;
 			case 39: // next
-				if (slideshowIndex + 1 < slideshowLength) slideshowIndex++; 
-				generateSlideContent();
+				next();
 				break;
 			case 40: // nextAnimation
-				var animationCount = Object.keys(slideshow[slideshowIndex].teamNames).length;
-				if (animationCount == 0) animationCount = Object.keys(slideshow[slideshowIndex].labelValues).length;
-				if ((slideshow[slideshowIndex].animationPosition + 1) <= animationCount) slideshow[slideshowIndex].animationPosition = slideshow[slideshowIndex].animationPosition + 1;
-				generateSlideContent();
+				nextAnimation();
 				break;  
 			case 81:
-				if(confirm('Are you sure you want to exit the slideshow?')) {
-					$('#controllerForm').append('<input type="hidden" name="command" value="exitSlideShow" />');
-					$("#controllerForm").submit(); 
-				}
+				quit();
 				break;  
 		} 
-
+	}
+	
+	function previous() {
+		if (slideshowIndex -1 >= 0) slideshowIndex--; 
+		generateSlideContent();
+	}
+	function previousAnimation() {
+		if ((slideshow[slideshowIndex].animationPosition - 1) >= 0) slideshow[slideshowIndex].animationPosition = slideshow[slideshowIndex].animationPosition - 1;
+		generateSlideContent();
+	}
+	function next() {
+		if (slideshowIndex + 1 < slideshowLength) slideshowIndex++; 
+		generateSlideContent();
+	}
+	function nextAnimation() {
+		var animationCount = Object.keys(slideshow[slideshowIndex].teamNames).length;
+		if (animationCount == 0) animationCount = Object.keys(slideshow[slideshowIndex].labelValues).length;
+		if ((slideshow[slideshowIndex].animationPosition + 1) <= animationCount) slideshow[slideshowIndex].animationPosition = slideshow[slideshowIndex].animationPosition + 1;
+		generateSlideContent();	
+	}
+	function quit() {
+		if(confirm('Are you sure you want to exit the slideshow?')) {
+			$('#controllerForm').append('<input type="hidden" name="command" value="exitSlideShow" />');
+			$("#controllerForm").submit(); 
+		}	
 	}
 	
 	function generateSlideContent() {
@@ -96,52 +130,52 @@ session_start();
 		var slide = slideshow[slideshowIndex];
 		
 		if (slide.type == 'PLACEHOLDER') {
-			slideHtml += '<div style="width: 100%; font-size: 200%; white-space:nowrap; text-align: center;">' + '<i>Science Olympiad</i>' + '</div><br />'
-			slideHtml += '<div style="width: 100%; font-size: 500%; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />';
+			slideHtml += '<div style="width: 100%; font-size: 2vw; white-space:nowrap; text-align: center;">' + '<i>Science Olympiad</i>' + '</div><br />'
+			slideHtml += '<div style="width: 100%; font-size: 5vw; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />';
 			slideHtml += '<center><img alt="" src="'+slide.logoPath+'" width="200" height="200"></center><br /><br />';
-			slideHtml += '<div style="width: 100%; font-size: 300%; white-space:nowrap; text-align: center;"><i>' + slide.text + '</i></div>';
+			slideHtml += '<div style="width: 100%; font-size: 3vw; white-space:nowrap; text-align: center;"><i>' + slide.text + '</i></div>';
 		}
 		else if (slide.type == 'GENERAL') {
-			slideHtml += '<div style="width: 100%; font-size: 200%; white-space:nowrap; text-align: center;">' + '<i>Science Olympiad</i>' + '</div><br />'
-			slideHtml += '<div style="width: 100%; font-size: 500%; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />';
-			slideHtml += '<div style="width: 100%; font-size: 300%; white-space:nowrap; text-align: center;"><i>' + slide.text + '</i></div>';
+			slideHtml += '<div style="width: 100%; font-size: 2vw; white-space:nowrap; text-align: center;">' + '<i>Science Olympiad</i>' + '</div><br />'
+			slideHtml += '<div style="width: 100%; font-size: 5vw; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />';
+			slideHtml += '<div style="width: 100%; font-size: 3vw; white-space:nowrap; text-align: center;"><i>' + slide.text + '</i></div>';
 		}
 		else if (slide.type == 'EVENTSCORE') {
-			slideHtml += '<div style="width: 100%; font-size: 500%; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />'
+			slideHtml += '<div style="width: 100%; font-size: 5vw; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br />'
 			var count  = 0; 
 			var animationPosition = slide.animationPosition;
 			var animationCount = Object.keys(slideshow[slideshowIndex].teamNames).length;
-			if (animationCount == 0) slideHtml += '<div style="width: 100%; font-size: 350%; white-space:nowrap; text-align: left;">' + 'No Results Available' + '</div>';
+			if (animationCount == 0) slideHtml += '<div style="width: 100%; font-size: 5vw; white-space:nowrap; text-align: left;">' + 'No Results Available' + '</div>';
 			
 			while (count < animationCount) {
-				if (((animationCount-1) - animationPosition) >= count) slideHtml += '<div style="width: 100%; font-size: 300%; white-space:nowrap; text-align: center;">&nbsp;</div>';
-				else slideHtml += '<div style="width: 100%; font-size: 350%; white-space:nowrap; text-align: left;">' + slide.teamNames[count] + '</div>';
+				if (((animationCount-1) - animationPosition) >= count) slideHtml += '<div style="width: 100%; font-size: 1vw; white-space:nowrap; text-align: center;">&nbsp;</div>';
+				else slideHtml += '<div style="width: 100%; font-size: 3.5vw; white-space:nowrap; text-align: left;">' + slide.teamNames[count] + '</div>';
 				count++;
 			}			
 		}
 		else if (slide.type == 'TEAMLIST') {
-			slideHtml += '<div style="width: 100%; font-size: 500%; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />'
+			slideHtml += '<div style="width: 100%; font-size: 5vw; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br />'
 			var count  = 0;
 			var animationPosition = slide.animationPosition;			
 			//var elementCount = Object.keys(slideshow[slideshowIndex].labelValues).length;	
 			while (count < animationPosition) {
 				var element = slide.labelValues[count];
-				slideHtml += '<div style="width: 100%; font-size: 200%; white-space:nowrap; text-align: left;">' + element[0] + '</div>';
+				slideHtml += '<div style="width: 100%; font-size: 2vw; white-space:nowrap; text-align: left;">' + element[0] + '</div>';
 				if (element.length > 1)
-					slideHtml += '<div style="width: 100%; font-size: 350%; white-space:nowrap; text-align: left;">' + element[1] + '</div><br /><br />';
+					slideHtml += '<div style="width: 100%; font-size: 3vw; white-space:nowrap; text-align: left;">' + element[1] + '</div><br /><br />';
 				count++;
 			}			
 		}
 		else if (slide.type == 'OVERALLRESULTS') {
-			slideHtml += '<div style="width: 100%; font-size: 500%; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br /><br />'
+			slideHtml += '<div style="width: 100%; font-size: 5vw; white-space:nowrap; text-align: center;">' + slide.headerText + '</div><br />'
 			var count  = 0;
 			var animationPosition = slide.animationPosition;			
 			//var elementCount = Object.keys(slideshow[slideshowIndex].labelValues).length;	
 			while (count < animationPosition) {
 				var element = slide.labelValues[count];
-				slideHtml += '<div style="width: 100%; font-size: 200%; white-space:nowrap; text-align: left;">' + element[0] + '</div>';
+				slideHtml += '<div style="width: 100%; font-size: 2vw; white-space:nowrap; text-align: left;">' + element[0] + '</div>';
 				if (element.length > 1)
-					slideHtml += '<div style="width: 100%; font-size: 350%; white-space:nowrap; text-align: left;">' + element[1] + '</div><br /><br />';
+					slideHtml += '<div style="width: 100%; font-size: 3.5vw; white-space:nowrap; text-align: left;">' + element[1] + '</div><br /><br />';
 				count++;
 			}			
 		}
@@ -174,7 +208,6 @@ session_start();
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
-   <!--  <h3><?php //echo 'Results: ' . $_SESSION["tournamentName"]; ?></h3> -->
 		<div id="slideshow">
 				
 	 

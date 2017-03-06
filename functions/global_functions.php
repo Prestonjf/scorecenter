@@ -68,6 +68,31 @@
 		return $status;
 	}
 	
+	// Return Role Name
+	function getRoleName($key) {
+		$status = 'Supervisor';
+		switch($key) {
+			case 'SUPERUSER':
+				$status = 'Super User';
+				break;			
+			case 'ADMIN':
+				$status = 'Admin';
+				break;
+			case 'VERIFIER':
+				$status = 'Verifier';
+				break;
+			case 'SUPERVISOR':
+				$status = 'Supervisor';
+				break;
+			case 'COACH':
+				$status = 'Coach';
+				break;	
+			default:
+				$status = 'Supervisor';
+		}		
+		return $status;
+	}
+	
 	// Display Tournament Search Header
 	function getTournamentSearchHeader() {
 		$html = '<div class="headerstyle">';
@@ -318,6 +343,44 @@
 		
 		return $html;
 	}
+	
+	// Bind Dynamic Parameters
+	function bindMysqliParams($stmt, $params) {
+    if ($params != null) {
+        $types = '';
+        foreach($params as $param) {
+            if(is_int($param)) {
+                // Integer
+                $types .= 'i';
+            } elseif (is_float($param)) {
+                // Double
+                $types .= 'd';
+            } elseif (is_string($param)) {
+                // String
+                $types .= 's';
+            } else {
+                // Blob and Unknown
+                $types .= 'b';
+            }
+        }
+  
+        $bind_names[] = $types;
+  
+        // Loop thru the given Parameters
+        for ($i=0; $i<count($params);$i++) {
+            // Create a variable Name
+            $bind_name = 'bind' . $i;
+            // Add the Parameter to the variable Variable
+            $$bind_name = $params[$i];
+            // Associate the Variable as an Element in the Array
+            $bind_names[] = &$$bind_name;
+        }
+         
+        // Call the Function bind_param with dynamic Parameters
+        call_user_func_array(array($stmt,'bind_param'), $bind_names);
+    }
+    return $stmt;
+}
 	
 	
 ?>

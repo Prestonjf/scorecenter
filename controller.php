@@ -949,10 +949,11 @@ else {
 		if ($_GET['improvedTeam'] != null) $_SESSION["improvedTeam"] = $_GET['improvedTeam']; else $_SESSION["improvedTeam"] = null;
 		if ($_GET['teamList1Text'] != null) $_SESSION["teamList1Text"] = $_GET['teamList1Text']; else $_SESSION["teamList1Text"] = '';
 		if ($_GET['teamList2Text'] != null) $_SESSION["teamList2Text"] = $_GET['teamList2Text']; else $_SESSION["teamList2Text"] = '';
-		
+		if ($_GET['stateBids'] != null) $_SESSION["stateBids"] = $_GET['stateBids']; else $_SESSION["stateBids"] = null;
 		
 		$_SESSION["tourn1Linked"] = $_GET['tourn1Linked'];
 		$_SESSION["tourn2Linked"] = $_GET['tourn2Linked'];
+		$_SESSION["previousTournLinked"] = $_GET['previousTournLinked'];
 		if ($_GET['highestScoreAlt'] != null) $_SESSION["highestScoreAlt"] = $_GET['highestScoreAlt'];
 		if ($_GET['pointsForNP'] != null) $_SESSION["pointsForNP"] = $_GET['pointsForNP'];
 		if ($_GET['pointsForDQ'] != null) $_SESSION["pointsForDQ"] = $_GET['pointsForDQ'];
@@ -1188,10 +1189,12 @@ else {
 		$_SESSION["teamList2Text"] = null;
 		$_SESSION["tourn1Linked"] = null;
 		$_SESSION["tourn2Linked"] = null;
+		$_SESSION["previousTournLinked"] = null;
 		$_SESSION["highestScoreAlt"] = null;
 		$_SESSION["pointsForNP"] = null;
 		$_SESSION["pointsForDQ"] = null;
 		$_SESSION["totalPointsWins"] = null;
+		$_SESSION["stateBids"] = null;
 		
 	}
 	
@@ -1548,29 +1551,52 @@ else {
 		echo '</select>';
 	}
 	function loadLinkedTournaments($division, $date, $mysqli) {
+		$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
 		$division1 = null;
 		$date1 = strtotime($date); $date = date('Y-m-d', $date1 );
 		if (strcmp($division,"A") == 0) $division1 = 'B'; else if (strcmp($division,"B") == 0) $division1 = 'A'; else if (strcmp($division,"C") == 0) $division1 = 'A';
 
-		$linkedTournaments1 = $mysqli->query("SELECT T.TOURNAMENT_ID, CONCAT(T.NAME,' (',T.DIVISION,')') AS NAME FROM TOURNAMENT T WHERE T.DATE='".$date."' AND T.DIVISION='".$division1."' ORDER BY T.NAME ASC ");
+		$linkedTournaments1 = $mysqli->query("SELECT T.TOURNAMENT_ID, CONCAT(T.NAME,' (',T.DIVISION,')') AS NAME,DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE1' FROM TOURNAMENT T WHERE T.DATE='".$date."' AND T.DIVISION='".$division1."' ORDER BY T.NAME ASC ");
 		
 		echo '<select class="form-control" name="tourn1Linked" id="tourn1Linked"><option value=""></option>';
 			    if ($linkedTournaments1) {
              		while($linkedTourn1Row = $linkedTournaments1->fetch_array()) {
-             			echo '<option value="'.$linkedTourn1Row['0'].'" '; if($_SESSION["tourn1Linked"] == $linkedTourn1Row['0']){echo("selected");} echo '>'.$linkedTourn1Row['1'].'</option>';
+             			echo '<option value="'.$linkedTourn1Row['0'].'" '; if($_SESSION["tourn1Linked"] == $linkedTourn1Row['0']){echo("selected");} echo '>'.$linkedTourn1Row['1'].' '.$linkedTourn1Row['2'].'</option>';
              			
              		}
              	}
 		echo '</select>';
+		
 		echo '*****';
 		
 		if (strcmp($division,"A") == 0) $division1 = 'C'; else if (strcmp($division,"B") == 0) $division1 = 'C'; else if (strcmp($division,"C") == 0) $division1 = 'B';
-		$linkedTournaments2 = $mysqli->query("SELECT T.TOURNAMENT_ID, CONCAT(T.NAME,' (',T.DIVISION,')') AS NAME FROM TOURNAMENT T WHERE T.DATE='".$date."' AND T.DIVISION='".$division1."' ORDER BY T.NAME ASC ");
+		$linkedTournaments2 = $mysqli->query("SELECT T.TOURNAMENT_ID, CONCAT(T.NAME,' (',T.DIVISION,')') AS NAME,DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE1' FROM TOURNAMENT T WHERE T.DATE='".$date."' AND T.DIVISION='".$division1."' ORDER BY T.NAME ASC ");
 
 		echo '<select class="form-control" name="tourn2Linked" id="tourn2Linked"><option value=""></option>';
 				if ($linkedTournaments2) {
              		while($linkedTourn2Row = $linkedTournaments2->fetch_array()) {
-             			echo '<option value="'.$linkedTourn2Row['0'].'" '; if($_SESSION["tourn2Linked"] == $linkedTourn2Row['0']){echo("selected");} echo '>'.$linkedTourn2Row['1'].'</option>';
+             			echo '<option value="'.$linkedTourn2Row['0'].'" '; if($_SESSION["tourn2Linked"] == $linkedTourn2Row['0']){echo("selected");} echo '>'.$linkedTourn2Row['1'].' '.$linkedTourn2Row['2'].'</option>';
+             			
+             		}
+             	}
+		echo '</select>';
+		
+		echo '*****';
+		
+		//if (strcmp($division,"A") == 0) $division1 = 'C'; else if (strcmp($division,"B") == 0) $division1 = 'C'; else if (strcmp($division,"C") == 0) $division1 = 'B';
+		$sql = " SELECT DISTINCT * FROM (
+					SELECT T.TOURNAMENT_ID, CONCAT(T.NAME,' (',T.DIVISION,')') AS NAME,DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE1' FROM TOURNAMENT T WHERE T.DIVISION='".$division."' AND T.TOURNAMENT_ID <> ".$_SESSION["tournamentId"];
+					if ($userSessionInfo->getRole() != 'SUPERUSER') $sql .= " AND T.ADMIN_USER_ID=".$userSessionInfo->getUserId() ;
+					$sql .= " UNION
+					SELECT T1.TOURNAMENT_ID, CONCAT(T1.NAME,' (',T1.DIVISION,')') AS NAME,DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE1' FROM TOURNAMENT T1 
+					INNER JOIN TOURNAMENT T ON T.PREVIOUS_YEAR_TOURN=T1.TOURNAMENT_ID AND T.TOURNAMENT_ID=".$_SESSION["tournamentId"]." 
+					) t ORDER BY NAME ASC ";
+		$previousTournLinked = $mysqli->query($sql);
+
+		echo '<select class="form-control" name="previousTournLinked" id="previousTournLinked"><option value=""></option>';
+				if ($previousTournLinked) {
+             		while($previousTournLinkedRow = $previousTournLinked->fetch_array()) {
+             			echo '<option value="'.$previousTournLinkedRow['0'].'" '; if($_SESSION["previousTournLinked"] == $previousTournLinkedRow['0']){echo("selected");} echo '>'.$previousTournLinkedRow['1'].' '.$previousTournLinkedRow['2'].'</option>';
              			
              		}
              	}
@@ -1706,6 +1732,8 @@ else {
 				$_SESSION["pointsForDQ"] = $tournamentRow['19'];
 				$_SESSION["teamList1Text"] = $tournamentRow['23']; 
 				$_SESSION["teamList2Text"] = $tournamentRow['24'];
+				$_SESSION["stateBids"] = $tournamentRow['25'];
+				$_SESSION["previousTournLinked"] = $tournamentRow['26'];				
  				
  				$date = strtotime($tournamentRow['4']);
  				$_SESSION["tournamentDate"] = date('m/d/Y', $date);
@@ -1820,11 +1848,13 @@ else {
 			$improvedTeam = $_SESSION["improvedTeam"];
 			$tourn1Linked = $_SESSION["tourn1Linked"]; if ($tourn1Linked == null or $tourn1Linked == '') $tourn1Linked = 'NULL';
 			$tourn2Linked = $_SESSION["tourn2Linked"]; if ($tourn2Linked == null or $tourn2Linked == '') $tourn2Linked = 'NULL';
+			$previousTournLinked = $_SESSION["previousTournLinked"]; if ($previousTournLinked == null or $previousTournLinked == '') $previousTournLinked = 'NULL';
 			$highestScoreAlt = $_SESSION["highestScoreAlt"];
 			$pointsForNP = $_SESSION["pointsForNP"];
 			$pointsForDQ = $_SESSION["pointsForDQ"];
 			$teamList1Text = $_SESSION["teamList1Text"];
 			$teamList2Text = $_SESSION["teamList2Text"];
+			$stateBids = $_SESSION["stateBids"];
 			
 		// if Tournament id is null create new
 		if ($_SESSION["tournamentId"] == null) { 
@@ -1836,9 +1866,9 @@ else {
 			$userId = getCurrentUserId();
 			
 			$query = $mysqli->prepare("INSERT INTO TOURNAMENT (TOURNAMENT_ID, NAME, LOCATION, DIVISION, DATE, NUMBER_EVENTS, NUMBER_TEAMS, 
-			HIGHEST_SCORE_POSSIBLE, DESCRIPTION, HIGH_LOW_WIN_FLAG, EVENTS_AWARDED, OVERALL_AWARDED,BEST_NEW_TEAM_FLAG,MOST_IMPROVED_FLAG,LINKED_TOURN_1,LINKED_TOURN_2,SCORES_LOCKED_FLAG,HIGHEST_SCORE_POSSIBLE_ALT,ADDITIONAL_POINTS_NP,ADDITIONAL_POINTS_DQ,EVENTS_AWARDED_ALT,OVERALL_AWARDED_ALT, ADMIN_USER_ID, TEAM_LIST_1_TEXT, TEAM_LIST_2_TEXT) VALUES (".$id.",?,?,?,?,?,?,?,?,?,?,?,?,?,".$tourn1Linked.",".$tourn2Linked.",?,?,?,?,?,?,?,?,?) ");
+			HIGHEST_SCORE_POSSIBLE, DESCRIPTION, HIGH_LOW_WIN_FLAG, EVENTS_AWARDED, OVERALL_AWARDED,BEST_NEW_TEAM_FLAG,MOST_IMPROVED_FLAG,LINKED_TOURN_1,LINKED_TOURN_2,SCORES_LOCKED_FLAG,HIGHEST_SCORE_POSSIBLE_ALT,ADDITIONAL_POINTS_NP,ADDITIONAL_POINTS_DQ,EVENTS_AWARDED_ALT,OVERALL_AWARDED_ALT, ADMIN_USER_ID, TEAM_LIST_1_TEXT, TEAM_LIST_2_TEXT,STATE_BID_COUNT,PREVIOUS_YEAR_TOURN) VALUES (".$id.",?,?,?,?,?,?,?,?,?,?,?,?,?,".$tourn1Linked.",".$tourn2Linked.",?,?,?,?,?,?,?,?,?,?,".$previousTournLinked.") ");
 			
-			$query->bind_param('ssssiiisiiiiiiiiiiiiss',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins, $eventsAwarded, $overallAwarded, $bestNewTeam, $improvedTeam,$lockScoresFlag,$highestScoreAlt,$pointsForNP,$pointsForDQ,$eventsAAwarded,$overallAAwarded,$userId,$teamList1Text,$teamList2Text);
+			$query->bind_param('ssssiiisiiiiiiiiiiiissi',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins, $eventsAwarded, $overallAwarded, $bestNewTeam, $improvedTeam,$lockScoresFlag,$highestScoreAlt,$pointsForNP,$pointsForDQ,$eventsAAwarded,$overallAAwarded,$userId,$teamList1Text,$teamList2Text,$stateBids);
 			
 			$query->execute();
 			$query->free_result();
@@ -1847,9 +1877,9 @@ else {
 		}
 		else {
 			$query = $mysqli->prepare("UPDATE TOURNAMENT SET NAME=?, LOCATION=?, DIVISION=?, DATE=?, NUMBER_EVENTS=?,NUMBER_TEAMS=?,
-			HIGHEST_SCORE_POSSIBLE=?, DESCRIPTION=?, HIGH_LOW_WIN_FLAG=?,EVENTS_AWARDED=?,OVERALL_AWARDED=?,BEST_NEW_TEAM_FLAG=?,MOST_IMPROVED_FLAG=?,LINKED_TOURN_1=".$tourn1Linked.",LINKED_TOURN_2=".$tourn2Linked.",SCORES_LOCKED_FLAG=?,HIGHEST_SCORE_POSSIBLE_ALT=?,ADDITIONAL_POINTS_NP=?,ADDITIONAL_POINTS_DQ=?,EVENTS_AWARDED_ALT=?,OVERALL_AWARDED_ALT=?,TEAM_LIST_1_TEXT=?,TEAM_LIST_2_TEXT=? WHERE TOURNAMENT_ID=".$_SESSION["tournamentId"]);
+			HIGHEST_SCORE_POSSIBLE=?, DESCRIPTION=?, HIGH_LOW_WIN_FLAG=?,EVENTS_AWARDED=?,OVERALL_AWARDED=?,BEST_NEW_TEAM_FLAG=?,MOST_IMPROVED_FLAG=?,LINKED_TOURN_1=".$tourn1Linked.",LINKED_TOURN_2=".$tourn2Linked.",SCORES_LOCKED_FLAG=?,HIGHEST_SCORE_POSSIBLE_ALT=?,ADDITIONAL_POINTS_NP=?,ADDITIONAL_POINTS_DQ=?,EVENTS_AWARDED_ALT=?,OVERALL_AWARDED_ALT=?,TEAM_LIST_1_TEXT=?,TEAM_LIST_2_TEXT=?,STATE_BID_COUNT=?,PREVIOUS_YEAR_TOURN=".$previousTournLinked." WHERE TOURNAMENT_ID=".$_SESSION["tournamentId"]);
 			
-			$query->bind_param('ssssiiisiiiiiiiiiiiss',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins,$eventsAwarded, $overallAwarded, $bestNewTeam, $improvedTeam,$lockScoresFlag,$highestScoreAlt,$pointsForNP,$pointsForDQ,$eventsAAwarded,$overallAAwarded,$teamList1Text,$teamList2Text);
+			$query->bind_param('ssssiiisiiiiiiiiiiissi',$name,$location, $division,$date, $numberEvents, $numberTeams, $highestScore, $description, $highLowWins,$eventsAwarded, $overallAwarded, $bestNewTeam, $improvedTeam,$lockScoresFlag,$highestScoreAlt,$pointsForNP,$pointsForDQ,$eventsAAwarded,$overallAAwarded,$teamList1Text,$teamList2Text,$stateBids);
 			$query->execute();
 			$query->free_result();
 			//$result = mysql_query($query);		
@@ -2518,9 +2548,10 @@ else {
 			LEFT JOIN REF_DATA RD on RD.REF_DATA_CODE=T.STATE AND RD.DOMAIN_CODE='STATE' 
 			LEFT JOIN REF_DATA RD1 on RD1.REF_DATA_CODE=T.REGION AND RD1.DOMAIN_CODE='REGION'
 			WHERE 1=1  ";
-			
+			$params = array();
 			if ($_SESSION["teamFilterName"] != null) {
-				$query = $query . " AND NAME LIKE '".$_SESSION["teamFilterName"]."%' " ;
+				$query = $query . " AND NAME LIKE ? " ;
+				array_push($params, $_SESSION["teamFilterName"].'%');
 			}
 			if ($_SESSION["filterDivision"] != null and $_SESSION["filterDivision"] != '') {
 				$query = $query . " AND DIVISION = '".$_SESSION["filterDivision"]."' " ;
@@ -2539,8 +2570,13 @@ else {
 			if ($_SESSION["teamFilterNumber"] != null) {
 				$query = $query . " LIMIT ".$_SESSION["teamFilterNumber"];
 			}
+		
 			
-			$result = $mysqli->query($query); 
+			$query = $mysqli->prepare($query);
+			bindMysqliParams($query,$params);
+			$query->execute();
+			$result = $query->get_result();
+			 
  			if ($result) {
 				while($teamRow = $result->fetch_array(MYSQLI_BOTH)) {
  					$teamRecord = array();	
@@ -2769,7 +2805,7 @@ else {
 		
 		// Load Event Headers
 		$query1 = "SELECT E.NAME, TE.TOURN_EVENT_ID, TE.TRIAL_EVENT_FLAG, TM.HIGH_LOW_WIN_FLAG,
-					CASE WHEN TM.NUMBER_TEAMS = COUNT(TES.TEAM_EVENT_SCORE_ID) THEN 1 ELSE 0 END AS COMPLETED_FLAG
+					CASE WHEN TM.NUMBER_TEAMS = COUNT(TES.TEAM_EVENT_SCORE_ID) AND TE.VERIFIED_FLAG = 1 THEN 1 ELSE 0 END AS COMPLETED_FLAG
 					FROM TOURNAMENT TM
 					INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURNAMENT_ID=TM.TOURNAMENT_ID 
 					INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID 
@@ -3008,6 +3044,66 @@ else {
 			if ($a[2] < $b[2]) return -1;
 			if ($a[2] > $b[2]) return 1;
 		}
+		return 0;
+	}
+	
+	function getMostImprovedTeams($id, $currentResults, $previousResults, $statebids, $highLowWin, $mysqli) {
+		$teamList = array();
+		$sql = " SELECT TE.TEAM_ID, TE.NAME, TT.TOURN_TEAM_ID as CURID,TT1.TOURN_TEAM_ID as PREVID, '' as difference FROM TEAM TE
+				INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=TE.TEAM_ID
+				INNER JOIN TOURNAMENT T ON T.TOURNAMENT_ID=TT.TOURNAMENT_ID
+				INNER JOIN TOURNAMENT T1 ON T1.TOURNAMENT_ID=T.PREVIOUS_YEAR_TOURN
+				INNER JOIN TOURNAMENT_TEAM TT1 ON TT1.TOURNAMENT_ID=T1.TOURNAMENT_ID
+				WHERE TT1.TEAM_ID=TT.TEAM_ID AND T.TOURNAMENT_ID=".$id."
+				ORDER BY TT.TEAM_NUMBER ASC ";
+		$results = $mysqli->query($sql); 
+		while ($row = $results->fetch_array(MYSQLI_BOTH)) {
+			$currentTTId = $row['CURID'];
+			$prevTTId = $row['PREVID'];
+			$prevPoints = null;
+			$currentPoints = null;
+			foreach($currentResults as $result) {
+				if ($currentTTId == $result[0] AND $result[sizeof($result)-2] > $statebids) {				
+					
+					$currentPoints = $result[sizeof($result)-3];
+					break;
+				}
+			}
+			foreach($previousResults as $result) {
+				if ($prevTTId == $result[0]) {
+					$prevPoints = $result[sizeof($result)-3];
+					break;
+				}
+			}
+			
+			if ($prevPoints AND $currentPoints) {				
+				array_push($teamList,array($row['NAME'], $prevPoints-$currentPoints));
+			}
+		}
+		
+		if ($highLowWin == 0) usort($teamList, "sortMostImprovedTeamsDesc");
+		else if ($highLowWin == 1) usort($teamList, "sortMostImprovedTeamsAsc");
+		$finalTeamList = array();
+		$number;
+		foreach($teamList as $team) {
+			if ($number != null AND $number != $team[1]) break;
+			$number = $team[1];
+			array_push($finalTeamList, $team);
+		}
+		
+		
+
+		return $finalTeamList;
+	}
+	
+	function sortMostImprovedTeamsDesc($a, $b) {
+		if ($a[1] > $b[1]) return -1;
+		if ($a[1] < $b[1]) return 1;
+		return 0;
+	}
+	function sortMostImprovedTeamsAsc($a, $b) {
+		if ($a[1] < $b[1]) return -1;
+		if ($a[1] > $b[1]) return 1;
 		return 0;
 	}
 	
@@ -3406,19 +3502,30 @@ else {
 		//$slide->setText('Random Text that identifies this as the 2nd slide!!!');
 		//array_push($resultSlideshow, $slide);
 		
-		$aId = null; $aEvents = array(); $aAltEvents = array(); $aHighLowFlag = 0; $aOverallAwarded = 0; $aOverallAwardedAlt = 0; $cEventAwardedAlt = 0;
-		$bId = null; $bEvents = array(); $bAltEvents = array(); $bHighLowFlag = 0; $bOverallAwarded = 0; $bOverallAwardedAlt = 0; $bEventAwardedAlt = 0;
-		$cId = null; $cEvents = array(); $cAltEvents = array(); $cHighLowFlag = 0; $cOverallAwarded = 0; $cOverallAwardedAlt = 0; $aEventAwardedAlt = 0;
+		$aId = null; $aEvents = array(); $aAltEvents = array(); $aHighLowFlag = 0; $aOverallAwarded = 0; $aOverallAwardedAlt = 0; $cEventAwardedAlt = 0; $aPreviousTournId = -1; $aStateBids = 0;
+		$bId = null; $bEvents = array(); $bAltEvents = array(); $bHighLowFlag = 0; $bOverallAwarded = 0; $bOverallAwardedAlt = 0; $bEventAwardedAlt = 0; $bPreviousTournId = -1; $bStateBids = 0;
+		$cId = null; $cEvents = array(); $cAltEvents = array(); $cHighLowFlag = 0; $cOverallAwarded = 0; $cOverallAwardedAlt = 0; $aEventAwardedAlt = 0; $cPreviousTournId = -1; $cStateBids = 0;
 		
-		$query = "select T1.TOURNAMENT_ID, T1.DIVISION, T1.LINKED_TOURN_1, T2.DIVISION, T1.LINKED_TOURN_2, T3.DIVISION FROM TOURNAMENT T1 
+		$query = "select T1.TOURNAMENT_ID, T1.DIVISION, T1.LINKED_TOURN_1, T2.DIVISION, T1.LINKED_TOURN_2, T3.DIVISION, 
+				T1.PREVIOUS_YEAR_TOURN,T2.PREVIOUS_YEAR_TOURN,T3.PREVIOUS_YEAR_TOURN,
+				T1.STATE_BID_COUNT,T2.STATE_BID_COUNT,T3.STATE_BID_COUNT
+				FROM TOURNAMENT T1 
 				LEFT JOIN TOURNAMENT T2 on T2.TOURNAMENT_ID=T1.LINKED_TOURN_1
 				LEFT JOIN TOURNAMENT T3 on T3.TOURNAMENT_ID=T1.LINKED_TOURN_2
 				WHERE T1.TOURNAMENT_ID=".$_SESSION["tournamentId"];
 		$tournaments = $mysqli->query($query);
 		$row = $tournaments->fetch_row();
-		if ($row[1] != null AND $row[1] == 'A') $aId = $row[0]; else if ($row[1] != null AND $row[1] == 'B') $bId = $row[0]; else if ($row[1] != null AND $row[1] == 'C') $cId = $row[0];
-		if ($row[3] != null AND $row[3] == 'A') $aId = $row[2]; else if ($row[3] != null AND $row[3] == 'B') $bId = $row[2]; else if ($row[3] != null AND $row[3] == 'C') $cId = $row[2];
-		if ($row[5] != null AND $row[5] == 'A') $aId = $row[4]; else if ($row[5] != null AND $row[5] == 'B') $bId = $row[4]; else if ($row[5] != null AND $row[5] == 'C') $cId = $row[4];
+		if ($row[1] != null AND $row[1] == 'A') { $aId = $row[0];  $aPreviousTournId = $row[6]; $aStateBids = $row[6]; }
+		else if ($row[1] != null AND $row[1] == 'B') { $bId = $row[0]; $bPreviousTournId = $row[6]; $bStateBids = $row[6]; }
+		else if ($row[1] != null AND $row[1] == 'C') { $cId = $row[0]; $cPreviousTournId = $row[6]; $cStateBids = $row[6]; }
+		
+		if ($row[3] != null AND $row[3] == 'A') { $aId = $row[2]; $aPreviousTournId = $row[7]; $aStateBids = $row[7]; }
+		else if ($row[3] != null AND $row[3] == 'B') { $bId = $row[2]; $bPreviousTournId = $row[7]; $bStateBids = $row[7]; }
+		else if ($row[3] != null AND $row[3] == 'C') { $cId = $row[2]; $cPreviousTournId = $row[7]; $cStateBids = $row[7]; }
+		
+		if ($row[5] != null AND $row[5] == 'A') { $aId = $row[4]; $aPreviousTournId = $row[8]; $aStateBids = $row[8]; }
+		else if ($row[5] != null AND $row[5] == 'B') { $bId = $row[4]; $bPreviousTournId = $row[8]; $bStateBids = $row[8]; }
+		else if ($row[5] != null AND $row[5] == 'C') { $cId = $row[4]; $cPreviousTournId = $row[8]; $cStateBids = $row[8]; }
 		
 		// Primary C
 		if ($cId != null) {
@@ -3747,7 +3854,62 @@ else {
 				array_push($resultSlideshow, $slide);
 			}
 		
-		if ($tournamentRow[4] == 1 OR $tournamentRow[5] == 1) {
+		// Load Overall Tournament Results
+
+		$tournamentResultsA = array(); $tournamentResultsB = array(); $tournamentResultsC = array();
+		$tournamentResultsAltA = array(); $tournamentResultsAltB = array(); $tournamentResultsAltC = array();
+		$previousTournResultsA = array(); $previousTournResultsB = array(); $previousTournResultsC = array();
+		$tournamentResultsA = getPrimaryTournamentResults($aId,$mysqli,$aHighLowFlag,$tournamentResultsA);
+		$tournamentResultsB = getPrimaryTournamentResults($bId,$mysqli,$bHighLowFlag,$tournamentResultsB);
+		$tournamentResultsC = getPrimaryTournamentResults($cId,$mysqli,$cHighLowFlag,$tournamentResultsC);
+		
+		$tournamentResultsAltA = getAlternateTournamentResults($aId,$mysqli,$aHighLowFlag,$tournamentResultsAltA);
+		$tournamentResultsAltB = getAlternateTournamentResults($bId,$mysqli,$bHighLowFlag,$tournamentResultsAltB);
+		$tournamentResultsAltC = getAlternateTournamentResults($cId,$mysqli,$cHighLowFlag,$tournamentResultsAltC);
+		
+					
+		// Most Improved Team Auto Calculated
+		$aMostImprovedTeams = null;$bMostImprovedTeams = null; $cMostImprovedTeams = null;
+		if ($aPreviousTournId AND $aPreviousTournId != -1) {
+			$previousTournResultsA = getPrimaryTournamentResults($aPreviousTournId,$mysqli,$aHighLowFlag,$previousTournResultsA);
+			$aMostImprovedTeams = getMostImprovedTeams($aId,$tournamentResultsA,$previousTournResultsA,$aStateBids,$aHighLowFlag,$mysqli);
+		}
+		if ($bPreviousTournId AND $bPreviousTournId != -1) {
+			$previousTournResultsB = getPrimaryTournamentResults($bPreviousTournId,$mysqli,$bHighLowFlag,$previousTournResultsB);
+			$bMostImprovedTeams = getMostImprovedTeams($bId,$tournamentResultsB,$previousTournResultsB,$bStateBids,$bHighLowFlag,$mysqli);
+		}
+		if ($cPreviousTournId AND $cPreviousTournId != -1) {
+			$previousTournResultsC = getPrimaryTournamentResults($cPreviousTournId,$mysqli,$cHighLowFlag,$previousTournResultsC);
+			$cMostImprovedTeams = getMostImprovedTeams($cId,$tournamentResultsC,$previousTournResultsC,$cStateBids,$cHighLowFlag,$mysqli);		
+		}
+		if ($aMostImprovedTeams OR $bMostImprovedTeams OR $cMostImprovedTeams) {
+			$slide = new slideshowSlide();
+			$slide->setType('TEAMLIST');
+			$slide->setHeaderText('Most Improved Team');
+			$labelValues = array();
+			if ($aMostImprovedTeams) {
+				foreach($aMostImprovedTeams as $team1)
+					array_push($labelValues, array($team1[0].' (' .$team1[1].'pts) - Division A'));
+			}
+			if ($bMostImprovedTeams) {
+				foreach($bMostImprovedTeams as $team2)
+					array_push($labelValues, array($team2[0].' (' .$team2[1].'pts) - Division B'));
+			}
+			if ($cMostImprovedTeams) {
+				foreach($cMostImprovedTeams as $team3)
+					array_push($labelValues, array($team3[0].' (' .$team3[1].'pts) - Division C'));
+			}
+
+			
+			$slide->setLabelValues($labelValues);
+			if (sizeof($labelValues) > 0) {
+				array_push($resultSlideshow, $slide);
+			}
+			
+		}
+		
+		
+		if ($tournamentRow[4] == 1 OR $tournamentRow[5] == 1 OR $aMostImprovedTeams OR $bMostImprovedTeams OR $cMostImprovedTeams) {
 			// Placeholder Slide
 			$slide = new slideshowSlide();
 			$slide->setType('PLACEHOLDER');
@@ -3756,15 +3918,6 @@ else {
 			$slide->setLogoPath('img/misologo.png');
 			array_push($resultSlideshow, $slide);
 		}
-		$tournamentResultsA = array(); $tournamentResultsB = array(); $tournamentResultsC = array();
-		$tournamentResultsAltA = array(); $tournamentResultsAltB = array(); $tournamentResultsAltC = array();
-		$tournamentResultsA = getPrimaryTournamentResults($aId,$mysqli,$aHighLowFlag,$tournamentResultsA);
-		$tournamentResultsB = getPrimaryTournamentResults($bId,$mysqli,$bHighLowFlag,$tournamentResultsB);
-		$tournamentResultsC = getPrimaryTournamentResults($cId,$mysqli,$cHighLowFlag,$tournamentResultsC);
-		
-		$tournamentResultsAltA = getAlternateTournamentResults($aId,$mysqli,$aHighLowFlag,$tournamentResultsAltA);
-		$tournamentResultsAltB = getAlternateTournamentResults($bId,$mysqli,$bHighLowFlag,$tournamentResultsAltB);
-		$tournamentResultsAltC = getAlternateTournamentResults($cId,$mysqli,$cHighLowFlag,$tournamentResultsAltC);
 		
 		// Overall Results
 		$maxRank = $cOverallAwarded;
@@ -3858,7 +4011,6 @@ else {
 	function exportSlideShowPDF($mysqli) {
 		$resultSlideshow = $_SESSION["resultSlideshowPDF"]; //json_decode($_SESSION["resultSlideshow"], FALSE);
 		
-		require('libs/fpdf/fpdf.php');
 		$pdf = new FPDF();
 		$pdf->SetTitle('Tournament Results Slideshow', true);
 		
@@ -4145,6 +4297,20 @@ else {
 			$userSessionInfo->setPhoneNumber($account['8']);
 			$userSessionInfo->setState($account['STATE_CODE']);
 			
+			if ($userSessionInfo->getRole() == 'COACH') {
+				$teamsCoached = array();
+				$query = " SELECT T.TEAM_ID, T.NAME FROM TEAM T INNER JOIN TEAM_COACH TC ON TC.TEAM_ID=T.TEAM_ID
+											WHERE TC.USER_ID=".$userSessionInfo->getUserId()." ORDER BY NAME ASC ";	
+				$results = $mysqli->query($query); 
+				while ($row = $results->fetch_array(MYSQLI_BOTH)) {
+					$team = array();
+					array_push($team,$row['TEAM_ID']);
+					array_push($team,$row['NAME']);		
+					array_push($teamsCoached, $team);
+				}
+				$userSessionInfo->setTeamsCoached($teamsCoached);
+			}
+			
 			$url = explode("/", $_SERVER[REQUEST_URI]);
 			$tmp = ''; 
 			$i = 0;
@@ -4402,7 +4568,7 @@ else {
 			break;
 		}
 		// Load Basic Schedule Information
-		$query = " SELECT TOURNAMENT_SCHEDULE_ID, OPEN_FLAG, DATE_FORMAT(START_TIME,'%h:%i %p') 'START_TIME', DATE_FORMAT(END_TIME,'%h:%i %p') 'END_TIME' FROM TOURNAMENT_SCHEDULE WHERE TOURNAMENT_ID=".$selfSchedule->getTournamentId();
+		$query = " SELECT TOURNAMENT_SCHEDULE_ID, OPEN_FLAG, DATE_FORMAT(START_TIME,'%h:%i %p') 'START_TIME', DATE_FORMAT(END_TIME,'%h:%i %p') 'END_TIME', COALESCE(ALTERNATE_TEAM_SCHEDULE_FLAG,0) 'ALTERNATE_TEAM_SCHEDULE_FLAG' FROM TOURNAMENT_SCHEDULE WHERE TOURNAMENT_ID=".$selfSchedule->getTournamentId();
 		$results = $mysqli->query($query);
 		if ($results) {
 			$row = $results->fetch_array(MYSQLI_BOTH);			
@@ -4410,6 +4576,7 @@ else {
 			$selfSchedule->setSelfScheduleOpenFlag($row['OPEN_FLAG']);
 			$selfSchedule->setStartTime($row['START_TIME']);
 			$selfSchedule->setEndTime($row['END_TIME']);
+			$selfSchedule->selfScheduleAlternateTeamFlag = $row['ALTERNATE_TEAM_SCHEDULE_FLAG'];
 		}
 		
 		
@@ -4486,13 +4653,15 @@ else {
 		
 		// Determine which teams the logged in user can modify at this Tournament
 		$availableTeams = array();
-		$query = "SELECT TT.TOURN_TEAM_ID, T.TEAM_ID, T.NAME from TEAM_COACH TC
+		$query = "SELECT TT.TOURN_TEAM_ID, T.TEAM_ID, T.NAME, TT.ALTERNATE_FLAG from TEAM_COACH TC
 		INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=TC.TEAM_ID
 		INNER JOIN TEAM T ON TC.TEAM_ID=T.TEAM_ID
 		WHERE TT.TOURNAMENT_ID=".$selfSchedule->getTournamentId()." AND TC.USER_ID=".getCurrentUserId();
 		$results = $mysqli->query($query); 
-		while ($row = $results->fetch_array(MYSQLI_BOTH)) {								
-			array_push($availableTeams, $row['TOURN_TEAM_ID']);
+		while ($row = $results->fetch_array(MYSQLI_BOTH)) {	
+			if ($selfSchedule->selfScheduleAlternateTeamFlag == 1 OR ($selfSchedule->selfScheduleAlternateTeamFlag == 0 AND $row['ALTERNATE_FLAG'] != 1)) {
+				array_push($availableTeams, $row['TOURN_TEAM_ID']);
+			}
 		}
 		
 		// Load Teams at the Tournament
@@ -4514,7 +4683,7 @@ else {
 				$team->tournTeamId = $row['TOURN_TEAM_ID'];
 				$team->teamAvailableFlag = false;
 				
-				if ($row['TEAM_NUMBER'] != null) {
+				if ($row['TOURN_TEAM_ID'] != null) {
 					$team->linkedPeriodsList = explode(",",$row['PERIODS']);
 				}
 				if (in_array($team->tournTeamId, $availableTeams) || isUserAccess(1)) {
@@ -4790,6 +4959,7 @@ else {
 		$selfSchedule->setStartTime($_GET['tournamentStartTime']);
 		$selfSchedule->setEndTime($_GET['tournamentEndTime']);
 		$selfSchedule->setSelfScheduleOpenFlag($_GET['selfScheduleOpen']);
+		$selfSchedule->selfScheduleAlternateTeamFlag = $_GET['selfScheduleAlternateTeams'];
 		
 		// Event info (period already cached)
 		$count = 0;
@@ -4817,6 +4987,7 @@ else {
 			$endTime1 = $endTime->format('Y-m-d H:i:s');
 			$tournamentId = $selfSchedule->getTournamentId();
 			$openFlag = $selfSchedule->getSelfScheduleOpenFlag();
+			$alternateTeamsScheduleFlag = $selfSchedule->selfScheduleAlternateTeamFlag;
 			
 			if ($selfSchedule->getTournamentScheduleId() == null or $selfSchedule->getTournamentScheduleId() == '') {			
 				$result = $mysqli->query("select max(TOURNAMENT_SCHEDULE_ID) + 1 from TOURNAMENT_SCHEDULE");
@@ -4824,16 +4995,16 @@ else {
 				$id = 1;
 				if ($row != null and $row['0'] != null) $id = $row['0'];  
 				
-				$query = $mysqli->prepare("INSERT INTO TOURNAMENT_SCHEDULE (TOURNAMENT_SCHEDULE_ID, TOURNAMENT_ID, START_TIME, END_TIME, OPEN_FLAG) VALUES (".$id.",?,?,?,?) ");
+				$query = $mysqli->prepare("INSERT INTO TOURNAMENT_SCHEDULE (TOURNAMENT_SCHEDULE_ID, TOURNAMENT_ID, START_TIME, END_TIME, OPEN_FLAG, ALTERNATE_TEAM_SCHEDULE_FLAG) VALUES (".$id.",?,?,?,?,?) ");
 					
-				$query->bind_param('issi',$tournamentId, $startTime1, $endTime1, $openFlag);		
+				$query->bind_param('issii',$tournamentId, $startTime1, $endTime1, $openFlag, $alternateTeamsScheduleFlag);		
 				$query->execute();
 				$query->free_result();	
 				$selfSchedule->setTournamentScheduleId($id);
 			}
 			else {
-				$query = $mysqli->prepare("UPDATE TOURNAMENT_SCHEDULE SET START_TIME=?, END_TIME=?, OPEN_FLAG=? WHERE TOURNAMENT_SCHEDULE_ID=".$selfSchedule->getTournamentScheduleId());	
-				$query->bind_param('ssi',$startTime1, $endTime1, $openFlag);	
+				$query = $mysqli->prepare("UPDATE TOURNAMENT_SCHEDULE SET START_TIME=?, END_TIME=?, OPEN_FLAG=?, ALTERNATE_TEAM_SCHEDULE_FLAG=? WHERE TOURNAMENT_SCHEDULE_ID=".$selfSchedule->getTournamentScheduleId());	
+				$query->bind_param('ssii',$startTime1, $endTime1, $openFlag, $alternateTeamsScheduleFlag);	
 				$query->execute();
 				$query->free_result();				
 			}

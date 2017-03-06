@@ -34,15 +34,20 @@
 		$msg = "Hello ".$firstName." ".$lastName. ", \n\n";	
 		$msg = $msg . $row['0'];
 		$msg = $msg . "\n\n\n";	
+		
 		$host = $_SERVER['HTTP_HOST'];
-		$msg = $msg . "URL: " . "http://".$host."/scorecenter \n";
+		$dir = dirname($_SERVER['PHP_SELF']);
+		if ($dir == '/') $dir = '';
+		$protocol = (!empty($_SERVER['HTTPS']) AND $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';		
+		
+		$msg = $msg . "URL: " . $protocol.$host.$dir." \n";
 		$msg = $msg . "User Name: " .$userName." \n";
 		$msg = $msg . "Password: " .$password." \n";
 		
 		$msgHtml = "Hello ".$firstName." ".$lastName. ", <br /><br />";	
 		$msgHtml = $msgHtml . $row['0'];
 		$msgHtml = $msgHtml . "<br /><br /><br />";
-		$msgHtml = $msgHtml . "URL: " . "http://".$host."/scorecenter <br />";
+		$msgHtml = $msgHtml . "URL: " . $protocol.$host.$dir."<br />";
 		$msgHtml = $msgHtml . "User Name: " .$userName." <br />";
 		$msgHtml = $msgHtml . "Password: " .$password." <br />";
 
