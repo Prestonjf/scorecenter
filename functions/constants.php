@@ -1,7 +1,7 @@
 <?php
 /**
  * Tournament Score Center (TSC) - Tournament scoring web application.
- * Copyright (C) 2016  Preston Frazier
+ * Copyright (C) 2017  Preston Frazier
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,10 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.3, 12.07.2016 
+ * @version: 1.17.1, 12.28.2017 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
- */	
+ */
 	
 	
 /** Declared Tournament Score Center Constant **/
@@ -45,7 +45,8 @@ define('ERROR_TOURNAMENT_ADD_VERIFIER','<strong>Cannot Add Verifier:</strong> Ve
 // Success Messages
 define('SUCCESS_SELF_SCHEDULE_PERIOD_DELETED', '<strong>Deleted: </strong>Period has been deleted.');
 define('SUCCESS_SELF_SCHEDULE_PERIODS_DELETED', '<strong>Deleted: </strong>Periods have been deleted.');			
-define('SUCCESS_SELF_SCHEDULE_SAVED', '<strong>Saved: </strong>Self Schedule has been saved.');		
+define('SUCCESS_SELF_SCHEDULE_SAVED', '<strong>Saved: </strong>Self Schedule has been saved.');
+define('SUCCESS_EVENT_SCORES_SAVED', '<strong>Saved: </strong> Event Scores have been saved.');		
 	
 	
 // String Split Token

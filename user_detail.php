@@ -1,7 +1,7 @@
 <?php
 /**
  * Tournament Score Center (TSC) - Tournament scoring web application.
- * Copyright (C) 2016  Preston Frazier
+ * Copyright (C) 2017  Preston Frazier
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.3, 12.07.2016 
+ * @version: 1.17.1, 12.28.2017 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -121,14 +121,9 @@ include_once('logon_check.php');
 	<td></td>
 	</tr>
 	<tr>
-	<td><label for="userRoleCode">User Role: </label></td>
+	<td><label for="resetPasswordText">Reset Password: </label></td>
 	<td>
-			<select class="form-control" name="userRoleCode" id="userRoleCode">
-			<option value="SUPERUSER" <?php if ($_SESSION["userRoleCode"] == 'SUPERUSER') echo 'selected'; ?> >Super User</option>
-			<option value="ADMIN" <?php if ($_SESSION["userRoleCode"] == 'ADMIN') echo 'selected'; ?> >Admin</option>
-			<option value="VERIFIER" <?php if ($_SESSION["userRoleCode"] == 'VERIFIER') echo 'selected'; ?>>Verifier</option>
-			<option value="SUPERVISOR" <?php if ($_SESSION["userRoleCode"] == 'SUPERVISOR') echo 'selected'; ?>>Supervisor</option>
-			</select>
+		<input type="text" class="form-control" name="resetPasswordText" id="resetPasswordText" size="50" />
 	</td>
 	<td><label for="userActiveFlag">Active User: </label></td>
 	<td>
@@ -138,17 +133,30 @@ include_once('logon_check.php');
 			</select>
 	</td>
 	</tr>
-	<tr>
-	<td><label for="resetPasswordText">Reset Password: </label></td>
-	<td>
-		<input type="text" class="form-control" name="resetPasswordText" id="resetPasswordText" size="50" />
-	</td>
-	<td><label for=""></label></td>
-	<td>
-	</td>
-	</tr>
-
 	</table>
+	
+	<h3>Roles</h3>
+	
+	<table width="100%" class="borderless">
+		<?
+		$roles = $_SESSION["userRoleCodes"];
+		foreach ($roles as $role) {			
+			echo '<tr><td>'.$role.'</td></tr>';
+		}	
+		?>		
+	</table>
+	<!--	
+	<td><label for="userRoleCode">User Role: </label></td>
+	<td>
+			<select class="form-control" name="userRoleCode" id="userRoleCode">
+			<option value="SUPERUSER" <?php if ($_SESSION["userRoleCode"] == 'SUPERUSER') echo 'selected'; ?> >Super User</option>
+			<option value="ADMIN" <?php if ($_SESSION["userRoleCode"] == 'ADMIN') echo 'selected'; ?> >Admin</option>
+			<option value="VERIFIER" <?php if ($_SESSION["userRoleCode"] == 'VERIFIER') echo 'selected'; ?>>Verifier</option>
+			<option value="SUPERVISOR" <?php if ($_SESSION["userRoleCode"] == 'SUPERVISOR') echo 'selected'; ?>>Supervisor</option>
+			</select>
+	</td>
+
+	</tr>-->
 	
 	<hr>
 

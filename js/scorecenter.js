@@ -1,6 +1,6 @@
 /**
  * Tournament Score Center (TSC) - Tournament scoring web application.
- * Copyright (C) 2016  Preston Frazier
+ * Copyright (C) 2017  Preston Frazier
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.3, 12.07.2016 
+ * @version: 1.17.1, 12.28.2017 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -560,8 +560,8 @@ function compare3(a,b) {
   if ((a[4] == 'N' || a[4] == 'D' || a[4] == 'X') && b[4] == 'P') return 1;
   if ((b[4] == 'N' || b[4] == 'D' || b[4] == 'X') && a[4] == 'P') return -1; 
   
-  var x = a[2]; if (a[2] == '') x = 100000;
-  var y = b[2]; if (b[2] == '') y = 100000;
+  var x = a[2]; if (a[2] === '') x = 100000;
+  var y = b[2]; if (b[2] === '') y = 100000;
   if (x < y)
     return -1;
   if (x > y)
@@ -585,8 +585,8 @@ function compare4(a,b) {
   if (a[3] > b[3])
     return 1;
   if (a[3] == b[3]) {  
-  	var x = a[2]; if (a[2] == '') x = 100000;
-  	var y = b[2]; if (b[2] == '') y = 100000;
+  	var x = a[2]; if (a[2] === '') x = 100000;
+  	var y = b[2]; if (b[2] === '') y = 100000;
   	if (x < y) return -1;
   	if (x > y) return 1;
   	if (x == y) {

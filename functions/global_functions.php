@@ -1,7 +1,7 @@
 <?php
 /**
  * Tournament Score Center (TSC) - Tournament scoring web application.
- * Copyright (C) 2016  Preston Frazier
+ * Copyright (C) 2017  Preston Frazier
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.3, 12.07.2016 
+ * @version: 1.17.1, 12.28.2017 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -37,7 +37,7 @@
 	// Display Page Level Succes Messages
 	function displayMsgs() {
 		if ($_SESSION['scorecenter_msgs'] != null) {
-		    $$msgs = $_SESSION['scorecenter_msgs'];
+		    $msgs = $_SESSION['scorecenter_msgs'];
 		    foreach($msgs as $msg) {
 			    echo '<script type="text/javascript">displaySuccess("'.$msg.'");</script>';
 			    break;
@@ -89,6 +89,31 @@
 				break;	
 			default:
 				$status = 'Supervisor';
+		}		
+		return $status;
+	}
+	
+		// Return Role Number
+	function getRoleNumber($key) {
+		$status = '3';
+		switch($key) {
+			case 'SUPERUSER':
+				$status = '-1';
+				break;			
+			case 'ADMIN':
+				$status = '0';
+				break;
+			case 'VERIFIER':
+				$status = '1';
+				break;
+			case 'SUPERVISOR':
+				$status = '2';
+				break;
+			case 'COACH':
+				$status = '3';
+				break;	
+			default:
+				$status = '3';
 		}		
 		return $status;
 	}
@@ -190,7 +215,7 @@
 		$html .= '<td><label for="userLastName">Last Name: </label></td>';
 		$html .= '<td><input type="text" size="20" class="form-control" name="userLastName" id="userLastName" value="'.$_SESSION["userLastName"].'"></td></tr>';
 		$html .= '<tr><td><label for="userRole">Role: </label></td>';
-		$html .= '<td><select class="form-control" name="userRole" id="userRole" '.$disabled.'>
+		$html .= '<td><select class="form-control" name="userRole" id="userRole" >
 			<option value="" '; if ($_SESSION["userRole"] == null or $_SESSION["userRole"] == '') $html .= ' selected '; $html .= '></option>
 			<option value="SUPERUSER" '; if ($_SESSION["userRole"] == 'SUPERUSER') $html .= ' selected '; $html .= ' >Super User</option>
 			<option value="ADMIN" '; if ($_SESSION["userRole"] == 'ADMIN') $html .= ' selected '; $html .= ' >Admin</option>
@@ -201,7 +226,7 @@
 		if ($isSuperUser) {
 			$html .= '<td><label for="autoCreatedFlag">Include Auto Created: </label></td>';
 			$html .= '<td>
-			<select class="form-control" name="autoCreatedFlag" id="autoCreatedFlag" '.$disabled.'>
+			<select class="form-control" name="autoCreatedFlag" id="autoCreatedFlag">
 			<option value="NO" '; if ($_SESSION["autoCreatedFlag"] == 'NO') $html .= ' selected '; $html .= ' >No</option>
 			<option value="YES" '; if ($_SESSION["autoCreatedFlag"] == 'YES') $html .= ' selected '; $html .= ' >Yes</option>
 			</select>

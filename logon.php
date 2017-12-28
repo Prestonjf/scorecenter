@@ -1,7 +1,7 @@
 <?php
 /**
  * Tournament Score Center (TSC) - Tournament scoring web application.
- * Copyright (C) 2016  Preston Frazier
+ * Copyright (C) 2017  Preston Frazier
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.3, 12.07.2016 
+ * @version: 1.17.1, 12.28.2017 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -72,7 +72,7 @@ session_start();
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
       
      	<div class="row row-offcanvas row-offcanvas-right">
-        <div class="col-xs-12 col-sm-9">
+        <div class="col-xs-12 col-sm-8">
          
 	<div width="50%" style="margin-bottom: 2em; background-color: #eee; border-radius: 4px; padding: 1em;">
 		<table class="borderless" cellspacing="5">
@@ -104,10 +104,10 @@ session_start();
 
 
 
-        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar">
+        <div class="col-xs-6 col-sm-4 sidebar-offcanvas" id="sidebar">
           <div class="list-group">
             <span class="list-group-item active">Information</span>
-            <a href="#" class="list-group-item">&nbsp;</a>
+            <a href="#" class="list-group-item">Tournament Score Center is an application designed to make managing competitive tournaments easy!</a>
           </div>
         </div><!--/.sidebar-offcanvas-->
         

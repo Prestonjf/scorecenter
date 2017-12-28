@@ -1,7 +1,7 @@
 <?php
 /**
  * Tournament Score Center (TSC) - Tournament scoring web application.
- * Copyright (C) 2016  Preston Frazier
+ * Copyright (C) 2017  Preston Frazier
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.3, 12.07.2016
+ * @version: 1.17.1, 12.28.2017 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -141,6 +141,12 @@ if (!$userSessionInfo) {
 }
 
 if ($_GET['command'] != null and ($_GET['command'] == 'loadIndex' or $_GET['command'] =='loadIndexLogin')) {
+	header("Location: index.php");	
+	exit();
+}
+else if ($_GET['command'] != null and $_GET['command'] == 'CHANGEUSERROLE') {
+	// update current role
+	changeUserRole($_GET['userRole']);
 	header("Location: index.php");	
 	exit();
 }
@@ -360,8 +366,8 @@ else if (isset($_GET['searchUsers']) or ($_GET['command'] != null and $_GET['com
 	$_SESSION["userFirstName"] = $_GET['userFirstName'];
 	$_SESSION["userLastName"] = $_GET['userLastName'];
 	$_SESSION["autoCreatedFlag"] = $_GET['autoCreatedFlag'];
-	if ($_SESSION["pageCommand"] == null || $_SESSION["pageCommand"] == '')
-		$_SESSION["userRole"] = $_GET['userRole'];
+	//if ($_SESSION["pageCommand"] == null || $_SESSION["pageCommand"] == '')
+	$_SESSION["userRole"] = $_GET['userRole'];
 	$_SESSION["userFilterNumber"] = $_GET['userFilterNumber'];
 
 	loadAllUsers($mysqli);
@@ -457,11 +463,17 @@ else if (isset($_GET['cancelEvent'])) {
 		exit();
 }
 else if (isset($_GET['saveEventScores'])) {
-		saveEventScores($mysqli);
-		$_SESSION["tournEventId"] = null;
-		loadTournamentEvents($mysqli);
-		header("Location: tournament_events.php");
-		exit();
+	saveEventScores($mysqli);
+	$_SESSION["tournEventId"] = null;
+	loadTournamentEvents($mysqli);
+	header("Location: tournament_events.php");
+	exit();
+}
+else if (isset($_GET['applyEventScores'])) {
+	saveEventScores($mysqli);
+	//$_SESSION["tournEventId"] = null;
+	header("Location: event_scores.php");
+	exit();
 }
 else if (isset($_GET['cancelEventScores'])) {	
 	header("Location: tournament_events.php");
@@ -1260,6 +1272,7 @@ else {
 			}
 			
 			if (!$exists) {
+				addRole($values[0],'VERIFIER');
 				$verifier = array();
 				array_push($verifier, $values[0]);
 				array_push($verifier, $values[1]);
@@ -1313,6 +1326,7 @@ else {
 		
 		foreach ($eventList as $event) {
 			if ($count == $rowId) {
+				addRole($values[0],'SUPERVISOR');
 				$supervisor = $event[5];
 				$supervisor[0] = $values[0];
 				$supervisor[1] = $name[1];
@@ -2132,7 +2146,7 @@ else {
 		$scoreList = $_SESSION["teamEventScoreList"];
 		if ($scoreList) {
 			$teamCount = 0;
-			foreach ($scoreList as $score) {
+			foreach ($scoreList as &$score) {
 				$value = $_GET['teamScore'.$teamCount];
 				$rawScore = $_GET['teamRawScore'.$teamCount];
 				$status = $_GET['teamStatus'.$teamCount];
@@ -2140,7 +2154,13 @@ else {
 				$tieBreak = $_GET['teamTieBreak'.$teamCount];
 				$pointsEarned = $_GET['teamPointsEarned'.$teamCount];
 				
-				
+				$score['2'] = $value;
+				$score['5'] = $pointsEarned;
+				$score['6'] = $rawScore;
+				$score['7'] = $tier;
+				$score['8'] = $tieBreak;
+				$score['9'] = $status;
+								
 				if ($value == '') $value = null;
 				if ($pointsEarned == '') $pointsEarned = null;
 					
@@ -2162,13 +2182,14 @@ else {
 				}
 				$teamCount++;	
 			}
+				$_SESSION["teamEventScoreList"] = $scoreList;
 		}
 		
 	// Alternate Teams
 		$scoreList = $_SESSION["teamAlternateEventScoreList"];
 		if ($scoreList) {
 			$teamCount = 0;
-			foreach ($scoreList as $score) {
+			foreach ($scoreList as &$score) {
 				$value = $_GET['teamAScore'.$teamCount];
 				$status = $_GET['teamAStatus'.$teamCount];
 				$rawScore = $_GET['teamARawScore'.$teamCount];
@@ -2176,6 +2197,13 @@ else {
 				$tieBreak = $_GET['teamATieBreak'.$teamCount];
 				$pointsEarned = $_GET['teamAPointsEarned'.$teamCount];
 				
+				$score['2'] = $value;
+				$score['5'] = $pointsEarned;
+				$score['6'] = $rawScore;
+				$score['7'] = $tier;
+				$score['8'] = $tieBreak;
+				$score['9'] = $status;
+				
 				
 				if ($value == '') $value = null;
 				if ($pointsEarned == '') $pointsEarned = null;
@@ -2198,6 +2226,7 @@ else {
 				}
 				$teamCount++;	
 			}
+			$_SESSION["teamAlternateEventScoreList"] = $scoreList;
 		}
 	
 	
@@ -2205,9 +2234,11 @@ else {
 		$query = $mysqli->prepare("UPDATE TOURNAMENT_EVENT SET SUBMITTED_FLAG=?, VERIFIED_FLAG=?, COMMENTS=? WHERE TOURN_EVENT_ID=".$_SESSION["tournEventId"]);			
 		$query->bind_param('iis',$_GET['submittedFlag'], $_GET['verifiedFlag'], $_GET['eventComments']); 
 		$query->execute();
+		$_SESSION["submittedFlag"] = $_GET['submittedFlag'];
+ 		$_SESSION["verifiedFlag"] = $_GET['verifiedFlag'];
+		$_SESSION["eventComments"] = $_GET['eventComments'];
 			
-		$_SESSION["teamEventScoreList"] = $scoreList;
-		$_SESSION['savesuccessScore'] = "1";
+		$_SESSION['scorecenter_msgs'] = array(SUCCESS_EVENT_SCORES_SAVED);
 	}
 
 
@@ -2368,7 +2399,6 @@ else {
 		
 		$row = $result3->fetch_row();
 		
-		require('libs/fpdf/fpdf.php');
 		$pdf = new FPDF();
 		$pdf->SetTitle($row[3], true);
 		$pdf->AddPage('P','Letter', 0);
@@ -2733,6 +2763,8 @@ else {
 		}
 		
 		if (!$exists) {
+			// Give Coach Role if does not exist
+			addRole($values[0],'COACH');
 			$coach = array();
 			array_push($coach, '');
 			array_push($coach, '');
@@ -3048,6 +3080,7 @@ else {
 	}
 	
 	function getMostImprovedTeams($id, $currentResults, $previousResults, $statebids, $highLowWin, $mysqli) {
+		if ($statebids === null OR $statebids == '') $statebids = 0;
 		$teamList = array();
 		$sql = " SELECT TE.TEAM_ID, TE.NAME, TT.TOURN_TEAM_ID as CURID,TT1.TOURN_TEAM_ID as PREVID, '' as difference FROM TEAM TE
 				INNER JOIN TOURNAMENT_TEAM TT ON TT.TEAM_ID=TE.TEAM_ID
@@ -3515,17 +3548,17 @@ else {
 				WHERE T1.TOURNAMENT_ID=".$_SESSION["tournamentId"];
 		$tournaments = $mysqli->query($query);
 		$row = $tournaments->fetch_row();
-		if ($row[1] != null AND $row[1] == 'A') { $aId = $row[0];  $aPreviousTournId = $row[6]; $aStateBids = $row[6]; }
-		else if ($row[1] != null AND $row[1] == 'B') { $bId = $row[0]; $bPreviousTournId = $row[6]; $bStateBids = $row[6]; }
-		else if ($row[1] != null AND $row[1] == 'C') { $cId = $row[0]; $cPreviousTournId = $row[6]; $cStateBids = $row[6]; }
+		if ($row[1] != null AND $row[1] == 'A') { $aId = $row[0];  $aPreviousTournId = $row[6]; $aStateBids = $row[9]; }
+		else if ($row[1] != null AND $row[1] == 'B') { $bId = $row[0]; $bPreviousTournId = $row[6]; $bStateBids = $row[9]; }
+		else if ($row[1] != null AND $row[1] == 'C') { $cId = $row[0]; $cPreviousTournId = $row[6]; $cStateBids = $row[9]; }
 		
-		if ($row[3] != null AND $row[3] == 'A') { $aId = $row[2]; $aPreviousTournId = $row[7]; $aStateBids = $row[7]; }
-		else if ($row[3] != null AND $row[3] == 'B') { $bId = $row[2]; $bPreviousTournId = $row[7]; $bStateBids = $row[7]; }
-		else if ($row[3] != null AND $row[3] == 'C') { $cId = $row[2]; $cPreviousTournId = $row[7]; $cStateBids = $row[7]; }
+		if ($row[3] != null AND $row[3] == 'A') { $aId = $row[2]; $aPreviousTournId = $row[7]; $aStateBids = $row[10]; }
+		else if ($row[3] != null AND $row[3] == 'B') { $bId = $row[2]; $bPreviousTournId = $row[7]; $bStateBids = $row[10]; }
+		else if ($row[3] != null AND $row[3] == 'C') { $cId = $row[2]; $cPreviousTournId = $row[7]; $cStateBids = $row[10]; }
 		
-		if ($row[5] != null AND $row[5] == 'A') { $aId = $row[4]; $aPreviousTournId = $row[8]; $aStateBids = $row[8]; }
-		else if ($row[5] != null AND $row[5] == 'B') { $bId = $row[4]; $bPreviousTournId = $row[8]; $bStateBids = $row[8]; }
-		else if ($row[5] != null AND $row[5] == 'C') { $cId = $row[4]; $cPreviousTournId = $row[8]; $cStateBids = $row[8]; }
+		if ($row[5] != null AND $row[5] == 'A') { $aId = $row[4]; $aPreviousTournId = $row[8]; $aStateBids = $row[11]; }
+		else if ($row[5] != null AND $row[5] == 'B') { $bId = $row[4]; $bPreviousTournId = $row[8]; $bStateBids = $row[11]; }
+		else if ($row[5] != null AND $row[5] == 'C') { $cId = $row[4]; $cPreviousTournId = $row[8]; $cStateBids = $row[11]; }
 		
 		// Primary C
 		if ($cId != null) {
@@ -3880,7 +3913,7 @@ else {
 		}
 		if ($cPreviousTournId AND $cPreviousTournId != -1) {
 			$previousTournResultsC = getPrimaryTournamentResults($cPreviousTournId,$mysqli,$cHighLowFlag,$previousTournResultsC);
-			$cMostImprovedTeams = getMostImprovedTeams($cId,$tournamentResultsC,$previousTournResultsC,$cStateBids,$cHighLowFlag,$mysqli);		
+			$cMostImprovedTeams = getMostImprovedTeams($cId,$tournamentResultsC,$previousTournResultsC,$cStateBids,$cHighLowFlag,$mysqli);	
 		}
 		if ($aMostImprovedTeams OR $bMostImprovedTeams OR $cMostImprovedTeams) {
 			$slide = new slideshowSlide();
@@ -4098,36 +4131,40 @@ else {
 	// USER MANAGEMENT ------------------------------------------------
 	function loadAllUsers($mysqli) {
 			$userList = array();
-			$query = "Select * from USER WHERE 1=1 ";
+			$query = "Select U.*, group_concat(DISTINCT UR2.ROLE_CODE ORDER BY UR2.ROLE_CODE ASC  SEPARATOR ', ') as ROLES 
+			from USER U 
+			INNER JOIN USER_ROLE UR ON UR.USER_ID=U.USER_ID 
+			INNER JOIN USER_ROLE UR2 ON UR.USER_ID=UR2.USER_ID
+			WHERE 1=1 ";
 			if ($_SESSION["userFirstName"] != null) {
-				$query = $query . " AND FIRST_NAME LIKE '".$_SESSION["userFirstName"]."%' " ;
+				$query = $query . " AND U.FIRST_NAME LIKE '".$_SESSION["userFirstName"]."%' " ;
 			}
 			if ($_SESSION["userLastName"] != null) {
-				$query = $query . " AND LAST_NAME LIKE '".$_SESSION["userLastName"]."%' " ;
+				$query = $query . " AND U.LAST_NAME LIKE '".$_SESSION["userLastName"]."%' " ;
 			}
 			if ($_SESSION["userRole"] != null) {
-				$query = $query . " AND ROLE_CODE = '".$_SESSION["userRole"]."' " ;
+				$query = $query . " AND UR.ROLE_CODE = '".$_SESSION["userRole"]."' " ;
 			}
 			if ($_SESSION["pageCommand"] AND ($_SESSION["pageCommand"] == 'selectCoach' || $_SESSION["pageCommand"] == 'selectSupervisor' || $_SESSION["pageCommand"] == 'selectVerifier')) {
-				$query = $query . " AND COALESCE(AUTO_CREATED_FLAG,0) = 0 " ;
+				$query = $query . " AND COALESCE(U.AUTO_CREATED_FLAG,0) = 0 " ;
 			}
 			if (isUserAccess(0) AND ($_SESSION["autoCreatedFlag"] == null || $_SESSION["autoCreatedFlag"] == '' || $_SESSION["autoCreatedFlag"] == 'NO')) {
-				$query = $query . " AND COALESCE(AUTO_CREATED_FLAG,0) = 0 " ;
+				$query = $query . " AND COALESCE(U.AUTO_CREATED_FLAG,0) = 0 " ;
 			}
-			$query = $query . " ORDER BY UPPER(LAST_NAME) ASC ";
+			$query = $query . " GROUP BY U.USERNAME ORDER BY UPPER(U.LAST_NAME) ASC ";
 			if ($_SESSION["userFilterNumber"] != null and $_SESSION["userFilterNumber"] != '0') {
 				$query = $query . " LIMIT ".$_SESSION["userFilterNumber"];
 			}
 			
 			$result = $mysqli->query($query); 
  			if ($result) {
-				while($userRow = $result->fetch_array()) {
+				while($userRow = $result->fetch_array(MYSQLI_BOTH)) {
  					$userRecord = array();	
 					array_push($userRecord, $userRow['0']);
 					array_push($userRecord, $userRow['4']);
 					array_push($userRecord, $userRow['5']);
 					array_push($userRecord, $userRow['1']);
-					array_push($userRecord, $userRow['3']);
+					array_push($userRecord, $userRow['ROLES']);
  				
 					array_push($userList, $userRecord);
 				}
@@ -4141,32 +4178,37 @@ else {
 		$_SESSION["userId"] = null;
 		$_SESSION["userName"] = null;
 		$_SESSION["userFirstLastName"] = null;
-		$_SESSION["userRoleCode"] = null;
+		//$_SESSION["userRoleCode"] = null;
+		$_SESSION["userRoleCodes"] = null;
 		$_SESSION["userActiveFlag"] = null;
 		$_SESSION["userPhoneNumber"] = null;
 	}
 
 
 	function loadUser($id, $mysqli) {
-		$result = $mysqli->query("SELECT USER_ID, USERNAME, CONCAT(FIRST_NAME,' ', LAST_NAME) as name, ROLE_CODE, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER, FIRST_NAME, LAST_NAME
-							  FROM USER WHERE USER_ID = " .$id); 
+		$result = $mysqli->query("SELECT U.USER_ID, U.USERNAME, CONCAT(U.FIRST_NAME,' ', U.LAST_NAME) as name, U.ACCOUNT_ACTIVE_FLAG, U.PHONE_NUMBER, U.FIRST_NAME, U.LAST_NAME,
+		group_concat(UR.ROLE_CODE ORDER BY UR.ROLE_CODE ASC  SEPARATOR ', ') as ROLES 
+							  FROM USER U
+							  INNER JOIN USER_ROLE UR ON UR.USER_ID=U.USER_ID 
+							  WHERE U.USER_ID = " .$id); 
  			if ($result) {
  				$userRow = $result->fetch_row();	
  				$_SESSION["userId"] = $userRow['0'];
  				$_SESSION["userName"] = $userRow['1'];
  				$_SESSION["userFirstLastName"] = $userRow['2'];
- 				$_SESSION["userRoleCode"] = $userRow['3'];
- 				$_SESSION["userActiveFlag"] = $userRow['4'];
- 				$_SESSION["userPhoneNumber"] = $userRow['5'];
- 				$_SESSION["firstName"] = $userRow['6'];
-				$_SESSION["lastName"] = $userRow['7'];				
+ 				//$_SESSION["userRoleCode"] = $userRow['3'];
+ 				$_SESSION["userRoleCodes"] = explode(', ', $userRow['7']);
+ 				$_SESSION["userActiveFlag"] = $userRow['3'];
+ 				$_SESSION["userPhoneNumber"] = $userRow['4'];
+ 				$_SESSION["firstName"] = $userRow['5'];
+				$_SESSION["lastName"] = $userRow['6'];				
     		}
 	}
 	
 	function saveUser($mysqli) {
-		$query = $mysqli->prepare("UPDATE USER SET ROLE_CODE=?, ACCOUNT_ACTIVE_FLAG=? WHERE USER_ID=".$_SESSION["userId"]);
+		$query = $mysqli->prepare("UPDATE USER SET ACCOUNT_ACTIVE_FLAG=? WHERE USER_ID=".$_SESSION["userId"]);
 			
-		$query->bind_param('si',$_GET["userRoleCode"], $_GET["userActiveFlag"]);
+		$query->bind_param('i', $_GET["userActiveFlag"]);
 		$query->execute();
 		$query->free_result();
 		
@@ -4279,7 +4321,7 @@ else {
 		$query->execute();
 		$result = $query->get_result();
 		$count = $result->num_rows;
-		$account = $result->fetch_array(MYSQLI_BOTH); //->fetch_row();-
+		$account = $result->fetch_array(MYSQLI_BOTH);
 		$query->free_result();
 
 		
@@ -4293,10 +4335,10 @@ else {
 			$userSessionInfo->setUserId($account['0']);
 			$userSessionInfo->setFirstName($account['4']);
 			$userSessionInfo->setLastName($account['5']);
-			$userSessionInfo->setRole($account['3']);
 			$userSessionInfo->setPhoneNumber($account['8']);
 			$userSessionInfo->setState($account['STATE_CODE']);
 			
+			// Load Coach Team List
 			if ($userSessionInfo->getRole() == 'COACH') {
 				$teamsCoached = array();
 				$query = " SELECT T.TEAM_ID, T.NAME FROM TEAM T INNER JOIN TEAM_COACH TC ON TC.TEAM_ID=T.TEAM_ID
@@ -4311,6 +4353,21 @@ else {
 				$userSessionInfo->setTeamsCoached($teamsCoached);
 			}
 			
+			// Load Role List AND Current Role (Current Role is always Highest
+			    $availableRoles = array();
+				$query = " SELECT UR.ROLE_CODE FROM USER_ROLE UR WHERE UR.USER_ID=".$userSessionInfo->getUserId()." ORDER BY UR.ROLE_CODE ASC ";	
+				$results = $mysqli->query($query); 		
+				$currentRole = 4;	
+				while ($row = $results->fetch_array(MYSQLI_BOTH)) {
+					array_push($availableRoles,$row['ROLE_CODE']);
+					if (getRoleNumber($row['ROLE_CODE']) < $currentRole) {
+						$userSessionInfo->setRole($row['ROLE_CODE']);
+						$currentRole = 	getRoleNumber($row['ROLE_CODE']);
+					}
+				}
+				$userSessionInfo->setAvailableRoles($availableRoles);
+			
+			
 			$url = explode("/", $_SERVER[REQUEST_URI]);
 			$tmp = ''; 
 			$i = 0;
@@ -4324,7 +4381,6 @@ else {
 			$userSessionInfo->setDomain($url);
 			
 			$_SESSION["userSessionInfo"] = serialize($userSessionInfo);
-			//$_SESSION["userEventDate"] = date("m/d/y");
 			$_SESSION['sessionTimeout'] = time(); // Session Timeout
 			
 			// Log Login Success
@@ -4339,6 +4395,18 @@ else {
 		$_SESSION["accountMode"] == '';
 		$_SESSION["loginError1"] = "1";
 		return false;
+	}
+	
+	function changeUserRole($newRole) {
+		global $mysqli;
+		$userSessionInfo = unserialize($_SESSION["userSessionInfo"]);
+		// make sure suer has role.
+		$query = " SELECT USER_ROLE_ID FROM USER_ROLE WHERE USER_ID=".$userSessionInfo->getUserId()." AND ROLE_CODE='".$newRole."'";
+		$results = $mysqli->query($query); 
+		if ($results->num_rows > 0) {
+			$userSessionInfo->setRole($newRole);
+			$_SESSION["userSessionInfo"] = serialize($userSessionInfo);
+		}
 	}
 	
 	function forgotPassword($mysqli) {
@@ -4433,7 +4501,7 @@ else {
 		}
 	}
 	
-	function manageAccount($mysqli, $mode) {
+		function manageAccount($mysqli, $mode) {
 		$userName = $_POST['userName']; 
 		$password = $_POST['password']; 
 		$firstName = $_POST['firstName'];
@@ -4498,13 +4566,25 @@ else {
 			$id = 0;
 			if ($row != null and $row['0'] != null) $id = $row['0'];  
 			
-			$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER, STATE_CODE) 
-				VALUES (".$id.",?,?,?,?,?,?,?,?) ");
+			$query = $mysqli->prepare("INSERT INTO USER (USER_ID, USERNAME, PASSWORD, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER, STATE_CODE) 
+				VALUES (".$id.",?,?,?,?,?,?,?) ");
 
 			$activeFlag = 1;	
-			$query->bind_param('sssssiss',$userName, $encryptedPassword, $role,$firstName, $lastName, $activeFlag, $phoneNumber,$stateCode);		
+			$query->bind_param('ssssiss',$userName, $encryptedPassword,$firstName, $lastName, $activeFlag, $phoneNumber,$stateCode);		
 			$query->execute();
-			$query->free_result();	
+			$query->free_result();
+			
+			// Save Role Info
+			$result = $mysqli->query("select max(USER_ROLE_ID) + 1 from USER_ROLE");
+			$row = $result->fetch_row(); 
+			$userRoleId = 0;
+			if ($row != null and $row['0'] != null) $userRoleId = $row['0'];  
+			
+			$query = $mysqli->prepare("INSERT INTO USER_ROLE (USER_ROLE_ID, USER_ID, ROLE_CODE) VALUES (".$userRoleId.",?,?) ");	
+			$query->bind_param('is',$id, $role);		
+			$query->execute();
+			$query->free_result();
+				
 			$_SESSION["accountCreationSuccess"] = "1";
 			$_SESSION["userId"] = $id;
 			
@@ -4546,6 +4626,26 @@ else {
 		}
 		
 		return true;
+	}
+	
+	function addRole($userId, $role) {
+		global $mysqli;
+		$query = " SELECT USER_ROLE_ID FROM USER_ROLE WHERE USER_ID=".$userId." AND ROLE_CODE='".$role."'";
+		$results = $mysqli->query($query); 
+		if ($results->num_rows < 1) {
+			$result = $mysqli->query("select max(USER_ROLE_ID) + 1 from USER_ROLE");
+			$row = $result->fetch_row(); 
+			$userRoleId = 0;
+			if ($row != null and $row['0'] != null) $userRoleId = $row['0'];  
+			
+			$query = $mysqli->prepare("INSERT INTO USER_ROLE (USER_ROLE_ID, USER_ID, ROLE_CODE) VALUES (".$userRoleId.",?,?) ");	
+			$query->bind_param('is',$userId, $role);		
+			$query->execute();
+			$query->free_result();			
+			return true;
+		}
+		return false;
+		
 	}
 	
 	

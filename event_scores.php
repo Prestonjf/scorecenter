@@ -1,7 +1,7 @@
 <?php
 /**
  * Tournament Score Center (TSC) - Tournament scoring web application.
- * Copyright (C) 2016  Preston Frazier
+ * Copyright (C) 2017  Preston Frazier
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.3, 12.07.2016
+ * @version: 1.17.1, 12.28.2017 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -559,9 +559,24 @@ include_once('functions/global_functions.php');
 		}); 
 		
 		$('#eventScoresForm').submit(function() {
-					  var btn = $('#saveEventScores').clone().insertAfter("#saveEventScores").prop('id', 'saveEventScores1').prop('disabled','true');
-		  $(this).find("#saveEventScores").hide();
-		}); 
+			var btn = $('#saveEventScores').clone().insertAfter("#saveEventScores").prop('id', 'saveEventScores1').prop('disabled','true');
+			var btn1 = $('#applyEventScores').clone().insertAfter("#applyEventScores").prop('id', 'applyEventScores').prop('disabled','true');
+			$(this).find("#saveEventScores").hide();
+			$(this).find("#applyEventScores").hide();
+		});
+		
+		/**$("#submittedFlag").change(function() {
+			$('#submittedFlag1').prop('checked', $("#submittedFlag").is(':checked'));
+		});
+		$("#submittedFlag1").change(function() {
+			$('#submittedFlag').prop('checked', $("#submittedFlag1").is(':checked'));
+		});
+		$("#verifiedFlag").change(function() {
+			$('#verifiedFlag1').prop('checked', $("#verifiedFlag").is(':checked'));
+		});
+		$("#verifiedFlag1").change(function() {
+			$('#verifiedFlag').prop('checked', $("#verifiedFlag1").is(':checked'));
+		});**/
 		
 		
    		
@@ -691,12 +706,9 @@ include_once('functions/global_functions.php');
 	 <hr>
 
 	 <table width="100%"><tr>
-	 <td><label for="submittedFlag">Submitted</label> &nbsp;&nbsp;<input type="checkbox" id="submittedFlag" name="submittedFlag" <?php echo $disable.' '.$submitted; ?>  value="1"></td>
-	 <td><label for="verifiedFlag">Verified</label> &nbsp;&nbsp;<input type="checkbox" id="verifiedFlag" name="verifiedFlag" <?php echo $disableVerfiy.' '.$verified; ?> value="1"></td>
-	 <?php if ($_SESSION["lockScoresFlag"] == '1')  echo '<td>(LOCKED)</td>'; ?>
 	 <td align="right">Status Key: <b>P</b> = Participated, <b>PX</b> = Participated (Unable to Score), <b>NP</b> = No Participation, <b>DQ</b> = Disqualified</td>
-	 </tr></table>
-	 <hr>
+	 </tr></table><br />
+
 		<?php if ($_SESSION["teamEventScoreList"] != null) {?>		
 		<fieldset class="utility-border"><legend class="utility-border">Primary Teams</legend>
 		<?php } ?>
@@ -842,9 +854,13 @@ include_once('functions/global_functions.php');
 		<?php } ?>
           <label for="eventComments">Supervisor's Comments</label><br />
           <textarea class="form-control"  name="eventComments" id="eventComments" spellcheck="true" rows="5" cols="100" <?php echo $disable; ?>><?php echo $_SESSION["eventComments"];?></textarea>
-          <br /> <br />
-
+          <br /> 
+	 <label for="submittedFlag">Submitted</label> &nbsp;&nbsp;<input type="checkbox" id="submittedFlag" name="submittedFlag" <?php echo $disable.' '.$submitted; ?>  value="1">&nbsp;&nbsp;&nbsp;&nbsp;
+	 <label for="verifiedFlag">Verified</label> &nbsp;&nbsp;<input type="checkbox" id="verifiedFlag" name="verifiedFlag" <?php echo $disableVerfiy.' '.$verified; ?> value="1">&nbsp;&nbsp;&nbsp;&nbsp;
+	 <?php if ($_SESSION["lockScoresFlag"] == '1')  echo '<td>(LOCKED)</td>'; ?>
+	 <br /><br />
         <?php if ($disable != 'disabled')   { ?>
+        		<button type="submit" class="btn btn-xs btn-danger" name="applyEventScores" id="applyEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"'; ?>>Apply</button>
 		<button type="submit" class="btn btn-xs btn-danger" name="saveEventScores" id="saveEventScores" onclick="return validate()" value=<?php echo '"'.$_SESSION["tournEventId"].'"'; ?>>Save</button>
 		<button type="button" class="btn btn-xs btn-warning" id="calculateEventScores" name="calculateEventScores" onclick="calculateScorez('<?php echo addslashes($_SESSION["eventName"]); ?>','<?php echo $_SESSION["tournamentDivision"]; ?>','<?php echo $_SESSION["scoreSystemCode"]; ?>');" >Calculate Ranks</button>
 		<button type="button" class="btn btn-xs btn-warning" id="clearScores" name="clearScores" onclick="resetScores();" >Clear Scores</button>
@@ -873,6 +889,10 @@ include_once('functions/global_functions.php');
     	highlightRawScoreDuplication();
     	highlightARawScoreDuplication();
     </script>
+    <?php 
+	    displayMsgs();
+		displayErrors();
+	?>
     
   </body>
 </html>

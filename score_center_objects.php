@@ -1,7 +1,7 @@
 <?php
 /**
  * Tournament Score Center (TSC) - Tournament scoring web application.
- * Copyright (C) 2016  Preston Frazier
+ * Copyright (C) 2017  Preston Frazier
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.3, 12.07.2016 
+ * @version: 1.17.1, 12.28.2017 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -36,6 +36,7 @@ class UserSessionInfo {
    private $domain;
    private $state;
    private $teamsCoached = array();
+   private $availableRoles = array();
    
    
  
@@ -111,6 +112,13 @@ class UserSessionInfo {
 	}
 	public function getTeamsCoached() {
 		return $this->teamsCoached;
+	}
+	
+	public function setAvailableRoles($availableRoles) {
+		$this->availableRoles = $availableRoles;
+	}
+	public function getAvailableRoles() {
+		return $this->availableRoles;
 	}
    
    public function loadUserSessionInfo() {

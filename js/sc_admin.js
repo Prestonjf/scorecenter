@@ -1,4 +1,3 @@
-<?php
 /**
  * Tournament Score Center (TSC) - Tournament scoring web application.
  * Copyright (C) 2017  Preston Frazier
@@ -22,8 +21,7 @@
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
  
- 	
-	// Global Setting Variables
-
-
-?>
+function changeUserRole() {
+	$('#indexFormCommand').val('CHANGEUSERROLE');
+	$('#indexForm').submit();
+}

@@ -1,7 +1,7 @@
 <?php 
 /**
  * Tournament Score Center (TSC) - Tournament scoring web application.
- * Copyright (C) 2016  Preston Frazier
+ * Copyright (C) 2017  Preston Frazier
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.16.3, 12.07.2016
+ * @version: 1.17.1, 12.28.2017 
  * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
@@ -45,7 +45,7 @@ require_once('login.php');
 <html lang="en">
   <head>
 	<?php include_once('functions/head_tags.php'); ?>
-	
+<script type="text/javascript" src="js/sc_admin.js" ></script>	
   <script type="text/javascript">
   	function clearDates() {
 		document.getElementById('userEventDate').value = '';
@@ -84,16 +84,16 @@ require_once('login.php');
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
+     <form action="controller.php" id="indexForm" method="GET">
+     <input type="hidden" name="command" value="" id="indexFormCommand" />
      
       <div class="row row-offcanvas row-offcanvas-right">
-        <div class="col-xs-12 col-sm-9">
+        <div class="col-xs-12 col-sm-8">
 		
           <div class="jumbotron" style="overflow: auto;">
 		  	<div style="float: left; width: 80%;">
             <h2 style="margin-top:0px;">Welcome!</h2>
-            <p style="padding-right: 10px;">Tournament Score Center is a new electronic scoring system designed specifically for Science Olympiad, but usable for most competitions.
-            This application allows tournament organizers the ability to manage tournaments, teams, and events
-			in a secure, efficient, and flexible process.</p>
+            <p style="padding-right: 10px;">Tournament Score Center will help you manage your tournament scores, schedules and more! Your home page display your user information along with tournament data specific to your role.</p>
 			</div>
 			<div style="float: left; width: 20%;">
 			<h2 style="margin-top:0px;">&nbsp;</h2>
@@ -101,16 +101,24 @@ require_once('login.php');
 			</div>
           </div>
           
-        </div><!--/.col-xs-12.col-sm-9-->
-        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" style="height:auto;">
+        </div>
+        <div class="col-xs-7 col-sm-4 sidebar-offcanvas" id="sidebar" style="height:auto;">
           <div class="list-group">
             <span class="list-group-item active">Information</span>
             <!--<a href="http://scorecenter.prestonsproductions.com/" target="_blank" class="list-group-item">Tournament Score Center Help</a>-->
             <a href="#" id="quote" class="list-group-item">
 	            <table>
-		        	            <tr><td><b>Username:&nbsp;</b></td><td><?php echo $userSessionInfo->getUserName() ?></td></tr>
+		        	<tr><td><b>Username:&nbsp;</b></td><td><?php echo $userSessionInfo->getUserName() ?></td></tr>
 		            <tr><td><b>Name:&nbsp;</b></td><td><?php echo $userSessionInfo->getFirstName() . ' ' . $userSessionInfo->getLastName() ?></td></tr>
-				<tr><td><b>Role:&nbsp;</b></td><td><?php echo getRoleName($userSessionInfo->getRole()) ?></td></tr>
+					<tr><td><b>Role:&nbsp;</b></td><td>
+						<select class="form-control" name="userRole" id="userRole" onchange="changeUserRole()">
+							<? foreach ($userSessionInfo->getAvailableRoles() as $role) {
+								echo '<option value="'.$role.'" ';
+								if ($role == $userSessionInfo->getRole()) echo 'selected';
+								echo '>'.getRoleName($role).'</option>';
+							} ?>
+						</select>
+					</td></tr>
 	            </table>
 	            <?php
 					if (getCurrentRole() ==='COACH' AND $userSessionInfo->getTeamsCoached()) {
@@ -130,7 +138,7 @@ require_once('login.php');
         </div><!--/.sidebar-offcanvas-->
       </div><!--/row--> 
       
-          <form action="controller.php" method="GET">
+          
         
         <?php
           	if (isUserAccess(2)) {
