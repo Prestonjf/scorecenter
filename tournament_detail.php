@@ -192,7 +192,7 @@
 					}					
 				}
 			}	
-        xmlhttp.open("GET","controller.php?command=validateDeleteTeam&TournTeamRowId="+$(element).closest('tr').index()+generateTeamParamsString,true);
+        xmlhttp.open("GET","controller.php?command=validateDeleteTeam&TournTeamRowId="+$(element).closest('tr').index()+generateTeamParamsString(),true);
         xmlhttp.send();
 	}
 	

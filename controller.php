@@ -1032,6 +1032,8 @@ else {
 	function generateUsersForEvents($mysqli, $id) {
 		// Delete linked users if auto_created flag = 1
 		$result = $mysqli->query("DELETE FROM USER_LOGIN_LOG WHERE USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE INNER JOIN USER U on u.USER_ID=TE.USER_ID WHERE TE.TOURNAMENT_ID=".$id." AND U.AUTO_CREATED_FLAG = 1)");
+		$result = $mysqli->query("DELETE UR.* FROM USER_ROLE UR INNER JOIN USER U on U.USER_ID=UR.USER_ID
+					WHERE U.AUTO_CREATED_FLAG = 1 AND U.USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE WHERE TE.TOURNAMENT_ID=".$id.")");
 		$result = $mysqli->query("DELETE U1.* FROM USER U1 WHERE U1.AUTO_CREATED_FLAG = 1 AND U1.USER_ID IN (SELECT TE.USER_ID FROM TOURNAMENT_EVENT TE WHERE TE.TOURNAMENT_ID=".$id.")");
 		
 
@@ -1068,7 +1070,8 @@ else {
 			$passowrd = $username . rand(0, 9);
 			$encryptPwd = crypt($passowrd);
 			$sql .= " INSERT INTO USER (USER_ID, USERNAME, PASSWORD, ROLE_CODE, FIRST_NAME, LAST_NAME, ACCOUNT_ACTIVE_FLAG, PHONE_NUMBER, AUTO_CREATED_FLAG) 
-				VALUES (".$id.",'".$username."','".$encryptPwd."','SUPERVISOR','".$eventName."','Supervisor',1,'',1); ";
+				VALUES (".$id.",'".$username."','".$encryptPwd."',null,'".$eventName."','Supervisor',1,'',1); 
+				INSERT INTO `USER_ROLE` (`USER_ID`, `ROLE_CODE`) VALUES (".$id.", 'SUPERVISOR'); ";
 			
 			$supervisor = array($id, $eventName,'Supervisor',$username);
 			$event['5'] = $supervisor;
@@ -1398,6 +1401,7 @@ else {
 			}
 			else if ($rowNum == $count) {
 				$result = $mysqli->query("UPDATE TOURNAMENT_EVENT SET USER_ID = null WHERE TOURN_EVENT_ID = " .$event[3]);
+								$result = $mysqli->query("DELETE UR.* FROM USER_ROLE UR INNER JOIN USER U ON U.USER_ID=UR.USER_ID WHERE U.AUTO_CREATED_FLAG = 1 AND U.USER_ID = " .$user[0]);
 				$result = $mysqli->query("DELETE FROM USER WHERE AUTO_CREATED_FLAG = 1 AND USER_ID = " .$user[0]);
 				$event['5'] = array(null,null,null,null);
 				$event['6'] = null;
@@ -1408,8 +1412,11 @@ else {
 		}
 		if ($rowNum == -1) {
 			$result = $mysqli->query("UPDATE TOURNAMENT_EVENT SET USER_ID = null WHERE TOURNAMENT_ID=".$_SESSION["tournamentId"]);
+			$result = $mysqli->query("DELETE UR.* FROM USER_ROLE UR INNER JOIN USER U ON U.USER_ID=UR.USER_ID WHERE U.AUTO_CREATED_FLAG = 1 AND U.USER_ID IN (".$userIds.")");
 			$result = $mysqli->query("DELETE FROM USER WHERE AUTO_CREATED_FLAG = 1 AND USER_ID IN (".$userIds.")");
 		}
+		
+		
 		
 		$_SESSION["eventList"] = $eventList;
 		reloadTournamentEvent($mysqli);
@@ -2455,31 +2462,31 @@ else {
 						
 		$queryPrimary = "SELECT TT.TEAM_NUMBER,
 				T.NAME AS TNAME, TES.TEAM_STATUS, RAW_SCORE,
-				CASE WHEN TES.TIER_TEXT IS NULL THEN 'I' WHEN TES.TIER_TEXT = 1 THEN 'I' WHEN TES.TIER_TEXT = 2 THEN 'II'
+				CASE WHEN TES.TIER_TEXT IS NULL THEN NULL WHEN TES.TIER_TEXT = 1 THEN 'I' WHEN TES.TIER_TEXT = 2 THEN 'II'
 				WHEN TES.TIER_TEXT = 3 THEN 'III' WHEN TES.TIER_TEXT = 4 THEN 'IV' WHEN TES.TIER_TEXT = 5 THEN 'V'
 				END AS TIER_TEXT,
-				TES.TIE_BREAK_TEXT, TES.SCORE, TES.POINTS_EARNED  
-				FROM TEAM_EVENT_SCORE TES 
-				INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURN_EVENT_ID=TES.TOURN_EVENT_ID
-				INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURN_TEAM_ID=TES.TOURN_TEAM_ID
+				TES.TIE_BREAK_TEXT, TES.SCORE, TES.POINTS_EARNED
+				FROM TOURNAMENT_EVENT TE
+				INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TE.TOURNAMENT_ID
+				LEFT JOIN TEAM_EVENT_SCORE TES ON TES.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID
 				INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
 				INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID
 				INNER JOIN TOURNAMENT TN ON TN.TOURNAMENT_ID=TE.TOURNAMENT_ID
-				WHERE TES.TOURN_EVENT_ID=".$id." AND COALESCE(TT.ALTERNATE_FLAG,0) = 0 ORDER BY CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC ";	
+				WHERE TE.TOURN_EVENT_ID=".$id." AND COALESCE(TT.ALTERNATE_FLAG,0) = 0 ORDER BY CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC ";	
 				
 		$queryAlternate = "SELECT TT.TEAM_NUMBER,
 				CONCAT(T.NAME,' +') AS TNAME, TES.TEAM_STATUS, RAW_SCORE,
-				CASE WHEN TES.TIER_TEXT IS NULL THEN 'I' WHEN TES.TIER_TEXT = 1 THEN 'I' WHEN TES.TIER_TEXT = 2 THEN 'II'
+				CASE WHEN TES.TIER_TEXT IS NULL THEN NULL WHEN TES.TIER_TEXT = 1 THEN 'I' WHEN TES.TIER_TEXT = 2 THEN 'II'
 				WHEN TES.TIER_TEXT = 3 THEN 'III' WHEN TES.TIER_TEXT = 4 THEN 'IV' WHEN TES.TIER_TEXT = 5 THEN 'V'
 				END AS TIER_TEXT,
 				TES.TIE_BREAK_TEXT, TES.SCORE, TES.POINTS_EARNED  
-				FROM TEAM_EVENT_SCORE TES 
-				INNER JOIN TOURNAMENT_EVENT TE ON TE.TOURN_EVENT_ID=TES.TOURN_EVENT_ID
-				INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURN_TEAM_ID=TES.TOURN_TEAM_ID
+				FROM TOURNAMENT_EVENT TE
+				INNER JOIN TOURNAMENT_TEAM TT ON TT.TOURNAMENT_ID=TE.TOURNAMENT_ID
+				LEFT JOIN TEAM_EVENT_SCORE TES ON TES.TOURN_EVENT_ID=TE.TOURN_EVENT_ID AND TES.TOURN_TEAM_ID=TT.TOURN_TEAM_ID
 				INNER JOIN TEAM T ON T.TEAM_ID=TT.TEAM_ID
 				INNER JOIN EVENT E ON E.EVENT_ID=TE.EVENT_ID
 				INNER JOIN TOURNAMENT TN ON TN.TOURNAMENT_ID=TE.TOURNAMENT_ID
-				WHERE TES.TOURN_EVENT_ID=".$id." AND COALESCE(TT.ALTERNATE_FLAG,0) = 1 ORDER BY CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC ";	
+				WHERE TE.TOURN_EVENT_ID=".$id." AND COALESCE(TT.ALTERNATE_FLAG,0) = 1 ORDER BY CAST(TT.TEAM_NUMBER AS UNSIGNED) ASC ";	
 		
 		$result = $mysqli->query($tournQuery);
 		$row = $result->fetch_row();
@@ -2561,6 +2568,7 @@ else {
 		$_SESSION["teamRegion"] = null;
 		$_SESSION["teamDescription"] = null;
 		$_SESSION["disableRecord"] = 0;
+		$_SESSION["coachList"] = array();
 	}
 	
 	function loadAllTeams($mysqli) {
@@ -2816,11 +2824,13 @@ else {
 		$_SESSION["teamPhone"] = $_GET["teamPhone"];
 		$_SESSION["teamEmail"] = $_GET["teamEmail"];
 		$_SESSION["teamDivision"] = $_GET["teamDivision"];
+		$_SESSION["teamState"] = $_GET["teamState"];
+		$_SESSION["teamRegion"] = $_GET["teamRegion"];
 		
 		$id = -1;
 		if ($_SESSION["teamId"] != null and $_SESSION["teamId"] != '') $id = $_SESSION["teamId"];
 		
-		$result = $mysqli->query("SELECT TEAM_ID FROM TEAM WHERE TEAM_ID <> ".$id." AND UPPER(NAME) = '".strtoupper($_GET["teamName"])."' "); 
+		$result = $mysqli->query("SELECT TEAM_ID FROM TEAM WHERE TEAM_ID <> ".$id." AND UPPER(NAME) = '".strtoupper($_GET["teamName"])."' AND DIVISION='".$_GET["teamDivision"]."'"); 
 		$count = $result->num_rows;
 		
 		if ($count > 0) { $_SESSION['saveTeamError'] = "1";	return true; }
@@ -3892,14 +3902,26 @@ else {
 		$tournamentResultsA = array(); $tournamentResultsB = array(); $tournamentResultsC = array();
 		$tournamentResultsAltA = array(); $tournamentResultsAltB = array(); $tournamentResultsAltC = array();
 		$previousTournResultsA = array(); $previousTournResultsB = array(); $previousTournResultsC = array();
-		$tournamentResultsA = getPrimaryTournamentResults($aId,$mysqli,$aHighLowFlag,$tournamentResultsA);
-		$tournamentResultsB = getPrimaryTournamentResults($bId,$mysqli,$bHighLowFlag,$tournamentResultsB);
-		$tournamentResultsC = getPrimaryTournamentResults($cId,$mysqli,$cHighLowFlag,$tournamentResultsC);
 		
-		$tournamentResultsAltA = getAlternateTournamentResults($aId,$mysqli,$aHighLowFlag,$tournamentResultsAltA);
-		$tournamentResultsAltB = getAlternateTournamentResults($bId,$mysqli,$bHighLowFlag,$tournamentResultsAltB);
-		$tournamentResultsAltC = getAlternateTournamentResults($cId,$mysqli,$cHighLowFlag,$tournamentResultsAltC);
+		if ($aId != null) {
+		  $tournamentResultsA = getPrimaryTournamentResults($aId,$mysqli,$aHighLowFlag,$tournamentResultsA);
+		}
+		if ($bId != null) {
+		  $tournamentResultsB = getPrimaryTournamentResults($bId,$mysqli,$bHighLowFlag,$tournamentResultsB);
+		}
+		if ($cId != null) {
+		  $tournamentResultsC = getPrimaryTournamentResults($cId,$mysqli,$cHighLowFlag,$tournamentResultsC);
+		}
 		
+		if ($aId != null) {
+		  $tournamentResultsAltA = getAlternateTournamentResults($aId,$mysqli,$aHighLowFlag,$tournamentResultsAltA);
+		}
+		if ($bId != null) {
+		  $tournamentResultsAltB = getAlternateTournamentResults($bId,$mysqli,$bHighLowFlag,$tournamentResultsAltB);
+		}
+		if ($cId != null) {
+		  $tournamentResultsAltC = getAlternateTournamentResults($cId,$mysqli,$cHighLowFlag,$tournamentResultsAltC);
+		}
 					
 		// Most Improved Team Auto Calculated
 		$aMostImprovedTeams = null;$bMostImprovedTeams = null; $cMostImprovedTeams = null;

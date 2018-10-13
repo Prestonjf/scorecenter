@@ -134,8 +134,8 @@
 				echo '</td>';
 				echo '<td>';
 				echo '<button type="submit" class="btn btn-xs btn-primary" name="enterEventScores" value="'.$row['3'].'">Enter Scores</button> &nbsp;
-				<button type="submit" class="btn btn-xs btn-primary" name="exportEventScores" value="'.$row['3'].'">Results</button>&nbsp;
-				<button type="submit" class="btn btn-xs btn-primary" name="exportEventAwards" value="'.$row['3'].'">Awards</button>  '; 				
+				<button type="submit" class="btn btn-xs btn-primary" name="exportEventScores" value="'.$row['3'].'">Score Sheet .csv</button>&nbsp;
+				<button type="submit" class="btn btn-xs btn-primary" name="exportEventAwards" value="'.$row['3'].'">Awards .pdf</button>  '; 				
 				echo '</td>';
 					
 				echo '</tr>';	

@@ -6,3 +6,11 @@
 .DS_Store
 
 .DS_Store
+
+.settings/org.eclipse.wst.common.project.facet.core.xml
+
+.settings/org.eclipse.php.core.prefs
+
+.project
+
+.buildpath
