@@ -101,7 +101,7 @@
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
      
      <h1>Manage Users</h1>
-     
+	     <p><?php echo 'MYSQLIi Error: '. $_SESSION["mysqli_error"]; ?></p>
      <?php
 	     echo getUserSearchHeader($disabled, isUserAccess(0));
 	    ?>
