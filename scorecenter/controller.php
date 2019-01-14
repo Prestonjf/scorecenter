@@ -4193,6 +4193,7 @@ else {
 			}
 		$_SESSION["resultsPage"] = 1;
 		$_SESSION["userList"] = $userList;
+		$_SESSION["mysqli_error"] = $mysqli->error;
 	
 	}
 	
