@@ -112,7 +112,7 @@ require_once('login.php');
 		            <tr><td><b>Name:&nbsp;</b></td><td><?php echo $userSessionInfo->getFirstName() . ' ' . $userSessionInfo->getLastName() ?></td></tr>
 					<tr><td><b>Role:&nbsp;</b></td><td>
 						<select class="form-control" name="userRole" id="userRole" onchange="changeUserRole()">
-							<? foreach ($userSessionInfo->getAvailableRoles() as $role) {
+							<?php foreach ($userSessionInfo->getAvailableRoles() as $role) {
 								echo '<option value="'.$role.'" ';
 								if ($role == $userSessionInfo->getRole()) echo 'selected';
 								echo '>'.getRoleName($role).'</option>';
@@ -314,7 +314,7 @@ require_once('login.php');
         <tbody>
          <?php
  			
-			$query = "SELECT DISTINCT T.TOURNAMENT_ID, DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE1', T.NAME as tName, T.DIVISION, T.LOCATION
+			$query = "SELECT DISTINCT T.TOURNAMENT_ID, DATE_FORMAT(T.DATE,'%m/%d/%Y') 'DATE1', T.NAME as tName, T.DIVISION, T.LOCATION, T.DATE
 					FROM TOURNAMENT_TEAM TT 
 					INNER JOIN TOURNAMENT T on T.TOURNAMENT_ID=TT.TOURNAMENT_ID 
 					INNER JOIN TEAM_COACH TC ON TC.TEAM_ID=TT.TEAM_ID								
