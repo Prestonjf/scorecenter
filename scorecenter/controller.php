@@ -4153,7 +4153,8 @@ else {
 	// USER MANAGEMENT ------------------------------------------------
 	function loadAllUsers($mysqli) {
 			$userList = array();
-			$query = "Select U.*, group_concat(DISTINCT UR2.ROLE_CODE ORDER BY UR2.ROLE_CODE ASC  SEPARATOR ', ') as ROLES 
+			$query = "Select U.USER_ID, U.FIRST_NAME, U.LAST_NAME, U.USERNAME, 
+			group_concat(DISTINCT UR2.ROLE_CODE ORDER BY UR2.ROLE_CODE ASC  SEPARATOR ', ') as ROLES 
 			from USER U 
 			INNER JOIN USER_ROLE UR ON UR.USER_ID=U.USER_ID 
 			INNER JOIN USER_ROLE UR2 ON UR.USER_ID=UR2.USER_ID
@@ -4173,7 +4174,7 @@ else {
 			if (isUserAccess(0) AND ($_SESSION["autoCreatedFlag"] == null || $_SESSION["autoCreatedFlag"] == '' || $_SESSION["autoCreatedFlag"] == 'NO')) {
 				$query = $query . " AND COALESCE(U.AUTO_CREATED_FLAG,0) = 0 " ;
 			}
-			$query = $query . " GROUP BY U.USERNAME ORDER BY UPPER(U.LAST_NAME) ASC ";
+			$query = $query . " GROUP BY U.USER_ID, U.FIRST_NAME, U.LAST_NAME, U.USERNAME ORDER BY UPPER(U.LAST_NAME) ASC ";
 			if ($_SESSION["userFilterNumber"] != null and $_SESSION["userFilterNumber"] != '0') {
 				$query = $query . " LIMIT ".$_SESSION["userFilterNumber"];
 			}
@@ -4183,9 +4184,9 @@ else {
 				while($userRow = $result->fetch_array(MYSQLI_BOTH)) {
  					$userRecord = array();	
 					array_push($userRecord, $userRow['0']);
-					array_push($userRecord, $userRow['4']);
-					array_push($userRecord, $userRow['5']);
 					array_push($userRecord, $userRow['1']);
+					array_push($userRecord, $userRow['2']);
+					array_push($userRecord, $userRow['3']);
 					array_push($userRecord, $userRow['ROLES']);
  				
 					array_push($userList, $userRecord);
