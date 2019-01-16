@@ -138,7 +138,7 @@ include_once('logon_check.php');
 	<h3>Roles</h3>
 	
 	<table width="100%" class="borderless">
-		<?
+		<?php
 		$roles = $_SESSION["userRoleCodes"];
 		foreach ($roles as $role) {			
 			echo '<tr><td>'.$role.'</td></tr>';
