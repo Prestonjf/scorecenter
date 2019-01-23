@@ -24,10 +24,6 @@
     
 ?>		
 <script type="text/javascript">
-	function about() { 
-		alert('Score Center \n \nDeveloped by Michigan Science Olympiad \nAn open source scoring application for Science Olympiad Tournaments. \n \nVersion: 1.0 (Beta) - November 2015');
-	}
-	
 	    jQuery(document).ready(function($){
    			$('#aboutLinkBox').popBox({width:200,height:350},'about');
 
