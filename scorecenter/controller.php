@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 'On');
 /**
  * Tournament Score Center (TSC) - Tournament scoring web application.
  * Copyright (C) 2019  Preston Frazier
