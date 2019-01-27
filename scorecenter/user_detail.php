@@ -74,6 +74,15 @@ include_once('logon_check.php');
 	  }
   }
 
+	function confSubmit(form) {
+		if (confirm("Are you sure you want to delete this user?")) {
+			form.submit();
+		}
+		else {
+			displayError("User not deleted!");
+		}
+	}
+
   $(document).ready(function(){
 
 	});
@@ -168,7 +177,7 @@ include_once('logon_check.php');
 	 			}
  			}
 			if ($flag) {
-				echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteUser" value="'.$_SESSION["userId"].'">Delete</button>';
+				echo '<button type="submit" class="btn btn-xs btn-danger" onClick="confSubmit(this.form);" name="deleteUser" value="'.$_SESSION["userId"].'">Delete</button>';
 			}
 		?>
  	 <button type="submit" class="btn btn-xs btn-primary" name="cancelUser" value="0">Cancel</button>

@@ -4259,7 +4259,7 @@ else {
 	function deleteUser($mysqli) {
 		  $sql = "";
 			$id = $_SESSION["userId"];
-			
+
 		  //Clean & Delete User Links
 		  $sql .= "UPDATE TOURNAMENT SET ADMIN_USER_ID = null WHERE ADMIN_USER_ID = ".$id.";";
 		  $sql .= "UPDATE TOURNAMENT_EVENT SET USER_ID = null WHERE USER_ID = ".$id.";";
