@@ -83,21 +83,15 @@ include_once('logon_check.php');
 				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 					if (xmlhttp.responseText.trim() == 'error') {
 						//error message
+						displayError("<strong>Delete User:</strong> User could not be removed.");
 					}
 					else {
 						// success message
-						displaySuccess("<strong>Delete User:</strong> User has been removed successfully!");
-            window.history.back();
 					}
 				}
 			}
-			<?php
-				$roles = $_SESSION["userRoleCodes"];
-				foreach ($roles as $role) {
-					$payload = $payload.$role;
-				}
-				echo 'xmlhttp.open("GET","controller.php?command=deleteUser&id='.$_SESSION["userId"].'&role='.$payload.'",true);';
-			?>
+
+		 	xmlhttp.open("GET","controller.php?command=deleteUser&id=<?php echo $_SESSION["userId"];?>",true);;
       xmlhttp.send();
 	  }
   }

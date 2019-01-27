@@ -420,7 +420,7 @@ else if ($_GET['command'] != null and $_GET['command'] == 'resetUserPassword') {
 	resetUserPassword($mysqli,$_GET['id']);
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'deleteUser') {
-	deleteUser($mysqli,$_GET['id'],$_GET['role']);
+	deleteUser($mysqli,$_GET['id']);
 }
 
 else if (isset($_GET['loadTournament'])) {
@@ -4254,34 +4254,23 @@ else {
 		$query->free_result();
 	}
 
-  function deleteUser($mysqli, $id, $role) {
-		if ($role == 'ADMIN') {
-			$query = $mysqli->prepare("DELETE FROM TOURNAMENT WHERE ADMIN_USER_ID = '$id'");
-			$query->execute();
-			$query->free_result();
-		}
-		elseif ($role == 'SUPERVISOR') {
-			$query = $mysqli->prepare("DELETE FROM TOURNAMENT_EVENT WHERE USER_ID = '$id'");
-			$query->execute();
-			$query->free_result();
-		}
-		elseif ($role == 'VERIFIER') {
-			$query = $mysqli->prepare("DELETE FROM TOURNAMENT_VERIFIER WHERE USER_ID = '$id'");
-			$query->execute();
-			$query->free_result();
-		}
-		elseif ($role == 'COACH') {
-			$query = $mysqli->prepare("DELETE FROM TEAM_COACH WHERE USER_ID = '$id'");
-			$query->execute();
-			$query->free_result();
-		}
-		$query = $mysqli->prepare("DELETE FROM USER_ROLE WHERE USER_ID = '$id'");
-		$query->execute();
-		$query->free_result();
+	function deleteUser($mysqli, $id) {
+		  $sql = "";
+		  //Clean & Delete User Links
+		  $sql .= "UPDATE TOURNAMENT SET ADMIN_USER_ID = null WHERE ADMIN_USER_ID = ".$id.";";
+		  $sql .= "UPDATE TOURNAMENT_EVENT SET USER_ID = null WHERE USER_ID = ".$id.";";
+		  $sql .= "DELETE FROM TOURNAMENT_VERIFIER WHERE USER_ID = ".$id.";";
+		  $sql .= "DELETE FROM TEAM_COACH WHERE USER_ID = ".$id.";";
+		  $sql .= "DELETE FROM USER_ROLE WHERE USER_ID = ".$id.";";
+		  $sql .= "DELETE FROM USER_LOGIN_LOG WHERE USER_ID = ".$id.";";
 
-		$query = $mysqli->prepare("DELETE FROM USER WHERE USER_ID = '$id'");
-		$query->execute();
-		$query->free_result();
+		  //Delete User
+		  $sql .= "DELETE FROM USER WHERE USER_ID = ".$id.";";
+
+		  $query = $mysqli->multi_query($sql);
+
+			// save Confirmation
+			$_SESSION['deletesuccessUser'] = "1";
 	}
 
 	// UTILITIES MANAGEMENT --------------------------------------------------
