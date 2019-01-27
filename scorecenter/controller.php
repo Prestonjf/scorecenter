@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 'On');
 /**
  * Tournament Score Center (TSC) - Tournament scoring web application.
  * Copyright (C) 2019  Preston Frazier
@@ -420,10 +422,7 @@ else if ($_GET['command'] != null and $_GET['command'] == 'resetUserPassword') {
 	resetUserPassword($mysqli,$_GET['id']);
 }
 else if ($_GET['command'] != null and $_GET['command'] == 'deleteUser') {
-	deleteUser($mysqli,$_GET['id']);
-}
-else if ($_GET['command'] != null and $_GET['command'] == 'deleteUserCoach') {
-	deleteUserCoach($mysqli,$_GET['id']);
+	deleteUser($mysqli,$_GET['id'],$_GET['role']);
 }
 
 else if (isset($_GET['loadTournament'])) {
@@ -4257,21 +4256,32 @@ else {
 		$query->free_result();
 	}
 
-  function deleteUser($mysqli, $id) {
-		$query = $mysqli->prepare("DELETE FROM USER WHERE USER_ID = '$id'");
-
+  function deleteUser($mysqli, $id, $role) {
+		if ($role == 'ADMIN') {
+			$query = $mysqli->prepare("DELETE FROM TOURNAMENT WHERE ADMIN_USER_ID = '$id'");
+			$query->execute();
+			$query->free_result();
+		}
+		elseif ($role == 'SUPERVISOR') {
+			$query = $mysqli->prepare("DELETE FROM TOURNAMENT_EVENT WHERE USER_ID = '$id'");
+			$query->execute();
+			$query->free_result();
+		}
+		elseif ($role == 'VERIFIER') {
+			$query = $mysqli->prepare("DELETE FROM TOURNAMENT_VERIFIER WHERE USER_ID = '$id'");
+			$query->execute();
+			$query->free_result();
+		}
+		elseif ($role == 'COACH') {
+			$query = $mysqli->prepare("DELETE FROM TEAM_COACH WHERE USER_ID = '$id'");
+			$query->execute();
+			$query->free_result();
+		}
+		$query = $mysqli->prepare("DELETE FROM USER_ROLE WHERE USER_ID = '$id'");
 		$query->execute();
 		$query->free_result();
-	}
-
-	function deleteUserCoach($mysqli, $id) {
-		$query = $mysqli->prepare("DELETE FROM TEAM_COACH WHERE USER_ID = '$id'");
-
-		$query->execute();
-		$query->free_result();
 
 		$query = $mysqli->prepare("DELETE FROM USER WHERE USER_ID = '$id'");
-
 		$query->execute();
 		$query->free_result();
 	}

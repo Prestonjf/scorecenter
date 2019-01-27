@@ -93,20 +93,10 @@ include_once('logon_check.php');
 			}
 			<?php
 				$roles = $_SESSION["userRoleCodes"];
-				$coach = false;
-
 				foreach ($roles as $role) {
-					if ($role == 'COACH') {
-						$coach = true;
-					}
+					$payload = $payload.$role;
 				}
-
-				if ($coach == true) {
-					echo 'xmlhttp.open("GET","controller.php?command=deleteUserCoach&id='.$_SESSION["userId"].'",true);';
-				}
-				else {
-					echo 'xmlhttp.open("GET","controller.php?command=deleteUser&id='.$_SESSION["userId"].'",true);';
-				}
+				echo 'xmlhttp.open("GET","controller.php?command=deleteUser&id='.$_SESSION["userId"].'&role='.$payload.'",true);';
 			?>
       xmlhttp.send();
 	  }
@@ -197,7 +187,18 @@ include_once('logon_check.php');
 
      <button type="submit" class="btn btn-xs btn-danger" name="saveUser" value="<?php echo $_SESSION["userId"];?>">Save</button>
      <input type="button" class="btn btn-xs btn-danger" name="resetUserPassword" onclick="resetPassword()" value="Reset Password"></button>
-     <input type="button" class="btn btn-xs btn-danger" name="deleteUser" onclick="deleteUsername()" value="Delete"></button>
+     <?php
+		 $roles = $_SESSION["userRoleCodes"];
+		 $flag = true;
+ 			foreach ($roles as $role) {
+	 			if ($role == 'SUPERUSER') {
+					$flag = false;
+	 			}
+ 			}
+			if ($flag) {
+				echo '<input type="button" class="btn btn-xs btn-danger" name="deleteUser" onclick="deleteUsername()" value="Delete"></button>';
+			}
+		?>
  	 <button type="submit" class="btn btn-xs btn-primary" name="cancelUser" value="0">Cancel</button>
 
 
