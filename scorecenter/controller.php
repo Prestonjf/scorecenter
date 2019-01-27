@@ -234,7 +234,8 @@ else if (isset($_GET['saveUser'])) {
 	exit();
 }
 else if (isset($_GET['deleteUser'])) {
-	deleteUser($mysqli);
+	deleteUser($mysqli, $_SESSION["userId"]);
+	clearUser();
 	loadAllUsers($mysqli);
 	header("Location: user.php");
 	exit();
@@ -4256,25 +4257,28 @@ else {
 		$query->free_result();
 	}
 
-	function deleteUser($mysqli) {
+	  function deleteUser($mysqli, $id) {
 		  $sql = "";
-			$id = $_SESSION["userId"];
-			
-		  //Clean & Delete User Links
+		  // Clean & Delete User Links
 		  $sql .= "UPDATE TOURNAMENT SET ADMIN_USER_ID = null WHERE ADMIN_USER_ID = ".$id.";";
 		  $sql .= "UPDATE TOURNAMENT_EVENT SET USER_ID = null WHERE USER_ID = ".$id.";";
 		  $sql .= "DELETE FROM TOURNAMENT_VERIFIER WHERE USER_ID = ".$id.";";
 		  $sql .= "DELETE FROM TEAM_COACH WHERE USER_ID = ".$id.";";
 		  $sql .= "DELETE FROM USER_ROLE WHERE USER_ID = ".$id.";";
 		  $sql .= "DELETE FROM USER_LOGIN_LOG WHERE USER_ID = ".$id.";";
-
-		  //Delete User
+  
+		  // Delete User
 		  $sql .= "DELETE FROM USER WHERE USER_ID = ".$id.";";
-
-		  $query = $mysqli->multi_query($sql);
-
-			// save Confirmation
-			$_SESSION['deletesuccessUser'] = "1";
+		  
+		  if (!$mysqli->multi_query($sql)) {}
+		do {
+		    if ($res = $mysqli->store_result()) {
+		        var_dump($res->fetch_all(MYSQLI_ASSOC));
+		        $res->free();
+		    }
+		} while ($mysqli->more_results() && $mysqli->next_result());
+		// save Confirmation
+		$_SESSION['deletesuccessUser'] = "1";
 	}
 
 	// UTILITIES MANAGEMENT --------------------------------------------------
