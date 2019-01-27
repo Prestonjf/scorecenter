@@ -12,25 +12,25 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-*
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see http://www.gnu.org/licenses/.
- *
+ *    
  * @package: Tournament Score Center (TSC) - Tournament scoring web application.
- * @version: 1.19.1, 01.13.2019
- * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php
+ * @version: 1.19.1, 01.13.2019  
+ * @author: Preston Frazier http://scorecenter.prestonsproductions.com/index.php 
  * @license: http://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
  */
-
-
-session_start();
+    
+	
+session_start(); 
 include_once('score_center_objects.php');
 include_once('logon_check.php');
 	require_once 'login.php';
 	$mysqli = mysqli_init();
 	mysqli_options($mysqli, MYSQLI_OPT_LOCAL_INFILE, true);
 	mysqli_real_connect($mysqli, $db_hostname,$db_username,$db_password,$db_database);
-
+	
 	if (mysqli_connect_errno()) {
 		printf("Connect failed: %s\n", mysqli_connect_error());
 		exit();
@@ -44,7 +44,7 @@ include_once('logon_check.php');
 <html lang="en">
   <head>
 	<?php include_once('functions/head_tags.php'); ?>
-
+	
   <script type="text/javascript">
   function resetPassword() {
 	 	clearError();
@@ -52,33 +52,36 @@ include_once('logon_check.php');
 	 	if (confirm('Are you sure you want to reset this users password?')) {
 		  if ($('#resetPasswordText') == null || $('#resetPasswordText').val().trim() === '') {
 		  	displayError("<strong>Cannot Reset Password:</strong> No password has been entered.");
-			return;
+			return;  
 		  }
 		  	xmlhttp = new XMLHttpRequest();
 			xmlhttp.onreadystatechange = function() {
 				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 					if (xmlhttp.responseText.trim() == 'error') {
-						//error message
+						//error message	
 					}
 					else {
 						// success message
 						$('#resetPasswordText').val('');
 						displaySuccess("<strong>Password Reset:</strong> User Password has been reset successfully!");
-					}
+					}					
 				}
 			}
 		var str = $('#resetPasswordText').val();
-		var encStr = window.btoa(str);
+		var encStr = window.btoa(str);	
         xmlhttp.open("GET","controller.php?command=resetUserPassword&id="+encStr,true);
-        xmlhttp.send();
+        xmlhttp.send();	 
 	  }
   }
 
+
+
   $(document).ready(function(){
-
+    	
 	});
-  </script>
 
+  
+  </script>
     <style>
   	.borderless td {
   			padding-top: 1em;
@@ -88,20 +91,20 @@ include_once('logon_check.php');
 	.red {
 		color: red;
 	}
-
-
+  
+  
   </style>
   </head>
-
+  
   <body>
   <?php include_once 'navbar.php'; ?>
-
+  
   	<form action="controller.php" method="GET">
      <div class="container">
-
+     
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
       <div id="messages" class="alert alert-success" role="alert" style="display: none;"></div>
-
+     
      <h1>Edit User</h1>
 	 <hr>
 	<table width="100%" class="borderless">
@@ -131,18 +134,18 @@ include_once('logon_check.php');
 	</td>
 	</tr>
 	</table>
-
+	
 	<h3>Roles</h3>
-
+	
 	<table width="100%" class="borderless">
 		<?php
 		$roles = $_SESSION["userRoleCodes"];
-		foreach ($roles as $role) {
+		foreach ($roles as $role) {			
 			echo '<tr><td>'.$role.'</td></tr>';
-		}
-		?>
+		}	
+		?>		
 	</table>
-	<!--
+	<!--	
 	<td><label for="userRoleCode">User Role: </label></td>
 	<td>
 			<select class="form-control" name="userRoleCode" id="userRoleCode">
@@ -154,23 +157,11 @@ include_once('logon_check.php');
 	</td>
 
 	</tr>-->
-
+	
 	<hr>
 
      <button type="submit" class="btn btn-xs btn-danger" name="saveUser" value="<?php echo $_SESSION["userId"];?>">Save</button>
      <input type="button" class="btn btn-xs btn-danger" name="resetUserPassword" onclick="resetPassword()" value="Reset Password"></button>
-     <?php
-		 $roles = $_SESSION["userRoleCodes"];
-		 $flag = true;
- 			foreach ($roles as $role) {
-	 			if ($role == 'SUPERUSER') {
-					$flag = false;
-	 			}
- 			}
-			if ($flag) {
-				echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteUser" value="'.$_SESSION["userId"].'">Delete</button>';
-			}
-		?>
  	 <button type="submit" class="btn btn-xs btn-primary" name="cancelUser" value="0">Cancel</button>
 
 
@@ -179,12 +170,12 @@ include_once('logon_check.php');
 
     </div><!--/.container-->
     </form>
-
-
+      
+      
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="js/jquery-1.11.3.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="js/bootstrap.min.js"></script>
-
+    
   </body>
 </html>
