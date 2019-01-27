@@ -73,6 +73,14 @@ include_once('logon_check.php');
         xmlhttp.send();
 	  }
   }
+	  
+function deleteUserAccount() {
+	  if (confirm('Are you sure you want to delete this user?')) {
+		  var input = $("<input>").attr("type", "hidden").attr("name", "deleteUser").val("1");
+		  $('#userForm').append($(input));
+		  $('#userForm').submit();
+	}
+  }
 
   $(document).ready(function(){
 
@@ -159,19 +167,8 @@ include_once('logon_check.php');
 
      <button type="submit" class="btn btn-xs btn-danger" name="saveUser" value="<?php echo $_SESSION["userId"];?>">Save</button>
      <input type="button" class="btn btn-xs btn-danger" name="resetUserPassword" onclick="resetPassword()" value="Reset Password"></button>
-     <?php
-		 $roles = $_SESSION["userRoleCodes"];
-		 $flag = true;
- 			foreach ($roles as $role) {
-	 			if ($role == 'SUPERUSER') {
-					$flag = false;
-	 			}
- 			}
-			if ($flag) {
-				echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteUser" value="'.$_SESSION["userId"].'">Delete</button>';
-			}
-		?>
- 	 <button type="submit" class="btn btn-xs btn-primary" name="cancelUser" value="0">Cancel</button>
+     <button type="button" class="btn btn-xs btn-danger" name="deleteUser" onclick="deleteUserAccount()"  value="0">Delete</button>
+     <button type="submit" class="btn btn-xs btn-primary" name="cancelUser" value="0">Cancel</button>
 
 
       <hr>
