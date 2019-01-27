@@ -104,7 +104,7 @@ function deleteUserAccount() {
   <body>
   <?php include_once 'navbar.php'; ?>
 
-  	<form action="controller.php" method="GET">
+  	<form action="controller.php" method="GET" id="userForm">
      <div class="container">
 
       <div id="errors" class="alert alert-danger" role="alert" style="display: none;"></div>
