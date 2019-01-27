@@ -233,6 +233,12 @@ else if (isset($_GET['saveUser'])) {
 	header("Location: user.php");
 	exit();
 }
+else if (isset($_GET['deleteUser'])) {
+	deleteUser($mysqli);
+	loadAllUsers($mysqli);
+	header("Location: user.php");
+	exit();
+}
 
 else if (isset($_GET['cancelUser'])) {
 	header("Location: user.php");
@@ -415,12 +421,8 @@ else if (isset($_GET['cancelSelectUser'])) {
 		exit();
 	}
 }
-
 else if ($_GET['command'] != null and $_GET['command'] == 'resetUserPassword') {
 	resetUserPassword($mysqli,$_GET['id']);
-}
-else if ($_GET['command'] != null and $_GET['command'] == 'deleteUser') {
-	deleteUser($mysqli,$_GET['id']);
 }
 
 else if (isset($_GET['loadTournament'])) {
@@ -4254,8 +4256,10 @@ else {
 		$query->free_result();
 	}
 
-	function deleteUser($mysqli, $id) {
+	function deleteUser($mysqli) {
 		  $sql = "";
+			$id = $_SESSION["userId"];
+			
 		  //Clean & Delete User Links
 		  $sql .= "UPDATE TOURNAMENT SET ADMIN_USER_ID = null WHERE ADMIN_USER_ID = ".$id.";";
 		  $sql .= "UPDATE TOURNAMENT_EVENT SET USER_ID = null WHERE USER_ID = ".$id.";";

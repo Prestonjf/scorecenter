@@ -74,28 +74,6 @@ include_once('logon_check.php');
 	  }
   }
 
-  function deleteUsername() {
-	 	clearError();
-	 	clearSuccess();
-    if (confirm('Are you sure you want to delete this user?')) {
-		  	xmlhttp = new XMLHttpRequest();
-			xmlhttp.onreadystatechange = function() {
-				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-					if (xmlhttp.responseText.trim() == 'error') {
-						//error message
-						displayError("<strong>Delete User:</strong> User could not be removed.");
-					}
-					else {
-						// success message
-					}
-				}
-			}
-
-		 	xmlhttp.open("GET","controller.php?command=deleteUser&id=<?php echo $_SESSION["userId"];?>",true);;
-      xmlhttp.send();
-	  }
-  }
-
   $(document).ready(function(){
 
 	});
@@ -190,7 +168,7 @@ include_once('logon_check.php');
 	 			}
  			}
 			if ($flag) {
-				echo '<input type="button" class="btn btn-xs btn-danger" name="deleteUser" onclick="deleteUsername()" value="Delete"></button>';
+				echo '<button type="submit" class="btn btn-xs btn-danger" name="deleteUser" value="'.$_SESSION["userId"].'">Delete</button>';
 			}
 		?>
  	 <button type="submit" class="btn btn-xs btn-primary" name="cancelUser" value="0">Cancel</button>
