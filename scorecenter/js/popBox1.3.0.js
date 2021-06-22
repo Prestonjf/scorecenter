@@ -1,7 +1,7 @@
 /*
 * jQuery popBox
 * Copyright (c) 2011 Simon Hibbard
-* 
+*
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
 * files (the "Software"), to deal in the Software without
@@ -13,7 +13,7 @@
 
 * The above copyright notice and this permission notice shall be
 * included in all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -21,7 +21,7 @@
 * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-* OTHER DEALINGS IN THE SOFTWARE. 
+* OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /*
@@ -33,9 +33,9 @@
 */
 
 (function ($) {
-	
+
 	var about = 'Tournament Score Center (TSC) - Tournament scoring web application.<br />'+
-	'Copyright (C) 2019  Preston Frazier<br /><br />'+
+	'Copyright (C) 2021  Preston Frazier<br /><br />'+
 
     'This program is free software: you can redistribute it and/or modify<br />'+
     'it under the terms of the GNU General Public License as published by<br />'+
@@ -49,14 +49,14 @@
 
     'You should have received a copy of the GNU General Public License<br />'+
     'along with this program.  If not, see <a href="http://www.gnu.org/licenses/" target="_blank">http://www.gnu.org/licenses/</a>.<br /><br />'+
-    
+
     '@package: Tournament Score Center (TSC) - Tournament scoring web application.<br />'+
-    '@version: 1.19.1, 01.13.2019<br />'+
-    '@author: Preston Frazier <a href="http://scorecenter.prestonsproductions.com/index.php" target="_blank">http://scorecenter.prestonsproductions.com/index.php</a><br />'+ 
+    '@version: 1.20.0, 06.22.2021<br />'+
+    '@author: Preston Frazier <a href="http://scorecenter.prestonsproductions.com/index.php" target="_blank">http://scorecenter.prestonsproductions.com/index.php</a><br />'+
     '@license: <a href="http://www.gnu.org/licenses/gpl-3.0.en.html" target="_blank">http://www.gnu.org/licenses/gpl-3.0.en.html</a> GPLv3<br />';
-	
-	
-	
+
+
+
     $.fn.popBox = function (options, type) {
 
         var defaults = {
@@ -73,14 +73,14 @@
 
             var inputName = 'popBoxInput' + obj.attr('id');
             var labelValue = $("label[for=" + obj.attr('id') + "]").text();
-			
+
 			if (type == 'copyPaste') {
             	obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label style="text-align:left;"><span style="font-weight:normal;font-size:14px;"><h4>Bulk Copy</h4>1. Primary and Alternate Teams must be copied and pasted separately. <br />2. Copy values from a spreadsheet (in corresponding team order as this screen) <br />3. Paste them in the text field below. Each row must be a number or blank. <br />4. Once finished, select done.</label><br /><label style="display: none;" for="' + inputName + '">' + labelValue + '</span></label><textarea id="' + inputName + '" name="' + inputName + '" class="popBox-input" /><div class="done-button"><input type="button" value="Done" class="btn btn-xs btn-primary" id="bulkCopyButton" /></div></div>');
 			}
 			else if (type == 'about') {
-			
+
 				obj.after('<div class="popBox-holder"></div><div class="popBox-container"><label style="text-align:left;"><span style="font-weight:normal;font-size:14px;">'+about+'</span></label><div class="done-button"><input type="button" value="Close" id="closeAbout" class="btn btn-xs btn-primary"/></div></div>');
-	
+
 			}
 
             obj.focus(function () {
@@ -131,13 +131,13 @@
 						count--;
                     }
                 });
-                
+
                 // Close Popup Box for About Inf
                 popBoxContainer.children().click(function() {
                 if (change && $('input',this).attr('id') == 'closeAbout') {
     				 $(this).parent().hide();
                      $(this).parent().prev().hide();
-    				}           
+    				}
 				});
 
             });

@@ -4266,10 +4266,10 @@ else {
 		  $sql .= "DELETE FROM TEAM_COACH WHERE USER_ID = ".$id.";";
 		  $sql .= "DELETE FROM USER_ROLE WHERE USER_ID = ".$id.";";
 		  $sql .= "DELETE FROM USER_LOGIN_LOG WHERE USER_ID = ".$id.";";
-  
+
 		  // Delete User
 		  $sql .= "DELETE FROM USER WHERE USER_ID = ".$id.";";
-		  
+
 		  if (!$mysqli->multi_query($sql)) {}
 		do {
 		    if ($res = $mysqli->store_result()) {
@@ -4293,6 +4293,7 @@ else {
 		$_SESSION["emailUsername"] = "";
 		$_SESSION["emailPassword"] = "";
 		$_SESSION["smtpSecure"] = "";
+		$_SESSION["senderEmail"] = "";
 
 		$_SESSION["accountCreationEmail"] = "";
 		$_SESSION["passwordResetMessage"] = "";
@@ -4312,6 +4313,7 @@ else {
 					else if ($utilityRow['0'] == 'MAILSERVER' and $utilityRow['1'] == 'USERNAME') $_SESSION["emailUsername"] = $utilityRow['2'];
 					else if ($utilityRow['0'] == 'MAILSERVER' and $utilityRow['1'] == 'PASSWORD') $_SESSION["emailPassword"] = $utilityRow['2'];
 					else if ($utilityRow['0'] == 'MAILSERVER' and $utilityRow['1'] == 'SMTPSECURE') $_SESSION["smtpSecure"] = $utilityRow['2'];
+					else if ($utilityRow['0'] == 'MAILSERVER' and $utilityRow['1'] == 'SENDEREMAIL') $_SESSION["senderEmail"] = $utilityRow['2'];
 					else if ($utilityRow['0'] == 'PASSWORDRESET' and $utilityRow['1'] == 'SALT') $_SESSION["resetPassword"] = $utilityRow['2'];
 					else if ($utilityRow['0'] == 'EMAILMESSAGE' and $utilityRow['1'] == 'ACCOUNTCREATE') $_SESSION["accountCreationEmail"] = $utilityRow['2'];
 					else if ($utilityRow['0'] == 'EMAILMESSAGE' and $utilityRow['1'] == 'PASSWORDRESET') $_SESSION["passwordResetMessage"] = $utilityRow['2'];
@@ -4347,6 +4349,9 @@ else {
 
 		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='MAILSERVER' AND REF_DATA_CODE='SMTPSECURE' ");
 		$query->bind_param('s',$_GET["smtpSecure"]); $query->execute();$query->free_result();
+
+		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='MAILSERVER' AND REF_DATA_CODE='SENDEREMAIL' ");
+		$query->bind_param('s',$_GET["senderEmail"]); $query->execute();$query->free_result();
 
 		$query = $mysqli->prepare("UPDATE REF_DATA SET DISPLAY_TEXT=? WHERE DOMAIN_CODE='EMAILMESSAGE' AND REF_DATA_CODE='ACCOUNTCREATE' ");
 		$query->bind_param('s',$_GET["accountCreationEmail"]); $query->execute();$query->free_result();

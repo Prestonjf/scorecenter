@@ -72,6 +72,7 @@ VALUES
 	(10,'MAILSERVER','USERNAME',NULL,2,''),
 	(11,'MAILSERVER','PASSWORD',NULL,3,''),
 	(12,'MAILSERVER','SMTPSECURE',NULL,4,'tls'),
+  (93,'MAILSERVER','SENDEREMAIL',NULL,5,''),
 	(13,'EMAILMESSAGE','ACCOUNTCREATE',NULL,0,'Thank you for creating an account on Tournament Score Center. You will now be able to enter scores for events assigned to you. If you are a score verifier, you will be able to enter scores for entire tournaments. You may access Score Center at the following address with the user name and password below.'),
 	(14,'EMAILMESSAGE','PASSWORDRESET',NULL,1,'A password reset for account <account name> has been requested from the Tournament Score Center application. To reset your password, select the hyperlink below and update your password on the account screen. If this message was sent in error, please disregard this email.'),
 	(15,'SCOREALGORITHM','HIGHRAW',NULL,0,'High Raw Score'),
